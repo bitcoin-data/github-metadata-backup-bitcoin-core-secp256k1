@@ -1,0 +1,1722 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33",
+    "id": 17416872,
+    "node_id": "MDExOlB1bGxSZXF1ZXN0MTc0MTY4NzI=",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/33.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/33.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/cd3f6850d65de0927049c212bcab0cde0ffaca60",
+    "number": 33,
+    "state": "closed",
+    "locked": false,
+    "maintainer_can_modify": false,
+    "title": "RFC: Enable and fix paranoid warnings",
+    "user": {
+      "login": "theuni",
+      "id": 417043,
+      "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/theuni",
+      "html_url": "https://github.com/theuni",
+      "followers_url": "https://api.github.com/users/theuni/followers",
+      "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+      "organizations_url": "https://api.github.com/users/theuni/orgs",
+      "repos_url": "https://api.github.com/users/theuni/repos",
+      "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/theuni/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "This is _not_ meant for merge as-is, but rather to discuss whether it's worth doing, and if so, how it might be done correctly.\n\nAbstract: If a baseline can be established where compilers (with all paranoid checks enabled) produce zero warnings, bugs in new code become much easier to spot.\n\nThis PR adds 2 configure switches: enable all paranoid warnings (and filter out the few that we don't care about), and turn warnings into errors. When combined, the pull-tester will fail when a new warning is introduced. It also adds clang to the build matrix in order to add a new batch of warnings (-Weverything)\n\nThe results are here: https://travis-ci.org/theuni/secp256k1/builds/28015905\n\nObviously most of these warnings are completely harmless and have no consequences, but a few legitimate bugs turn up as well. In a heavy math/crypto lib, type narrowing and implicit sign changes can be especially dangerous, so I would argue that these warnings are actually quite valuable.\n\nAlso, obviously the warnings that compilers enable with \"-Wall -Wextra -Weverything\" are entirely arbitrary, so the list of filtered warnings will likely evolve a bit.\n\nAssuming this work is wanted, I see 2 possible ways to go about it:\n1. as done in this pr. Quell all warnings so that the pull tester is happy, then begin fixing them up correctly. Please read the commit message from https://github.com/theuni/secp256k1/commit/30fba32ddab28d034afdd530d8dbd8d524832619 before pointing out the stupid changes in that commit.\n2. don't flip the 'all warnings are errors' switch, and fix up each case properly. then flip the switch.\n",
+    "labels": [],
+    "created_at": "2014-06-20T17:11:32Z",
+    "updated_at": "2016-04-27T10:13:55Z",
+    "closed_at": "2014-12-12T01:21:00Z",
+    "mergeable": false,
+    "mergeable_state": "dirty",
+    "merge_commit_sha": "4fb7f057f9ed8774378faf9d127f5069174849b8",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "rebaseable": false,
+    "head": {
+      "label": "theuni:paranoid-warnings",
+      "ref": "paranoid-warnings",
+      "sha": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "repo": {
+        "id": 20003297,
+        "node_id": "MDEwOlJlcG9zaXRvcnkyMDAwMzI5Nw==",
+        "name": "secp256k1",
+        "full_name": "theuni/secp256k1",
+        "owner": {
+          "login": "theuni",
+          "id": 417043,
+          "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+          "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/theuni",
+          "html_url": "https://github.com/theuni",
+          "followers_url": "https://api.github.com/users/theuni/followers",
+          "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+          "organizations_url": "https://api.github.com/users/theuni/orgs",
+          "repos_url": "https://api.github.com/users/theuni/repos",
+          "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/theuni/received_events",
+          "type": "User",
+          "site_admin": false
+        },
+        "private": false,
+        "html_url": "https://github.com/theuni/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/theuni/secp256k1",
+        "archive_url": "https://api.github.com/repos/theuni/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/theuni/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/theuni/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/theuni/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/theuni/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/theuni/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/theuni/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/theuni/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/theuni/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/theuni/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/theuni/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/theuni/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/theuni/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/theuni/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/theuni/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/theuni/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/theuni/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/theuni/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/theuni/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/theuni/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/theuni/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/theuni/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/theuni/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/theuni/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/theuni/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/theuni/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/theuni/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/theuni/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/theuni/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:theuni/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/theuni/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/theuni/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/theuni/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/theuni/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/theuni/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/theuni/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/theuni/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/theuni/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/theuni/secp256k1/hooks",
+        "svn_url": "https://github.com/theuni/secp256k1",
+        "language": "C",
+        "forks_count": 1,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "size": 10086,
+        "default_branch": "master",
+        "open_issues_count": 0,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2023-05-08T15:25:42Z",
+        "created_at": "2014-05-21T01:09:55Z",
+        "updated_at": "2016-04-27T10:13:49Z",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "ebfa43b20a10d321b0d3a04c118cef96b803e061",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 948,
+        "stargazers_count": 1768,
+        "watchers_count": 1768,
+        "size": 10062,
+        "default_branch": "master",
+        "open_issues_count": 142,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2023-06-12T16:38:48Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2023-06-12T17:38:13Z",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+      }
+    },
+    "author_association": "MEMBER",
+    "draft": false,
+    "additions": 304,
+    "deletions": 160,
+    "changed_files": 21,
+    "commits": 16,
+    "review_comments": 5,
+    "comments": 6
+  },
+  "events": [
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6ZDQwOTA4NzYzYTllNjU0ZjViNjI5ZWVlMTFlYzE2MWViYjllZjNjYQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d40908763a9e654f5b629eee11ec161ebb9ef3ca",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d40908763a9e654f5b629eee11ec161ebb9ef3ca",
+      "tree": {
+        "sha": "401f01d695fe877d03dafc15e3e9848f7ba1620f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/401f01d695fe877d03dafc15e3e9848f7ba1620f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ebfa43b20a10d321b0d3a04c118cef96b803e061",
+          "sha": "ebfa43b20a10d321b0d3a04c118cef96b803e061",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ebfa43b20a10d321b0d3a04c118cef96b803e061"
+        }
+      ],
+      "message": "build: add autogen. How was this missing?",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-19T18:56:23Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-17T01:40:44Z"
+      },
+      "sha": "d40908763a9e654f5b629eee11ec161ebb9ef3ca"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6YjBjYzIxZjg5NmVkMTJkNWI1YjA1Nzk1ODMyNmIyOTY1YWExMjdlZQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b0cc21f896ed12d5b5b057958326b2965aa127ee",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b0cc21f896ed12d5b5b057958326b2965aa127ee",
+      "tree": {
+        "sha": "e0d04e0b03f5d9984a26777e1c990d1d959cedbb",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e0d04e0b03f5d9984a26777e1c990d1d959cedbb"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d40908763a9e654f5b629eee11ec161ebb9ef3ca",
+          "sha": "d40908763a9e654f5b629eee11ec161ebb9ef3ca",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d40908763a9e654f5b629eee11ec161ebb9ef3ca"
+        }
+      ],
+      "message": "build: add travis support\n\nThis adds a huge matrix of builds. The undesirable ones can be removed.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-19T18:56:23Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-17T01:34:56Z"
+      },
+      "sha": "b0cc21f896ed12d5b5b057958326b2965aa127ee"
+    },
+    {
+      "event": "commented",
+      "id": 46703956,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzAzOTU2",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46703956",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:23:00Z",
+      "updated_at": "2014-06-20T17:23:00Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "For things like where you've added the casts to change sign conversions without (as you believe) changing behavior, what I'd expect to find is that the objdump -d on stripped outputs doesn't change. Did you try something like that?\n\n-Werror is something that can't generally be shipped in production because compiler warnings are not deterministic from version to version. \n",
+      "user": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46703956",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "commented",
+      "id": 46704354,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzA0MzU0",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46704354",
+      "actor": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:26:37Z",
+      "updated_at": "2014-06-20T17:26:37Z",
+      "author_association": "MEMBER",
+      "body": "@gmaxwell That's a great idea. I'm sure I bungled a few of em. I'll do that.\n\nAs for -Werror, I completely agree. It's off by default, and really only meant to be used by the pull-tester (where we're in control of the compilers used).\n",
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46704354",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "mentioned",
+      "id": 133612599,
+      "node_id": "MDE0Ok1lbnRpb25lZEV2ZW50MTMzNjEyNTk5",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/133612599",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:26:37Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 133612600,
+      "node_id": "MDE1OlN1YnNjcmliZWRFdmVudDEzMzYxMjYwMA==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/133612600",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:26:37Z"
+    },
+    {
+      "event": "commented",
+      "id": 46704527,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzA0NTI3",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46704527",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:28:12Z",
+      "updated_at": "2014-06-20T17:28:12Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Cool, make sure to try the different compile options (endomorphisms / openssl / gmp / 32 bit).\n",
+      "user": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46704527",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "commented",
+      "id": 46705118,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzA1MTE4",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46705118",
+      "actor": {
+        "login": "jgarzik",
+        "id": 494411,
+        "node_id": "MDQ6VXNlcjQ5NDQxMQ==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/494411?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jgarzik",
+        "html_url": "https://github.com/jgarzik",
+        "followers_url": "https://api.github.com/users/jgarzik/followers",
+        "following_url": "https://api.github.com/users/jgarzik/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jgarzik/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jgarzik/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jgarzik/subscriptions",
+        "organizations_url": "https://api.github.com/users/jgarzik/orgs",
+        "repos_url": "https://api.github.com/users/jgarzik/repos",
+        "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jgarzik/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:33:41Z",
+      "updated_at": "2014-06-20T17:33:41Z",
+      "author_association": "NONE",
+      "body": "General comment/principle:  casts are dangerous.  They hide bugs, as we saw many times in the kernel.  Programmers cast to shut up a warning, rather than (1) take a hard look at the asm output, and (2) re-examine the types used, to see if a type-related change can be made instead.\n\nA cast may be expedient, it may be necessary, but it effectively kills any type-related warnings after the cast.\n",
+      "user": {
+        "login": "jgarzik",
+        "id": 494411,
+        "node_id": "MDQ6VXNlcjQ5NDQxMQ==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/494411?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jgarzik",
+        "html_url": "https://github.com/jgarzik",
+        "followers_url": "https://api.github.com/users/jgarzik/followers",
+        "following_url": "https://api.github.com/users/jgarzik/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jgarzik/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jgarzik/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jgarzik/subscriptions",
+        "organizations_url": "https://api.github.com/users/jgarzik/orgs",
+        "repos_url": "https://api.github.com/users/jgarzik/repos",
+        "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jgarzik/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46705118",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "commented",
+      "id": 46705863,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzA1ODYz",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46705863",
+      "actor": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:40:31Z",
+      "updated_at": "2014-06-20T17:40:31Z",
+      "author_association": "MEMBER",
+      "body": "@jgarzik Agreed, but at least the casts must be explicit. In the ones shown in https://github.com/theuni/secp256k1/commit/30fba32ddab28d034afdd530d8dbd8d524832619, all of those casts were already happening, they just might not have been obvious.\n\nAlso, the casts as done in that commit are completely wrong. I agree. Most would be fixed properly by simply using the correct types in the first place. This one shows up often, for example:\n\n```\nfunction foo(unsigned int a)\n{\n    int b;\n    for (b=0; b != a; b++)\n        ...\n}\n```\n\nObviously the right thing to do there is just use an unsigned int for b. But I attempted to avoid mixing functional changes with cosmetic ones here.\n",
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46705863",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "mentioned",
+      "id": 133618225,
+      "node_id": "MDE0Ok1lbnRpb25lZEV2ZW50MTMzNjE4MjI1",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/133618225",
+      "actor": {
+        "login": "jgarzik",
+        "id": 494411,
+        "node_id": "MDQ6VXNlcjQ5NDQxMQ==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/494411?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jgarzik",
+        "html_url": "https://github.com/jgarzik",
+        "followers_url": "https://api.github.com/users/jgarzik/followers",
+        "following_url": "https://api.github.com/users/jgarzik/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jgarzik/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jgarzik/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jgarzik/subscriptions",
+        "organizations_url": "https://api.github.com/users/jgarzik/orgs",
+        "repos_url": "https://api.github.com/users/jgarzik/repos",
+        "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jgarzik/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:40:31Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 133618226,
+      "node_id": "MDE1OlN1YnNjcmliZWRFdmVudDEzMzYxODIyNg==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/133618226",
+      "actor": {
+        "login": "jgarzik",
+        "id": 494411,
+        "node_id": "MDQ6VXNlcjQ5NDQxMQ==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/494411?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jgarzik",
+        "html_url": "https://github.com/jgarzik",
+        "followers_url": "https://api.github.com/users/jgarzik/followers",
+        "following_url": "https://api.github.com/users/jgarzik/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jgarzik/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jgarzik/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jgarzik/subscriptions",
+        "organizations_url": "https://api.github.com/users/jgarzik/orgs",
+        "repos_url": "https://api.github.com/users/jgarzik/repos",
+        "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jgarzik/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:40:31Z"
+    },
+    {
+      "event": "commented",
+      "id": 46706231,
+      "node_id": "MDEyOklzc3VlQ29tbWVudDQ2NzA2MjMx",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/46706231",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-06-20T17:44:09Z",
+      "updated_at": "2014-06-20T17:44:09Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Using unsigned in loop counters frequently has performance implications because it weakens the compiler's range analysis.  It also often causes bugs inside the loop body when the fact that unsigned is the stronger type causes surprising interior promotions in statements referencing the loop counter.\n",
+      "user": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46706231",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6NmNiYjZjNmNhMTg5ZmQzMjZlN2ZjZmJlNzllZjgzODJiOGUyMTNmMg==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2",
+      "tree": {
+        "sha": "ac221ed21960cc78ed32787c3182898c2bb2f986",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ac221ed21960cc78ed32787c3182898c2bb2f986"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b0cc21f896ed12d5b5b057958326b2965aa127ee",
+          "sha": "b0cc21f896ed12d5b5b057958326b2965aa127ee",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b0cc21f896ed12d5b5b057958326b2965aa127ee"
+        }
+      ],
+      "message": "warnings: add compiler warning options to configure\n\nThese are mainly useful for the pull-tester. Once stable, it may be reasonable\nto turn the warnings on by default.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:16:47Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T02:34:55Z"
+      },
+      "sha": "6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6ZjE4MGVmNzgzYTI3M2Y2OGM1Njg4YzJjYjAzMjE4ODY2ZDJmZWQyMQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f180ef783a273f68c5688c2cb03218866d2fed21",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f180ef783a273f68c5688c2cb03218866d2fed21",
+      "tree": {
+        "sha": "6209baaab9bc58832ba518165b7978a8b50c3ee4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6209baaab9bc58832ba518165b7978a8b50c3ee4"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2",
+          "sha": "6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6cbb6c6ca189fd326e7fcfbe79ef8382b8e213f2"
+        }
+      ],
+      "message": "warnings: enable quiet builds",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:16:47Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T02:36:24Z"
+      },
+      "sha": "f180ef783a273f68c5688c2cb03218866d2fed21"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6MjcxNjViZWE0NWUyNDJhMGQwMDI2ZDA5MDk5NmE5YmI1ODViODI3ZA==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/27165bea45e242a0d0026d090996a9bb585b827d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/27165bea45e242a0d0026d090996a9bb585b827d",
+      "tree": {
+        "sha": "4f28eabdccc2bfa1c9956e75b8f405ff152ad488",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4f28eabdccc2bfa1c9956e75b8f405ff152ad488"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f180ef783a273f68c5688c2cb03218866d2fed21",
+          "sha": "f180ef783a273f68c5688c2cb03218866d2fed21",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f180ef783a273f68c5688c2cb03218866d2fed21"
+        }
+      ],
+      "message": "warnings: use new warning settings and add clang builder",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:16:47Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T02:38:04Z"
+      },
+      "sha": "27165bea45e242a0d0026d090996a9bb585b827d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6ZmMwMjJkMDIwYTRmMjkwNzgxYTczNDhlMWJjMjkyMzI2Nzg3MDlkMw==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fc022d020a4f290781a7348e1bc29232678709d3",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fc022d020a4f290781a7348e1bc29232678709d3",
+      "tree": {
+        "sha": "c3cbe740dfabd212771a1049df76e67cafa55746",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c3cbe740dfabd212771a1049df76e67cafa55746"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/27165bea45e242a0d0026d090996a9bb585b827d",
+          "sha": "27165bea45e242a0d0026d090996a9bb585b827d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/27165bea45e242a0d0026d090996a9bb585b827d"
+        }
+      ],
+      "message": "warnings: remove unused variables",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:16:47Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T03:00:53Z"
+      },
+      "sha": "fc022d020a4f290781a7348e1bc29232678709d3"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6NjE4MGJmMzJmMjFhMjRjNTI0MjAwNzk0MGI4YzMyZDkzNjFlYTJmYw==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6180bf32f21a24c5242007940b8c32d9361ea2fc",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6180bf32f21a24c5242007940b8c32d9361ea2fc",
+      "tree": {
+        "sha": "41195ef274d222e51d3258bb572fa80808c47960",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/41195ef274d222e51d3258bb572fa80808c47960"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fc022d020a4f290781a7348e1bc29232678709d3",
+          "sha": "fc022d020a4f290781a7348e1bc29232678709d3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fc022d020a4f290781a7348e1bc29232678709d3"
+        }
+      ],
+      "message": "warnings: initialize arrays to 0\n\nfoo[] = {} is a gnu extension.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T05:11:00Z"
+      },
+      "sha": "6180bf32f21a24c5242007940b8c32d9361ea2fc"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6N2ZkMzllMmUyYzI5OTFlMmQzNTg3MTY1ZjUyYjIxZDZhNmEzYmYwYQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a",
+      "tree": {
+        "sha": "888b0ff95a3578f6a8f4124e09e4f1fca03548de",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/888b0ff95a3578f6a8f4124e09e4f1fca03548de"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6180bf32f21a24c5242007940b8c32d9361ea2fc",
+          "sha": "6180bf32f21a24c5242007940b8c32d9361ea2fc",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6180bf32f21a24c5242007940b8c32d9361ea2fc"
+        }
+      ],
+      "message": "warnings: shut up about unused params",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T05:15:53Z"
+      },
+      "sha": "7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6MjczODU3NjE3ODIyODFiNjRjNWNmMDI4Yzg0NmNjZjRhOWE2ZTk1MQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/27385761782281b64c5cf028c846ccf4a9a6e951",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/27385761782281b64c5cf028c846ccf4a9a6e951",
+      "tree": {
+        "sha": "3f42e0dd3662aa9e6eef531e353e4cdf357175da",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3f42e0dd3662aa9e6eef531e353e4cdf357175da"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a",
+          "sha": "7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fd39e2e2c2991e2d3587165f52b21d6a6a3bf0a"
+        }
+      ],
+      "message": "warnings: let the external functions see their prototypes\n\nThey may need to set attributes like visibility=default.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T05:19:39Z"
+      },
+      "sha": "27385761782281b64c5cf028c846ccf4a9a6e951"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6ZTQ1ZDI2ZTUzZmJjYWNmOGExZWY0YjM5MzVlZjY2ZjA0ZDE2MDI3NA==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e45d26e53fbcacf8a1ef4b3935ef66f04d160274",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e45d26e53fbcacf8a1ef4b3935ef66f04d160274",
+      "tree": {
+        "sha": "b891f6351290b57b60060db5da4a3b8bf09b8519",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b891f6351290b57b60060db5da4a3b8bf09b8519"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/27385761782281b64c5cf028c846ccf4a9a6e951",
+          "sha": "27385761782281b64c5cf028c846ccf4a9a6e951",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/27385761782281b64c5cf028c846ccf4a9a6e951"
+        }
+      ],
+      "message": "warnings: make warnings errors and let's see what breaks",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T05:24:55Z"
+      },
+      "sha": "e45d26e53fbcacf8a1ef4b3935ef66f04d160274"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6ZGM4ODQ1ODQwZTM3Yzg1NWQ1YTJhNTk4YzExNTcwZTFhY2ZjMDZlYw==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dc8845840e37c855d5a2a598c11570e1acfc06ec",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dc8845840e37c855d5a2a598c11570e1acfc06ec",
+      "tree": {
+        "sha": "78e196500200e76dcd2ae2431abd6c95df80ff14",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/78e196500200e76dcd2ae2431abd6c95df80ff14"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e45d26e53fbcacf8a1ef4b3935ef66f04d160274",
+          "sha": "e45d26e53fbcacf8a1ef4b3935ef66f04d160274",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e45d26e53fbcacf8a1ef4b3935ef66f04d160274"
+        }
+      ],
+      "message": "warnings: fix possible overlength string",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T18:24:47Z"
+      },
+      "sha": "dc8845840e37c855d5a2a598c11570e1acfc06ec"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6YWM4YmMwMDE0YjZhYTZjOWZlZTcyYzIxM2FjNjVjNDZlZjQxMmI4NQ==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ac8bc0014b6aa6c9fee72c213ac65c46ef412b85",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ac8bc0014b6aa6c9fee72c213ac65c46ef412b85",
+      "tree": {
+        "sha": "6dbb7c9ccecff610760732c971faec88f3a08a9e",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6dbb7c9ccecff610760732c971faec88f3a08a9e"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dc8845840e37c855d5a2a598c11570e1acfc06ec",
+          "sha": "dc8845840e37c855d5a2a598c11570e1acfc06ec",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dc8845840e37c855d5a2a598c11570e1acfc06ec"
+        }
+      ],
+      "message": "warnings: unsigned can't be negative",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T18:28:43Z"
+      },
+      "sha": "ac8bc0014b6aa6c9fee72c213ac65c46ef412b85"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6MDQ2OTcwMTYwMjJlNThhYzBkNjhmMzA0OGMyYWQwOWU3MzhkNzQzMw==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/04697016022e58ac0d68f3048c2ad09e738d7433",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/04697016022e58ac0d68f3048c2ad09e738d7433",
+      "tree": {
+        "sha": "f907a17a4c1c82b3f5c79e7307f00b9de1c46759",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f907a17a4c1c82b3f5c79e7307f00b9de1c46759"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ac8bc0014b6aa6c9fee72c213ac65c46ef412b85",
+          "sha": "ac8bc0014b6aa6c9fee72c213ac65c46ef412b85",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ac8bc0014b6aa6c9fee72c213ac65c46ef412b85"
+        }
+      ],
+      "message": "warnings: make gcc happy with parentheses",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T18:29:02Z"
+      },
+      "sha": "04697016022e58ac0d68f3048c2ad09e738d7433"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6MTE3MThjOWE1ODM1YjM4OWQ5MjZiMjcxYzcxM2Y2YjdkYjAwOTA0Ng==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/11718c9a5835b389d926b271c713f6b7db009046",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/11718c9a5835b389d926b271c713f6b7db009046",
+      "tree": {
+        "sha": "2fbfa5c92fd25155a3a3e92c1a1f461da918fd0b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2fbfa5c92fd25155a3a3e92c1a1f461da918fd0b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/04697016022e58ac0d68f3048c2ad09e738d7433",
+          "sha": "04697016022e58ac0d68f3048c2ad09e738d7433",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/04697016022e58ac0d68f3048c2ad09e738d7433"
+        }
+      ],
+      "message": "warnings: fix struct padding. This is the _wrong_ fix.\n\nThere are several places that use sizeof(struct) for tests, where the struct's\nsize may be padded by the compiler. Those need to be sanitized.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T03:01:19Z"
+      },
+      "sha": "11718c9a5835b389d926b271c713f6b7db009046"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6MjJjMDIxMTk0NTMyYjNmZmY5NTA0OTNiOTYyYTNjZGIzNmM4ZmEwYw==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/22c021194532b3fff950493b962a3cdb36c8fa0c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/22c021194532b3fff950493b962a3cdb36c8fa0c",
+      "tree": {
+        "sha": "b21b784772942c0fd8cfad6b2cf5796674af3d9d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b21b784772942c0fd8cfad6b2cf5796674af3d9d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/11718c9a5835b389d926b271c713f6b7db009046",
+          "sha": "11718c9a5835b389d926b271c713f6b7db009046",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/11718c9a5835b389d926b271c713f6b7db009046"
+        }
+      ],
+      "message": "warnings: fix pedantic compiler warnings\n\nMost of these are related to implicit sign conversion and width narrowing. They\nhave been \"fixed\" with casts in order to create a starting point for fixing\nthem correctly. Many of the changes in this commit are most definitely logically\n_wrong_, but attempt to be consistent without breaking any functionality.\n\nFor example, the following old code:\n\n  unsigned int a;\n  int b = a;\n  uint64_t c;\n  uint32_t d = c;\n\nHas become:\n\n  unsigned int foo;\n  int bar = (int)foo;\n  uint64_t c;\n  uint32_t d = (uint32_t)c;\n\nThis of course does nothing to fix any consequences of the narrowing and sign\nconversions, but the casts become explicit.\n\nBy doing this as a first step, any attempt to fix the explicit casts more\ncorrectly, while introducing a new warning, will be noticed by the pull-tester.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:06Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-19T21:53:40Z"
+      },
+      "sha": "22c021194532b3fff950493b962a3cdb36c8fa0c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "MDY6Q29tbWl0MTY2NDg2MTg6Y2QzZjY4NTBkNjVkZTA5MjcwNDljMjEyYmNhYjBjZGUwZmZhY2E2MA==",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "tree": {
+        "sha": "2081c7573605bc6d49a85cee09ec0e4de9791b8c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2081c7573605bc6d49a85cee09ec0e4de9791b8c"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/22c021194532b3fff950493b962a3cdb36c8fa0c",
+          "sha": "22c021194532b3fff950493b962a3cdb36c8fa0c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/22c021194532b3fff950493b962a3cdb36c8fa0c"
+        }
+      ],
+      "message": "warnings: explicitly call out __int128 as a gnu extension\n\nOtherwise -pedantic (correctly) complains.",
+      "committer": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T19:22:07Z"
+      },
+      "author": {
+        "name": "Cory Fields",
+        "email": "cory-nospam-@coryfields.com",
+        "date": "2014-06-20T18:43:32Z"
+      },
+      "sha": "cd3f6850d65de0927049c212bcab0cde0ffaca60"
+    },
+    {
+      "event": "line-commented",
+      "id": null,
+      "node_id": "MDIzOlB1bGxSZXF1ZXN0UmV2aWV3VGhyZWFkMTM4NDczMjE6djI=",
+      "url": null,
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null
+    },
+    {
+      "event": "line-commented",
+      "id": null,
+      "node_id": "MDIzOlB1bGxSZXF1ZXN0UmV2aWV3VGhyZWFkMTM4NDczMjI6djI=",
+      "url": null,
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null
+    },
+    {
+      "event": "closed",
+      "id": 206541563,
+      "node_id": "MDExOkNsb3NlZEV2ZW50MjA2NTQxNTYz",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/206541563",
+      "actor": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2014-12-12T01:21:00Z"
+    }
+  ],
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274022",
+      "pull_request_review_id": null,
+      "id": 14274022,
+      "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE0Mjc0MDIy",
+      "diff_hunk": "@@ -9,6 +9,7 @@\n #include \"field.h\"\n \n /** A group element of the secp256k1 curve, in affine coordinates. */\n+#pragma pack(1)",
+      "path": "src/group.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "original_commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Why?\n",
+      "created_at": "2014-06-26T23:58:49Z",
+      "updated_at": "2014-06-26T23:58:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#discussion_r14274022",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274022"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 12,
+      "original_line": null,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274026",
+      "pull_request_review_id": null,
+      "id": 14274026,
+      "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE0Mjc0MDI2",
+      "diff_hunk": "@@ -85,6 +86,7 @@ void static secp256k1_num_add_abs(secp256k1_num_t *r, const secp256k1_num_t *a,\n \n void static secp256k1_num_sub_abs(secp256k1_num_t *r, const secp256k1_num_t *a, const secp256k1_num_t *b) {\n     mp_limb_t c = mpn_sub(r->data, a->data, a->limbs, b->data, b->limbs);\n+    (void)c;",
+      "path": "src/num_gmp_impl.h",
+      "position": 47,
+      "original_position": 47,
+      "commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "original_commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "What is this for?\n",
+      "created_at": "2014-06-26T23:59:08Z",
+      "updated_at": "2014-06-26T23:59:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#discussion_r14274026",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274026"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 89,
+      "original_line": null,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274076",
+      "pull_request_review_id": null,
+      "id": 14274076,
+      "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE0Mjc0MDc2",
+      "diff_hunk": "@@ -9,6 +9,7 @@\n #include \"field.h\"\n \n /** A group element of the secp256k1 curve, in affine coordinates. */\n+#pragma pack(1)",
+      "path": "src/group.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "original_commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "sizeof(secp256k1_ge_consts_t)\n",
+      "created_at": "2014-06-27T00:00:33Z",
+      "updated_at": "2014-06-27T00:00:33Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#discussion_r14274076",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274076"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 12,
+      "original_line": null,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274105",
+      "pull_request_review_id": null,
+      "id": 14274105,
+      "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE0Mjc0MTA1",
+      "diff_hunk": "@@ -9,6 +9,7 @@\n #include \"field.h\"\n \n /** A group element of the secp256k1 curve, in affine coordinates. */\n+#pragma pack(1)",
+      "path": "src/group.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "original_commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "??\n",
+      "created_at": "2014-06-27T00:01:33Z",
+      "updated_at": "2014-06-27T00:01:33Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#discussion_r14274105",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274105"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 12,
+      "original_line": null,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274106",
+      "pull_request_review_id": null,
+      "id": 14274106,
+      "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE0Mjc0MTA2",
+      "diff_hunk": "@@ -85,6 +86,7 @@ void static secp256k1_num_add_abs(secp256k1_num_t *r, const secp256k1_num_t *a,\n \n void static secp256k1_num_sub_abs(secp256k1_num_t *r, const secp256k1_num_t *a, const secp256k1_num_t *b) {\n     mp_limb_t c = mpn_sub(r->data, a->data, a->limbs, b->data, b->limbs);\n+    (void)c;",
+      "path": "src/num_gmp_impl.h",
+      "position": 47,
+      "original_position": 47,
+      "commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "original_commit_id": "cd3f6850d65de0927049c212bcab0cde0ffaca60",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "c is unused. Obviously the right thing to do is just not create it, but I was trying to leave the result unaffected.\n",
+      "created_at": "2014-06-27T00:01:34Z",
+      "updated_at": "2014-06-27T00:01:34Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#discussion_r14274106",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/14274106"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/33"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 89,
+      "original_line": null,
+      "side": "RIGHT"
+    }
+  ]
+}

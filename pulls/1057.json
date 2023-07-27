@@ -1,0 +1,1349 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1057",
+    "id": 810631089,
+    "node_id": "PR_kwDOAP4Jqs4wUT-x",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1057.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1057.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1057/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1057/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/4a4d16e83c69bff9ad0c3c27fc13b6ad8b222f24",
+    "number": 1057,
+    "state": "closed",
+    "locked": false,
+    "maintainer_can_modify": false,
+    "title": "Signed-digit multi-comb ecmult_gen algorithm",
+    "user": {
+      "login": "sipa",
+      "id": 548488,
+      "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/sipa",
+      "html_url": "https://github.com/sipa",
+      "followers_url": "https://api.github.com/users/sipa/followers",
+      "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+      "organizations_url": "https://api.github.com/users/sipa/orgs",
+      "repos_url": "https://api.github.com/users/sipa/repos",
+      "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/sipa/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "body": "A third iteration of the signed-digit multi-comb ecmult_gen algorithm (earlier attempts: #693, and #546 by Peter Dettman). Short summary:\r\n* A new constant-time point multiplication algorithm with precomputation (so only used for multiply with G).\r\n* Based on section 3.3 of https://eprint.iacr.org/2012/309 by Mike Hamburg.\r\n* Configurable through two parameters: COMB_BLOCKS and COMB_TEETH\r\n  * Currently only 3 predefined configurations reachable through ./configure (tables 2 kB, 22 kB, 86 kB). All three are included in precomputed_ecmult_gen.c and tested in CI. The 2 kB option is already comparable in speed with the current code.\r\n  * Many more configurations can be reached by manually setting the macros. These are not tested.\r\n\r\nCompared with the previous PR #693:\r\n* Updated to the new static-precomputation-only model (#893).\r\n* Just 3 curated configurations reachable through configure.\r\n* Removed some optimizations that do not matter (much).\r\n* Do blinding through an final correction add rather than an initial start point, which may later permit usage of incomplete addition formulae (#1051).\r\n* The recoding of the input scalar to signed bit representation is done slightly differently, which needs fewer special cases.",
+    "labels": [],
+    "created_at": "2021-12-27T22:51:37Z",
+    "updated_at": "2021-12-29T21:00:29Z",
+    "closed_at": "2021-12-29T20:54:49Z",
+    "mergeable_state": "unknown",
+    "merge_commit_sha": "4af342f92f28bce8c0bf6e2bfbdcfced6eeff42d",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "head": {
+      "label": "sipa:202112_sdmc",
+      "ref": "202112_sdmc",
+      "sha": "4a4d16e83c69bff9ad0c3c27fc13b6ad8b222f24",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "repo": {
+        "id": 16648672,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODY3Mg==",
+        "name": "secp256k1",
+        "full_name": "sipa/secp256k1",
+        "owner": {
+          "login": "sipa",
+          "id": 548488,
+          "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+          "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/sipa",
+          "html_url": "https://github.com/sipa",
+          "followers_url": "https://api.github.com/users/sipa/followers",
+          "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+          "organizations_url": "https://api.github.com/users/sipa/orgs",
+          "repos_url": "https://api.github.com/users/sipa/repos",
+          "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/sipa/received_events",
+          "type": "User",
+          "site_admin": false
+        },
+        "private": false,
+        "html_url": "https://github.com/sipa/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/sipa/secp256k1",
+        "archive_url": "https://api.github.com/repos/sipa/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/sipa/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/sipa/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/sipa/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/sipa/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/sipa/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/sipa/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/sipa/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/sipa/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/sipa/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/sipa/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/sipa/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/sipa/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/sipa/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/sipa/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/sipa/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/sipa/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/sipa/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/sipa/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/sipa/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/sipa/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/sipa/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/sipa/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/sipa/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/sipa/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/sipa/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/sipa/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/sipa/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/sipa/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:sipa/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/sipa/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/sipa/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/sipa/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/sipa/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/sipa/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/sipa/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/sipa/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/sipa/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/sipa/secp256k1/hooks",
+        "svn_url": "https://github.com/sipa/secp256k1",
+        "language": "C",
+        "forks_count": 20,
+        "stargazers_count": 43,
+        "watchers_count": 43,
+        "size": 11487,
+        "default_branch": "master",
+        "open_issues_count": 0,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2023-05-31T17:42:23Z",
+        "created_at": "2014-02-08T17:33:30Z",
+        "updated_at": "2023-05-11T11:08:51Z",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "39a36db94a6f733398d4eefd4e89bcaaeb063551",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 948,
+        "stargazers_count": 1768,
+        "watchers_count": 1768,
+        "size": 10062,
+        "default_branch": "master",
+        "open_issues_count": 142,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2023-06-12T16:38:48Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2023-06-12T17:38:13Z",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1057"
+      }
+    },
+    "author_association": "MEMBER",
+    "draft": false,
+    "additions": 2276,
+    "deletions": 9918,
+    "changed_files": 17,
+    "commits": 12,
+    "review_comments": 0,
+    "comments": 5
+  },
+  "events": [
+    {
+      "event": "renamed",
+      "id": 5819344648,
+      "node_id": "RTE_lADOAP4Jqs5A8JTMzwAAAAFa3CcI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5819344648",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-27T23:14:31Z",
+      "rename": {
+        "from": "WIP Reword of Signed-Digit Multicomb",
+        "to": "WIP Rework of Signed-Digit Multicomb"
+      }
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 5819532571,
+      "node_id": "HRFPE_lADOAP4Jqs5A8JTMzwAAAAFa3wUb",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5819532571",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-28T01:31:30Z"
+    },
+    {
+      "event": "commented",
+      "id": 1002050953,
+      "node_id": "IC_kwDOAP4Jqs47uhWJ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1002050953",
+      "actor": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-28T11:48:14Z",
+      "updated_at": "2021-12-28T11:48:14Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Just out of curiosity, some perf. numbers (best Min of 3 `bench sign`, 64-bit, i7-9750H):\r\n\r\n| branch | ecdsa_sign | schnorrsig_sign |\r\n| --- | --- | --- |\r\n| master | 29.5 | 23.1 |\r\n| this PR | 25.6 | 19.2 |\r\n| experimental | 23.8| 17.7 |\r\n\r\n(\"experimental\" is this PR plus the other PRs for normalize, group formulae, and the \"vector\" modinv).\r\n",
+      "user": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057#issuecomment-1002050953",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGY4ZDE0OGI2ZmFkMDdhZGY2MGRiYWQ2Y2VmNWYzOTk1NTA4OTc4MTQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f8d148b6fad07adf60dbad6cef5f399550897814",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f8d148b6fad07adf60dbad6cef5f399550897814",
+      "tree": {
+        "sha": "daa0887cc4a2d33d741a327a120df8d3f63e4b09",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/daa0887cc4a2d33d741a327a120df8d3f63e4b09"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/39a36db94a6f733398d4eefd4e89bcaaeb063551",
+          "sha": "39a36db94a6f733398d4eefd4e89bcaaeb063551",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/39a36db94a6f733398d4eefd4e89bcaaeb063551"
+        }
+      ],
+      "message": "Add secp256k1_scalar_half\n\nThis introduces a new secp256k1_scalar_half function which multiplies\na scalar with the multiplicative inverse of 2 (modulo order).",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T00:03:53Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-25T21:24:29Z"
+      },
+      "sha": "f8d148b6fad07adf60dbad6cef5f399550897814"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDZhNzkyYjY0MDYyZTc1ODI2Y2Y0OTVmOWE3OGQ3ZTg3YTNmODFkNzE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6a792b64062e75826cf495f9a78d7e87a3f81d71",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6a792b64062e75826cf495f9a78d7e87a3f81d71",
+      "tree": {
+        "sha": "1a9131c079fa27d62f00a54330aa01c80286f3e1",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/1a9131c079fa27d62f00a54330aa01c80286f3e1"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f8d148b6fad07adf60dbad6cef5f399550897814",
+          "sha": "f8d148b6fad07adf60dbad6cef5f399550897814",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f8d148b6fad07adf60dbad6cef5f399550897814"
+        }
+      ],
+      "message": "Initial gej blinding -> final ge blinding\n\nInstead of having the starting point of the ecmult_gen computation be\noffset, do it with the final point. This enables reasoning over the\nset of points reachable in intermediary computations, which can be\nleveraged by potential future optimization.\n\nBecause the final point is in affine coordinates, its projective\nblinding is no longer possible. It will be reintroduced again in\na different way, in a later commit.\n\nAlso introduce some more comments and more descriptive names.",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T00:04:41Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-26T23:21:57Z"
+      },
+      "sha": "6a792b64062e75826cf495f9a78d7e87a3f81d71"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 5822958161,
+      "node_id": "HRFPE_lADOAP4Jqs5A8JTMzwAAAAFbE0pR",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5822958161",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T00:07:45Z"
+    },
+    {
+      "event": "commented",
+      "id": 1002330482,
+      "node_id": "IC_kwDOAP4Jqs47vlly",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1002330482",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T00:08:41Z",
+      "updated_at": "2021-12-29T00:08:41Z",
+      "author_association": "MEMBER",
+      "body": "@peterdettman Care to redo benchmarks for the latest commit (I've removed the incomplete comb optimization, and re-added the uint32_t[9] recoded approach)?",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057#issuecomment-1002330482",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057"
+    },
+    {
+      "event": "mentioned",
+      "id": 5822959785,
+      "node_id": "MEE_lADOAP4Jqs5A8JTMzwAAAAFbE1Cp",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5822959785",
+      "actor": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T00:08:41Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 5822959788,
+      "node_id": "SE_lADOAP4Jqs5A8JTMzwAAAAFbE1Cs",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5822959788",
+      "actor": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T00:08:41Z"
+    },
+    {
+      "event": "commented",
+      "id": 1002380016,
+      "node_id": "IC_kwDOAP4Jqs47vxrw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1002380016",
+      "actor": {
+        "login": "siv2r",
+        "id": 56887198,
+        "node_id": "MDQ6VXNlcjU2ODg3MTk4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56887198?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/siv2r",
+        "html_url": "https://github.com/siv2r",
+        "followers_url": "https://api.github.com/users/siv2r/followers",
+        "following_url": "https://api.github.com/users/siv2r/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/siv2r/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/siv2r/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/siv2r/subscriptions",
+        "organizations_url": "https://api.github.com/users/siv2r/orgs",
+        "repos_url": "https://api.github.com/users/siv2r/repos",
+        "events_url": "https://api.github.com/users/siv2r/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/siv2r/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T03:28:20Z",
+      "updated_at": "2021-12-29T03:28:20Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "These were the best min I got (running the benchmark thrice) on my machine (64-bit, i7-8750H).\r\n\r\n| branch | ecdsa_sign | schnorrsig_sign |\r\n|-----------|-----------------|-----------------------|\r\n| master |      64.4       |         49.6            |\r\n| this PR|       57.0       |         42.0          |",
+      "user": {
+        "login": "siv2r",
+        "id": 56887198,
+        "node_id": "MDQ6VXNlcjU2ODg3MTk4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56887198?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/siv2r",
+        "html_url": "https://github.com/siv2r",
+        "followers_url": "https://api.github.com/users/siv2r/followers",
+        "following_url": "https://api.github.com/users/siv2r/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/siv2r/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/siv2r/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/siv2r/subscriptions",
+        "organizations_url": "https://api.github.com/users/siv2r/orgs",
+        "repos_url": "https://api.github.com/users/siv2r/repos",
+        "events_url": "https://api.github.com/users/siv2r/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/siv2r/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057#issuecomment-1002380016",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057"
+    },
+    {
+      "event": "commented",
+      "id": 1002410483,
+      "node_id": "IC_kwDOAP4Jqs47v5Hz",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1002410483",
+      "actor": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T06:00:58Z",
+      "updated_at": "2021-12-29T06:02:04Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Updated perf. numbers (-O3, best Min of 3 `bench sign`, 64-bit, i7-9750H):\r\n\r\n| branch | ecdsa_sign | schnorrsig_sign |\r\n| --- | --- | --- |\r\n| master | 29.6 | 23.1 |\r\n| this PR | 25.7 | 19.4 |\r\n| experimental | 24.2| 17.9 |\r\n\r\n(\"experimental\" is this PR plus the other PRs for normalize, group formulae, and the \"vector\" modinv).\r\n\r\nSo this looks just slightly slower than before, but perfectly fine if we are merge-focused. We can go hunting the extra 2% once we've booked the 20%.",
+      "user": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057#issuecomment-1002410483",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 5825998743,
+      "node_id": "HRFPE_lADOAP4Jqs5A8JTMzwAAAAFbQa-X",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5825998743",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T20:29:57Z"
+    },
+    {
+      "event": "renamed",
+      "id": 5826013502,
+      "node_id": "RTE_lADOAP4Jqs5A8JTMzwAAAAFbQek-",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5826013502",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T20:37:24Z",
+      "rename": {
+        "from": "WIP Rework of Signed-Digit Multicomb",
+        "to": "Signed-digit multi-comb ecmult_gen algorithm"
+      }
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDFhZTk4YmI1OGMyYmZmMjM5ZmNmYzZlZWMxOGMyZTFlZDBmYjliZjI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2",
+      "tree": {
+        "sha": "b23044af4a71dbcaeb6912e0b588c281b8715957",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b23044af4a71dbcaeb6912e0b588c281b8715957"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6a792b64062e75826cf495f9a78d7e87a3f81d71",
+          "sha": "6a792b64062e75826cf495f9a78d7e87a3f81d71",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6a792b64062e75826cf495f9a78d7e87a3f81d71"
+        }
+      ],
+      "message": "Signed-digit multi-comb ecmult_gen algorithm\n\nThis introduces the signed-digit multi-comb multiplication algorithm\nfor constant-time G multiplications (ecmult_gen). It is based on\nsection 3.3 of \"Fast and compact elliptic-curve cryptography\" by\nMike Hamburg (see https://eprint.iacr.org/2012/309).\n\nOriginal implementation by Peter Dettman, with changes by Pieter Wuille\nto use scalars for recoding, and additional comments.",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:09Z"
+      },
+      "author": {
+        "name": "Peter Dettman",
+        "email": "peter.dettman@gmail.com",
+        "date": "2021-12-26T23:09:27Z"
+      },
+      "sha": "1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDE3NzcxNjM4MzFmMTM0NmYyMzRjNDQ2MDFiYjljZmM2MDQ0MTg4ZDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1777163831f1346f234c44601bb9cfc6044188d3",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1777163831f1346f234c44601bb9cfc6044188d3",
+      "tree": {
+        "sha": "d06d2bc9f6de0e60ca210834a5d4d6c55b0fbb89",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d06d2bc9f6de0e60ca210834a5d4d6c55b0fbb89"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2",
+          "sha": "1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1ae98bb58c2bff239fcfc6eec18c2e1ed0fb9bf2"
+        }
+      ],
+      "message": "Always generate tables for current (blocks,teeth) config",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T19:37:38Z"
+      },
+      "sha": "1777163831f1346f234c44601bb9cfc6044188d3"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDg3OGU2Nzg5NzYwMGQwZWU0ZDkyNjE4MTVlMzhkMGZjNmVjOTJmNDA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/878e67897600d0ee4d9261815e38d0fc6ec92f40",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/878e67897600d0ee4d9261815e38d0fc6ec92f40",
+      "tree": {
+        "sha": "95cb8db84330931e593c5a1c364c434e266aed68",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/95cb8db84330931e593c5a1c364c434e266aed68"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1777163831f1346f234c44601bb9cfc6044188d3",
+          "sha": "1777163831f1346f234c44601bb9cfc6044188d3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1777163831f1346f234c44601bb9cfc6044188d3"
+        }
+      ],
+      "message": "Provide 3 configurations accessible through ./configure",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:09:52Z"
+      },
+      "sha": "878e67897600d0ee4d9261815e38d0fc6ec92f40"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGEyM2RhNzUxYWZkZTg2OWU1YzgwMzg0YTk3YzIzOTk4Njc4ODk3YTk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a23da751afde869e5c80384a97c23998678897a9",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a23da751afde869e5c80384a97c23998678897a9",
+      "tree": {
+        "sha": "f40df4cc48d8ec45ebe11ca87aa398de68e56bbb",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f40df4cc48d8ec45ebe11ca87aa398de68e56bbb"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/878e67897600d0ee4d9261815e38d0fc6ec92f40",
+          "sha": "878e67897600d0ee4d9261815e38d0fc6ec92f40",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/878e67897600d0ee4d9261815e38d0fc6ec92f40"
+        }
+      ],
+      "message": "Optimization: move 2^COMB_BITS-1 offset into ctx->scalar_offset\n\nIt is unnecessary to recompute the 2^COMB_BITS-1 scalar offset needed\nby the SDMC algorithm for every multiplication; move it into the\ncontext scalar_offset value instead.",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-26T23:37:53Z"
+      },
+      "sha": "a23da751afde869e5c80384a97c23998678897a9"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ0YWIwMzc0NDFiZTA5ZTkyNTc0MTM4OTUwMTJkYjJiOGY5NzhlODI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d4ab037441be09e9257413895012db2b8f978e82",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d4ab037441be09e9257413895012db2b8f978e82",
+      "tree": {
+        "sha": "e26973ab02953f2adbfe4dfb57a8f7ff8a999adc",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e26973ab02953f2adbfe4dfb57a8f7ff8a999adc"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a23da751afde869e5c80384a97c23998678897a9",
+          "sha": "a23da751afde869e5c80384a97c23998678897a9",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a23da751afde869e5c80384a97c23998678897a9"
+        }
+      ],
+      "message": "Optimization: first table lookup needs no point addition",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-27T00:05:49Z"
+      },
+      "sha": "d4ab037441be09e9257413895012db2b8f978e82"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDEwZTZkNmJlNGI5ZDMzMmU0NDY4NWIzZmNkYjZmMWM2YjM4NzRkMmM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c",
+      "tree": {
+        "sha": "33813434b679e0cf101e7aa2588daab98f243e4b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/33813434b679e0cf101e7aa2588daab98f243e4b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d4ab037441be09e9257413895012db2b8f978e82",
+          "sha": "d4ab037441be09e9257413895012db2b8f978e82",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d4ab037441be09e9257413895012db2b8f978e82"
+        }
+      ],
+      "message": "Optimization: avoid unnecessary doublings in precomputation",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Peter Dettman",
+        "email": "peter.dettman@gmail.com",
+        "date": "2021-12-27T03:50:09Z"
+      },
+      "sha": "10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGVhYjk5M2E5YmMxYTA0ZjRmMWRjYWY0ZmRhZDg2MzE2MWY1MGJhMDk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eab993a9bc1a04f4f1dcaf4fdad863161f50ba09",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eab993a9bc1a04f4f1dcaf4fdad863161f50ba09",
+      "tree": {
+        "sha": "5c4a1af24078989d7e80bc875e900a989b0473c3",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5c4a1af24078989d7e80bc875e900a989b0473c3"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c",
+          "sha": "10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/10e6d6be4b9d332e44685b3fcdb6f1c6b3874d2c"
+        }
+      ],
+      "message": "Make secp256k1_scalar_get_bits support 32-bit reads",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-28T23:13:04Z"
+      },
+      "sha": "eab993a9bc1a04f4f1dcaf4fdad863161f50ba09"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDE0NjRiOTM3ZGFjNzZlMDIxMzUxOWVlOTViYWEwNTQ5Zjk0YTMyY2E",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1464b937dac76e0213519ee95baa0549f94a32ca",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1464b937dac76e0213519ee95baa0549f94a32ca",
+      "tree": {
+        "sha": "876f3d429289d78f688669bdf487ee0722ab4809",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/876f3d429289d78f688669bdf487ee0722ab4809"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eab993a9bc1a04f4f1dcaf4fdad863161f50ba09",
+          "sha": "eab993a9bc1a04f4f1dcaf4fdad863161f50ba09",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eab993a9bc1a04f4f1dcaf4fdad863161f50ba09"
+        }
+      ],
+      "message": "Optimization: use Nx32 representation for recoded bits\n\nThe existing code needs to deal with the edge case that bit_pos >= 256,\nwhich would lead to an out-of-bounds read from secp256k1_scalar.\n\nInstead, recode the scalar into an array of uint32_t with enough zero\npadding at the end to alleviate the issue. This also simplifies the\ncode, and is necessary for a security improvement in a follow-up\ncommit.\n\nOriginal code by Peter Dettman, with modifications by Pieter Wuille.",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Peter Dettman",
+        "email": "peter.dettman@gmail.com",
+        "date": "2021-12-28T23:13:43Z"
+      },
+      "sha": "1464b937dac76e0213519ee95baa0549f94a32ca"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDNkOTAyNzQ1N2E4MDIxNDIxMDhkOGM4NGViNmQzZDM2OTcxNTJkMWI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/3d9027457a802142108d8c84eb6d3d3697152d1b",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/3d9027457a802142108d8c84eb6d3d3697152d1b",
+      "tree": {
+        "sha": "9cdb215eae61bd286f421f929d2db3aa2161649d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9cdb215eae61bd286f421f929d2db3aa2161649d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1464b937dac76e0213519ee95baa0549f94a32ca",
+          "sha": "1464b937dac76e0213519ee95baa0549f94a32ca",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1464b937dac76e0213519ee95baa0549f94a32ca"
+        }
+      ],
+      "message": "Reduce side channels from single-bit reads",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Peter Dettman",
+        "email": "peter.dettman@gmail.com",
+        "date": "2021-12-28T23:25:04Z"
+      },
+      "sha": "3d9027457a802142108d8c84eb6d3d3697152d1b"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDRhNGQxNmU4M2M2OWJmZjlhZDBjM2MyN2ZjMTNiNmFkOGIyMjJmMjQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4a4d16e83c69bff9ad0c3c27fc13b6ad8b222f24",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4a4d16e83c69bff9ad0c3c27fc13b6ad8b222f24",
+      "tree": {
+        "sha": "4797fe919d985358f80ae3cef2bf9b2a87afec8b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4797fe919d985358f80ae3cef2bf9b2a87afec8b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/3d9027457a802142108d8c84eb6d3d3697152d1b",
+          "sha": "3d9027457a802142108d8c84eb6d3d3697152d1b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/3d9027457a802142108d8c84eb6d3d3697152d1b"
+        }
+      ],
+      "message": "Reintroduce projective blinding",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-29T20:54:12Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2021-12-27T03:45:30Z"
+      },
+      "sha": "4a4d16e83c69bff9ad0c3c27fc13b6ad8b222f24"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 5826047933,
+      "node_id": "HRFPE_lADOAP4Jqs5A8JTMzwAAAAFbQm-9",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5826047933",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T20:54:20Z"
+    },
+    {
+      "event": "closed",
+      "id": 5826048868,
+      "node_id": "CE_lADOAP4Jqs5A8JTMzwAAAAFbQnNk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/5826048868",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T20:54:49Z"
+    },
+    {
+      "event": "commented",
+      "id": 1002774459,
+      "node_id": "IC_kwDOAP4Jqs47xR-7",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1002774459",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-29T21:00:28Z",
+      "updated_at": "2021-12-29T21:00:28Z",
+      "author_association": "MEMBER",
+      "body": "Restarting this in a new PR to avoid the WIP discussion: #1058.",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1057#issuecomment-1002774459",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1057"
+    }
+  ],
+  "comments": []
+}
