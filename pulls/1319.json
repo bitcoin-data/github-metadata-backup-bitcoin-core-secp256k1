@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2023-05-23T01:23:40Z",
-    "updated_at": "2023-07-28T01:11:57Z",
+    "updated_at": "2023-07-28T04:55:16Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "4ad2fe46bbb0eb1f140761815c4953ec23825c94",
@@ -342,7 +342,7 @@
     "changed_files": 4,
     "commits": 3,
     "review_comments": 1,
-    "comments": 9
+    "comments": 10
   },
   "events": [
     {
@@ -1254,6 +1254,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1319#issuecomment-1654830282",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1319"
+    },
+    {
+      "event": "commented",
+      "id": 1655003765,
+      "node_id": "IC_kwDOAP4Jqs5ipVp1",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1655003765",
+      "actor": {
+        "login": "andres-erbsen",
+        "id": 918403,
+        "node_id": "MDQ6VXNlcjkxODQwMw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/918403?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/andres-erbsen",
+        "html_url": "https://github.com/andres-erbsen",
+        "followers_url": "https://api.github.com/users/andres-erbsen/followers",
+        "following_url": "https://api.github.com/users/andres-erbsen/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/andres-erbsen/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/andres-erbsen/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/andres-erbsen/subscriptions",
+        "organizations_url": "https://api.github.com/users/andres-erbsen/orgs",
+        "repos_url": "https://api.github.com/users/andres-erbsen/repos",
+        "events_url": "https://api.github.com/users/andres-erbsen/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/andres-erbsen/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-07-28T04:55:16Z",
+      "updated_at": "2023-07-28T04:55:16Z",
+      "author_association": "NONE",
+      "body": "> I think performance should probably be the primary concern. However if correctness is the main motivation for this PR, then things get debatable. Each approach to formal correctness comes with a boatload of their own caveats.\r\n\r\nI just want to let you know that I'd be more than happy to explain the good/bad/ugly of what we fiat-crypto proofs are about in detail, if this would be of interest to the maintainers. Evaluating verification techniques can indeed be subtle, and I would try to be as unbiased of a resource as I can.\r\n\r\nIn short, fiat-crypto proofs about field arithmetic cover limb representation and modular-reduction algorithm, correct determination of bit-sizes of intermediate values (no unexpected overflow / lost carries), and low-level arithmetic optimization. The last verified format of code fiat-crypto-to-C translation is arithmetic operators with truncating casts `r` encoding desired value ranges of C types to be used for intermediates, as they appear on the left-hand sides of [this match statement](https://github.com/mit-plv/fiat-crypto/blob/master/src/Stringification/IR.v#L722-L786). Translating word arithmetic in fiat-crypto to word arithmetic in C is not covered by the proofs, and loading of the inputs and storing of the outputs isn't either. The latter is easy to inspect, but the former can be subtle due to integer promotion and other type-based arithmetic. These aspects *are* [modeled](https://github.com/mit-plv/fiat-crypto/blob/7b43573cb053c0f99bff761ca8fb1021bf1cd123/src/Stringification/C.v#L344-L579) in fiat cryptography, and the C-code generation explicitly [considers](https://github.com/mit-plv/fiat-crypto/blob/7b43573cb053c0f99bff761ca8fb1021bf1cd123/src/Stringification/C.v#L497-L504) that model, but in the end we are taking on faith that clang and gcc follow the same rules as encoded in our model. This same assumption would be present even if the last translation was verified against a semantics of C, as that semantics would refer to the same (or very similar) arithmetic rules. Every seriously-exercised formal model of C I have used or built has had corner cases where it didn't cover the behavior of some popular C compiler. That said, larger-than-int unsigned-integer arithmetic is as simple as C semantics get. For reviewing the generated code, it may also be helpful to consider how the same arithmetic was expressed in a different language such as [Zig](https://github.com/mit-plv/fiat-crypto/blob/master/fiat-zig/src/secp256k1_dettman_64.zig).\r\n\r\nThe main goal of the ongoing fiat-crypto-bedrock2 integration is to enable computer-checked integration proofs of generated field-arithmetic code, underlying polyfills, elliptic-curve algorithms, and application code above. In other words, we are looking to ensure that one proven layer of the cryptographic implementation does not make incompatible assumptions about another layer; we are working to avoid broken integration of individually proven components. Having a slightly lower-level language between fiat-crypto and C is a side benefit from our perspective. Similarly, pretty-printing (in bedrock2) and parsing (in CompCert before VST) do not represent a significant difference in our key considerations for semantic correctness; we chose pretty-printing to alleviate the user-experience concerns around ruling out common but poorly understood features of C that would be hard to model soundly. (The status of this work is that we have an x25519 implementation and some more proven and under submission, but not all performance-hurting shortcuts have been removed yet.)",
+      "user": {
+        "login": "andres-erbsen",
+        "id": 918403,
+        "node_id": "MDQ6VXNlcjkxODQwMw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/918403?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/andres-erbsen",
+        "html_url": "https://github.com/andres-erbsen",
+        "followers_url": "https://api.github.com/users/andres-erbsen/followers",
+        "following_url": "https://api.github.com/users/andres-erbsen/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/andres-erbsen/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/andres-erbsen/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/andres-erbsen/subscriptions",
+        "organizations_url": "https://api.github.com/users/andres-erbsen/orgs",
+        "repos_url": "https://api.github.com/users/andres-erbsen/repos",
+        "events_url": "https://api.github.com/users/andres-erbsen/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/andres-erbsen/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1319#issuecomment-1655003765",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1319"
     }
   ],
