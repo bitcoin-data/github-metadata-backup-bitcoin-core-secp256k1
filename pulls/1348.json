@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2023-06-15T14:12:49Z",
-    "updated_at": "2023-07-28T23:52:52Z",
+    "updated_at": "2023-07-29T02:56:57Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "5ef7b23e508599ad4261050803b42b552afe9d21",
@@ -165,7 +165,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 10349,
+        "size": 10372,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -340,7 +340,7 @@
     "deletions": 73,
     "changed_files": 5,
     "commits": 6,
-    "review_comments": 21,
+    "review_comments": 22,
     "comments": 6
   },
   "events": [
@@ -2579,6 +2579,58 @@
       "start_side": "LEFT",
       "line": 730,
       "original_line": 730,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1278220147",
+      "pull_request_review_id": 1553168846,
+      "id": 1278220147,
+      "node_id": "PRRC_kwDOAP4Jqs5MMBdz",
+      "diff_hunk": "@@ -44,6 +44,14 @@ typedef struct {\n \n #define SECP256K1_GE_STORAGE_CONST_GET(t) SECP256K1_FE_STORAGE_CONST_GET(t.x), SECP256K1_FE_STORAGE_CONST_GET(t.y)\n \n+/** Maximum allowed magnitudes for group element coordinates\n+ *  in affine (x, y) and jacobian (x, y, z) representation. */\n+#define SECP256K1_GE_X_MAGNITUDE_MAX  6\n+#define SECP256K1_GE_Y_MAGNITUDE_MAX  4\n+#define SECP256K1_GEJ_X_MAGNITUDE_MAX 6\n+#define SECP256K1_GEJ_Y_MAGNITUDE_MAX 4\n+#define SECP256K1_GEJ_Z_MAGNITUDE_MAX 2",
+      "path": "src/group.h",
+      "position": 10,
+      "original_position": 10,
+      "commit_id": "31bc9a434811d9d2c0a8058c93957c365b39089b",
+      "original_commit_id": "31bc9a434811d9d2c0a8058c93957c365b39089b",
+      "in_reply_to_id": 1272218956,
+      "user": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> Good question. I took these limits over from the original PR by @peterdettman (#1032) without further evaluation. Even on that PR, I verified that with the limits (4,3) and (4,4,1) the tests still pass, so no idea where the (6,4)/(6,4,2) limits were originally coming from. (My best guess would be that in the earliest version of the PR, those were the tightest limits where test would pass?!).\r\n\r\nThere is an inherent tension between tight limits, which might enable optimizations at method entry, and more generous limits, which might enable optimizations at method exit.\r\n\r\nThe true initial choice of limit was 8, to reflect the tacit assumption throughout the existing group code that it was safe to immediately (i.e. without normalization) mul/sqr any coordinate(s). Abstractly the intention was then to conservatively tighten the limits as necessary to enable specific method-entry optimizations without adding method-exit costs.\r\n\r\nThe only actual optimization applied was the one in the original PR removing the need to _normalize_weak as part of u1, u2 calculations in group addition. This leads to the choice of 6 for x, y.\r\n\r\nMy memory fails me as to the choice of 4 for z, but it might make sense that I was contemplating a possible implementation that calculates the output z using the form (a+b)^2 - a^2 - b^2 (instead of 2.a.b).\r\n",
+      "created_at": "2023-07-29T02:56:56Z",
+      "updated_at": "2023-07-29T02:56:57Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1348#discussion_r1278220147",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1278220147"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1348"
+        }
+      },
+      "start_line": 47,
+      "original_start_line": 47,
+      "start_side": "RIGHT",
+      "line": 53,
+      "original_line": 53,
       "side": "RIGHT"
     }
   ]
