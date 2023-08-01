@@ -60,9 +60,9 @@
       }
     ],
     "created_at": "2023-06-15T14:12:49Z",
-    "updated_at": "2023-07-31T23:53:34Z",
+    "updated_at": "2023-08-01T03:07:04Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "2875e14edc3a0e0260f9a016c207d27971e8cab7",
     "assignees": [],
     "requested_reviewers": [],
@@ -165,7 +165,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 10372,
+        "size": 10389,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -178,7 +178,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-07-31T23:33:14Z",
+        "pushed_at": "2023-08-01T00:50:25Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2022-01-22T19:24:39Z",
         "license": {
@@ -294,11 +294,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 962,
-        "stargazers_count": 1800,
-        "watchers_count": 1800,
+        "stargazers_count": 1801,
+        "watchers_count": 1801,
         "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 144,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -309,9 +309,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-07-31T23:33:18Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-07-29T15:58:49Z",
+        "updated_at": "2023-08-01T03:17:54Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -340,7 +340,7 @@
     "deletions": 73,
     "changed_files": 5,
     "commits": 6,
-    "review_comments": 25,
+    "review_comments": 26,
     "comments": 8
   },
   "events": [
@@ -2972,6 +2972,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1279232666"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1348"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 47,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 53,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1280065013",
+      "pull_request_review_id": 1556096003,
+      "id": 1280065013,
+      "node_id": "PRRC_kwDOAP4Jqs5MTD31",
+      "diff_hunk": "@@ -44,6 +44,14 @@ typedef struct {\n \n #define SECP256K1_GE_STORAGE_CONST_GET(t) SECP256K1_FE_STORAGE_CONST_GET(t.x), SECP256K1_FE_STORAGE_CONST_GET(t.y)\n \n+/** Maximum allowed magnitudes for group element coordinates\n+ *  in affine (x, y) and jacobian (x, y, z) representation. */\n+#define SECP256K1_GE_X_MAGNITUDE_MAX  6\n+#define SECP256K1_GE_Y_MAGNITUDE_MAX  4\n+#define SECP256K1_GEJ_X_MAGNITUDE_MAX 6\n+#define SECP256K1_GEJ_Y_MAGNITUDE_MAX 4\n+#define SECP256K1_GEJ_Z_MAGNITUDE_MAX 2",
+      "path": "src/group.h",
+      "position": null,
+      "original_position": 10,
+      "commit_id": "b7c685e74adbd83937990e90f076600fabf8ccf0",
+      "original_commit_id": "31bc9a434811d9d2c0a8058c93957c365b39089b",
+      "in_reply_to_id": 1272218956,
+      "user": {
+        "login": "peterdettman",
+        "id": 3423981,
+        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/peterdettman",
+        "html_url": "https://github.com/peterdettman",
+        "followers_url": "https://api.github.com/users/peterdettman/followers",
+        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
+        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
+        "repos_url": "https://api.github.com/users/peterdettman/repos",
+        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "I think the introduction of _fe_half is what allowed the z max magnitude to be lowered to 1. We have flirted in the past with formulae that utilize an output z calculation of the form (a+b)^2 - a^2 - b^2 (where a^2 and b^2 are already used in the formula, so that overall 1M is saved at 1S cost - plus linear ops), which suggests it might like z max mag >= 4, but there's no strong reason to expect we will move to such formulae.\r\n\r\nMy main focus was really just getting the limits 8,8(,8) in place and verified. I don't see any harm in setting the tightest limits that work; future changes contemplating changes to those limits can then be argued case-by-case.",
+      "created_at": "2023-08-01T03:07:03Z",
+      "updated_at": "2023-08-01T03:07:03Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1348#discussion_r1280065013",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1280065013"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1348"
