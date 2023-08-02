@@ -146,7 +146,7 @@
         "forks_count": 4,
         "stargazers_count": 3,
         "watchers_count": 3,
-        "size": 11430,
+        "size": 11947,
         "default_branch": "master",
         "open_issues_count": 16,
         "is_template": false,
@@ -159,7 +159,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-05-24T13:49:16Z",
+        "pushed_at": "2023-07-31T19:10:25Z",
         "created_at": "2016-05-03T03:14:21Z",
         "updated_at": "2023-03-16T11:44:51Z",
         "license": {
@@ -274,12 +274,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -290,9 +290,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -315,7 +315,7 @@
         "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/687"
       }
     },
-    "author_association": "MEMBER",
+    "author_association": "CONTRIBUTOR",
     "draft": false,
     "additions": 28,
     "deletions": 0,
@@ -334,7 +334,7 @@
       "commit_id": "33ad6d62fd6e7f37d265b9bc74afd5cb61526e5f",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Concept ACK",
       "user": {
         "login": "sipa",
@@ -390,7 +390,7 @@
       "commit_url": null,
       "created_at": "2019-11-05T10:41:16Z",
       "updated_at": "2019-11-05T10:45:00Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Apparently both test programs fail with the sanitizer enabled on travis.\r\n\r\nI'm testing this locally and the output is much better with\r\n`./configure --enable-coverage --disable-openssl-tests CC=clang CFLAGS=\"-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer -g\"`\r\n\r\n * `-fsanitize-memory-track-origins` is a no brainer. It needs more ressources but fine\r\n * `-fno-omit-frame-pointer -g` for printing functions and line numbers\r\n * `--enable-coverage` is mostly a hack to force `-O0`.\r\n\r\nInterestingly, I get different results with coverage on and off (due to the enabled VERIFYs), and in both cases the sanitizer fails pretty early here. :/\r\n\r\nedit: The caveat of all these options is that they don't work on the compiler options that we really use for the build in the end. I still think they're useful, I guess the memory sanitizer is more useful for spotting mistakes in the source code and not issues introduced by the compiler.   ",
       "user": {
         "login": "real-or-random",
@@ -444,7 +444,7 @@
       "commit_url": null,
       "created_at": "2019-11-05T10:49:43Z",
       "updated_at": "2019-11-05T10:49:43Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@real-or-random you're missing `--without-asm` and `--with-bignum=no`. The problem with the travis test run is that ASM=no doesn't have an effect. Will write a fix.",
       "user": {
         "login": "jonasnick",
@@ -556,7 +556,7 @@
       "commit_url": null,
       "created_at": "2019-11-05T10:58:33Z",
       "updated_at": "2019-11-05T10:58:33Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Oh indeed. I still suggest adding `-fsanitize-memory-track-origins -fno-omit-frame-pointer -g` here to make sure that the output of the sanitizer is useful. \r\n\r\nBy the way, is there a reason why you can't override the optimization level in the CFLAGS? @gmaxwell @sipa ",
       "user": {
         "login": "real-or-random",
@@ -706,7 +706,7 @@
       "commit_id": "33ad6d62fd6e7f37d265b9bc74afd5cb61526e5f",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -902,7 +902,7 @@
       "commit_url": null,
       "created_at": "2019-11-05T13:04:47Z",
       "updated_at": "2019-11-05T13:06:09Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Rebased. @real-or-random \r\n\r\n> Oh indeed. I still suggest adding -fsanitize-memory-track-origins -fno-omit-frame-pointer -g here to make sure that the output of the sanitizer is useful.\r\n\r\nWhen I experimented with this before opening the PR I noticed that with `-fsanitize-memory-track-origins` the tests take much longer (especially with schnorrsigs). I settled on giving travis only the responsibility to detect errors and not to pretty-print them. That would be done locally, by the devs because they need to verify anyway that their patch works. OTOH I don't know how to document all the nice flags such that it's easy to discover. I'll play with `-fsanitize-memory-track-origins` in my fork to see how long it takes for travis.\r\n",
       "user": {
         "login": "jonasnick",
@@ -1043,7 +1043,7 @@
       "commit_url": null,
       "created_at": "2019-11-05T20:23:12Z",
       "updated_at": "2019-11-05T20:23:12Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I've added a non-endo test. But my tests with `-fsanitize-memory-track-origins` didn't go that well: I didn't manage to escape quotes in a way that allows specifying multiple options with CFLAGS. Unless someone has an idea for how to do that, I'll leave the PR as is.",
       "user": {
         "login": "jonasnick",
@@ -1195,7 +1195,7 @@
       "commit_url": null,
       "created_at": "2019-11-06T09:16:20Z",
       "updated_at": "2019-11-06T09:16:20Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "With @real-or-random's help I added `-fno-omit-frame-pointer -g` to give a much nicer output in case of failure.",
       "user": {
         "login": "jonasnick",
@@ -1307,7 +1307,7 @@
       "commit_url": null,
       "created_at": "2019-11-06T10:37:03Z",
       "updated_at": "2019-11-06T10:37:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK f3cae6be43457e8a7837b53f5f4e60068feffca2\r\n\r\n> When I experimented with this before opening the PR I noticed that with `-fsanitize-memory-track-origins` the tests take much longer (especially with schnorrsigs). I settled on giving travis only the responsibility to detect errors and not to pretty-print them. That would be done locally, by the devs because they need to verify anyway that their patch works. \r\n\r\nMakes perfect sense by the way.",
       "user": {
         "login": "real-or-random",
@@ -1341,7 +1341,7 @@
       "commit_id": "f3cae6be43457e8a7837b53f5f4e60068feffca2",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
         "login": "real-or-random",
@@ -1451,7 +1451,7 @@
       "commit_url": null,
       "created_at": "2019-11-07T09:38:51Z",
       "updated_at": "2019-11-07T09:38:51Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> The msan is a much weaker test than valgrind particularly with -DVALGRIND as that tests properties that can't be easily tested any other way ... does the travis environment have valgrind? We've historically used valgrind (so this is not a case where valgrind is too slow to be useful)...\r\n\r\nMy guess was that it is too slow but this was really just a guess. If you say it's not, we should definitively try it.",
       "user": {
         "login": "real-or-random",
@@ -1729,7 +1729,7 @@
       "commit_url": null,
       "created_at": "2019-11-07T19:17:35Z",
       "updated_at": "2019-11-07T19:17:35Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@elichai valgrind certainly found the uninitialized I temporarily added to #558.\r\n\r\n@gmaxwell this PR is not intended to replace local testing - it's just belt and suspenders. Travis is not to be trusted anyway.\r\n\r\nI played with running valgrind in travis and it seems to work with \"test count\" 8 instead of the default 64 https://github.com/jonasnick/secp256k1/pull/10. I'll open an alternative PR with a more cleaned up version of the valgrind travis config.",
       "user": {
         "login": "jonasnick",
@@ -1879,7 +1879,7 @@
       "commit_id": "f3cae6be43457e8a7837b53f5f4e60068feffca2",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "user": {
         "login": "MarcoFalke",
         "id": 6399679,
@@ -1934,7 +1934,7 @@
       "commit_url": null,
       "created_at": "2019-11-08T13:29:33Z",
       "updated_at": "2019-11-08T13:29:33Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "The [memory sanitizer documentation](https://github.com/google/sanitizers/wiki/MemorySanitizer) says that it implements a subset of valgrind's memcheck. So I don't think we need both and can close this PR if we have valgrind.",
       "user": {
         "login": "jonasnick",
@@ -1958,6 +1958,182 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#issuecomment-551794708",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/687"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "elichai",
+        "id": 2167860,
+        "node_id": "MDQ6VXNlcjIxNjc4NjA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/elichai",
+        "html_url": "https://github.com/elichai",
+        "followers_url": "https://api.github.com/users/elichai/followers",
+        "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
+        "organizations_url": "https://api.github.com/users/elichai/orgs",
+        "repos_url": "https://api.github.com/users/elichai/repos",
+        "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/elichai/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2019-11-08T13:48:44Z",
+      "updated_at": "2019-11-08T13:48:44Z",
+      "source": {
+        "issue": {
+          "id": 520024326,
+          "node_id": "MDExOlB1bGxSZXF1ZXN0MzM4Njg0NzMy",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/690",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/690/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/690/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/690/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/690",
+          "number": 690,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Add valgrind check to travis",
+          "body": "As discussed in https://github.com/bitcoin-core/secp256k1/pull/687\r\nThis adds valgrind check to the repo.\r\n\r\nIt doesn't run on recovery+ecdh because of the time.\r\nNo openssl because of uninitialized mem.\r\nI debated between with and without ASM, but decided with ASM because it might be more fragile(?).\r\n\r\nI wasn't sure if I should pass `-DVALGRIND` via `CFLAGS` or `CPPFLAGS`, it seems like because this is only C then there shouldn't even be `CPPFLAGS` but looks like we use `CPPFLAGS` in other places for the preprocessor definitions.\r\n\r\nIf people are worried about the time it takes we can mark it as `allow_failure` although I don't think it's a problem here because there's only a handful of PRs and they're usually open for weeks.\r\n",
+          "user": {
+            "login": "elichai",
+            "id": 2167860,
+            "node_id": "MDQ6VXNlcjIxNjc4NjA=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/elichai",
+            "html_url": "https://github.com/elichai",
+            "followers_url": "https://api.github.com/users/elichai/followers",
+            "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
+            "organizations_url": "https://api.github.com/users/elichai/orgs",
+            "repos_url": "https://api.github.com/users/elichai/repos",
+            "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/elichai/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 3,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/690",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/690",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/690.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/690.patch"
+          },
+          "closed_at": "2019-11-25T10:19:49Z",
+          "created_at": "2019-11-08T13:48:43Z",
+          "updated_at": "2020-05-02T17:56:36Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "MarcoFalke",
+        "id": 6399679,
+        "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/MarcoFalke",
+        "html_url": "https://github.com/MarcoFalke",
+        "followers_url": "https://api.github.com/users/MarcoFalke/followers",
+        "following_url": "https://api.github.com/users/MarcoFalke/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/MarcoFalke/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/MarcoFalke/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/MarcoFalke/subscriptions",
+        "organizations_url": "https://api.github.com/users/MarcoFalke/orgs",
+        "repos_url": "https://api.github.com/users/MarcoFalke/repos",
+        "events_url": "https://api.github.com/users/MarcoFalke/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/MarcoFalke/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2019-11-14T15:28:59Z",
+      "updated_at": "2019-11-14T15:28:59Z",
+      "source": {
+        "issue": {
+          "id": 521890414,
+          "node_id": "MDU6SXNzdWU1MjE4OTA0MTQ=",
+          "url": "https://api.github.com/repos/bitcoin/bitcoin/issues/17460",
+          "repository_url": "https://api.github.com/repos/bitcoin/bitcoin",
+          "labels_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/17460/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/17460/comments",
+          "events_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/17460/events",
+          "html_url": "https://github.com/bitcoin/bitcoin/issues/17460",
+          "number": 17460,
+          "state": "closed",
+          "state_reason": "completed",
+          "title": "Run tests in memory sanitizer",
+          "body": "We run the tests in the thread (and other sanitizers), see `git grep sanitizer ./ci`, but not in the memory sanitizer. This seems like it could be improved. See e.g. #17449 ",
+          "user": {
+            "login": "MarcoFalke",
+            "id": 6399679,
+            "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/MarcoFalke",
+            "html_url": "https://github.com/MarcoFalke",
+            "followers_url": "https://api.github.com/users/MarcoFalke/followers",
+            "following_url": "https://api.github.com/users/MarcoFalke/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/MarcoFalke/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/MarcoFalke/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/MarcoFalke/subscriptions",
+            "organizations_url": "https://api.github.com/users/MarcoFalke/orgs",
+            "repos_url": "https://api.github.com/users/MarcoFalke/repos",
+            "events_url": "https://api.github.com/users/MarcoFalke/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/MarcoFalke/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 64583,
+              "node_id": "MDU6TGFiZWw2NDU4Mw==",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Feature",
+              "name": "Feature",
+              "color": "7cf575",
+              "default": false
+            },
+            {
+              "id": 62963516,
+              "node_id": "MDU6TGFiZWw2Mjk2MzUxNg==",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Tests",
+              "name": "Tests",
+              "color": "d4c5f9",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "MEMBER",
+          "locked": true,
+          "active_lock_reason": "resolved",
+          "comments": 5,
+          "closed_at": "2019-12-17T16:47:50Z",
+          "created_at": "2019-11-13T00:58:48Z",
+          "updated_at": "2021-12-16T15:12:28Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "closed",
@@ -2055,7 +2231,7 @@
       "created_at": "2019-11-04T22:51:54Z",
       "updated_at": "2019-11-06T00:02:45Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r342310872",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/342310872"
@@ -2107,7 +2283,7 @@
       "created_at": "2019-11-04T23:20:28Z",
       "updated_at": "2019-11-06T00:02:45Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r342318813",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/342318813"
@@ -2159,7 +2335,7 @@
       "created_at": "2019-11-05T11:24:53Z",
       "updated_at": "2019-11-06T00:02:45Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r342510810",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/342510810"
@@ -2211,7 +2387,7 @@
       "created_at": "2019-11-05T13:22:16Z",
       "updated_at": "2019-11-06T00:02:45Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r342558620",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/342558620"
@@ -2263,7 +2439,7 @@
       "created_at": "2019-11-07T22:16:16Z",
       "updated_at": "2019-11-07T22:16:16Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r343903452",
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/343903452"
@@ -2315,7 +2491,7 @@
       "created_at": "2019-11-08T09:12:13Z",
       "updated_at": "2019-11-08T09:12:13Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/687#discussion_r344067184",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/344067184"

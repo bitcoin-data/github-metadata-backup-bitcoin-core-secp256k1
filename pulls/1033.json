@@ -275,12 +275,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -291,9 +291,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -384,7 +384,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T01:50:17Z",
       "updated_at": "2021-12-22T01:50:17Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK b6d109ddc80254e4ceedd7f22e6195a1ef37a087\r\n\r\nI've written a basic test for the new function directly: https://github.com/sipa/secp256k1/commits/pr1033",
       "user": {
         "login": "sipa",
@@ -530,7 +530,7 @@
       "commit_id": "b6d109ddc80254e4ceedd7f22e6195a1ef37a087",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK mod nit. It may be a good idea to squash the last commit (update comments) into the first one.",
       "user": {
         "login": "real-or-random",
@@ -586,7 +586,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T11:54:21Z",
       "updated_at": "2021-12-22T11:54:21Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Looking at the comment in `gej_double`:\r\nhttps://github.com/bitcoin-core/secp256k1/blob/master/src/group_impl.h#L274-L280\r\n\r\nI wonder if `half` can save the normalization when switching to the other formula.\r\n\r\nhttps://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l gives\r\n```\r\nA = X1^2\r\nB = Y1^2\r\nC = B^2\r\nD = 2*((X1+B)^2-A-C)\r\nE = 3*A\r\nF = E^2\r\nX3 = F-2*D\r\nY3 = E*(D-X3)-8*C\r\nZ3 = 2*Y1*Z1\r\n```\r\n\r\nI think this is equivalent to\r\n\r\n```\r\nA = X1^2\r\nB = Y1^2\r\nC = B^2\r\nD = (X1+B)^2-A-C\r\nE = 3*(A/2)\r\nF = E^2\r\nX3 = F-D\r\nY3 = E*(D/2-X3)-C\r\nZ3 = Y1*Z1\r\n```\r\n",
       "user": {
         "login": "real-or-random",
@@ -757,7 +757,7 @@
       "commit_id": "0559a3d905ad9ec2e98faeb839e017349a18f8da",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 0559a3d905ad9ec2e98faeb839e017349a18f8da",
       "user": {
         "login": "real-or-random",
@@ -867,7 +867,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T15:38:15Z",
       "updated_at": "2021-12-22T17:39:57Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Hm, it didn't occur to me that the analysis of the magnitude is that involved and I made a wrong assumption when reviewing this...\r\n\r\nI believe your proof is correct but then we should maybe add a polished version of the proof to a comment and introduce tests that check the function with the exact largest input value (for even and odd input magnitudes).",
       "user": {
         "login": "real-or-random",
@@ -975,7 +975,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T19:30:15Z",
       "updated_at": "2021-12-22T19:30:15Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I think you need to rebase (or force-push for some other reason) once here to make CI happy. A few tasks were failing due to #1047  being merged during the CI run of this PR. (Sorry for the CI mess again. Shouldn't happen for other PRs then at least...)",
       "user": {
         "login": "real-or-random",
@@ -1029,7 +1029,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T19:38:33Z",
       "updated_at": "2021-12-22T19:38:33Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> e.g a method to assert a new magnitude value would be helpful since we can generally get the limbs we want, but lose control of the magnitude. \r\n\r\nSorry I can't follow here. When you \"assert a new magnitude\" value, wouldn't you have control then? \r\n\r\nCould we just add 2P (?) to increase the magnitude artificially for testing?\r\n\r\n> Then again, maybe it's easier to just directly manipulate the specific field representation(s) under SECP256K1_WIDEMUL_INT64/128 defines?\r\n\r\nYou mean construct special values by by setting the fe members directly? Yeah, I think that's what we should do for testing.  go crypto has a similar thing, see this commit: https://github.com/golang/go/commit/d95ca9138026cbe40e0857d76a81a16d03230871",
       "user": {
         "login": "real-or-random",
@@ -1083,7 +1083,7 @@
       "commit_url": null,
       "created_at": "2021-12-22T22:25:21Z",
       "updated_at": "2021-12-22T22:33:18Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I clearly also went too fast over the new bound.\r\n\r\nHere is my reasoning for it. It applies to `x = r->n[i]` (for i=0..8) for the 32-bit code. Think of x as a real number.\r\n\r\nLet `C = 2*0x3ffffff`.\r\n\r\nOn entrance to the function, we know that `x <= m*C`. In the first half of the function, at most `0x3ffffff` is added (the value of `mask`). Now `x <= (m+1/2)*C`. Then it is divided by two, leading to `x <= (m/2+1/4)*C`. Lastly, at most `1 << 25` is added (which is equal to `C/4 + 1/2`), giving `x <= (m/2+1/2)*C + 1/2`. This implies `x <= ceil(m/2 + 1/2)*C + 1/2`. And since `x`, `ceil(m/2 + 1/2)` and `C` are all integral, we can drop the `+ 1/2`, giving `x <= ceil(m/2 + 1/2)*C`, and `ceil(m/2 + 1/2)` equals the new magnitude `(m>>1)+1` for all natural m.\r\n\r\nLet `D = 2*3fffff`.\r\n\r\nFor `x = r->n[8]` we instead have on entrance `x <= m*D`. In the first half of the function, at most `0x3fffff` is added. Now `x <= (m+1/2)*D`. Then it is divided by two, leading to `x <= (m/2+1/4)*D`. This implies `x <= ceil(m/2+1/4)*D`, and `ceil(m/2+1/4)` equals the new magnitude `(m>>1)+1` for all natural m.\r\n\r\nSimilar reasoning can be used for the 64-bit code.\r\n\r\nIt'd be good to document this reasoning in the code.\r\n",
       "user": {
         "login": "sipa",
@@ -1137,7 +1137,7 @@
       "commit_url": null,
       "created_at": "2021-12-23T00:04:28Z",
       "updated_at": "2021-12-23T00:09:27Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@real-or-random By just following the \"basic\" doubling formula (affine `λ = (3/2)*X1^2/Y1`, `X3 = λ^2 - 2*X1`, `Y3 = λ*(X1 - X3) - Y1`), but using halving for the halving rather than bringing it to the Z coordinate when going to Jacobian, you get:\r\n\r\n```\r\nL = (3/2) * X1^2\r\nS = Y1^2\r\nT = X1*S\r\nX3 = L^2 - 2*T\r\nY3 = L*(T - X3) - S^2\r\nZ3 = Z1*Y1\r\n```\r\n\r\nwhich seems even simpler.",
       "user": {
         "login": "sipa",
@@ -1249,7 +1249,7 @@
       "commit_url": null,
       "created_at": "2021-12-23T01:04:41Z",
       "updated_at": "2021-12-23T01:04:41Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Implemented here; seems to  work, but I can't really notice anything becoming faster. By operation count I would expect it to be slightly faster though: https://github.com/sipa/secp256k1/commits/202112_doublehalf. There may be some micro optimizations I've missed (e.g. I feel like it should be possible with one less negation), but it's not going to matter much.",
       "user": {
         "login": "sipa",
@@ -1743,7 +1743,7 @@
       "commit_url": null,
       "created_at": "2021-12-23T15:08:03Z",
       "updated_at": "2021-12-23T15:08:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Edit: Interestingly, moving the negate from Y3 to Z3 can't be done without changing some tests that appear to check for an exact expected z-ratio in some way that I haven't investigated.\r\n\r\nDid you add a `secp256k1_fe_negate(rzr, &a->y)` in secp256k1_gej_double_var?",
       "user": {
         "login": "sipa",
@@ -1777,7 +1777,7 @@
       "commit_id": "bb8f15fdd744a4d51a0321905f06c29d78cc4a6b",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "sipa",
         "id": 548488,
@@ -1802,6 +1802,81 @@
       "submitted_at": "2021-12-23T15:18:57Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1033"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-23T16:19:02Z",
+      "updated_at": "2021-12-23T16:19:02Z",
+      "source": {
+        "issue": {
+          "id": 1087816645,
+          "node_id": "I_kwDOAP4Jqs5A1sPF",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1051",
+          "number": 1051,
+          "state": "open",
+          "state_reason": null,
+          "title": "Try a non-uniform group law (e.g., for ecmult_gen)?",
+          "body": "The group law in `secp256k1_gej_add_ge` is uniform, i.e., it works for P + Q no matter if P != Q or P = Q. (It still needs to handle infinity and has another special case.) \r\n\r\nIt needs 7 fe mul and 5 fe sqr, the best non-uniform group law in EFD needs one fewer sqr (https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-madd-2007-bl). Mabye it's faster also in practice. We could simply implement it and benchmark it.\r\n\r\nDepending on the specifics of our ecmult_gen algorithm, it may be the case that this algorithm never adds P + Q with P = Q (for example, the ecmult algorithm within the MuSig-DN circuit has a similar property)). Then, we could get away with the non-uniform law in ecmult_gen.\r\n\r\nI think we shouldn't really think about this before https://github.com/bitcoin-core/secp256k1/pull/693 has been done.",
+          "user": {
+            "login": "real-or-random",
+            "id": 1071625,
+            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/real-or-random",
+            "html_url": "https://github.com/real-or-random",
+            "followers_url": "https://api.github.com/users/real-or-random/followers",
+            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+            "repos_url": "https://api.github.com/users/real-or-random/repos",
+            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 30,
+          "created_at": "2021-12-23T15:38:09Z",
+          "updated_at": "2022-12-03T16:44:05Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "reviewed",
@@ -1979,7 +2054,7 @@
       "commit_url": null,
       "created_at": "2021-12-24T14:37:46Z",
       "updated_at": "2021-12-24T14:37:46Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "The Sage group prover works with this new doubling formula:\r\n\r\n```diff\r\n--- a/sage/prove_group_implementations.sage\r\n+++ b/sage/prove_group_implementations.sage\r\n@@ -8,25 +8,20 @@ load(\"weierstrass_prover.sage\")\r\n def formula_secp256k1_gej_double_var(a):\r\n   \"\"\"libsecp256k1's secp256k1_gej_double_var, used by various addition functions\"\"\"\r\n   rz = a.Z * a.Y\r\n-  rz = rz * 2\r\n-  t1 = a.X^2\r\n-  t1 = t1 * 3\r\n-  t2 = t1^2\r\n-  t3 = a.Y^2\r\n-  t3 = t3 * 2\r\n-  t4 = t3^2\r\n-  t4 = t4 * 2\r\n-  t3 = t3 * a.X\r\n-  rx = t3\r\n-  rx = rx * 4\r\n-  rx = -rx\r\n-  rx = rx + t2\r\n-  t2 = -t2\r\n-  t3 = t3 * 6\r\n-  t3 = t3 + t2\r\n-  ry = t1 * t3\r\n-  t2 = -t4\r\n-  ry = ry + t2\r\n+  s = a.Y^2\r\n+  l = a.X^2\r\n+  l = l * 3\r\n+  l = l / 2\r\n+  t = -s\r\n+  t = t * a.X\r\n+  rx = l^2\r\n+  rx = rx + t\r\n+  rx = rx + t\r\n+  s = s^2\r\n+  t = t + rx\r\n+  ry = t * l\r\n+  ry = ry + s\r\n+  ry = -ry\r\n   return jacobianpoint(rx, ry, rz)\r\n```\r\n",
       "user": {
         "login": "sipa",
@@ -2170,7 +2245,7 @@
       "commit_url": null,
       "created_at": "2021-12-27T10:18:12Z",
       "updated_at": "2021-12-27T10:18:12Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Please ignore the macOS CI failures. The Cirrus macOS VMs seems to have network issues... https://github.com/cirruslabs/osx-images/issues/42 macOS on CI is getting annoying on multiple fronts apparently.",
       "user": {
         "login": "real-or-random",
@@ -2224,7 +2299,7 @@
       "commit_url": null,
       "created_at": "2021-12-31T02:10:06Z",
       "updated_at": "2021-12-31T15:09:57Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK b6631a809189fdbc9f31b710f995e7075160d536\r\n\r\nCurious observation: in `secp256k1_gej_add_ge`, using `degenerate = secp256k1_fe_normalizes_to_zero(&m);` (dropping the `& secp256k1_fe_normalizes_to_zero(&rr)`) also works (and passes sage symbolic verification). I haven't thought through why.",
       "user": {
         "login": "sipa",
@@ -2444,7 +2519,7 @@
       "commit_url": null,
       "created_at": "2021-12-31T14:51:39Z",
       "updated_at": "2021-12-31T14:51:39Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> It might not be relevant, but do these sage scripts understand that the endomorphism exists so that (y1 == +/-y2) does not imply (x1 == x2)?\r\n\r\nThey reason over (fractions and ideals of) polynomials over Q. My intuition says that that will discover all properties that could hold in some field, but I don't know enough theory to know whether that's true. The script does find the error in the \"old\" gej_add_ge code, which was only wrong due to the existence of (x1,y) and (x2,-y) points, IIRC.",
       "user": {
         "login": "sipa",
@@ -2498,7 +2573,7 @@
       "commit_url": null,
       "created_at": "2022-01-26T14:58:22Z",
       "updated_at": "2022-01-26T14:58:22Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "needs (trivial) rebase :)",
       "user": {
         "login": "real-or-random",
@@ -2615,7 +2690,7 @@
       "commit_id": "534df0fbb7515ac0e395440e3162aa5146f62eb7",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "This was fun to review. I get an 6% speedup in double and 2.5% in add.\r\n\r\nI can't run the sage code. Tried to run it on two different implementations, but I'm getting a `no canonical coercion from Multivariate Polynomial Ring` error.",
       "user": {
         "login": "jonasnick",
@@ -2872,6 +2947,88 @@
       "created_at": "2022-01-31T12:44:17Z"
     },
     {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-01-31T21:03:15Z",
+      "updated_at": "2022-01-31T21:03:15Z",
+      "source": {
+        "issue": {
+          "id": 1010105369,
+          "node_id": "PR_kwDOAP4Jqs4saSld",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/982",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/982/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/982/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/982/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/982",
+          "number": 982,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Add Elligator Square module",
+          "body": "Based on #979.\r\n\r\nThis adds a module with an implementation of the Elligator Squared algorithm for encoding/decoding public keys in uniformly random byte arrays.",
+          "user": {
+            "login": "sipa",
+            "id": 548488,
+            "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+            "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/sipa",
+            "html_url": "https://github.com/sipa",
+            "followers_url": "https://api.github.com/users/sipa/followers",
+            "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+            "organizations_url": "https://api.github.com/users/sipa/orgs",
+            "repos_url": "https://api.github.com/users/sipa/repos",
+            "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/sipa/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 11,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/982",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/982",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/982.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/982.patch"
+          },
+          "closed_at": "2022-07-07T14:01:10Z",
+          "created_at": "2021-09-28T19:04:34Z",
+          "updated_at": "2022-07-07T14:01:11Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
       "event": "committed",
       "id": null,
       "node_id": "C_kwDOAP4JqtoAKGQ2NGJiNWQ0ZjNmYmQ0OGI1NzBkODQ3YzkzODliOWNmOGYzZDlhYmM",
@@ -2989,7 +3146,7 @@
       "commit_id": "e848c3799c4f31367c3ed98d17e3b7de504d4c6e",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK e848c3799c4f31367c3ed98d17e3b7de504d4c6e\r\n\r\nWas able to run the updated sage scripts with #1068",
       "user": {
         "login": "jonasnick",
@@ -3045,7 +3202,7 @@
       "commit_url": null,
       "created_at": "2022-02-04T11:26:18Z",
       "updated_at": "2022-02-04T11:26:18Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Curious observation: in `secp256k1_gej_add_ge`, using `degenerate = secp256k1_fe_normalizes_to_zero(&m);` (dropping the `& secp256k1_fe_normalizes_to_zero(&rr)`) also works (and passes sage symbolic verification). I haven't thought through why.\r\n\r\nI thought about this and I believe it works. The code currently switches to the alternative formula for lambda only if (R,M) = (0,0) but the alternative formula works whenever M = 0: Specifically, M = 0 implies y1 = -y2. If x1 = x2, then a = -b this is the r = infinity case that we handle separately. If x1 != x2, then the denominator in the alternative formula is non-zero, so this formula is well-defined. (And I understand this means that it gives the right result?) \r\n\r\nOne needs to carefully check that the `infinity = ` assignment is still correct because now the definition of `m_alt` at this point in the code has changed. But this is true:\r\n\r\nCase y1 = -y2 ==> degenerate = true ==> infinity = ((x1 -  x2)Z = 0) & ~a->infinity\r\na->infinity is handled separately. And if ~a->infinity, then Z = Z1 != 0, so infinity = (x1 - x2 = 0) = (a = -b) by case condition.\r\n\r\nCase y1 != -y2 ==> degenerate = false ==> infinity = ((y1 + y2)Z = 0) & ~a->infinity.\r\na->infinity is handled separately. And if ~a->infinity, then Z = Z1 != 0, so infinity = (y1 + y2 = 0) = false by case condition.",
       "user": {
         "login": "real-or-random",
@@ -3099,7 +3256,7 @@
       "commit_url": null,
       "created_at": "2022-02-04T14:29:47Z",
       "updated_at": "2022-02-04T14:29:47Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I pushed it here with a further change that saves the infinity variable: https://github.com/real-or-random/secp256k1/commits/202202-gej_add_ge  (Should not hold up this PR, I'm in the middle of reviewing it)",
       "user": {
         "login": "real-or-random",
@@ -3125,6 +3282,88 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1033"
     },
     {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-02-04T14:41:07Z",
+      "updated_at": "2022-02-04T14:41:07Z",
+      "source": {
+        "issue": {
+          "id": 1119295116,
+          "node_id": "PR_kwDOAP4Jqs4x1K9m",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1068",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1068/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1068/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1068/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1068",
+          "number": 1068,
+          "state": "closed",
+          "state_reason": null,
+          "title": "sage: Fix incompatibility with sage 9.4",
+          "body": "`allexprs` is already the product all numerators. Don't take it's\r\nnumerator again.\r\n\r\nFixes #1067.\r\n\r\nTo be honest, I have no idea what I'm doing here.",
+          "user": {
+            "login": "real-or-random",
+            "id": 1071625,
+            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/real-or-random",
+            "html_url": "https://github.com/real-or-random",
+            "followers_url": "https://api.github.com/users/real-or-random/followers",
+            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+            "repos_url": "https://api.github.com/users/real-or-random/repos",
+            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 4,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1068",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1068",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1068.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1068.patch"
+          },
+          "closed_at": "2022-02-05T22:11:15Z",
+          "created_at": "2022-01-31T11:16:27Z",
+          "updated_at": "2022-02-05T22:11:15Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
       "event": "reviewed",
       "id": 873189776,
       "node_id": "PRR_kwDOAP4Jqs40C9GQ",
@@ -3133,7 +3372,7 @@
       "commit_id": "e848c3799c4f31367c3ed98d17e3b7de504d4c6e",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK e848c3799c4f31367c3ed98d17e3b7de504d4c6e\r\n\r\nIf you ever touch this again, maybe squash the commits that affect the doubling function. But no need to invalidate the ACKs for this. \r\n\r\nedit: Changed to PR title to reflect to change to _gej_double ",
       "user": {
         "login": "real-or-random",
@@ -3222,7 +3461,7 @@
       "commit_url": null,
       "created_at": "2022-02-17T21:33:44Z",
       "updated_at": "2022-02-17T21:33:44Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "utACK e848c3799c4f31367c3ed98d17e3b7de504d4c6e",
       "user": {
         "login": "sipa",
@@ -3304,6 +3543,88 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2022-02-21T10:00:22Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-02-21T10:25:06Z",
+      "updated_at": "2022-02-21T10:25:06Z",
+      "source": {
+        "issue": {
+          "id": 1145578597,
+          "node_id": "PR_kwDOAP4Jqs4zN5Z-",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1078",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1078/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1078/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1078/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1078",
+          "number": 1078,
+          "state": "closed",
+          "state_reason": null,
+          "title": "group: Save a normalize_to_zero in gej_add_ge",
+          "body": "As discovered  by sipa in #1033. \r\n\r\nSee commit message for reasoning but note that the infinity handling will be replaced in the second commit again.",
+          "user": {
+            "login": "real-or-random",
+            "id": 1071625,
+            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/real-or-random",
+            "html_url": "https://github.com/real-or-random",
+            "followers_url": "https://api.github.com/users/real-or-random/followers",
+            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+            "repos_url": "https://api.github.com/users/real-or-random/repos",
+            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 6,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1078",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1078",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1078.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1078.patch"
+          },
+          "closed_at": "2023-02-14T19:55:56Z",
+          "created_at": "2022-02-21T10:05:51Z",
+          "updated_at": "2023-02-14T19:55:56Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "referenced",
@@ -3391,6 +3712,88 @@
       "commit_id": "465d05253aaff1e06165a1777e70da16e14d2519",
       "commit_url": "https://api.github.com/repos/fanquake/bitcoin/commits/465d05253aaff1e06165a1777e70da16e14d2519",
       "created_at": "2022-03-30T09:43:02Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-03-30T15:19:17Z",
+      "updated_at": "2022-03-30T15:19:17Z",
+      "source": {
+        "issue": {
+          "id": 1186620285,
+          "node_id": "PR_kwDOAjZbZs41Uj9Z",
+          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/174",
+          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
+          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/174/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/174/comments",
+          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/174/events",
+          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/174",
+          "number": 174,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Upstream PRs 1064, 1049, 899, 1068, 1072, 1069, 1074, 1026, 1033, 748, 1079, 1088, 1090, 731, 1089, 995, 1094, 1093",
+          "body": "[bitcoin-core/secp256k1#1064]: Modulo-reduce msg32 inside RFC6979 nonce fn to match spec. Fixes #1063\r\n[bitcoin-core/secp256k1#1049]: Faster fixed-input ecmult tests\r\n[bitcoin-core/secp256k1#899]: Reduce stratch space needed by ecmult_strauss_wnaf.\r\n[bitcoin-core/secp256k1#1068]: sage: Fix incompatibility with sage 9.4\r\n[bitcoin-core/secp256k1#1072]: ci: Attempt to make macOS builds more reliable\r\n[bitcoin-core/secp256k1#1069]: build: Replace use of deprecated autoconf macro AC_PROG_CC_C89\r\n[bitcoin-core/secp256k1#1074]: ci: Retry brew update a few times to avoid random failures\r\n[bitcoin-core/secp256k1#1026]: ecdh: Add test computing shared_secret=basepoint with random inputs\r\n[bitcoin-core/secp256k1#1033]: Add _fe_half and use in _gej_add_ge and _gej_double\r\n[bitcoin-core/secp256k1#748]: Add usage examples\r\n[bitcoin-core/secp256k1#1079]: configure: Add hidden --enable-dev-mode to enable all the stuff\r\n[bitcoin-core/secp256k1#1088]: configure: Use modern way to set AR\r\n[bitcoin-core/secp256k1#1090]: configure: Remove redundant pkg-config code\r\n[bitcoin-core/secp256k1#731]: Change SHA256 byte counter from size_t to uint64_t\r\n[bitcoin-core/secp256k1#1089]: Schnorrsig API improvements\r\n[bitcoin-core/secp256k1#995]: build: stop treating schnorrsig, extrakeys modules as experimental\r\n[bitcoin-core/secp256k1#1094]: doc: Clarify configure flags for optional modules\r\n[bitcoin-core/secp256k1#1093]: hash: Make code agnostic of endianness\r\n\r\nThis PR can be recreated  with `./sync-upstream.sh range 8746600eec5e7fcd35dabd480839a3a4bdfee87b`.",
+          "user": {
+            "login": "jonasnick",
+            "id": 2582071,
+            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/jonasnick",
+            "html_url": "https://github.com/jonasnick",
+            "followers_url": "https://api.github.com/users/jonasnick/followers",
+            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+            "repos_url": "https://api.github.com/users/jonasnick/repos",
+            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 3,
+          "pull_request": {
+            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/174",
+            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/174",
+            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/174.diff",
+            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/174.patch"
+          },
+          "closed_at": "2022-04-01T13:21:05Z",
+          "created_at": "2022-03-30T15:19:17Z",
+          "updated_at": "2022-04-01T13:21:05Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "referenced",
@@ -3652,6 +4055,35 @@
       "commit_id": "e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
       "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
       "created_at": "2023-06-04T15:42:10Z"
+    },
+    {
+      "event": "referenced",
+      "id": 9696152901,
+      "node_id": "REFE_lADOAP4Jqs4_3jDlzwAAAAJB741F",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/9696152901",
+      "actor": {
+        "login": "vmta",
+        "id": 23269741,
+        "node_id": "MDQ6VXNlcjIzMjY5NzQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/23269741?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/vmta",
+        "html_url": "https://github.com/vmta",
+        "followers_url": "https://api.github.com/users/vmta/followers",
+        "following_url": "https://api.github.com/users/vmta/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/vmta/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/vmta/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/vmta/subscriptions",
+        "organizations_url": "https://api.github.com/users/vmta/orgs",
+        "repos_url": "https://api.github.com/users/vmta/repos",
+        "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/vmta/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "8f03457eede9abfd1d7a0d26abc379a710e16755",
+      "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/8f03457eede9abfd1d7a0d26abc379a710e16755",
+      "created_at": "2023-07-01T12:32:54Z"
     }
   ],
   "comments": [
@@ -3691,7 +4123,7 @@
       "created_at": "2021-12-22T10:21:06Z",
       "updated_at": "2021-12-22T11:37:56Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r773773300",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/773773300"
@@ -3795,7 +4227,7 @@
       "created_at": "2021-12-23T15:18:57Z",
       "updated_at": "2021-12-23T15:18:57Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r774634769",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/774634769"
@@ -3899,7 +4331,7 @@
       "created_at": "2021-12-23T18:34:37Z",
       "updated_at": "2021-12-23T18:34:37Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r774728500",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/774728500"
@@ -3951,7 +4383,7 @@
       "created_at": "2021-12-23T18:35:34Z",
       "updated_at": "2021-12-23T18:35:35Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r774728829",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/774728829"
@@ -4055,7 +4487,7 @@
       "created_at": "2021-12-23T19:10:08Z",
       "updated_at": "2021-12-23T19:10:08Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r774741207",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/774741207"
@@ -4107,7 +4539,7 @@
       "created_at": "2021-12-23T21:05:05Z",
       "updated_at": "2021-12-23T21:05:05Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r774778258",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/774778258"
@@ -4263,7 +4695,7 @@
       "created_at": "2022-01-28T21:34:08Z",
       "updated_at": "2022-01-28T22:22:53Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r794903593",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/794903593"
@@ -4315,7 +4747,7 @@
       "created_at": "2022-01-28T21:36:37Z",
       "updated_at": "2022-01-28T22:22:53Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r794904754",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/794904754"
@@ -4471,7 +4903,7 @@
       "created_at": "2022-01-31T13:38:14Z",
       "updated_at": "2022-01-31T13:38:14Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1033#discussion_r795676660",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/795676660"

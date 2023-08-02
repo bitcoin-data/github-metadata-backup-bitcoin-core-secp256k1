@@ -168,7 +168,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13626,
+        "size": 13948,
         "default_branch": "master",
         "open_issues_count": 1,
         "is_template": false,
@@ -181,7 +181,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-01T20:02:33Z",
+        "pushed_at": "2023-07-31T14:24:54Z",
         "created_at": "2017-06-07T05:39:43Z",
         "updated_at": "2023-03-08T17:07:47Z",
         "license": {
@@ -296,12 +296,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -312,9 +312,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -337,7 +337,7 @@
         "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/835"
       }
     },
-    "author_association": "MEMBER",
+    "author_association": "CONTRIBUTOR",
     "draft": false,
     "additions": 29,
     "deletions": 23,
@@ -582,7 +582,7 @@
       "commit_url": null,
       "created_at": "2020-10-26T12:43:24Z",
       "updated_at": "2020-10-26T12:43:24Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@elichai @gmaxwell Mind to review? It's trivial.",
       "user": {
         "login": "real-or-random",
@@ -860,7 +860,7 @@
       "commit_url": null,
       "created_at": "2020-10-26T13:33:14Z",
       "updated_at": "2020-10-26T13:33:14Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Just realized,\r\n> are these also UB? :O\r\n> \r\n> https://github.com/bitcoin-core/secp256k1/blob/ac05f61fcf639a15b5101131561620303e4bd808/src/util.h#L269-L270\r\n\r\nYeah, probably. We use `__` types but we don't declare them, so this fine. But we define types reserved for the standard lib, so I guess this is evil, yes... And this is probably the only case where we may see a real clash in practice in the future, if some compiler defines both `int128_t` and `__int128_t`. (Even then is unlikely to cause issues because it's hopefully the same type.) What we could do is to guard these typedefs with `defined(INT128_MAX)`. Does this make sense? I could add this to the PR.\r\n\r\nIMO the entire libary would be more readable if we used typedefs like i32 and u128. But we'd get a huge diff now, and would interrupt all PRs, pretty much like clang-format. ",
       "user": {
         "login": "real-or-random",
@@ -914,7 +914,7 @@
       "commit_url": null,
       "created_at": "2020-10-26T16:56:56Z",
       "updated_at": "2020-10-26T16:57:09Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@real-or-random Replacing all int types everywhere is invasive, but I think can reasonably change `uint128_t` into `uint128`.",
       "user": {
         "login": "sipa",
@@ -1080,7 +1080,7 @@
       "commit_url": null,
       "created_at": "2020-10-27T02:39:20Z",
       "updated_at": "2020-10-27T02:39:20Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK e89278f211a526062745c391d48a7baf782b4b2b",
       "user": {
         "login": "sipa",
@@ -1134,7 +1134,7 @@
       "commit_url": null,
       "created_at": "2020-10-27T15:01:58Z",
       "updated_at": "2020-10-27T15:01:58Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> I had thought the int128 typedefs only ran if they weren't already defined. \r\n\r\nI added a commit that implements this. I also added `MAX` and `MIN` macros\r\n\r\nNote: Currently there's no compiler that provides `(u)int128_t` because that will open a can of worms due to `(u)intmax_t`. See http://www.open-std.org/jtc1/sc22/wg14/www/docs/n2425.pdf .",
       "user": {
         "login": "real-or-random",
@@ -1168,7 +1168,7 @@
       "commit_id": "7d878a0e4baee6e8dbb44e7b70c77b080987fb77",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "sipa",
         "id": 548488,
@@ -1341,7 +1341,7 @@
       "commit_id": "1f4dd0383807bfb7fef884601357b4c629dfb566",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Just to spell it out, the assumption is that a compiler that adds int128_t in the future also defines UINT128_MAX? \r\n\r\nLooks good in general. Not sure how useful it is to define constants we don't use.",
       "user": {
         "login": "jonasnick",
@@ -1397,7 +1397,7 @@
       "commit_url": null,
       "created_at": "2020-11-04T17:36:45Z",
       "updated_at": "2020-11-04T17:36:45Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Just to spell it out, the assumption is that a compiler that adds int128_t in the future also defines UINT128_MAX?\r\n\r\nYes. And this is implied by the standard as far as I understand it. \r\n\r\n> \r\n> Looks good in general. Not sure how useful it is to define constants we don't use.\r\n\r\nYeah, one of the reasons why I decided for it is that it increases the probability to have a clash be apparent at compile-time (and fail compilation).    \r\n",
       "user": {
         "login": "real-or-random",
@@ -1431,7 +1431,7 @@
       "commit_id": "1f4dd0383807bfb7fef884601357b4c629dfb566",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 1f4dd0383807bfb7fef884601357b4c629dfb566",
       "user": {
         "login": "jonasnick",
@@ -1487,7 +1487,7 @@
       "commit_url": null,
       "created_at": "2020-11-04T23:23:51Z",
       "updated_at": "2020-11-04T23:23:51Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "utACK 1f4dd0383807bfb7fef884601357b4c629dfb566",
       "user": {
         "login": "sipa",
@@ -1666,7 +1666,7 @@
       "created_at": "2020-10-27T18:09:17Z",
       "updated_at": "2020-10-27T19:18:28Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/835#discussion_r512919635",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/512919635"
@@ -1718,7 +1718,7 @@
       "created_at": "2020-10-27T19:20:41Z",
       "updated_at": "2020-10-27T19:20:41Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/835#discussion_r512963420",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/512963420"

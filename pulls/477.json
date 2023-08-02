@@ -145,7 +145,7 @@
         "hooks_url": "https://api.github.com/repos/tomasvdw/secp256k1/hooks",
         "svn_url": "https://github.com/tomasvdw/secp256k1",
         "language": "C",
-        "forks_count": 0,
+        "forks_count": 1,
         "stargazers_count": 0,
         "watchers_count": 0,
         "size": 1646,
@@ -276,12 +276,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +292,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -815,7 +815,7 @@
       "commit_url": null,
       "created_at": "2017-09-24T03:33:30Z",
       "updated_at": "2017-09-24T03:33:41Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> > We use trial-and-increment which is fast but non-constant time.\r\n\r\n> I believe that this is slower than shallue van de woestijne at least in batches when a fast legendre symbol is available.\r\n\r\nI think that's only true for characteristic-2 curves. Constant-time Shallue-Van de Woestijne here needs 1 inverse and 3 square roots. Even variable-time SVdW would need 1 inverse, 1.5 Jacobi symbols, and 1 square root.\r\n\r\nThe increment-and-test approach is indeed biased, and I'd prefer to avoid it, but using a hash operation rather than an increment would be fine (variable time doesn't matter here), and should be pretty fast when a fast Jacobi symbol is available (almost 2x the speed of the current PR, as it relies on using sqrt to test quadratic residues).",
       "user": {
         "login": "sipa",
@@ -1003,7 +1003,7 @@
       "commit_url": null,
       "created_at": "2017-09-25T17:23:30Z",
       "updated_at": "2017-09-25T17:23:52Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> > because it would add CPU hours to synchronization\r\n\r\n> It is currently running at ~14us/hash, which won't add CPU hours, but only a few minutes.\r\n\r\nAt 14us per operation, synchronization from scratch would gain 3.5 hours of CPU time (there are about 900M inputs+outputs in the chain).\r\n\r\nYou could argue that in a post-UTXO-sync world that isn't relevant, but we're not there, and I don't think we should disregard the cost for doing a full validation.\r\n\r\nI think less than 14us/op is doable though; I'll have a look at the code soon.",
       "user": {
         "login": "sipa",
@@ -1111,7 +1111,7 @@
       "commit_url": null,
       "created_at": "2017-09-25T18:13:30Z",
       "updated_at": "2017-09-25T18:13:30Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> But even for full validation, why would you hash spend TXOs? Surely, you only need to hash the current UTXO set, at ~50 million or ~12 min (with a single thread).\r\n\r\nPerhaps you're thinking of a different use case than I am. My hope is that every full node can at every point in time know what the hash of their UTXO set is. It could be used to compare the state of nodes, do sanity checking, or as part of a future UTXO commitment in blocks.\r\n\r\nAll of those things are not possible if you don't know the UTXO set hash during (even initial) synchronization.",
       "user": {
         "login": "sipa",
@@ -1219,7 +1219,7 @@
       "commit_url": null,
       "created_at": "2017-09-25T18:39:18Z",
       "updated_at": "2017-09-25T18:47:06Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "If we'd have UTXO commitments (as a consensus rule) in blocks, with (B) you wouldn't be able to validate the correctness of those commitments in the historical chain.\r\n\r\nMy view is that with commutative hashing the advantage is that you *can* just start off with a UTXO set and compare it to chain commitments, if that's the security tradeoff you want to make. But I think it's wrong to think that everyone will make it, and disregard the validation cost it entails for those who want full historical validation.\r\n\r\nTo be clear, I'm not using this as an argument that using secp256k1 multiset hashing is the wrong approach. I'm just pointing out that the performance does matter for some use cases, but perhaps the tradeoffs are still worth it.\r\n\r\n",
       "user": {
         "login": "sipa",
@@ -1307,7 +1307,7 @@
       "commit_id": "05121a7256c91d39d28824b9b44620e42689369a",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
         "login": "jonasnick",
@@ -1389,6 +1389,106 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/477"
     },
     {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "fjahr",
+        "id": 1322187,
+        "node_id": "MDQ6VXNlcjEzMjIxODc=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1322187?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fjahr",
+        "html_url": "https://github.com/fjahr",
+        "followers_url": "https://api.github.com/users/fjahr/followers",
+        "following_url": "https://api.github.com/users/fjahr/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fjahr/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fjahr/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fjahr/subscriptions",
+        "organizations_url": "https://api.github.com/users/fjahr/orgs",
+        "repos_url": "https://api.github.com/users/fjahr/repos",
+        "events_url": "https://api.github.com/users/fjahr/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fjahr/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2020-01-24T23:07:27Z",
+      "updated_at": "2020-01-24T23:07:27Z",
+      "source": {
+        "issue": {
+          "id": 554996240,
+          "node_id": "MDExOlB1bGxSZXF1ZXN0MzY3MDUwMzM1",
+          "url": "https://api.github.com/repos/bitcoin/bitcoin/issues/18000",
+          "repository_url": "https://api.github.com/repos/bitcoin/bitcoin",
+          "labels_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/18000/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/18000/comments",
+          "events_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/18000/events",
+          "html_url": "https://github.com/bitcoin/bitcoin/pull/18000",
+          "number": 18000,
+          "state": "closed",
+          "state_reason": null,
+          "title": "[WIP] Index for UTXO Set Statistics",
+          "body": "**This PR will not be updated anymore because the project is now split up into multiple pull requests. But I will use it to keep track of the projects PRs:**\r\n\r\n| Content                                             | PR     | Status   | Review Club |\r\n| --------------------------------------------------- |--------|----------|--------|\r\n| Add Muhash and SHA256Writer (unused)                | #19055 | Merged     | [notes](https://bitcoincore.reviews/19055.html)\r\n| Add Muhash Python implementation (unused)           | #19105 | Merged  | [notes](https://bitcoincore.reviews/19105.html) |\r\n| Add hash_type NONE (Muhash code independent)\t\t  | #19328 | Merged\t  | - |\r\n| Add hash_type MUHASH\t\t\t\t\t\t          | #19145 | Merged     | ?  |\r\n| Add ASM optimizations for MuHash\t\t\t\t\t  | #19181 | Open\t  | ?   |\r\n| Add CoinStatsIndex          | #19521       | Merged         | ? |\r\n| Parallelize gettxoutsetinfo        |      |     |   |\r\n| Remove legacy UTXO set hash                         |        | (future) | |\r\n\r\nSince it's starting to get confusing I am trying to visualize the dependencies of the open PRs in this depency graph:\r\n\r\n```\r\n+--------------+   +-------------+   +----------+\r\n|#19328        |   |#19105       |   |#19055    |\r\n|hash_type NONE|   |Muhash Python|   |Muhash CPP|\r\n+----+-----+---+   +------+------+   +-+----+---+\r\n     ^     ^              ^            ^    ^\r\n     |     |              |            |    |\r\n     |     |    +---------+------+     |    |\r\n     |     +----+#19145          +-----+    |\r\n     |          |hash_type MUHASH|          |\r\n     |          +----------------+          |\r\n     |                               +------+---+\r\n+----+--------+                      |#19181    |\r\n|#19521       |                      |MuHash ASM|\r\n|No hash Index|                      +----------+\r\n+-------------+\r\n\r\n```\r\n\r\n---\r\n\r\nThis implements an index of coin statistics with the goal of making the response time of the `gettxoutsetinfo` RPC call dramatically faster. Currently, this RPC is scanning the full UTXO set every time it is called which makes it hard to use for users that [want to continually check the coin supply](https://blog.bitmex.com/forkmonitor-unexpected-inflation-detection-and-warning-system/) or compare UTXO set hashes between different nodes. It is especially challenging in periods of multiple quickly mined blocks, even relatively fast machines.\r\n\r\nImplementation overview:\r\n- The current serialization of the UTXO set for the purpose of hashing is changed based on sipa's concept in proposed on the [mailing list in 2017](https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2017-May/014337.html) and #10434\r\n- The hashing algorithm in for the UTXO set is changed to Muhash, which was also implemented by sipa\r\n- CoinStatsIndex is added which keeps an index of all values that would require `gettxoutsetinfo` to scan the UTXO set\r\n- CoinStatsIndex can be activated through the flag `-coinstatsindex`\r\n\r\nTodos/Open questions:\r\n- The transactions count is currently not implemented as it seems not knowable ex-post without running a full IBD to build up the index. I am looking for a solution to this. Ideas are:\r\n  - Require `txindex` and the transactions count from it\r\n  - Remove transactions count or mark it as unreliable in a different way if coinstatsindex is enabled\r\n- The transactions count question is also interesting because it seems to be the only obstacle to providing access to historical coin statistics, which may be a nice follow-up feature if transaction counts can be ignored somehow\r\n- More benchmarking to evaluate potential switch from Muhash to [ECMH](https://github.com/bitcoin-core/secp256k1/pull/477) as the hashing algorithm\r\n- IBD benchmarking with the index enabled\r\n- Tests could be improved\r\n\r\nThis is an extension to my [rolling UTXO set hash proposal](https://gist.github.com/fjahr/fa4892874b090d3a4f4fccc5bafa0210) from last year.\r\n\r\nEdit: 3c5c1ca should probably be squashed into the prior commits but I wanted to leave sipa's commits unchanged for the start.",
+          "user": {
+            "login": "fjahr",
+            "id": 1322187,
+            "node_id": "MDQ6VXNlcjEzMjIxODc=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1322187?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/fjahr",
+            "html_url": "https://github.com/fjahr",
+            "followers_url": "https://api.github.com/users/fjahr/followers",
+            "following_url": "https://api.github.com/users/fjahr/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/fjahr/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/fjahr/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/fjahr/subscriptions",
+            "organizations_url": "https://api.github.com/users/fjahr/orgs",
+            "repos_url": "https://api.github.com/users/fjahr/repos",
+            "events_url": "https://api.github.com/users/fjahr/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/fjahr/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 97470796,
+              "node_id": "MDU6TGFiZWw5NzQ3MDc5Ng==",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/UTXO%20Db%20and%20Indexes",
+              "name": "UTXO Db and Indexes",
+              "color": "fbca04",
+              "default": false
+            },
+            {
+              "id": 955867938,
+              "node_id": "MDU6TGFiZWw5NTU4Njc5Mzg=",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Needs%20rebase",
+              "name": "Needs rebase",
+              "description": "",
+              "color": "cccccc",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": true,
+          "comments": 30,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin/bitcoin/pulls/18000",
+            "html_url": "https://github.com/bitcoin/bitcoin/pull/18000",
+            "diff_url": "https://github.com/bitcoin/bitcoin/pull/18000.diff",
+            "patch_url": "https://github.com/bitcoin/bitcoin/pull/18000.patch"
+          },
+          "closed_at": "2021-12-19T16:51:12Z",
+          "created_at": "2020-01-24T23:07:27Z",
+          "updated_at": "2022-12-19T10:03:48Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
       "event": "referenced",
       "id": 8176552214,
       "node_id": "REFE_lADOAP4Jqs4Pbey4zwAAAAHnXEkW",
@@ -1446,7 +1546,7 @@
       "commit_url": null,
       "created_at": "2023-05-08T13:00:23Z",
       "updated_at": "2023-05-08T13:00:23Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Our parent project Bitcoin Core has MuHash3072 now (https://doxygen.bitcoincore.org/class_mu_hash3072.html). I feel that obsoletes this PR. (But please don't hesitate to disagree.)",
       "user": {
         "login": "real-or-random",
@@ -1567,7 +1667,7 @@
       "created_at": "2019-07-31T13:41:52Z",
       "updated_at": "2019-07-31T13:41:57Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/477#discussion_r309226451",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/309226451"

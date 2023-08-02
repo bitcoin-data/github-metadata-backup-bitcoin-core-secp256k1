@@ -36,7 +36,7 @@
     },
     "labels": [],
     "assignees": [],
-    "author_association": "MEMBER",
+    "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 6,
     "created_at": "2020-05-01T11:42:06Z",
@@ -130,7 +130,7 @@
       "commit_url": null,
       "created_at": "2020-05-01T11:47:16Z",
       "updated_at": "2020-05-01T11:47:16Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "See libsodium for example.\r\n\r\nhttps://github.com/jedisct1/libsodium/blob/2f915846ff41191c1a17357f0efaae9d500e9858/src/libsodium/randombytes/internal/randombytes_internal_random.c\r\n\r\nThis is heavy stuff. If we really want a function, we could simply steal this or another one. No need to reinvent the wheel. \r\n\r\nI don't like to have that complexity in our code but the question is whether we prefer to have it in our code or let our users write correct system PRG calls...",
       "user": {
         "login": "real-or-random",
@@ -238,7 +238,7 @@
       "commit_url": null,
       "created_at": "2020-05-01T14:44:29Z",
       "updated_at": "2020-05-01T14:44:29Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Well, the thing that people would usually do is to move that code to the library and just call it. But for SHA256 we're working on doing it the other way around actually. I've never quite heard and/or understood the full reasoning behind this. @sipa Can you elaborate a little bit? ",
       "user": {
         "login": "real-or-random",
@@ -350,7 +350,7 @@
       "commit_url": null,
       "created_at": "2020-05-04T07:56:16Z",
       "updated_at": "2020-05-04T07:56:16Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I'm fine with keeping key generation out of scope. But adding a good reference to the usage section would be helpful. @real-or-random do you have a particular reference in mind?",
       "user": {
         "login": "jonasnick",
@@ -462,7 +462,7 @@
       "commit_url": null,
       "created_at": "2020-05-04T08:15:31Z",
       "updated_at": "2020-05-04T08:15:31Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@real-or-random My thinking is that libsecp256k1 should be focussing on doing secp256k1 EC crypto, and not become a general purpose crypto library.\n\nPart of this is scope creep... there is a lot that can be done around efficient hash functions for various architectures, random number generators for various platforms... and I think it would take us too far. If we want to do all those things near-perfectly it will mean duplicating a lot of work that's done elsewhere, plus maintenance to keep up with new developments in hardware and operating systems. If we do less than a near optimal job, callers who care will still be forced to reimplement or use other libraries.\n\nOf course, this is partially in conflict with the goal of exposing a safe high-level API. We've already been forced to include a (naive) SHA256 implementation, but even there I feel like it would be a waste of our efforts to try to extend it to e.g. SSE4/AVX2/SHA-NI support. Permitting the caller to plug in their own version (at runtime or compile time) feels like a better option to getting better performance out of that. Most callers won't care about the mediocre performance of our SHA256, and those that do probably already have access to better versions.\n\nI don't think it's that different for random generation. I wouldn't be opposed to adding a simple minimal built-in one, but I fear that any decent one is already going to be a pain in terms of build system integration etc alone.",
       "user": {
         "login": "sipa",
@@ -574,7 +574,7 @@
       "commit_url": null,
       "created_at": "2020-05-05T10:00:29Z",
       "updated_at": "2020-05-05T10:03:38Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "That seems wise. \r\n\r\nWhat does that mean for us? I think then giving a bit of useful advice in the examples and/or the usage section is what we should do right now. This helps the user but we don't promise to maintain any code in our library. We should cover at least (modern versions) Linux, MacOS, and Windows. I can try to find some references.\r\n\r\nI'm against adding a minimal key gen function then, because then the user may just use that one without looking at it. If we offer nothing, the user may indeed read our docs. \r\n\r\nedit: \r\nI think we can safely export a cleaning function though. Ours is pretty portable and depends much less on the environment than randomness generation. It still depends on the compiler, but if our cleaning function is not effective, then it anyway won't help that the user uses a different working one just for his code. \r\n\r\nSorry, didn't want to close here actually",
       "user": {
         "login": "real-or-random",
@@ -656,6 +656,88 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2020-05-05T10:00:51Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2020-05-06T08:34:37Z",
+      "updated_at": "2020-05-06T08:34:37Z",
+      "source": {
+        "issue": {
+          "id": 609894847,
+          "node_id": "MDExOlB1bGxSZXF1ZXN0NDExNDEwNDM4",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/748",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/748/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/748/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/748/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/748",
+          "number": 748,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Add usage examples",
+          "body": "Resolves https://github.com/bitcoin-core/secp256k1/issues/184\r\n\r\nI didn't add a sign/verify/recover example yet because I'd prefer that the example included hashing a message, \r\nbut we don't provide a hash function so I decided to start only with key generation and ECDH, and get feedback.\r\n\r\nI *did not* check the example on windows, but did try to implement it correctly, if anyone has access to a windows machine(and knows how to build on windows hehe) please test this :)\r\n\r\nP.S. Should the usage examples be MIT or CC0(Public Domain)?",
+          "user": {
+            "login": "elichai",
+            "id": 2167860,
+            "node_id": "MDQ6VXNlcjIxNjc4NjA=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/elichai",
+            "html_url": "https://github.com/elichai",
+            "followers_url": "https://api.github.com/users/elichai/followers",
+            "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
+            "organizations_url": "https://api.github.com/users/elichai/orgs",
+            "repos_url": "https://api.github.com/users/elichai/repos",
+            "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/elichai/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 16,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/748",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/748",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/748.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/748.patch"
+          },
+          "closed_at": "2022-02-23T17:36:43Z",
+          "created_at": "2020-04-30T12:12:37Z",
+          "updated_at": "2022-02-23T17:36:43Z"
+        },
+        "type": "issue"
+      }
     }
   ]
 }

@@ -72,7 +72,7 @@
       "commit_url": null,
       "created_at": "2020-07-30T10:58:12Z",
       "updated_at": "2020-07-30T10:58:25Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "My first thought was: Maybe first do the two ORs and only afterwards do the AND with the result and `~no`? \r\n\r\nps: It even saves an op (when compiled naively)!",
       "user": {
         "login": "real-or-random",
@@ -180,7 +180,7 @@
       "commit_url": null,
       "created_at": "2020-08-11T12:17:16Z",
       "updated_at": "2020-08-11T12:17:16Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Another `volatile` does the trick on s390x. The difference on other platforms seems minimal: \r\nhttps://godbolt.org/z/9rxTP7\r\n\r\nWith this fix applied, we have the same issue in `secp256k1_scalar_is_high`, which is very similar in structure, so the same fix should apply...\r\nI'm somewhat reluctant to make the code more complex for s390x but it would enable us to enable us the tests there, and this may help packaging, see the discussion in #723. \r\n\r\n\r\nOn the way, I wondered why some of the short functions are `inline` and some are not. For example `secp256k1_scalar_check_overflow` is and `secp256k1_scalar_is_high` and ` secp256k1_scalar_negate` are not. This is now more relevant with GCC on -O2 whereas automatic inlining is disabled.",
       "user": {
         "login": "real-or-random",
@@ -288,7 +288,7 @@
       "commit_url": null,
       "created_at": "2020-08-12T00:25:17Z",
       "updated_at": "2020-08-12T00:35:59Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> ugh. maybe it's just me but casting to volatile just seems even more awful than having a volatile temporary that copies an input as we've done in some other places. \r\n\r\nWell yeah. The cast variant is in fact faster here (typically one instruction) because then only the read is volatile and not the store in the temporary. \r\n\r\nBut I was somewhat surprised that this works here. In the existing instances `volatile` hinders value analysis. ~~It seems that GCC prefers `clc` when it can avoid load instructions. So if neither operand are in a register yet, then `clc` is used, and `volatile` just changes this.~~\r\n\r\n> Also-- there are integer comparisons all over the code base and AFAIK the next version of the compiler will just create this problem for other ones.\r\n\r\nThis may just be true, yeah.\r\n\r\n> I also feel like if I prompted GPT3 with a story about peppering our source code with volatile casts it would likely continue the story by saying and that's how we found 27 compiler bugs...\r\n\r\nHehe, maybe. Let's also add a few more `restrict`s.\r\n\r\n> \r\n> I'm going to see if I can solicit some help from a s390x expert or gcc developer.\r\n\r\nThis would be neat. \r\n\r\n> Having a BE test in travis would be really good.\r\n\r\nYes, and we don't need the ct test for this anyway.\r\n\r\n> But unlike some of the other constant time hacks in the codebase, I think this one is unlikely to help any other cpus/compilers\r\n\r\nAgreed.\r\n\r\n > or even silence the issue completely on s390x.\r\n\r\nHm, I believe it would. At least on that GCC config, the one in this `secp256k1_scalar_is_high` was the only remaining branch...\r\n\r\nedit: strike through totally wrong assumption, I misremembered this.",
       "user": {
         "login": "real-or-random",
@@ -342,7 +342,7 @@
       "commit_url": null,
       "created_at": "2020-08-12T01:02:18Z",
       "updated_at": "2020-08-12T01:02:18Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Funnily enough, it's also enough to make `SECP256K1_N_0` a `volatile const`. ",
       "user": {
         "login": "real-or-random",
@@ -396,7 +396,7 @@
       "commit_url": null,
       "created_at": "2020-08-12T01:24:22Z",
       "updated_at": "2020-08-12T01:24:22Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Funnily enough, it's also enough to make `SECP256K1_N_0` a `volatile const`.\r\n\r\nI have rarely felt the need for a \"puke\" reaction emoji on Github.",
       "user": {
         "login": "sipa",
@@ -450,7 +450,7 @@
       "commit_url": null,
       "created_at": "2020-08-12T13:15:13Z",
       "updated_at": "2020-08-12T13:15:13Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "That's probably not helpful but I forgot to mention it in my comment yesterday: we don't even know if the `clc` instruction is variable-time or not in the CPU. (We may be able to benchmark it but I don't care in the end.)  \r\n\r\nValgrind models `clc` as comparing byte-by-byte and conditionally branching to the next instruction if the two compared bytes are not equal. And this is the most precise way to model it. For example, the program could be comparing two strings of length 5 bytes where only the first 4 bytes are initialized and it's always guaranteed that the 2nd bytes differ. Then the program will be correct as it never branches on the 5th byte. But that does not mean that the CPU implements it that way same, in particular in that case where the length of the compared byte string is 8, which is just the native register size of the CPU...",
       "user": {
         "login": "real-or-random",
@@ -558,7 +558,7 @@
       "commit_url": null,
       "created_at": "2020-08-12T16:06:16Z",
       "updated_at": "2020-08-12T16:06:16Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "And it supports up to 255 byte long comparisons, which is unlikely to be running in constant time if it can bail out early.\n\nOf course, it could work in a quantized way, comparing groups of say 8 bytes at a time, and comparisons of up to 8 would be ct then.",
       "user": {
         "login": "sipa",
@@ -582,6 +582,82 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/784#issuecomment-672966584",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/784"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-03T10:02:30Z",
+      "updated_at": "2021-12-03T10:02:30Z",
+      "source": {
+        "issue": {
+          "id": 1069796744,
+          "node_id": "I_kwDOAP4Jqs4_w82I",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1023",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1023/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1023/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1023/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1023",
+          "number": 1023,
+          "state": "closed",
+          "state_reason": "completed",
+          "title": "-Wunused-parameter warnings when cross-compiling for riscv64-linux-gnu",
+          "body": "Steps to reproduce on master (fecf436d5327717801da84beb3066f5a9b80ea8e):\r\n```\r\n$ ./configure --host=riscv64-linux-gnu\r\n$ make clean\r\n$ $ make\r\n  CC       src/bench.o\r\ngcc -DHAVE_CONFIG_H -I. -I./src -O2  -std=c89 -pedantic -Wno-long-long -Wnested-externs -Wshadow -Wstrict-prototypes -Wundef -Wno-overlength-strings -Wall -Wno-unused-function -Wextra -Wcast-align -Wcast-align=strict -fvisibility=hidden -g -O2 -c src/gen_context.c -o gen_context.o\r\ngcc -O2  -std=c89 -pedantic -Wno-long-long -Wnested-externs -Wshadow -Wstrict-prototypes -Wundef -Wno-overlength-strings -Wall -Wno-unused-function -Wextra -Wcast-align -Wcast-align=strict -fvisibility=hidden -g -O2  gen_context.o -o gen_context\r\n./gen_context\r\n  CC       src/libsecp256k1_la-secp256k1.lo\r\nsrc/secp256k1.c: In function ‘secp256k1_declassify’:\r\nsrc/secp256k1.c:227:93: warning: unused parameter ‘p’ [-Wunused-parameter]\r\n  227 | static SECP256K1_INLINE void secp256k1_declassify(const secp256k1_context* ctx, const void *p, size_t len) {\r\n      |                                                                                 ~~~~~~~~~~~~^\r\nsrc/secp256k1.c:227:103: warning: unused parameter ‘len’ [-Wunused-parameter]\r\n  227 | static SECP256K1_INLINE void secp256k1_declassify(const secp256k1_context* ctx, const void *p, size_t len) {\r\n      |                                                                                                ~~~~~~~^~~\r\n  CCLD     libsecp256k1.la\r\n  CCLD     bench\r\n  CC       src/bench_internal-bench_internal.o\r\n  CCLD     bench_internal\r\n  CC       src/bench_ecmult-bench_ecmult.o\r\n  CCLD     bench_ecmult\r\n  CC       src/tests-tests.o\r\nIn file included from src/tests.c:17:\r\nsrc/secp256k1.c: In function ‘secp256k1_declassify’:\r\nsrc/secp256k1.c:227:93: warning: unused parameter ‘p’ [-Wunused-parameter]\r\n  227 | static SECP256K1_INLINE void secp256k1_declassify(const secp256k1_context* ctx, const void *p, size_t len) {\r\n      |                                                                                 ~~~~~~~~~~~~^\r\nsrc/secp256k1.c:227:103: warning: unused parameter ‘len’ [-Wunused-parameter]\r\n  227 | static SECP256K1_INLINE void secp256k1_declassify(const secp256k1_context* ctx, const void *p, size_t len) {\r\n      |                                                                                                ~~~~~~~^~~\r\n  CCLD     tests\r\n  CC       src/valgrind_ctime_test.o\r\n  CCLD     valgrind_ctime_test\r\n  CC       src/exhaustive_tests-tests_exhaustive.o\r\n  CCLD     exhaustive_tests\r\n```",
+          "user": {
+            "login": "hebasto",
+            "id": 32963518,
+            "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/hebasto",
+            "html_url": "https://github.com/hebasto",
+            "followers_url": "https://api.github.com/users/hebasto/followers",
+            "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+            "organizations_url": "https://api.github.com/users/hebasto/orgs",
+            "repos_url": "https://api.github.com/users/hebasto/repos",
+            "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/hebasto/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "MEMBER",
+          "locked": false,
+          "comments": 6,
+          "closed_at": "2021-12-05T10:48:09Z",
+          "created_at": "2021-12-02T17:16:45Z",
+          "updated_at": "2021-12-05T10:48:09Z"
+        },
+        "type": "issue"
+      }
     }
   ]
 }

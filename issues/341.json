@@ -235,7 +235,7 @@
       "commit_url": null,
       "created_at": "2015-10-25T00:49:42Z",
       "updated_at": "2015-10-25T00:49:42Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I tried to completely separate the \"valid encoding\" from \"valid signature\".\nIf you're going to mix the two, you get very hard to get\nconsensus-compatible behaviour. Checking for out of range values is not\nsomething you expect a DER parser to do.\n",
       "user": {
         "login": "sipa",
@@ -451,7 +451,7 @@
       "commit_url": null,
       "created_at": "2015-10-25T14:44:48Z",
       "updated_at": "2015-10-25T21:50:00Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "But exactly what tests should be done?\n- BIP66 specifies max 32 bytes for R and S, because that's much simpler to implement than an accurate range check, and has no additional DoS risk.\n- You seem to suggest that values 0 or >= order should be rejected because the implementation-specific representation if numbers inside libsecp256k1 can't deal with them, so they are \"obviously\" invalid.\n- What about values of r that are not equal to a valid x coordinate mod order? Those are also guaranteed to be invalid signatures, and a different implementation that decompresses the r value into one or two points ahead of time would equally \"obviously\" detect such failure.\n\nAll of these additional constraints are arbitrary, so which one do you pick? For some applications the distinction between incorrect parse and invalid signature matters, and we shouldn't be introducing any extra\nstandards just because our signature parser is smart enough to detect some cases already.\n",
       "user": {
         "login": "sipa",
@@ -588,7 +588,7 @@
       "commit_url": null,
       "created_at": "2015-10-27T14:35:59Z",
       "updated_at": "2015-10-27T14:35:59Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "One suggestion that @gmaxwell came up with is to make the serialize\nfunction fail on such signatures.\n\nAdvantage: there is no \"DER parse succeeds, but reserialize results in\nsomething else\" behaviour.\n\nDisadvantage: there is a \" DER parse succeeds but cannot serialize\"\nbehaviour.\n\nI don't know whether it makes much of a difference, but I'd like to know\nwhat others think. I believe it's unfortunate that either is necessary, but\nthe alternative is arbitrary-sized secp256k1_ecdsa_signature data types,\nwhich I think is way worse.\n",
       "user": {
         "login": "sipa",
@@ -836,6 +836,101 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2015-10-28T04:08:23Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "sleepdefic1t",
+        "id": 7477456,
+        "node_id": "MDQ6VXNlcjc0Nzc0NTY=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7477456?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sleepdefic1t",
+        "html_url": "https://github.com/sleepdefic1t",
+        "followers_url": "https://api.github.com/users/sleepdefic1t/followers",
+        "following_url": "https://api.github.com/users/sleepdefic1t/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sleepdefic1t/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sleepdefic1t/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sleepdefic1t/subscriptions",
+        "organizations_url": "https://api.github.com/users/sleepdefic1t/orgs",
+        "repos_url": "https://api.github.com/users/sleepdefic1t/repos",
+        "events_url": "https://api.github.com/users/sleepdefic1t/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sleepdefic1t/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2019-02-09T16:07:13Z",
+      "updated_at": "2019-02-09T16:07:13Z",
+      "source": {
+        "issue": {
+          "id": 373700636,
+          "node_id": "MDU6SXNzdWUzNzM3MDA2MzY=",
+          "url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/issues/7",
+          "repository_url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto",
+          "labels_url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/issues/7/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/issues/7/comments",
+          "events_url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/issues/7/events",
+          "html_url": "https://github.com/ArkEcosystemArchive/cpp-crypto/issues/7",
+          "number": 7,
+          "state": "closed",
+          "state_reason": "completed",
+          "title": "Not stable Transaction verifing",
+          "body": "```\r\n#include <iostream>\r\n\r\n#include  \"ark/arkCrypto.h\"\r\n\r\n#include <iostream>\r\nusing namespace std;\r\n\r\nint main()\r\n{\r\n\r\n string passphrase = \"any passphrase\";\r\n\r\n\tAddress addr = Address::fromPassphrase(\"any other passphrase\", 0);\r\n\tstring recipientId = addr.toString();\r\n\t\r\n\tsize_t j = 0;\r\n\tsize_t i;\r\n\tfor (i = 0; i < 10; ++i) {\r\n\t\tTransaction transaction = Builder::buildTransfer(recipientId, 24, \"vendor field\", passphrase);\r\n\t\tstring signature = transaction.sign(passphrase.c_str());\r\n\t\tcout << \"iter\"<< i <<  \" transaction.verify: \" << transaction.verify() << endl;\r\n\t\tif (transaction.verify()) {\r\n\t\t\tj++;\r\n\t\t}\r\n\t\tSerializer serialiser(transaction);\r\n\t\tstring serialised = serialiser.serialize();\r\n\t\tcout << \"iter\" << i << \" serialised: \" << serialised << endl;\r\n\t\tDeserializer deserialiser(serialised);\r\n\t\ttransaction = deserialiser.deserialize();\r\n\t\tcout << \"iter\" << i << \" transaction.verify: \" << transaction.verify() << endl << endl;\r\n\t}\r\n\t\r\n\tcout << \"success verify \" << j << \" out of \" << i << \" attempts\";\r\n}\r\n\r\n```\r\n\r\n// output 4 of 10 was success",
+          "user": {
+            "login": "officefish",
+            "id": 1983214,
+            "node_id": "MDQ6VXNlcjE5ODMyMTQ=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1983214?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/officefish",
+            "html_url": "https://github.com/officefish",
+            "followers_url": "https://api.github.com/users/officefish/followers",
+            "following_url": "https://api.github.com/users/officefish/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/officefish/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/officefish/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/officefish/subscriptions",
+            "organizations_url": "https://api.github.com/users/officefish/orgs",
+            "repos_url": "https://api.github.com/users/officefish/repos",
+            "events_url": "https://api.github.com/users/officefish/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/officefish/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 1180161276,
+              "node_id": "MDU6TGFiZWwxMTgwMTYxMjc2",
+              "url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/labels/Status:%20Resolved",
+              "name": "Status: Resolved",
+              "description": "The issue has been resolved.",
+              "color": "007700",
+              "default": false
+            },
+            {
+              "id": 1180161417,
+              "node_id": "MDU6TGFiZWwxMTgwMTYxNDE3",
+              "url": "https://api.github.com/repos/ArkEcosystemArchive/cpp-crypto/labels/Type:%20Bug",
+              "name": "Type: Bug",
+              "description": "The issue relates to broken or incorrect behaviour.",
+              "color": "e11d21",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "NONE",
+          "locked": false,
+          "comments": 5,
+          "closed_at": "2020-01-31T06:47:43Z",
+          "created_at": "2018-10-24T22:22:30Z",
+          "updated_at": "2020-01-31T06:47:45Z"
+        },
+        "type": "issue"
+      }
     }
   ]
 }

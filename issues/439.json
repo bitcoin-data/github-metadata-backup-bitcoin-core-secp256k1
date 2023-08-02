@@ -73,7 +73,7 @@
       "commit_url": null,
       "created_at": "2017-01-26T19:33:42Z",
       "updated_at": "2017-01-26T19:33:42Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "If you have your own representation of keys, I would expect that your application makes assumptions about its contents. In that case, my suggestion would be to use a vector (or any container you like), with a serialized key in it. Whenever you need the key, deserialize it into a secp256k1_pubkey. That has well-defined stable properties that don't change over time, and has no risk in breaking assumptions with future versions.\r\n\r\nIf for performance reasons you want to keep deserialized keys around, then I believe there is no problem in being restricted to using secp256k1_pubkey as data type. It makes it clear to contributors of the application code base that the contents is defined by the secp256k1 library, and can change.",
       "user": {
         "login": "sipa",
@@ -127,7 +127,7 @@
       "commit_url": null,
       "created_at": "2017-01-26T19:37:43Z",
       "updated_at": "2017-01-26T19:37:43Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> I think it would have been better simply to use void const* pubkey as the parameter type in functions that currently accept secp256k1_pubkey*.\r\n\r\nYes, that was the alternative we considered. However, for good abstraction, allocation of such objects would also need to be left to the library (i.e. have a secp256k1_pubkey_create and secp256k1_pubkey_free function), which would unnecessarily require heap allocation for objects that fit on the stack (a performance issue for some use cases). So the choice was made to expose the size of type, but not its representation.",
       "user": {
         "login": "sipa",

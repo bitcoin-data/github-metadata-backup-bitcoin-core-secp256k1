@@ -102,7 +102,7 @@
       "commit_url": null,
       "created_at": "2021-09-10T10:20:04Z",
       "updated_at": "2021-09-10T10:20:04Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Hm, that long warning in `configure.ac:35` is very strange. Looks like some quoting issue. It tries to find a single symbol that is split over tens of lines  and in fact contains real code... So I don't think it's a dependency issue.\r\n\r\nDo you use some non-standard shell or have some strange shell settings?\r\n\r\nApart from that, it's hard to debug from here. As I said, I think the root cause is somewhere during generation of `configure` already but still, can you attach the entire generated `configure` script?",
       "user": {
         "login": "real-or-random",
@@ -210,7 +210,7 @@
       "commit_url": null,
       "created_at": "2021-09-12T15:24:28Z",
       "updated_at": "2021-09-12T15:24:28Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "This is very strange. The code around this line is \r\n\r\n```\r\n  case $as_dir in #(((\r\n    ''\r\n as_dir=./ ;;\r\n    */) ;;\r\n    *) as_dir=$as_dir/ ;;\r\n  esac\r\n```\r\nbut it should be\r\n```\r\n  case $as_dir in #(((\r\n    '') as_dir=./ ;;\r\n    */) ;;\r\n    *) as_dir=$as_dir/ ;;\r\n  esac\r\n```\r\n\r\nSo, a there's a newline instead of a `)`. Maybe it helps to edit the script as dirty workaround.\r\n\r\n\r\nAccording to the warning message output by `autoreconf` (in `autogen.sh`), there's something wrong deep in the internals of autoconf... \r\n\r\nI have no idea what's going on. Here's a shoot in the dark: Can you try to remove the line 30 from configure.ac and try again?\r\n```\r\nm4_rename_force([saved_AC_PROG_CC], [AC_PROG_CC])\r\n```\r\n\r\nIf that doesn't help (or at least produces a better error), I would reocmmend to ask on the autoconf mailing list.\r\n\r\n@hebasto it would be nice if you have a minute to check if you can reproduce this on MacOS.",
       "user": {
         "login": "real-or-random",
@@ -571,7 +571,7 @@
       "commit_url": null,
       "created_at": "2021-09-14T07:22:18Z",
       "updated_at": "2021-09-14T07:22:18Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Addendum -- if I re-clone the repository, I get the following warning while running autogen:\r\n> \r\n> ```\r\n> configure.ac:32: warning: The macro `AC_PROG_CC_C89' is obsolete.\r\n> configure.ac:32: You should run autoupdate\r\n> ```\r\n\r\nOh, this warning is intended for the maintainer, not for the user. So you shouldn't run autoupdate. (And we have reasons why we don't run it because then old versions of autoconf won't work any longer.) Have you tried\r\n```\r\ngit clone https://github.com/bitcoin-core/secp256k1.git\r\ncd secp256k1\r\n./autogen.sh\r\n./configure\r\n```\r\nwithout autoupdate?\r\n\r\n> I just found out that if I don't rerun autogen.sh after running autoupdate, I can run the configure script to what appears to be completion; however, after that, if I run \"make\", I get an error with the same syntax error (newline on 13153) in the configure script that I had before -- the same error is still present, but it looks like it doesn't trigger when running configure alone, only when runnign make.\r\n\r\nThis is because make notices that ./configure should be run and then runs it, so it's no surprise that the effect is the same.",
       "user": {
         "login": "real-or-random",
@@ -625,7 +625,7 @@
       "commit_url": null,
       "created_at": "2022-02-08T21:56:05Z",
       "updated_at": "2022-02-08T21:56:05Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Closing this for now, but feel free to reply if this is still an issue.",
       "user": {
         "login": "real-or-random",

@@ -276,12 +276,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +292,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -356,7 +356,7 @@
       "commit_url": null,
       "created_at": "2021-12-08T19:41:40Z",
       "updated_at": "2021-12-08T19:41:40Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Wowwow, calm down!",
       "user": {
         "login": "sipa",
@@ -410,7 +410,7 @@
       "commit_url": null,
       "created_at": "2021-12-08T23:33:54Z",
       "updated_at": "2021-12-08T23:33:54Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "See https://github.com/sipa/secp256k1/commits/pr1031 for two commits on top of this. One renames your delta to theta (as the variable operated on is really defined as delta-1/2 compared to delta as defined in the paper). The other updates the writeup to reflect the improvements here.\r\n\r\nConcept ACK in any case. I'll look over the code in more detail, but at least this convinces me it's correct.",
       "user": {
         "login": "sipa",
@@ -464,7 +464,7 @@
       "commit_url": null,
       "created_at": "2021-12-09T10:07:36Z",
       "updated_at": "2021-12-09T10:07:36Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "As I understand, this should always be faster and we don't need lots of benchmarks to confirm. \r\n\r\n>  The other updates the writeup to reflect the improvements here.\r\n\r\nNice, I wanted to ask for this. \r\n",
       "user": {
         "login": "real-or-random",
@@ -518,7 +518,7 @@
       "commit_url": null,
       "created_at": "2021-12-09T18:09:30Z",
       "updated_at": "2021-12-09T18:09:30Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Updated my branch with additional assertions and a few more improvements to the documentation.\r\n\r\nCode review ACK. I'm happy to do my changes on top in a separate PR, though it's probably better to include them, as a few code comments are out of that as-is in this PR. Feel free to cherry-pick or otherwise include my suggested changes.",
       "user": {
         "login": "sipa",
@@ -684,7 +684,7 @@
       "commit_url": null,
       "created_at": "2021-12-10T15:09:05Z",
       "updated_at": "2021-12-10T15:21:33Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@peterdettman Nice!\r\n\r\nBenchmarks on Ryzen 5950x (default compilation options, GCC 11.2.0, `SECP256K1_BENCH_ITERS=1000000 ./bench_internal inverse`:\r\n\r\n```\r\nmaster:\r\nfield_inverse                 ,     1.27      ,     1.27      ,     1.28   \r\nfield_inverse_var             ,     0.867     ,     0.871     ,     0.874  \r\npr1031:\r\nfield_inverse                 ,     1.26      ,     1.26      ,     1.27   \r\nfield_inverse_var             ,     0.846     ,     0.860     ,     0.868  \r\nvec_modinv:\r\nfield_inverse                 ,     0.986     ,     0.995     ,     1.01   \r\nfield_inverse_var             ,     0.868     ,     0.870     ,     0.873  \r\nvec_modinv, using the const-time matrix in the vartime code:\r\nfield_inverse                 ,     1.00      ,     1.00      ,     1.01   \r\nfield_inverse_var             ,     0.866     ,     0.871     ,     0.876  \r\n```\r\n\r\nThis seems to at least suggest the option of throwing out the vartime matrix computation code, and using this new constant-time code for both?\r\n\r\nThe last option (if someone else wants to benchmark) is simply this on top of https://github.com/peterdettman/secp256k1/tree/vec_modinv:\r\n\r\n```diff\r\n@@ -568,7 +568,7 @@ static void secp256k1_modinv64_var(secp256k1_modinv64_signed62 *x, const secp256\r\n     while (1) {\r\n         /* Compute transition matrix and new eta after 62 divsteps. */\r\n         secp256k1_modinv64_trans2x2 t;\r\n-        eta = secp256k1_modinv64_divsteps_62_var(eta, f.v[0], g.v[0], &t);\r\n+        eta = secp256k1_modinv64_divsteps_59(eta, f.v[0], g.v[0], &t);\r\n         /* Update d,e using that transition matrix. */\r\n```\r\n",
       "user": {
         "login": "sipa",
@@ -850,7 +850,7 @@
       "commit_url": null,
       "created_at": "2021-12-10T16:02:48Z",
       "updated_at": "2021-12-10T16:02:48Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@peterdettman A vartime version of the vec matrix code could perhaps also do more than 59 iterations.",
       "user": {
         "login": "sipa",
@@ -1016,7 +1016,7 @@
       "commit_url": null,
       "created_at": "2021-12-10T16:28:42Z",
       "updated_at": "2021-12-10T16:29:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Benchmarks on ARM64 (Cortex-A53, default compilation options, GCC 9.3.0, `./bench_internal inverse`):\r\n\r\n```\r\nmaster:\r\nfield_inverse                 ,    12.5       ,    12.5       ,    12.5    \r\nfield_inverse_var             ,     7.26      ,     7.27      ,     7.27\r\npr1031:\r\nfield_inverse                 ,    11.9       ,    11.9       ,    11.9    \r\nfield_inverse_var             ,     7.26      ,     7.27      ,     7.27 \r\nvec_modinv:\r\nfield_inverse                 ,    11.1       ,    11.1       ,    11.1    \r\nfield_inverse_var             ,     7.26      ,     7.27      ,     7.27   \r\nvec_modinv using const-time matrix for vartime:\r\nfield_inverse                 ,    11.2       ,    11.2       ,    11.2    \r\nfield_inverse_var             ,     9.83      ,     9.83      ,     9.83  \r\n```\r\n\r\nLooks like we shouldn't throw out the vartime matrix code just yet...",
       "user": {
         "login": "sipa",
@@ -1099,7 +1099,7 @@
       "commit_url": null,
       "created_at": "2021-12-21T16:21:56Z",
       "updated_at": "2021-12-21T16:21:56Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 6afd499f53e94d48a7fd90ff345d47101a6c6e41\r\n\r\n@robot-dreams Perhaps you're interested in reviewing this too?\r\n\r\n@peterdettman Given that your later (and much more significant) improvement builds on top of this one (at least conceptually, using initially-shifted u,v,q,r variables) and doesn't work for 32 bit yet, I'd vote to get this change merged as-is, and do the rest in a follow-up. WDYT?",
       "user": {
         "login": "sipa",
@@ -1793,7 +1793,7 @@
       "commit_url": null,
       "created_at": "2022-01-04T18:44:07Z",
       "updated_at": "2022-01-04T18:44:07Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "See my updated branch https://github.com/sipa/secp256k1/commits/pr1031 . I've edited the \"Update safegcd writeup to reflect the code\"  commit to address @robot-dreams's comments.",
       "user": {
         "login": "sipa",
@@ -2304,7 +2304,7 @@
       "commit_url": null,
       "created_at": "2022-11-21T20:52:31Z",
       "updated_at": "2022-11-21T20:52:31Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Rebased on top of merged #1000: https://github.com/sipa/secp256k1/commits/pr1031",
       "user": {
         "login": "sipa",
@@ -2358,7 +2358,7 @@
       "commit_url": null,
       "created_at": "2023-01-19T21:02:47Z",
       "updated_at": "2023-01-19T21:02:47Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I've taken the liberty to open a rebased PR of this #1197.",
       "user": {
         "login": "sipa",
@@ -2412,7 +2412,7 @@
       "commit_url": null,
       "created_at": "2023-05-11T16:19:35Z",
       "updated_at": "2023-05-11T16:19:35Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Closing in favor of #1197",
       "user": {
         "login": "real-or-random",

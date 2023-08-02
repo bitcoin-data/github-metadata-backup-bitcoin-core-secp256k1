@@ -126,7 +126,7 @@
       "commit_url": null,
       "created_at": "2023-03-01T14:42:50Z",
       "updated_at": "2023-03-01T14:42:50Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "So in principle, you could just call `secp256k1_ec_pubkey_create` with a secret key of 1, but that's inconvenient because that  incurs a run time overhead and/or non-static initialization? Do I get this right? ",
       "user": {
         "login": "real-or-random",
@@ -628,7 +628,7 @@
       "commit_url": null,
       "created_at": "2023-03-01T16:43:15Z",
       "updated_at": "2023-03-01T16:43:15Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Violating these will potentially trigger `ARG_CHECK`s\r\n\r\nIndeed. If panicking is okay, then you can really just set to all zeroes, and rely on the `ARG_CHECK`s (which will panic IIRC)?\r\n\r\n>  So users can't simply memset stuff to 0 and call it a day (or rather, if they do this, they need `unsafe` code and then need to be very careful not to use the zeroed-out object again).\r\n\r\nCouldn't you provide something like a destructor that takes ownership and memsets to 0? If it takes ownership of the value, then the user can't use the value any more?\r\n",
       "user": {
         "login": "real-or-random",
@@ -852,7 +852,7 @@
       "commit_url": null,
       "created_at": "2023-03-01T17:56:23Z",
       "updated_at": "2023-03-01T17:56:23Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> @real-or-random because if it takes ownership then it'll copy the memory :P. Any zeroing functionality needs to work on a reference.\r\n\r\nOh yes, I remember that discussion...\r\n\r\n> They do panic, but this is technically UB  [...]\r\n\r\nOh, and I remember that one even better! :/\r\n\r\n> @Kixunil ah! I am surprised to see that our signing functions don't return a `Result`. Agreed, let's not change those APIs. Better to panic (explicitly, not via `ARG_CHECK` :)).\r\n\r\nYeah, that seems much better.\r\n\r\nShould this issue here be closed then?\r\n\r\n\r\n",
       "user": {
         "login": "real-or-random",
@@ -1159,7 +1159,7 @@
       "commit_url": null,
       "created_at": "2023-03-02T10:40:10Z",
       "updated_at": "2023-03-02T10:48:19Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Anyway, if we're going to zero-out, we need a guarantee that all-zeroed values will never be valid. Can we have that?\r\n\r\nWhy do you need this if you're going to check for zeros? Or are you saying you need this to make sure your API is complete, i.e., every value that can be used with our API, can be used with your API too? \r\n\r\nThen you'd need it the other way around. If an object is valid (what does this mean)?, then it will never have all zero bytes? \r\n\r\n",
       "user": {
         "login": "real-or-random",
@@ -1296,7 +1296,7 @@
       "commit_url": null,
       "created_at": "2023-03-02T15:47:59Z",
       "updated_at": "2023-03-02T15:47:59Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "The following holds:\r\n\r\nIf no callback is raised when a `secp256k1_pubkey`, `secp256k1_only_pubkey` or `secp256k1_keypair` object is passed as an argument to an API function, then the first 32 bytes of the object are not all zeros.\r\n\r\nReason:\r\n - The first 32 bytes of `secp256k1_pubkey` and `secp256k1_only_pubkey` are the x-coordinate. We call the illegal callback while loading if that's 0.\r\n - The first 32 bytes of `secp256k1_keypair` are the secret key. We call the illegal callback while loading if that's 0.\r\n\r\n",
       "user": {
         "login": "real-or-random",
@@ -1404,7 +1404,7 @@
       "commit_url": null,
       "created_at": "2023-03-02T16:50:48Z",
       "updated_at": "2023-03-02T16:50:48Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Yes, I can't imagine that we will change that. We could add a promise to the docs, but that seems a bit arbitrary, to be honest. I'd rather suggest you add a test to secp256k1-sys that checks that if the 32 bytes are all zeros, then a callback is raised. Then you'll notice the (very unlikely) case that we break this guarantee in the future. ",
       "user": {
         "login": "real-or-random",
@@ -1566,7 +1566,7 @@
       "commit_url": null,
       "created_at": "2023-03-02T22:08:23Z",
       "updated_at": "2023-03-02T22:10:09Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> it's hard to imagine \"all bits 0s\" ever representing anything else\r\n\r\nIn MuSig, 33 bytes of zero represent infinity, at least in the case of the aggregate nonce. We needed a serialization for this because the attacker can force it to be infinity, and we don't to abort in this case. We also have an opaque struct for this in the -zkp implementation, but it comes with magic bytes, see https://github.com/BlockstreamResearch/secp256k1-zkp/blob/4f57024d868c2dc59b737e6a02b8990abffd3165/src/modules/musig/session_impl.h#L90.  And see also https://github.com/BlockstreamResearch/secp256k1-zkp/pull/218, which proposes something similar. But there's no struct in this case. \r\n\r\nedit: It seems reasonable to always add dummy bytes to new public opaque types. We also have it here for the scratch space already. We just can't introduce it retroactively for the existing types because this would be a breaking change. (The size of types is guaranteed.)",
       "user": {
         "login": "real-or-random",

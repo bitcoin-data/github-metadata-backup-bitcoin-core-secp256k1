@@ -72,7 +72,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T14:17:25Z",
       "updated_at": "2021-09-13T14:17:52Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": ">     3. `e == 0`, then `u1 == 0`, then `u1 * G` is invalid because you cannot multiply G by 0\r\n\r\nSure you can multiply G by 0.\r\n0*G is the point at infinity.\r\n",
       "user": {
         "login": "real-or-random",
@@ -404,7 +404,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T14:36:55Z",
       "updated_at": "2021-09-13T14:36:55Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Which is invalid point.\r\n\r\n\"invalid\" according to what definition? It's a perfectly valid `secp256k1_ge`. What's the attack you have in mind?",
       "user": {
         "login": "real-or-random",
@@ -458,7 +458,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T14:44:04Z",
       "updated_at": "2021-09-13T14:44:04Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "No, we're not going to change this.\n\n1) It violates the spec. It says nothing about rejecting hash=0, or why the point at infinity would be invalid as an intermediary result. It **is** invalid as a public key, but that doesn't apply here.\n2) It shouldn't matter. The hash has to be a hash in correct usage, and thus it won't ever be 0 (as that implies mounting a succesful preimage attack first).",
       "user": {
         "login": "sipa",
@@ -624,7 +624,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T15:01:03Z",
       "updated_at": "2021-09-13T15:15:25Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ed25519 is not ECDSA. I also don't see what this has to do with malleability. The libsecp256k1 API requires passing in the *hash* of the message. The probability that that hash is 0, is negligible.\n\nYou could argue that this is unsafe API design, and that libsecp256k1 should do the hashing for you, if you're concerned about someone using the API incorrectly. That'd be a reasonable point, but the solution isn't deviating from the spec.\n\nYou can also argue that the ECDSA spec is unsafe by permitting 0 (though I still don't see the actual attack). If that's the case, I'm afraid it is too late, as that's a discussion you should have had with the SECG when they wrote the spec.",
       "user": {
         "login": "sipa",
@@ -790,7 +790,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T16:30:10Z",
       "updated_at": "2021-09-13T16:33:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> So they all deviate from spec? But it's fine for ed25519, why it isn't ok for secp?\r\n\r\nThis library is explicitly designed for consensus-critical applications, where exact behavior is paramount. Deviations can cause forks. I don't think that *this* change in particular would risk that, but still - I see absolutely no reason for deviating from (a) existing behavior and (b) the specification. The fact that ed25519 implementations differ in their behavior around edge cases is a problem for some of its use cases too.\r\n\r\n> and it's pretty bad.\r\n\r\nYes indeed. No reason to taking a bad approach because others do it too.\r\n\r\n> Yes, your thinking here matches mine -- it's unsafe API design, and since libsecp is embedded everywhere, in every language, someone will use the api incorrectly.\r\n\r\nThen the solution is changing the API to accept the full unhashed message, and performing the hashing inside the API. Not changing behavior by deviating from the spec.\r\n\r\n> My point here is that it's probably the only public api part that allows user input to produce point at infinity.\r\n\r\nThere are definitely other ways, like `secp256k1_ec_combine` with two complementary public keys, will cause a point at infinity to be computed internally.\r\n\r\nAlso, in the actual implementation, the msghash=0 case won't actually construct the point at infinity in general. The *u1G + u2Q* sum of multiplications is computed in a single operation, which doesn't actually evaluate both multiplications individually.\r\n\r\n> Has there been extensive testing done for this case?\r\n\r\nAdding the condition you suggest (failing verification if msghash=0) will cause our current tests to fail.\r\n\r\n> What about timing discrepancies?\r\n\r\nThis is a verification operation, where constant-timeness isn't a concern (there is no secret data involved that could be leaked).\r\n",
       "user": {
         "login": "sipa",
@@ -844,7 +844,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T16:33:03Z",
       "updated_at": "2021-09-13T16:33:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "\r\n> Yes, your thinking here matches mine -- it's unsafe API design, and since libsecp is embedded everywhere, in every language, someone will use the api incorrectly.\r\n\r\nYeah, the API is not optimal. I don't think we'll change the API but we could add another cleaner API for ECDSA. I think that's a good idea. But we'll need someone to work on it.\r\n\r\n> My point here is that it's probably the only public api part that allows user input to produce point at infinity.\r\n\r\nThat's not true. A lot of computations start with accumulator initialized with the point at infinity, just because it's zero in the group.\r\n\r\n> Has there been extensive testing done for this case?\r\n\r\nYes.\r\n\r\n> What about timing discrepancies?\r\n\r\nVerification does not involve secrets, so this is not an issue. For secret computations, we have constant-time code that protect secrets.\r\n\r\nOf course there can be bugs, but shooting random questions in the dark here isn't really helpful. ",
       "user": {
         "login": "real-or-random",
@@ -952,7 +952,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T16:37:10Z",
       "updated_at": "2021-09-13T16:51:46Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Ed25519 is also used in consensus-critical applications, but I see your point. We can close this if you don't see the value I guess man_shrugging\r\n\r\nLet's leave it open as a reminder that we should change the API. (Allow me to update the title.) For historical context, one goal of the library was not to depend on SHA256 explicitly, so that's why an API with prehashed messages was chosen. Now we support two primitives that anyway depend on SHA256 (Schnorr sigs with a better API, no prehashed message) and ECDH with SHA256 in the code. So we're anyway committed to having SHA256 in the repo, and then we can design a better ECDSA API. ",
       "user": {
         "login": "real-or-random",
@@ -1039,7 +1039,7 @@
       "commit_url": null,
       "created_at": "2021-09-13T16:39:28Z",
       "updated_at": "2021-09-13T16:39:28Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Note that Bitcoin's consensus rules rely on being able to set msghash=1 for pre-segwit transactions with SIGHASH_SINGLE set, for a txin index that doesn't have a corresponding txout index. That's dumb, and makes it insecure to use, but for better or worse it's part of the consensus rules, so at least that code path requires that an API with prehashed messages remains available.",
       "user": {
         "login": "sipa",

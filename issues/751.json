@@ -139,7 +139,7 @@
       "commit_url": null,
       "created_at": "2020-05-04T17:23:52Z",
       "updated_at": "2020-05-04T17:23:52Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Yeah, this somehow depends on what \"parsing\" is. The `parse` function is supposed to parse the signature (as in \"read a byte array\"), whereas it assumes that `recid` is an int already. But that's weird because the normal usage of recovery is that the `recid` is transferred along with the `signature`. You may even consider it part of the signature, and if you look at the caller in Core, that's pretty much what it's doing: https://github.com/bitcoin/bitcoin/blob/99813a9745fe10a58bedd7a4cb721faf14f907a4/src/pubkey.cpp#L187\r\n\r\nI'm not sure to be honest. I think the ideal API would define a serialized recoverable signature to be a 65-byte string and simply take care of parsing the first byte. Maybe we can simply add a function that does this but also the keep the current function as it is? \r\n\r\nIf people don't think that's a good idea, I think you're right. Then the pragmatic thing is to return 0. (And we could do this change without breaking the API, we're just defining undefined cases.)",
       "user": {
         "login": "real-or-random",

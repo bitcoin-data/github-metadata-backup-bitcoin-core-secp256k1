@@ -102,7 +102,7 @@
       "commit_url": null,
       "created_at": "2021-10-03T13:42:13Z",
       "updated_at": "2021-10-03T13:42:13Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> This does mean that any non-bitcoin libsecp256k1 users that need to interoperate with openssl may now experience inconsistencies. ... and maybe it suggests that libsecp256k1 should increase the strictness of its standard ecdsa parser to match the bitcoin strictder, which should also make it consistent with openssl 3. (legacy signatures in the blockchain are supported by the 'lax' parser in contrib in any case).\r\n\r\nThis would be a breaking change, so I don't think we should do it. I'd prefer API stability over compatibility with OpenSSL 3. There are some (blockchain/encoding-critical) projects out there that rely on libsecp256k1 (without the lax parser).\r\n\r\n",
       "user": {
         "login": "real-or-random",
@@ -156,7 +156,7 @@
       "commit_url": null,
       "created_at": "2021-10-03T17:58:11Z",
       "updated_at": "2021-10-03T17:59:45Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> As far as breaking, the obvious thing to do would be to just introduce the stricter parser under a different name and recommend it, and mark the old one as deprecated (and potentially move it to contrib with the other lax parsers).\r\n\r\nOk sure, we could do this but it's work and I don't think Bitcoin Core would benefit from this, so we should not spend time on this. And new applications shouldn't use ECDSA at all. ",
       "user": {
         "login": "real-or-random",
@@ -263,6 +263,92 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2021-10-16T22:36:46Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "daira",
+        "id": 643204,
+        "node_id": "MDQ6VXNlcjY0MzIwNA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/643204?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/daira",
+        "html_url": "https://github.com/daira",
+        "followers_url": "https://api.github.com/users/daira/followers",
+        "following_url": "https://api.github.com/users/daira/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/daira/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/daira/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/daira/subscriptions",
+        "organizations_url": "https://api.github.com/users/daira/orgs",
+        "repos_url": "https://api.github.com/users/daira/repos",
+        "events_url": "https://api.github.com/users/daira/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/daira/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-09-26T21:09:01Z",
+      "updated_at": "2022-09-26T21:09:01Z",
+      "source": {
+        "issue": {
+          "id": 1386682331,
+          "node_id": "I_kwDOAZvKKc5Spxfb",
+          "url": "https://api.github.com/repos/zcash/zcash/issues/6180",
+          "repository_url": "https://api.github.com/repos/zcash/zcash",
+          "labels_url": "https://api.github.com/repos/zcash/zcash/issues/6180/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/zcash/zcash/issues/6180/comments",
+          "events_url": "https://api.github.com/repos/zcash/zcash/issues/6180/events",
+          "html_url": "https://github.com/zcash/zcash/issues/6180",
+          "number": 6180,
+          "state": "closed",
+          "state_reason": "completed",
+          "title": "secp256k1 test failure on machines with OpenSSL 3.0.x installed",
+          "body": "### Describe the issue\r\n`make -C src/secp256k1 check` fails on my machine. (This is run by `qa/zcash/full_test_suite.py`.)\r\n\r\n### Can you reliably reproduce the issue?\r\nYes:\r\n1. Check out 34f0a973c785e81c45e3c5e9bcbdcaf9b7f4505f which is current zcash master.\r\n2. `zcutil/build.sh`\r\n3. `make -C src/secp256k1 check`\r\n\r\n### Expected behaviour\r\nThe secp256k1 tests should pass.\r\n\r\n### Actual behaviour + errors\r\n```\r\n  CCLD     exhaustive_tests\r\nclang-14: warning: argument unused during compilation: '-static-libstdc++' [-Wunused-command-line-argument]\r\nmake  check-TESTS\r\nmake[1]: Entering directory '/home/daira/zecc/zcash.master/src/secp256k1'\r\nmake[2]: Entering directory '/home/daira/zecc/zcash.master/src/secp256k1'\r\n./build-aux/test-driver: line 112: 632834 Aborted                 \"$@\" >> \"$log_file\" 2>&1\r\nFAIL: tests\r\nPASS: exhaustive_tests\r\n============================================================================\r\nTestsuite summary for libsecp256k1 0.1\r\n============================================================================\r\n# TOTAL: 2\r\n# PASS:  1\r\n# SKIP:  0\r\n# XFAIL: 0\r\n# FAIL:  1\r\n# XPASS: 0\r\n# ERROR: 0\r\n============================================================================\r\nSee ./test-suite.log\r\n============================================================================\r\nmake[2]: *** [Makefile:1287: test-suite.log] Error 1\r\nmake[2]: Leaving directory '/home/daira/zecc/zcash.master/src/secp256k1'\r\nmake[1]: *** [Makefile:1395: check-TESTS] Error 2\r\nmake[1]: Leaving directory '/home/daira/zecc/zcash.master/src/secp256k1'\r\nmake: *** [Makefile:1613: check-am] Error 2\r\nmake: Leaving directory '/home/daira/zecc/zcash.master/src/secp256k1'\r\n\r\ndaira@katava:/home/daira/zecc/zcash.master$ cat src/secp256k1/test-suite.log \r\n========================================\r\n   libsecp256k1 0.1: ./test-suite.log\r\n========================================\r\n\r\n# TOTAL: 2\r\n# PASS:  1\r\n# SKIP:  0\r\n# XFAIL: 0\r\n# FAIL:  1\r\n# XPASS: 0\r\n# ERROR: 0\r\n\r\n.. contents:: :depth: 2\r\n\r\nFAIL: tests\r\n===========\r\n\r\ntest count = 64\r\nrandom seed = 7e869b10c369a59b3ab8ad74115b2b05\r\nFailure 10 on 30 23 02 03 40 b5 80 02 1c a1 b1 ff fb ff 00 00 00 10 f8 ff ff ff ef ff ff 00 ec ff fb ff ff ff ff ff 01 00 00 \r\nsrc/tests.c:4947: test condition failed: ret == 0\r\nFAIL tests (exit status: 134)\r\n```\r\n\r\n### The version of Zcash you were using:\r\nZcash Daemon version v5.2.0-34f0a973c\r\n\r\n### Machine specs:\r\n- OS name + version: Debian 11 (Bullseye)\r\n- CPU: Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz\r\n- RAM: 96 MiB (~50% free)\r\n- Disk size: 150 GB available\r\n- Disk Type (HD/SDD): the git checkout is on an SDD, the filesystem root is HD\r\n- Linux kernel version (uname -a): `Linux katava 5.19.0-1-amd64 #1 SMP PREEMPT_DYNAMIC Debian 5.19.6-1 (2022-09-01) x86_64 GNU/Linux`\r\n- Compiler version (gcc --version): gcc (Debian 12.2.0-2) 12.2.0\r\n- Linker version (ld -v): GNU ld (GNU Binutils for Debian) 2.38.90.20220713\r\n- Assembler version (as --version): GNU assembler (GNU Binutils for Debian) 2.38.90.20220713\r\n",
+          "user": {
+            "login": "daira",
+            "id": 643204,
+            "node_id": "MDQ6VXNlcjY0MzIwNA==",
+            "avatar_url": "https://avatars.githubusercontent.com/u/643204?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/daira",
+            "html_url": "https://github.com/daira",
+            "followers_url": "https://api.github.com/users/daira/followers",
+            "following_url": "https://api.github.com/users/daira/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/daira/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/daira/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/daira/subscriptions",
+            "organizations_url": "https://api.github.com/users/daira/orgs",
+            "repos_url": "https://api.github.com/users/daira/repos",
+            "events_url": "https://api.github.com/users/daira/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/daira/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 442116761,
+              "node_id": "MDU6TGFiZWw0NDIxMTY3NjE=",
+              "url": "https://api.github.com/repos/zcash/zcash/labels/A-dependencies",
+              "name": "A-dependencies",
+              "description": "Area: Dependencies",
+              "color": "f7e101",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 4,
+          "closed_at": "2022-09-30T21:02:48Z",
+          "created_at": "2022-09-26T20:30:36Z",
+          "updated_at": "2022-09-30T21:02:48Z"
+        },
+        "type": "issue"
+      }
     }
   ]
 }

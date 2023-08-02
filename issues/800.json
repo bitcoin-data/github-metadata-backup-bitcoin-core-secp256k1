@@ -73,7 +73,7 @@
       "commit_url": null,
       "created_at": "2020-08-15T19:58:46Z",
       "updated_at": "2020-08-15T19:58:46Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> One way to address that would be to simply have test.c and secp256k1.c set the macro before importing the headers.\r\n\r\nI don't see why that wouldn't work.\r\n\r\n> Related, USE_FIELD_INV_BUILTIN/USE_SCALAR_INV_BUILTIN should get automatically defaulted. (maybe these go away with safegcd?) right now a non-buildsystem user needs to set them.\r\n\r\nYeah, I was expecting them to go away after safegcd (and we'd drop gmp/num support entirely; it can always be brought back from history if there is really a need).\r\n\r\n> Perhaps for the rest too... I think now that there aren't defines needed for the fe/scalar type it should be possible to build with zero defines.\r\n\r\nThe remaining things are:\r\n* GMP or not (for now) (field inv/scalar inv could be decided automatically based on the presence of GMP, but GMP's availability in the first place needs to be detected/configured through the build system or manual defines)\r\n* tweaks for ecmult / ecmult_gen (changed with #693) - there could be an automatic default if there is no override, though.\r\n* viability of using x86_64 asm can probably be made automatic (it's restricted to x86_64, and to non-ancient gcc and cland anyway, which are pretty uniform)\r\n* ARM asm is harder/impossible, as it's a separate file that needs to be externally assembled\r\n* Endomorphism or not (will also go away :D)\r\n* Static precomputation or not",
       "user": {
         "login": "sipa",
@@ -181,7 +181,7 @@
       "commit_url": null,
       "created_at": "2020-08-25T00:26:10Z",
       "updated_at": "2020-08-25T00:26:10Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I don't quite understand what the purpose of `SECP256K1_BUILD` is, can someone explain?",
       "user": {
         "login": "real-or-random",
@@ -235,7 +235,7 @@
       "commit_url": null,
       "created_at": "2020-08-25T00:37:31Z",
       "updated_at": "2020-08-25T00:37:31Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@real-or-random It's used to indicate that we're building the library itself, and not an interface.\r\n\r\nIt matters because secp256k1.h is included both when building the library itself, and by applications linking with it. For the former, we don't want the \"nonnull\" attributes, as they would make the compiler optimize away our explicit nonnull checks. We only want them as part of the external interface.\r\n\r\nIt's also not set when compiling `gen_context` or the benchmarks. It's less to clear to whether that matters.",
       "user": {
         "login": "sipa",
@@ -347,7 +347,7 @@
       "commit_url": null,
       "created_at": "2022-07-06T10:29:12Z",
       "updated_at": "2022-07-06T10:29:12Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": " - SECP256K1_BUILD :  duplicate of #927 solved by #928\r\n - making manual builds easier: tracked in #929  ",
       "user": {
         "login": "real-or-random",

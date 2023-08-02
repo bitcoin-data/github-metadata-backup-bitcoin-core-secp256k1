@@ -275,12 +275,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 948,
-        "stargazers_count": 1768,
-        "watchers_count": 1768,
-        "size": 10062,
+        "forks_count": 962,
+        "stargazers_count": 1802,
+        "watchers_count": 1802,
+        "size": 10374,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 145,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -291,9 +291,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-06-12T16:38:48Z",
+        "pushed_at": "2023-08-01T01:00:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-06-12T17:38:13Z",
+        "updated_at": "2023-08-01T08:52:35Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -355,7 +355,7 @@
       "commit_url": null,
       "created_at": "2021-12-26T15:40:31Z",
       "updated_at": "2021-12-26T15:40:31Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Woho, we'll soon need a few more Peters to review all those improvements! :) ",
       "user": {
         "login": "real-or-random",
@@ -409,7 +409,7 @@
       "commit_url": null,
       "created_at": "2021-12-26T15:41:59Z",
       "updated_at": "2021-12-26T15:41:59Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Can you update the symbolic versions of this code in `sage/prove_group_implementations.sage` too?",
       "user": {
         "login": "sipa",
@@ -463,7 +463,7 @@
       "commit_url": null,
       "created_at": "2021-12-31T19:23:43Z",
       "updated_at": "2021-12-31T19:23:43Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 66a412939351396a6351b062dff820989a63cc56\r\n\r\nI re-derived these formulas by manipulating the sage code until it matches the forms in this PR, and then comparing the result with the C implementations.",
       "user": {
         "login": "sipa",
@@ -487,6 +487,81 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#issuecomment-1003439638",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1056"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2021-12-31T22:25:22Z",
+      "updated_at": "2021-12-31T22:25:22Z",
+      "source": {
+        "issue": {
+          "id": 1087816645,
+          "node_id": "I_kwDOAP4Jqs5A1sPF",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1051",
+          "number": 1051,
+          "state": "open",
+          "state_reason": null,
+          "title": "Try a non-uniform group law (e.g., for ecmult_gen)?",
+          "body": "The group law in `secp256k1_gej_add_ge` is uniform, i.e., it works for P + Q no matter if P != Q or P = Q. (It still needs to handle infinity and has another special case.) \r\n\r\nIt needs 7 fe mul and 5 fe sqr, the best non-uniform group law in EFD needs one fewer sqr (https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-madd-2007-bl). Mabye it's faster also in practice. We could simply implement it and benchmark it.\r\n\r\nDepending on the specifics of our ecmult_gen algorithm, it may be the case that this algorithm never adds P + Q with P = Q (for example, the ecmult algorithm within the MuSig-DN circuit has a similar property)). Then, we could get away with the non-uniform law in ecmult_gen.\r\n\r\nI think we shouldn't really think about this before https://github.com/bitcoin-core/secp256k1/pull/693 has been done.",
+          "user": {
+            "login": "real-or-random",
+            "id": 1071625,
+            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/real-or-random",
+            "html_url": "https://github.com/real-or-random",
+            "followers_url": "https://api.github.com/users/real-or-random/followers",
+            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+            "repos_url": "https://api.github.com/users/real-or-random/repos",
+            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 30,
+          "created_at": "2021-12-23T15:38:09Z",
+          "updated_at": "2022-12-03T16:44:05Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "head_ref_force_pushed",
@@ -546,7 +621,7 @@
       "commit_url": null,
       "created_at": "2022-01-07T18:50:24Z",
       "updated_at": "2022-01-07T18:50:24Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK e6ed3705b602cd8e51612ce6d3728654bc2d1aec. Verified it's just a rebase of 66a412939351396a6351b062dff820989a63cc56",
       "user": {
         "login": "sipa",
@@ -580,7 +655,7 @@
       "commit_id": "e6ed3705b602cd8e51612ce6d3728654bc2d1aec",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
         "login": "real-or-random",
@@ -806,7 +881,7 @@
       "commit_url": null,
       "created_at": "2022-02-23T09:26:28Z",
       "updated_at": "2022-02-23T09:26:28Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@peterdettman Nice. :) Can you squash this? I think at least the `fixup!` should be squashed but it's probably also good to change  the sage stuff in the same commit as the C code, then C and sage are always consistent.",
       "user": {
         "login": "real-or-random",
@@ -981,7 +1056,7 @@
       "commit_id": "2d0e1154c1939e8e7ffb05f64faf3f626fcb7000",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 2d0e1154c1939e8e7ffb05f64faf3f626fcb7000",
       "user": {
         "login": "real-or-random",
@@ -1017,7 +1092,7 @@
       "commit_id": "2d0e1154c1939e8e7ffb05f64faf3f626fcb7000",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
         "login": "jonasnick",
@@ -1053,7 +1128,7 @@
       "commit_id": "2d0e1154c1939e8e7ffb05f64faf3f626fcb7000",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
         "login": "real-or-random",
@@ -1109,7 +1184,7 @@
       "commit_url": null,
       "created_at": "2022-03-28T15:08:52Z",
       "updated_at": "2022-03-28T15:08:52Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Anything left to do here?",
       "user": {
         "login": "sipa",
@@ -1275,7 +1350,7 @@
       "commit_url": null,
       "created_at": "2022-03-28T16:12:03Z",
       "updated_at": "2022-03-28T16:12:03Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@peterdettman It should boil down to just applying my fixup commit here, so I think it's a matter of minutes until this ready for final review. https://github.com/real-or-random/secp256k1/commits/group_var\r\n",
       "user": {
         "login": "real-or-random",
@@ -1490,7 +1565,7 @@
       "commit_id": "2f984ffc45eba89faa9e79da3d5d5bd50a6c1c3d",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 2f984ffc45eba89faa9e79da3d5d5bd50a6c1c3d",
       "user": {
         "login": "real-or-random",
@@ -1526,7 +1601,7 @@
       "commit_id": "2f984ffc45eba89faa9e79da3d5d5bd50a6c1c3d",
       "commit_url": null,
       "created_at": null,
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "ACK 2f984ffc45eba89faa9e79da3d5d5bd50a6c1c3d",
       "user": {
         "login": "jonasnick",
@@ -1582,7 +1657,7 @@
       "commit_url": null,
       "created_at": "2022-03-29T09:19:26Z",
       "updated_at": "2022-03-29T09:19:26Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@sipa want to reACK this?",
       "user": {
         "login": "real-or-random",
@@ -1954,6 +2029,281 @@
       "commit_id": "e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
       "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
       "created_at": "2023-06-04T15:42:09Z"
+    },
+    {
+      "event": "referenced",
+      "id": 9696152867,
+      "node_id": "REFE_lADOAP4Jqs5A5abhzwAAAAJB740j",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/9696152867",
+      "actor": {
+        "login": "vmta",
+        "id": 23269741,
+        "node_id": "MDQ6VXNlcjIzMjY5NzQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/23269741?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/vmta",
+        "html_url": "https://github.com/vmta",
+        "followers_url": "https://api.github.com/users/vmta/followers",
+        "following_url": "https://api.github.com/users/vmta/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/vmta/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/vmta/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/vmta/subscriptions",
+        "organizations_url": "https://api.github.com/users/vmta/orgs",
+        "repos_url": "https://api.github.com/users/vmta/repos",
+        "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/vmta/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "8f03457eede9abfd1d7a0d26abc379a710e16755",
+      "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/8f03457eede9abfd1d7a0d26abc379a710e16755",
+      "created_at": "2023-07-01T12:32:53Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-07-17T11:51:01Z",
+      "updated_at": "2023-07-17T11:51:01Z",
+      "source": {
+        "issue": {
+          "id": 1807601021,
+          "node_id": "PR_kwDOAjZbZs5VqXWS",
+          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/236",
+          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
+          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/236/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/236/comments",
+          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/236/events",
+          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/236",
+          "number": 236,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Upstream PRs 1056, 1104, 1105, 1084, 1114, 1115",
+          "body": "[bitcoin-core/secp256k1#1056]: Save negations in var-time group addition\r\n[bitcoin-core/secp256k1#1104]: Fix the false positive of `SECP_64BIT_ASM_CHECK`\r\n[bitcoin-core/secp256k1#1105]: Don'\\''t export symbols in static libraries\r\n[bitcoin-core/secp256k1#1084]: ci: Add MSVC builds\r\n[bitcoin-core/secp256k1#1114]: `_scratch_destroy`: move `VERIFY_CHECK` after invalid scrach space check\r\n[bitcoin-core/secp256k1#1115]: Fix sepc256k1 -> secp256k1 typo in group.h\r\n\r\nThis PR can be recreated with `./contrib/sync-upstream.sh range 43756da819a235d813e7ecd53eae6df073b53247`.",
+          "user": {
+            "login": "jonasnick",
+            "id": 2582071,
+            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/jonasnick",
+            "html_url": "https://github.com/jonasnick",
+            "followers_url": "https://api.github.com/users/jonasnick/followers",
+            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+            "repos_url": "https://api.github.com/users/jonasnick/repos",
+            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 0,
+          "pull_request": {
+            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/236",
+            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/236",
+            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/236.diff",
+            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/236.patch"
+          },
+          "closed_at": "2023-07-17T12:23:00Z",
+          "created_at": "2023-07-17T11:51:01Z",
+          "updated_at": "2023-07-17T12:23:00Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-07-17T12:25:24Z",
+      "updated_at": "2023-07-17T12:25:24Z",
+      "source": {
+        "issue": {
+          "id": 1807666126,
+          "node_id": "PR_kwDOAjZbZs5Vqlnm",
+          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/237",
+          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
+          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/237/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/237/comments",
+          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/237/events",
+          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/237",
+          "number": 237,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Upstream PRs 1056, 1104, 1105, 1084, 1114, 1115",
+          "body": "[bitcoin-core/secp256k1#1056]: Save negations in var-time group addition\r\n[bitcoin-core/secp256k1#1104]: Fix the false positive of `SECP_64BIT_ASM_CHECK`\r\n[bitcoin-core/secp256k1#1105]: Don'\\''t export symbols in static libraries\r\n[bitcoin-core/secp256k1#1084]: ci: Add MSVC builds\r\n[bitcoin-core/secp256k1#1114]: `_scratch_destroy`: move `VERIFY_CHECK` after invalid scrach space check\r\n[bitcoin-core/secp256k1#1115]: Fix sepc256k1 -> secp256k1 typo in group.h\r\n\r\nThis PR can be recreated with `./contrib/sync-upstream.sh range 43756da819a235d813e7ecd53eae6df073b53247`.",
+          "user": {
+            "login": "jonasnick",
+            "id": 2582071,
+            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/jonasnick",
+            "html_url": "https://github.com/jonasnick",
+            "followers_url": "https://api.github.com/users/jonasnick/followers",
+            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+            "repos_url": "https://api.github.com/users/jonasnick/repos",
+            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 0,
+          "pull_request": {
+            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/237",
+            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/237",
+            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/237.diff",
+            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/237.patch"
+          },
+          "closed_at": "2023-07-17T12:35:36Z",
+          "created_at": "2023-07-17T12:25:23Z",
+          "updated_at": "2023-07-17T12:35:36Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-07-17T13:04:16Z",
+      "updated_at": "2023-07-17T13:04:16Z",
+      "source": {
+        "issue": {
+          "id": 1807743389,
+          "node_id": "PR_kwDOAjZbZs5Vq2s0",
+          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/238",
+          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
+          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/238/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/238/comments",
+          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/238/events",
+          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/238",
+          "number": 238,
+          "state": "closed",
+          "state_reason": null,
+          "title": "Upstream PRs 1056, 1104, 1105, 1084, 1114, 1115, 1116, 1120, 1122, 1121, 1128, 1131, 1144, 1150, 1146",
+          "body": "[bitcoin-core/secp256k1#1056]: Save negations in var-time group addition\r\n[bitcoin-core/secp256k1#1104]: Fix the false positive of `SECP_64BIT_ASM_CHECK`\r\n[bitcoin-core/secp256k1#1105]: Don't export symbols in static libraries\r\n[bitcoin-core/secp256k1#1084]: ci: Add MSVC builds\r\n[bitcoin-core/secp256k1#1114]: `_scratch_destroy`: move `VERIFY_CHECK` after invalid scrach space check\r\n[bitcoin-core/secp256k1#1115]: Fix sepc256k1 -> secp256k1 typo in group.h\r\n[bitcoin-core/secp256k1#1116]: build: Fix #include \"...\" paths to get rid of further -I arguments\r\n[bitcoin-core/secp256k1#1120]: ecmult_gen: Skip RNG when creating blinding if no seed is available\r\n[bitcoin-core/secp256k1#1122]: tests: Randomize the context with probability 15/16 instead of 1/4\r\n[bitcoin-core/secp256k1#1121]: config: Set preprocessor defaults for ECMULT_* config values\r\n[bitcoin-core/secp256k1#1128]: configure: Remove pkgconfig macros again (reintroduced by mismerge)\r\n[bitcoin-core/secp256k1#1131]: readme: Misc improvements\r\n[bitcoin-core/secp256k1#1144]: Cleanup `.gitignore` file\r\n[bitcoin-core/secp256k1#1150]: ci: always cat test_env.log\r\n[bitcoin-core/secp256k1#1146]: ci: prevent \"-v/--version: not found\" irrelevant error\r\n\r\nThis PR can be recreated with `./contrib/sync-upstream.sh range c2ee9175e972b2e9749baae764388c44f30d3bdb`.\r\n",
+          "user": {
+            "login": "jonasnick",
+            "id": 2582071,
+            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/jonasnick",
+            "html_url": "https://github.com/jonasnick",
+            "followers_url": "https://api.github.com/users/jonasnick/followers",
+            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+            "repos_url": "https://api.github.com/users/jonasnick/repos",
+            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 0,
+          "pull_request": {
+            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/238",
+            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/238",
+            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/238.diff",
+            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/238.patch"
+          },
+          "closed_at": "2023-07-17T13:24:37Z",
+          "created_at": "2023-07-17T13:04:15Z",
+          "updated_at": "2023-07-17T13:24:37Z"
+        },
+        "type": "issue"
+      }
     }
   ],
   "comments": [
@@ -1993,7 +2343,7 @@
       "created_at": "2022-02-09T10:42:15Z",
       "updated_at": "2022-02-09T11:35:56Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r802523103",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/802523103"
@@ -2045,7 +2395,7 @@
       "created_at": "2022-02-09T10:54:59Z",
       "updated_at": "2022-02-09T11:35:56Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r802534188",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/802534188"
@@ -2201,7 +2551,7 @@
       "created_at": "2022-02-23T09:28:12Z",
       "updated_at": "2022-02-23T09:28:13Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r812698599",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/812698599"
@@ -2253,7 +2603,7 @@
       "created_at": "2022-03-06T12:30:42Z",
       "updated_at": "2022-03-06T12:31:35Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r820227470",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/820227470"
@@ -2305,7 +2655,7 @@
       "created_at": "2022-03-06T13:45:40Z",
       "updated_at": "2022-03-28T16:24:13Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r820236949",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/820236949"
@@ -2357,7 +2707,7 @@
       "created_at": "2022-03-06T13:46:46Z",
       "updated_at": "2022-03-06T13:46:50Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r820237085",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/820237085"
@@ -2409,7 +2759,7 @@
       "created_at": "2022-03-06T14:27:12Z",
       "updated_at": "2022-03-06T14:27:13Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r820242015",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/820242015"
@@ -2461,7 +2811,7 @@
       "created_at": "2022-03-06T14:32:21Z",
       "updated_at": "2022-03-06T14:32:21Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1056#discussion_r820242662",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/820242662"

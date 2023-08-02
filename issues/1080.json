@@ -73,7 +73,7 @@
       "commit_url": null,
       "created_at": "2022-02-25T19:43:40Z",
       "updated_at": "2022-02-25T19:43:40Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Can you try compiling with `-DSECP256K1_BIG_ENDIAN`, since apparently the autodetection based on macros doesn't work?",
       "user": {
         "login": "sipa",
@@ -127,7 +127,7 @@
       "commit_url": null,
       "created_at": "2022-02-25T23:14:58Z",
       "updated_at": "2022-02-25T23:15:05Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@tankf33der Can you post the output of this command?  \r\n\r\n```\r\necho | gcc -dM -E -\r\n``` \r\n\r\nThis will help us to improve the autodetection, see https://stackoverflow.com/a/2224357.\r\n\r\n(Judging from the error message, I assume `_BIG_ENDIAN` is defined but as the empty string instead of `1`...)",
       "user": {
         "login": "real-or-random",
@@ -347,7 +347,7 @@
       "commit_url": null,
       "created_at": "2022-02-26T10:24:38Z",
       "updated_at": "2022-02-26T12:01:17Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Thanks for the quick reply. The output does not include `_BIG_ENDIAN`, so this is probably defined somewhere else.\r\n\r\n\r\n---\r\n\r\nSo the following two are not equivalent if `FOO` is defined but empty:\r\n\r\n```\r\n#if defined(FOO)\r\n#if FOO = 1\r\n...\r\n#endif\r\n#endif \r\n```\r\n\r\n\r\n```\r\n#if defined(FOO) && FOO == 1\r\n...\r\n#endif \r\n```\r\n\r\nWe took the code partly from https://github.com/rofl0r/endianness.h/blob/9853923246b065a3b52d2c43835f3819a62c7199/endianness.h#L52L73 and changed it slightly. The original code \r\nchecks the most commonly used macro  ` __BYTE_ORDER__` separately and then skips all the other checks, so that would have worked here. But still, maybe the entire thing is somewhat fragile. [1] agrees with this observation and favors run-time detection, which then is again turned into compile-time detection by a clever compiler. \r\n\r\nThe only place where we have endianness-dependant code is when reading input data for SHA256: https://github.com/bitcoin-core/secp256k1/blob/master/src/hash_impl.h#L54\r\n\r\nSo we could: \r\n1. Stick to the precompiler macros and improve them. This will at least fix this issue here.\r\n2. Switch to runtime detection, e.g., as with a inlineable and compile-time-evalulatable function as suggested in [1]\r\n3. Make the code endianness-independent, preferably in a way that has in the end no overhead for LE.\r\n\r\nI think we should try 3 and benchmark if it really has an effect on performance. If not, we should favor that approach. It's by far the least brittle. Otherwise 2 could be a solid option, too.\r\n\r\nFor 1, I'm a little bit concerned by the observation in [1] that the macro approach really led to misdetection cases. We have the self-tests but they're not always run (static context). Unfortunately there seems to be no portable C89 expression that we could use in `assumptions.h` (Even if compile-time constantness is not a requirement, there's `(*(uint16_t *)\"\\0\\xff\" < 0x0100)` in C89 but it relies on the assumption that string literals are aligned. The other expressions I found all use C99 compound literals, e.g., see https://stackoverflow.com/a/2100549)\r\n\r\n[1] https://fastcompression.blogspot.com/2014/11/portability-woes-endianess-and_24.html",
       "user": {
         "login": "real-or-random",
@@ -400,6 +400,88 @@
       "commit_id": "1f43294e533f6797b63c7f67913b0f3b62b68595",
       "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/1f43294e533f6797b63c7f67913b0f3b62b68595",
       "created_at": "2022-03-25T09:37:22Z"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2022-03-25T09:55:35Z",
+      "updated_at": "2022-03-25T09:55:35Z",
+      "source": {
+        "issue": {
+          "id": 1180578255,
+          "node_id": "PR_kwDOAP4Jqs41AaZi",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1093",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1093/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1093/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1093/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1093",
+          "number": 1093,
+          "state": "closed",
+          "state_reason": null,
+          "title": "hash: Make code agnostic of endianness",
+          "body": "Recent compilers compile the two new functions to very efficient code\r\non various platforms. In particular, already GCC >= 5 and clang >= 5\r\nunderstand do this for the read function, which is the one critical\r\nfor performance (called 16 times per SHA256 transform).\r\n\r\nFixes #1080.",
+          "user": {
+            "login": "real-or-random",
+            "id": 1071625,
+            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/real-or-random",
+            "html_url": "https://github.com/real-or-random",
+            "followers_url": "https://api.github.com/users/real-or-random/followers",
+            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+            "repos_url": "https://api.github.com/users/real-or-random/repos",
+            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 4,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1093",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1093",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1093.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1093.patch"
+          },
+          "closed_at": "2022-03-28T19:30:37Z",
+          "created_at": "2022-03-25T09:55:35Z",
+          "updated_at": "2022-04-15T06:42:48Z"
+        },
+        "type": "issue"
+      }
     },
     {
       "event": "referenced",
@@ -516,6 +598,35 @@
       "commit_id": "b9138ab266b5b27a8b784b68a1ef4ae49063a7ee",
       "commit_url": "https://api.github.com/repos/dderjoel/secp256k1/commits/b9138ab266b5b27a8b784b68a1ef4ae49063a7ee",
       "created_at": "2023-05-23T01:15:37Z"
+    },
+    {
+      "event": "referenced",
+      "id": 9548193671,
+      "node_id": "REFE_lADOAP4Jqs5Ek6tszwAAAAI5Hd-H",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/9548193671",
+      "actor": {
+        "login": "matteonardelli",
+        "id": 93912011,
+        "node_id": "U_kgDOBZj7yw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/93912011?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/matteonardelli",
+        "html_url": "https://github.com/matteonardelli",
+        "followers_url": "https://api.github.com/users/matteonardelli/followers",
+        "following_url": "https://api.github.com/users/matteonardelli/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/matteonardelli/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/matteonardelli/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/matteonardelli/subscriptions",
+        "organizations_url": "https://api.github.com/users/matteonardelli/orgs",
+        "repos_url": "https://api.github.com/users/matteonardelli/repos",
+        "events_url": "https://api.github.com/users/matteonardelli/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/matteonardelli/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "5ac4bc757f9c9e16c37ac3bbd408c903128a4d34",
+      "commit_url": "https://api.github.com/repos/bancaditalia/secp256k1-frost/commits/5ac4bc757f9c9e16c37ac3bbd408c903128a4d34",
+      "created_at": "2023-06-16T07:29:06Z"
     }
   ]
 }

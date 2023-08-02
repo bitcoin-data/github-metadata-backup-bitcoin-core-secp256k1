@@ -36,7 +36,7 @@
     },
     "labels": [],
     "assignees": [],
-    "author_association": "MEMBER",
+    "author_association": "NONE",
     "locked": false,
     "comments": 9,
     "closed_at": "2018-12-16T15:17:18Z",
@@ -73,7 +73,7 @@
       "commit_url": null,
       "created_at": "2018-12-14T09:34:15Z",
       "updated_at": "2018-12-14T09:34:15Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Which implementation of Bitcoin did you test? Bitcoin Core does not call `secp256k1_der_parse_integer` AFAIK because it used the code for lax DER parsing in `contrib`.\r\n\r\nApart from that, if you think it's due to all the branching, then `-fprofile-arcs` and `-fprofile-use` are the first things that come to my mind.",
       "user": {
         "login": "real-or-random",
@@ -127,7 +127,7 @@
       "commit_url": null,
       "created_at": "2018-12-14T16:31:29Z",
       "updated_at": "2018-12-14T17:09:17Z",
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "body": "Are you sure? I'm not running any special build, just Bitcoin core master with gprof enabled. It looks like it's called from secp256k1_ecdsa_sig_parse ?",
       "user": {
         "login": "jb55",
@@ -181,7 +181,7 @@
       "commit_url": null,
       "created_at": "2018-12-14T19:00:01Z",
       "updated_at": "2018-12-14T19:00:01Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "Yeah but disregarding tests and bechnmarks, `secp256k1_ecdsa_sig_parse` is called only from `secp256k1_ecdsa_signature_parse_der`, which is not called from Bitcoin Core? If you look at the code you see that that Core uses lax parsing and then its own function `IsValidSignatureEncoding` to check the encoding.",
       "user": {
         "login": "real-or-random",
@@ -235,7 +235,7 @@
       "commit_url": null,
       "created_at": "2018-12-14T20:15:53Z",
       "updated_at": "2018-12-14T20:15:53Z",
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "body": "I'll try to get a call graph from gprof to see what's going on",
       "user": {
         "login": "jb55",
@@ -289,7 +289,7 @@
       "commit_url": null,
       "created_at": "2018-12-15T15:46:53Z",
       "updated_at": "2018-12-15T15:46:53Z",
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "body": "Yeah this is weird, all I see is \r\n\r\n```\r\n                                                 <spontaneous>\r\n[12]     4.9   75.43    0.00                 secp256k1_der_parse_integer [12]\r\n```\r\n\r\nwhich might make sense if secp256k1 isn't compiled with -pg ?\r\n\r\nRight now I'm going to assume the gprof output is somehow wrong.\r\n\r\nHere are the full gprof logs:\r\n\r\nhttps://jb55.com/s/bitcoin-weird-gprof.txt\r\nhttps://jb55.com/s/bitcoin-weird-gprof-graph.txt",
       "user": {
         "login": "jb55",
@@ -372,7 +372,7 @@
       "commit_url": null,
       "created_at": "2018-12-18T17:05:54Z",
       "updated_at": "2018-12-18T17:05:54Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "What was actually the issue?",
       "user": {
         "login": "jonasnick",
@@ -426,7 +426,7 @@
       "commit_url": null,
       "created_at": "2018-12-20T18:25:21Z",
       "updated_at": "2018-12-20T18:25:21Z",
-      "author_association": "MEMBER",
+      "author_association": "NONE",
       "body": "@jonasnick I never got around to figuring it out. For some reason gprof seemed to think it was sampling `secp256k1_der_parse_integer` while running bitcoin even though no code paths reach there. So it's either wrong or there is a memory corruption issue somewhere? The former is perhaps more likely?",
       "user": {
         "login": "jb55",
@@ -592,7 +592,7 @@
       "commit_url": null,
       "created_at": "2022-04-10T12:39:25Z",
       "updated_at": "2022-04-10T12:39:25Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> Maybe using the bad practice of putting functions in header files got gprof confused :D\r\n\r\nA C compiler doesn't have a notion of a header file, so I doubt that's the issue.\r\n\r\n>  Does anyone have a suggestion on what configuration combination is the fastest?\r\n\r\nIt will depend on the compiler (flags) and your machine. I suggest running `./bench_ecmult`. Check the first line `ecmult_gen`. Maybe we should add a benchmark for key generation.\r\n",
       "user": {
         "login": "real-or-random",

@@ -72,7 +72,7 @@
       "commit_url": null,
       "created_at": "2023-03-30T23:04:17Z",
       "updated_at": "2023-03-30T23:04:17Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> When running `make -j… check` I noticed it doesn't use more than 3 CPU's at any one time, one for `tests`, `exhaustive_tests` and `noverify_tests`. At least when I tried it on an Intel macOS 13.2 machine.\r\n\r\nYep, the only parallelism we have is that one from different binaries.\r\n\r\nAs you say, it's not the end of the world, but it would be good to improve this if it's a bottleneck in Core. I thought a few times about this issue, but my pain was never big enough that I actually spend time working on this.   \r\n\r\n * Pragmatically speaking, we could just run 4x `tests 16` and 4x `noverify_tests 16` instead of 1x `tests 64` and 1x `noverify_tests 64`. This means we'll run the deterministic part of the test suite 4x... Not elegant, but also not the end of the world. It errs on the other side of the spectrum. \r\n * Some \"proper\" unit testing framework would give us a way to run different test cases in different processes/threads. https://github.com/bitcoin-core/secp256k1/pull/1211 is a bit of a poor man's approach version of this, and it is ready right now. This will make it possible to run different subsets in different processes. One disadvantage is that we'll need to run to split the test suite manually and find the right command line args. It would perhaps make sense to add more generic arguments like \"--split 4 --part 3\", which would split the test cases into four groups and run only the third of it.   ",
       "user": {
         "login": "real-or-random",
@@ -404,7 +404,7 @@
       "commit_url": null,
       "created_at": "2023-04-01T07:04:29Z",
       "updated_at": "2023-04-01T07:04:29Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "> (or maybe we could be a little bit smart and divide 64 by the `-j` value\r\n\r\nI checked, and I don't think there's no way to access the `-j` value from within the Makefile. \r\n\r\nBut yeah, we could still just use 4x16.",
       "user": {
         "login": "real-or-random",

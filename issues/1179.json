@@ -72,7 +72,7 @@
       "commit_url": null,
       "created_at": "2022-12-19T09:41:46Z",
       "updated_at": "2022-12-19T09:41:46Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "I think the call is correct at this level of abstraction. The caller in the `schnorrsig` module is not supposed to know what `secp256k1_sha256_initialize()` does, e.g., it could initialize further struct members in the future. Moreover, it's not a performance problem because any sane compiler will hopefully drop the call. \r\n\r\nHowever, that means that one could say that the code in the `schnorrsig` module shouldn't set the struct members directly. This was also discussed in https://github.com/bitcoin-core/secp256k1/pull/731 but I ended up not doing it. I think my reasoning was that a midstate is really just a triple of the state of \"internal\" arrays, buffer of unwritten bytes and bytes written so far. This matches the struct exactly. So one way to look at this is that the struct is \"public\" to other modules, and those modules can simply write it to. \r\n\r\nIf we really want to fix this code smell, here are three ways:\r\n1. We could still introduce a setter function but the API would be somewhat annoying due to the 8 integers plus the array (which means we need a pointer). https://github.com/bitcoin-core/secp256k1/pull/731/files#diff-c2d5f1f7616875ab71cd41b053cfb428696988ff89642b931a0963d50f34f7e8R557-R558. \r\n2. Alternatively, we could  restrict the API to midstates with no unwritten bytes (i.e., where the byte counter is divisible by 64). This is all the callers currently need and then we could at least drop the pointer argument. This would mean we introduce a function `secp256k1_sha256_initialize_midstate(uint64_t bytes, uint32_t s1, ..., uint32_t s2)`. (Or alternatively make the 8 arguments an array if 8 arguments feel too many. But I think 8 args is still fine and they provide more type-safety than an array.)   \r\n3. We could make the `hash` module offer specific initialization functions, e.g., `secp256k1_sha256_initialize_bip340_nonce`. This works but it feels a little bit wrong to have the bip340-specific code in the `hash` module.\r\n\r\nI prefer solution 2. @Coding-Enthusiast, would be by any chance be interested in working on this?\r\n",
       "user": {
         "login": "real-or-random",
@@ -238,7 +238,7 @@
       "commit_url": null,
       "created_at": "2022-12-19T10:28:51Z",
       "updated_at": "2022-12-19T10:28:51Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "\r\n> and also doesn't need hard-coded midstate values.\r\n\r\nWe want hard-coded midstates for performance.",
       "user": {
         "login": "real-or-random",
@@ -346,7 +346,7 @@
       "commit_url": null,
       "created_at": "2022-12-19T14:24:01Z",
       "updated_at": "2022-12-19T14:24:01Z",
-      "author_association": "MEMBER",
+      "author_association": "CONTRIBUTOR",
       "body": "@Coding-Enthusiast That's not easily doable in C, as it has no runtime-computed constants. We'd need to store it in the context or so, and compute it on initialization. I think that's overkill for what we're doing here.",
       "user": {
         "login": "sipa",
