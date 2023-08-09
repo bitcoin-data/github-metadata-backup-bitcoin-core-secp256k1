@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-08-07T06:59:02Z",
-    "updated_at": "2023-08-09T11:46:09Z",
+    "updated_at": "2023-08-09T16:50:05Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merge_commit_sha": "3038537dfc838e84b481eccb0a4e3c574c7742ea",
@@ -157,7 +157,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 10944,
+        "size": 10957,
         "default_branch": "master",
         "open_issues_count": 2,
         "is_template": false,
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-09T14:59:12Z",
+        "pushed_at": "2023-08-09T15:48:57Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2023-05-05T16:09:11Z",
         "license": {
@@ -288,7 +288,7 @@
         "forks_count": 966,
         "stargazers_count": 1805,
         "watchers_count": 1805,
-        "size": 10384,
+        "size": 10388,
         "default_branch": "master",
         "open_issues_count": 147,
         "is_template": false,
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 2,
     "commits": 3,
-    "review_comments": 11,
+    "review_comments": 12,
     "comments": 26
   },
   "events": [
@@ -379,7 +379,7 @@
           "state": "open",
           "state_reason": null,
           "title": "ci: Future of CI after Cirrus pricing change ",
-          "body": "Corresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nI think the natural way forward for us is:\r\n - [ ] Move native Windows tasks to GitHub Actions (solved by #1389)\r\n - [ ] Move native macOS tasks to GitHub Actions \r\n - [ ] Move Linux tasks to the Bitcoin Core persistent workers\r\n - [ ] (Optional, in the long run:) Move Linux tasks to GitHub actions\r\n\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
+          "body": "Corresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [ ] Move native macOS tasks to GitHub Actions (#1394)\r\n - [ ] Move Linux tasks to the Bitcoin Core persistent workers\r\n - [ ] (Optional, in the long run:) Move Linux tasks to GitHub actions (#1396)\r\n\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
           "user": {
             "login": "real-or-random",
             "id": 1071625,
@@ -416,7 +416,7 @@
           "locked": false,
           "comments": 9,
           "created_at": "2023-08-04T14:03:09Z",
-          "updated_at": "2023-08-08T17:02:11Z"
+          "updated_at": "2023-08-09T16:06:52Z"
         },
         "type": "issue"
       }
@@ -3001,6 +3001,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1287673703"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 16,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1288893620",
+      "pull_request_review_id": 1570121513,
+      "id": 1288893620,
+      "node_id": "PRRC_kwDOAP4Jqs5M0vS0",
+      "diff_hunk": "@@ -0,0 +1,26 @@\n+name: CI\n+on: [pull_request, push]\n+\n+jobs:\n+  modified_files:\n+    runs-on: ubuntu-latest\n+    outputs:\n+      all: ${{ steps.changes.outputs.modified_files}}\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Get modified files\n+        id: changes\n+        env:\n+          COMMIT_BEFORE: ${{ github.event_name != 'pull_request' && github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before || github.event.repository.default_branch) }}",
+      "path": ".github/workflows/ci.yml",
+      "position": null,
+      "original_position": 16,
+      "commit_id": "c066aff6cfedb3ad98cc8f76ad87da7a06a17011",
+      "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
+      "in_reply_to_id": 1286161786,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "I see. But would you need to mutually exclusive exec paths? The way I imagine it is just to skip the rebuilding of the image when it doesn't need to be rebuilt. But maybe I'm overlooking something.",
+      "created_at": "2023-08-09T16:50:04Z",
+      "updated_at": "2023-08-09T16:50:04Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#discussion_r1288893620",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1288893620"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396"
