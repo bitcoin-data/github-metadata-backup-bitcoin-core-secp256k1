@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-08-10T08:04:22Z",
-    "updated_at": "2023-08-11T10:54:43Z",
+    "updated_at": "2023-08-11T11:10:32Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "c866e41841fb7dd6b988f18393baffbc332ddfc1",
@@ -157,7 +157,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 11035,
+        "size": 11043,
         "default_branch": "master",
         "open_issues_count": 2,
         "is_template": false,
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-11T10:45:00Z",
+        "pushed_at": "2023-08-11T11:59:49Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2023-05-05T16:09:11Z",
         "license": {
@@ -332,7 +332,7 @@
     "deletions": 83,
     "changed_files": 5,
     "commits": 2,
-    "review_comments": 6,
+    "review_comments": 7,
     "comments": 12
   },
   "events": [
@@ -1763,6 +1763,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1291199620"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1398"
+        }
+      },
+      "start_line": 59,
+      "original_start_line": 59,
+      "start_side": "RIGHT",
+      "line": 75,
+      "original_line": 75,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1291213762",
+      "pull_request_review_id": 1573465180,
+      "id": 1291213762,
+      "node_id": "PRRC_kwDOAP4Jqs5M9lvC",
+      "diff_hunk": "@@ -8,9 +8,153 @@ on:\n       - '**'\n \n env:\n+  ### compiler options\n+  HOST:\n+  WRAPPER_CMD:\n+  # Specific warnings can be disabled with -Wno-error=foo.\n+  # -pedantic-errors is not equivalent to -Werror=pedantic and\n+  # thus not implied by -Werror according to the GCC manual.\n+  WERROR_CFLAGS: '-Werror -pedantic-errors'\n+  MAKEFLAGS: '-j4'\n+  BUILD: 'check'\n+  ### secp256k1 config\n+  ECMULTWINDOW: 'auto'\n+  ECMULTGENPRECISION: 'auto'\n+  ASM: 'no'\n+  WIDEMUL: 'auto'\n+  WITH_VALGRIND: 'yes'\n+  EXTRAFLAGS:\n+  ### secp256k1 modules\n+  EXPERIMENTAL: 'no'\n+  ECDH: 'no'\n+  RECOVERY: 'no'\n+  SCHNORRSIG: 'no'\n+  ELLSWIFT: 'no'\n+  ### test options\n+  SECP256K1_TEST_ITERS:\n+  BENCH: 'yes'\n   SECP256K1_BENCH_ITERS: 2\n+  CTIMETESTS: 'yes'\n+  # Compile and run the examples.\n+  EXAMPLES: 'yes'\n \n jobs:\n+  docker_wine_cache:\n+    name: \"Build MinGW/MSVC Debian image\"\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Set up Docker Buildx\n+        uses: docker/setup-buildx-action@v2\n+\n+      - name: Build container\n+        uses: docker/build-push-action@v4\n+        with:\n+          file: ./ci/linux-debian-wine.Dockerfile\n+          tags: ci-image\n+          push: false\n+          load: false\n+          cache-from: type=gha\n+          cache-to: type=gha,mode=min\n+\n+  mingw_env_vars:\n+    name: \"Prepare environment variables\"\n+    runs-on: ubuntu-latest\n+    env:\n+      WRAPPER_CMD: 'wine'\n+      WITH_VALGRIND: 'no'\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      CTIMETESTS: 'no'\n+    outputs:\n+      json: ${{ steps.result.outputs.json }}\n+    steps:\n+      - name: Put environment variables into a standard job output\n+        id: result\n+        run: |\n+          echo \"json=$(echo '${{ toJSON(env) }}' | jq -c '.')\" >> \"$GITHUB_OUTPUT\"",
+      "path": ".github/workflows/ci.yml",
+      "position": 68,
+      "original_position": 68,
+      "commit_id": "dba39d0ac83b507a5c19d4369259165a35af4105",
+      "original_commit_id": "dba39d0ac83b507a5c19d4369259165a35af4105",
+      "in_reply_to_id": 1291182213,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> But what about setting `common_env_vars` only inside `mingw_debian`?\r\n\r\nThis works for  `common_env_vars`, but we still need a way to pass global environment variables to the called workflow or duplicate them inside `mingw_debian`.",
+      "created_at": "2023-08-11T11:10:31Z",
+      "updated_at": "2023-08-11T11:10:31Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1398#discussion_r1291213762",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1291213762"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1398"
