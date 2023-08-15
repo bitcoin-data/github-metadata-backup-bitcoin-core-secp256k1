@@ -13,7 +13,7 @@
     "state": "open",
     "state_reason": null,
     "title": "ci: Future of CI after Cirrus pricing change ",
-    "body": "Corresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [ ] Move native macOS tasks to GitHub Actions (#1394)\r\n - [ ] Move Linux tasks to the Bitcoin Core persistent workers\r\n - [ ] (Optional, in the long run:) Move Linux tasks to GitHub actions (#1396, #1398)\r\n\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
+    "body": "Corresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [x] Move SageMath task to GitHub Actions (#1399)\r\n - [ ] Move native macOS tasks to GitHub Actions, this will convert them to x86_64 unfortunately (#1394)\r\n - (optional:) Bring back some ARM testing  \r\n   - [ ] Add some ARM64 Linux tasks to Cirrus self-hosted runners (https://github.com/bitcoin-core/secp256k1/pull/1394#issuecomment-1671784065 and #1163)\r\n   - [ ] (or alternatively:) Add an ARM64 ctimetest on QEMU\r\n - Move Linux tasks\r\n   - [ ] ... to the Bitcoin Core persistent workers\r\n   - [ ] (or alternatively:)  to GitHub actions (#1396, #1398)\r\n\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
     "user": {
       "login": "real-or-random",
       "id": 1071625,
@@ -48,9 +48,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 10,
+    "comments": 13,
     "created_at": "2023-08-04T14:03:09Z",
-    "updated_at": "2023-08-14T14:15:19Z"
+    "updated_at": "2023-08-15T17:28:58Z"
   },
   "events": [
     {
@@ -675,7 +675,7 @@
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
-          "comments": 28,
+          "comments": 30,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396",
@@ -683,7 +683,7 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1396.patch"
           },
           "created_at": "2023-08-07T06:59:02Z",
-          "updated_at": "2023-08-12T11:08:57Z"
+          "updated_at": "2023-08-15T17:39:23Z"
         },
         "type": "issue"
       }
@@ -1019,7 +1019,7 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1398.patch"
           },
           "created_at": "2023-08-10T08:04:22Z",
-          "updated_at": "2023-08-14T13:59:03Z"
+          "updated_at": "2023-08-15T17:25:36Z"
         },
         "type": "issue"
       }
@@ -1064,7 +1064,7 @@
           "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1399/events",
           "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1399",
           "number": 1399,
-          "state": "open",
+          "state": "closed",
           "state_reason": null,
           "title": "ci, gha: Run \"SageMath prover\" job on GitHub Actions",
           "body": "Solves one item in https://github.com/bitcoin-core/secp256k1/issues/1392 partially.\r\n\r\nRequested in https://github.com/bitcoin-core/secp256k1/pull/1398#issuecomment-1677074743.",
@@ -1088,7 +1088,17 @@
             "type": "User",
             "site_admin": false
           },
-          "labels": [],
+          "labels": [
+            {
+              "id": 4975349089,
+              "node_id": "LA_kwDOAP4Jqs8AAAABKI3NYQ",
+              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/ci",
+              "name": "ci",
+              "description": "",
+              "color": "006B75",
+              "default": false
+            }
+          ],
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
@@ -1099,8 +1109,9 @@
             "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1399.diff",
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1399.patch"
           },
+          "closed_at": "2023-08-15T11:54:46Z",
           "created_at": "2023-08-14T13:30:33Z",
-          "updated_at": "2023-08-14T13:39:27Z"
+          "updated_at": "2023-08-15T17:05:16Z"
         },
         "type": "issue"
       }
@@ -1157,6 +1168,226 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1677401316",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
+    },
+    {
+      "event": "commented",
+      "id": 1679306773,
+      "node_id": "IC_kwDOAP4Jqs5kGDAV",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1679306773",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-15T17:08:32Z",
+      "updated_at": "2023-08-15T17:26:14Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "@hebasto Hm, we currently don't have native Linux arm64 jobs, so we can't \"move\" them over. We could add some (see #1163 and https://github.com/bitcoin-core/secp256k1/pull/1394#issuecomment-1671784065).\r\n\r\nI tend to think that is also acceptable to wait for https://github.com/github/roadmap/issues/528, it's currently planned for the end of the year. Then we could move macOS back to ARM. Until that happens, perhaps we can add a QEMU jobs that run the ctimetests on MSan (clang-only) at least. Note to self: We need `apt-get install libclang-rt-dev:arm64` and this works with\r\n```\r\nHOST=\"aarch64-linux-gnu\" CC=\"clang --target=aarch64-linux-gnu\" WRAPPER_CMD=\"qemu-aarch64\"\r\n```\r\n(The real tests fail with msan enabled on qemu. I think this is because the stack will explode.)\r\n\r\nI updated the list above with optional items.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679306773",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
+    },
+    {
+      "event": "mentioned",
+      "id": 10099416064,
+      "node_id": "MEE_lADOAP4Jqs5te3ctzwAAAAJZ-NwA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10099416064",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-15T17:08:32Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 10099416075,
+      "node_id": "SE_lADOAP4Jqs5te3ctzwAAAAJZ-NwL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10099416075",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-15T17:08:32Z"
+    },
+    {
+      "event": "commented",
+      "id": 1679314570,
+      "node_id": "IC_kwDOAP4Jqs5kGE6K",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1679314570",
+      "actor": {
+        "login": "MarcoFalke",
+        "id": 6399679,
+        "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/MarcoFalke",
+        "html_url": "https://github.com/MarcoFalke",
+        "followers_url": "https://api.github.com/users/MarcoFalke/followers",
+        "following_url": "https://api.github.com/users/MarcoFalke/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/MarcoFalke/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/MarcoFalke/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/MarcoFalke/subscriptions",
+        "organizations_url": "https://api.github.com/users/MarcoFalke/orgs",
+        "repos_url": "https://api.github.com/users/MarcoFalke/repos",
+        "events_url": "https://api.github.com/users/MarcoFalke/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/MarcoFalke/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-15T17:14:57Z",
+      "updated_at": "2023-08-15T17:14:57Z",
+      "author_association": "NONE",
+      "body": "qemu-arm is a bit slower than native aarch64. You can use the already existing persistent worker, if you want:\r\n\r\nhttps://github.com/bitcoin/bitcoin/blob/cd43a8444ba44f86ddbb313a03a2782482beda89/.cirrus.yml#L210-L212\r\n\r\n(Currently not set up for this repo, but should be some time this week)",
+      "user": {
+        "login": "MarcoFalke",
+        "id": 6399679,
+        "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/MarcoFalke",
+        "html_url": "https://github.com/MarcoFalke",
+        "followers_url": "https://api.github.com/users/MarcoFalke/followers",
+        "following_url": "https://api.github.com/users/MarcoFalke/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/MarcoFalke/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/MarcoFalke/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/MarcoFalke/subscriptions",
+        "organizations_url": "https://api.github.com/users/MarcoFalke/orgs",
+        "repos_url": "https://api.github.com/users/MarcoFalke/repos",
+        "events_url": "https://api.github.com/users/MarcoFalke/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/MarcoFalke/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679314570",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
+    },
+    {
+      "event": "commented",
+      "id": 1679332070,
+      "node_id": "IC_kwDOAP4Jqs5kGJLm",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1679332070",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-15T17:28:11Z",
+      "updated_at": "2023-08-15T17:28:11Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Sure, that's an easy option. I just think we're currently playing around with the idea to move everything to GHA, if it's feasible for this repo.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679332070",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
     }
   ]
