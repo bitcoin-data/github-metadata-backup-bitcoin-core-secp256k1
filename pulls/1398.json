@@ -51,14 +51,14 @@
       }
     ],
     "created_at": "2023-08-10T08:04:22Z",
-    "updated_at": "2023-08-14T13:59:03Z",
-    "mergeable": true,
-    "mergeable_state": "clean",
+    "updated_at": "2023-08-15T13:37:54Z",
+    "mergeable": false,
+    "mergeable_state": "dirty",
     "merge_commit_sha": "9b92dc97761240a15e39be9f86f7a7bf549ca07e",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
-    "rebaseable": true,
+    "rebaseable": false,
     "head": {
       "label": "hebasto:230810-gha-win",
       "ref": "230810-gha-win",
@@ -285,12 +285,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 969,
-        "stargazers_count": 1809,
-        "watchers_count": 1809,
-        "size": 10388,
+        "forks_count": 971,
+        "stargazers_count": 1811,
+        "watchers_count": 1811,
+        "size": 10391,
         "default_branch": "master",
-        "open_issues_count": 149,
+        "open_issues_count": 148,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,9 +301,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-14T13:30:34Z",
+        "pushed_at": "2023-08-15T12:11:24Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-14T10:17:01Z",
+        "updated_at": "2023-08-15T10:07:00Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 93,
     "changed_files": 6,
     "commits": 3,
-    "review_comments": 27,
+    "review_comments": 28,
     "comments": 34
   },
   "events": [
@@ -414,7 +414,7 @@
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
-          "comments": 28,
+          "comments": 29,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396",
@@ -422,7 +422,7 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1396.patch"
           },
           "created_at": "2023-08-07T06:59:02Z",
-          "updated_at": "2023-08-12T11:08:57Z"
+          "updated_at": "2023-08-15T13:44:00Z"
         },
         "type": "issue"
       }
@@ -2333,9 +2333,9 @@
           "assignees": [],
           "author_association": "CONTRIBUTOR",
           "locked": false,
-          "comments": 9,
+          "comments": 10,
           "created_at": "2023-08-04T14:03:09Z",
-          "updated_at": "2023-08-11T15:49:06Z"
+          "updated_at": "2023-08-14T14:15:19Z"
         },
         "type": "issue"
       }
@@ -3572,9 +3572,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-08-14T10:29:13Z",
-      "updated_at": "2023-08-14T10:29:13Z",
+      "updated_at": "2023-08-15T13:19:02Z",
       "author_association": "CONTRIBUTOR",
-      "body": "> This works because this repo doesn't use ccache and thus, the docker images are the only thing in the cache and won't exceed the 10GB limit?\r\n\r\nIndeed, but we already ran into problems here a few days ago with the 10GB limit.\r\n\r\nThe docker images in the cache are quite large (see https://github.com/bitcoin-core/secp256k1/actions/caches), so we can fit at most builds in the limit, e.g., one PR + master. When we have multiple PRs updating the Dockerfiles, we see cache misses. I don't think that's a big issue. We usually don't have multiple PRs updating CI. In the worst case, the images needs to be rebuilt more often than necessary, which just adds <30 min of delay to the CI. Moreover, we can reduce the size of the images a bit. Just these the following two should get us multiple GBs back:\r\n - [ ] removing GCC build files after the build (currently testing this locally, I'll have a patch soon)\r\n - [ ] simply using the official https://hub.docker.com/r/sagemath/sagemath for the sage job instead of installing sagemath in our Linux image\r\n\r\nHowever, a conceptual problem is that we rely on the images not being evicted between the \"build docker image\" job and the actual CI jobs. That contradicts the philosophy of a cache a bit. When we have multiple concurrent CI runs going on, this may fail:\r\n - PR1 stores docker image A in cache\r\n - PR2 stores docker image B in cache, will evict image A\r\n - PR1 tries to run the CI script, but A has been evicted: So A is rebuilt as part of every single job. This is slow, may fail due to insufficient disk space, and may evict B again \r\n - ...\r\n\r\nThere's a possible third way to move the docker image from the build job to the actual CI job: Use artifacts: https://github.com/actions/upload-artifact https://github.com/actions/download-artifact This seems to be the proper way to move data between jobs. Artifacts won't be evicted automatically, but they'll be cleaned up after 90 days, so this is probably the sweet spot between GHCR and the GHA cache. We'd still use the GHA cache for caching the docker build, but just the way we transfer the image from one job to another (in the same CI run) would use artifacts.\r\n\r\nI'm not entirely sure how to proceed. I think I'd like to see at least one of the two aforementioned issues addressed. If we can reduce the size of the images for now, that will probably good enough. Even if we then have issues with concurrent CI runs, that's not the end of the world. (One can just re-run manually...) But it's certainly not convenient, and it's a bit hacky, so having a reliable way to move images from one job to another (e.g., artifacts) will be better. ",
+      "body": "> This works because this repo doesn't use ccache and thus, the docker images are the only thing in the cache and won't exceed the 10GB limit?\r\n\r\nIndeed, but we already ran into problems here a few days ago with the 10GB limit.\r\n\r\nThe docker images in the cache are quite large (see https://github.com/bitcoin-core/secp256k1/actions/caches), so we can fit at most builds in the limit, e.g., one PR + master. When we have multiple PRs updating the Dockerfiles, we see cache misses. I don't think that's a big issue. We usually don't have multiple PRs updating CI. In the worst case, the images needs to be rebuilt more often than necessary, which just adds <30 min of delay to the CI. Moreover, we can reduce the size of the images a bit. Just these the following two should get us multiple GBs back:\r\n - [ ] removing GCC build files after the build (currently testing this locally, I'll have a patch soon)\r\n - [x] simply using the official https://hub.docker.com/r/sagemath/sagemath for the sage job instead of installing sagemath in our Linux image\r\n\r\nHowever, a conceptual problem is that we rely on the images not being evicted between the \"build docker image\" job and the actual CI jobs. That contradicts the philosophy of a cache a bit. When we have multiple concurrent CI runs going on, this may fail:\r\n - PR1 stores docker image A in cache\r\n - PR2 stores docker image B in cache, will evict image A\r\n - PR1 tries to run the CI script, but A has been evicted: So A is rebuilt as part of every single job. This is slow, may fail due to insufficient disk space, and may evict B again \r\n - ...\r\n\r\nThere's a possible third way to move the docker image from the build job to the actual CI job: Use artifacts: https://github.com/actions/upload-artifact https://github.com/actions/download-artifact This seems to be the proper way to move data between jobs. Artifacts won't be evicted automatically, but they'll be cleaned up after 90 days, so this is probably the sweet spot between GHCR and the GHA cache. We'd still use the GHA cache for caching the docker build, but just the way we transfer the image from one job to another (in the same CI run) would use artifacts.\r\n\r\nI'm not entirely sure how to proceed. I think I'd like to see at least one of the two aforementioned issues addressed. If we can reduce the size of the images for now, that will probably good enough. Even if we then have issues with concurrent CI runs, that's not the end of the world. (One can just re-run manually...) But it's certainly not convenient, and it's a bit hacky, so having a reliable way to move images from one job to another (e.g., artifacts) will be better. ",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -3626,9 +3626,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-08-14T10:48:31Z",
-      "updated_at": "2023-08-14T10:48:31Z",
+      "updated_at": "2023-08-15T13:19:05Z",
       "author_association": "CONTRIBUTOR",
-      "body": "Just the following two should get us multiple GBs back:\r\n> \r\n>    * [ ]  removing GCC build files after the build (currently testing this locally, I'll have a patch soon)\r\n>\r\n>    * [ ]  simply using the official [hub.docker.com/r/sagemath/sagemath](https://hub.docker.com/r/sagemath/sagemath) for the sage job instead of installing sagemath in our Linux image\r\n\r\n[This commit](https://github.com/real-or-random/secp256k1/commit/20b208df0ab22a2afd80f3cf172f100365766e7b) reduces the *uncompressed* size from 9.37GB to 3.55GB. The GHA cache uses compression, but this should still make a large difference.  \r\n\r\nCirrus CI will fail now due to Sagemath being unavailable. @hebasto If you want to keep the scope of this PR small, perhaps we should move the Sagemath job to GHA in a separate PR first.\r\n",
+      "body": "Just the following two should get us multiple GBs back:\r\n> \r\n>    * [ ]  removing GCC build files after the build (currently testing this locally, I'll have a patch soon)\r\n>\r\n>    * [x]  simply using the official [hub.docker.com/r/sagemath/sagemath](https://hub.docker.com/r/sagemath/sagemath) for the sage job instead of installing sagemath in our Linux image\r\n\r\n[This commit](https://github.com/real-or-random/secp256k1/commit/20b208df0ab22a2afd80f3cf172f100365766e7b) reduces the *uncompressed* size from 9.37GB to 3.55GB. The GHA cache uses compression, but this should still make a large difference.  \r\n\r\nCirrus CI will fail now due to Sagemath being unavailable. @hebasto If you want to keep the scope of this PR small, perhaps we should move the Sagemath job to GHA in a separate PR first.\r\n",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -3862,7 +3862,7 @@
           "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1399/events",
           "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1399",
           "number": 1399,
-          "state": "open",
+          "state": "closed",
           "state_reason": null,
           "title": "ci, gha: Run \"SageMath prover\" job on GitHub Actions",
           "body": "Solves one item in https://github.com/bitcoin-core/secp256k1/issues/1392 partially.\r\n\r\nRequested in https://github.com/bitcoin-core/secp256k1/pull/1398#issuecomment-1677074743.",
@@ -3886,7 +3886,17 @@
             "type": "User",
             "site_admin": false
           },
-          "labels": [],
+          "labels": [
+            {
+              "id": 4975349089,
+              "node_id": "LA_kwDOAP4Jqs8AAAABKI3NYQ",
+              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/ci",
+              "name": "ci",
+              "description": "",
+              "color": "006B75",
+              "default": false
+            }
+          ],
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
@@ -3897,8 +3907,9 @@
             "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1399.diff",
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1399.patch"
           },
+          "closed_at": "2023-08-15T11:54:46Z",
           "created_at": "2023-08-14T13:30:33Z",
-          "updated_at": "2023-08-14T13:39:27Z"
+          "updated_at": "2023-08-15T13:23:04Z"
         },
         "type": "issue"
       }
@@ -3931,9 +3942,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-08-14T13:31:35Z",
-      "updated_at": "2023-08-14T13:31:35Z",
+      "updated_at": "2023-08-15T13:19:15Z",
       "author_association": "MEMBER",
-      "body": ">    * [ ]  simply using the official [hub.docker.com/r/sagemath/sagemath](https://hub.docker.com/r/sagemath/sagemath) for the sage job instead of installing sagemath in our Linux image\r\n\r\nDone in https://github.com/bitcoin-core/secp256k1/pull/1399.",
+      "body": ">    * [x]  simply using the official [hub.docker.com/r/sagemath/sagemath](https://hub.docker.com/r/sagemath/sagemath) for the sage job instead of installing sagemath in our Linux image\r\n\r\nDone in https://github.com/bitcoin-core/secp256k1/pull/1399.",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -4010,6 +4021,149 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1398#issuecomment-1677364954",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1398"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "MarcoFalke",
+        "id": 6399679,
+        "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/MarcoFalke",
+        "html_url": "https://github.com/MarcoFalke",
+        "followers_url": "https://api.github.com/users/MarcoFalke/followers",
+        "following_url": "https://api.github.com/users/MarcoFalke/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/MarcoFalke/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/MarcoFalke/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/MarcoFalke/subscriptions",
+        "organizations_url": "https://api.github.com/users/MarcoFalke/orgs",
+        "repos_url": "https://api.github.com/users/MarcoFalke/repos",
+        "events_url": "https://api.github.com/users/MarcoFalke/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/MarcoFalke/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-14T14:15:23Z",
+      "updated_at": "2023-08-14T14:15:23Z",
+      "source": {
+        "issue": {
+          "id": 1848728439,
+          "node_id": "PR_kwDOABII585X06Sv",
+          "url": "https://api.github.com/repos/bitcoin/bitcoin/issues/28265",
+          "repository_url": "https://api.github.com/repos/bitcoin/bitcoin",
+          "labels_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/28265/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/28265/comments",
+          "events_url": "https://api.github.com/repos/bitcoin/bitcoin/issues/28265/events",
+          "html_url": "https://github.com/bitcoin/bitcoin/pull/28265",
+          "number": 28265,
+          "state": "open",
+          "state_reason": null,
+          "title": "ci: Run \"macOS 11.0 [gui, no tests] [jammy]\" job on GitHub Actions",
+          "body": "In response to upcoming [limiting free usage of Cirrus CI](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/), suggesting to move the \"macOS 11.0 [gui, no tests] [jammy]\" task from Cirrus CI to [GitHub Actions](https://docs.github.com/actions) (GHA).\r\n\r\n(See slightly related discussion in https://github.com/bitcoin/bitcoin/issues/28098)\r\n\r\nBuilds in my personal repo:\r\n- unpopulated caches: https://github.com/hebasto/bitcoin/actions/runs/5849385308/attempts/1\r\n![image](https://github.com/bitcoin/bitcoin/assets/32963518/d817b2ff-0491-4251-a58c-96f3e5fc99df)\r\n\r\n- populated caches: https://github.com/hebasto/bitcoin/actions/runs/5849385308/attempts/2\r\n![image](https://github.com/bitcoin/bitcoin/assets/32963518/59c92adc-1336-4fe8-8c5f-9da267ac696a)\r\n\r\nA list of the used actions for the \"Actions permissions\" repository settings:\r\n```\r\nactions/cache@*,\r\nactions/checkout@*,\r\ndocker/build-push-action@*,\r\ndocker/setup-buildx-action@*,\r\n```\r\n",
+          "user": {
+            "login": "hebasto",
+            "id": 32963518,
+            "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/hebasto",
+            "html_url": "https://github.com/hebasto",
+            "followers_url": "https://api.github.com/users/hebasto/followers",
+            "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+            "organizations_url": "https://api.github.com/users/hebasto/orgs",
+            "repos_url": "https://api.github.com/users/hebasto/repos",
+            "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/hebasto/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 234879,
+              "node_id": "MDU6TGFiZWwyMzQ4Nzk=",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/macOS",
+              "name": "macOS",
+              "description": "",
+              "color": "660000",
+              "default": false
+            },
+            {
+              "id": 62963516,
+              "node_id": "MDU6TGFiZWw2Mjk2MzUxNg==",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Tests",
+              "name": "Tests",
+              "color": "d4c5f9",
+              "default": false
+            },
+            {
+              "id": 955867938,
+              "node_id": "MDU6TGFiZWw5NTU4Njc5Mzg=",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Needs%20rebase",
+              "name": "Needs rebase",
+              "description": "",
+              "color": "cccccc",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "MEMBER",
+          "locked": false,
+          "comments": 4,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin/bitcoin/pulls/28265",
+            "html_url": "https://github.com/bitcoin/bitcoin/pull/28265",
+            "diff_url": "https://github.com/bitcoin/bitcoin/pull/28265.diff",
+            "patch_url": "https://github.com/bitcoin/bitcoin/pull/28265.patch"
+          },
+          "created_at": "2023-08-13T20:27:04Z",
+          "updated_at": "2023-08-15T12:03:06Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "reviewed",
+      "id": 1578578962,
+      "node_id": "PRR_kwDOAP4Jqs5eFzQS",
+      "url": null,
+      "actor": null,
+      "commit_id": "9ade5743f19f91a3da7ef2b1fe38be0bc6914362",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1398#pullrequestreview-1578578962",
+      "submitted_at": "2023-08-15T13:37:54Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1398"
     }
   ],
   "comments": [
@@ -5415,6 +5569,58 @@
       "start_side": null,
       "line": 9,
       "original_line": 9,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1294608154",
+      "pull_request_review_id": 1578578962,
+      "id": 1294608154,
+      "node_id": "PRRC_kwDOAP4Jqs5NKica",
+      "diff_hunk": "@@ -8,9 +8,209 @@ on:\n       - '**'\n \n env:\n+  ### compiler options\n+  HOST:\n+  WRAPPER_CMD:\n+  # Specific warnings can be disabled with -Wno-error=foo.\n+  # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.\n+  WERROR_CFLAGS: '-Werror -pedantic-errors'\n+  MAKEFLAGS: '-j4'\n+  BUILD: 'check'\n+  ### secp256k1 config\n+  ECMULTWINDOW: 'auto'\n+  ECMULTGENPRECISION: 'auto'\n+  ASM: 'no'\n+  WIDEMUL: 'auto'\n+  WITH_VALGRIND: 'yes'\n+  EXTRAFLAGS:\n+  ### secp256k1 modules\n+  EXPERIMENTAL: 'no'\n+  ECDH: 'no'\n+  RECOVERY: 'no'\n+  SCHNORRSIG: 'no'\n+  ELLSWIFT: 'no'\n+  ### test options\n+  SECP256K1_TEST_ITERS:\n+  BENCH: 'yes'\n   SECP256K1_BENCH_ITERS: 2\n+  CTIMETESTS: 'yes'\n+  # Compile and run the examples.\n+  EXAMPLES: 'yes'\n \n jobs:\n+  docker_wine_cache:\n+    name: \"Build MinGW/MSVC Debian image\"\n+    runs-on: ubuntu-latest\n+    steps:\n+      - name: Set up Docker Buildx\n+        uses: docker/setup-buildx-action@v2\n+        with:\n+          # See: https://github.com/moby/buildkit/issues/3969.\n+          driver-opts: |\n+            network=host\n+\n+      - name: Build container\n+        uses: docker/build-push-action@v4\n+        with:\n+          file: ./ci/linux-debian-wine.Dockerfile\n+          tags: linux-debian-wine-image\n+          push: false\n+          load: false\n+          cache-from: type=gha\n+          cache-to: type=gha,mode=min\n+\n+  mingw_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_wine_cache\n+\n+    env:\n+      WRAPPER_CMD: 'wine'\n+      WITH_VALGRIND: 'no'\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'x86_64 (mingw32-w64): Windows (Debian stable, Wine)'\n+            env_vars:\n+              HOST: 'x86_64-w64-mingw32'\n+          - job_name: 'i686 (mingw32-w64): Windows (Debian stable, Wine)'\n+            env_vars:\n+              HOST: 'i686-w64-mingw32'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: CI script\n+        env: ${{ matrix.configuration.env_vars }}\n+        uses: ./.github/actions/run-in-docker-action\n+        with:\n+          dockerfile: ./ci/linux-debian-wine.Dockerfile\n+          tag: linux-debian-wine-image\n+          command: >\n+            git config --global --add safe.directory ${{ github.workspace }} &&\n+            ./ci/ci.sh\n+\n+      - run: cat tests.log || true\n+        if: ${{ always() }}\n+      - run: cat noverify_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat exhaustive_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat ctime_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat bench.log || true\n+        if: ${{ always() }}\n+      - run: cat config.log || true\n+        if: ${{ always() }}\n+      - run: cat test_env.log || true\n+        if: ${{ always() }}\n+      - name: CI env\n+        run: env\n+        if: ${{ always() }}\n+\n+  msvc_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_wine_cache\n+\n+    env:\n+      WRAPPER_CMD: 'wine'\n+      WERROR_CFLAGS: '-WX'\n+      WITH_VALGRIND: 'no'\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      EXPERIMENTAL: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+      # Use a MinGW-w64 host to tell ./configure we're building for Windows.\n+      # This will detect some MinGW-w64 tools but then make will need only\n+      # the MSVC tools CC, AR and NM as specified below.\n+      HOST: 'x86_64-w64-mingw32'\n+      CC: '/opt/msvc/bin/x64/cl'\n+      AR: '/opt/msvc/bin/x64/lib'\n+      NM: '/opt/msvc/bin/x64/dumpbin -symbols -headers'\n+      # Set non-essential options that affect the CLI messages here.\n+      # (They depend on the user's taste, so we don't want to set them automatically in configure.ac.)\n+      CFLAGS: '-nologo -diagnostics:caret'\n+      LDFLAGS: '-Xlinker -Xlinker -Xlinker -nologo'",
+      "path": ".github/workflows/ci.yml",
+      "position": 136,
+      "original_position": 136,
+      "commit_id": "9ade5743f19f91a3da7ef2b1fe38be0bc6914362",
+      "original_commit_id": "9ade5743f19f91a3da7ef2b1fe38be0bc6914362",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Using MSVC on Linux is still pretty hacky. The reason why I introduced this was simply that we didn't have Windows runners. We could consider moving it to native Windows (later, in a separate PR). \r\n\r\nAdvantages:\r\n -  That would get us rid of the entire business of \"installing MSVC\" and it would make this Docker image much smaller. \r\n\r\nDisadvantages:\r\n -  We won't have Dockerfile anymore that people can use locally, e.g., when working on problems that appear only with MSVC.\r\n - We'll probably need some separate CI script for Windows / CMake. Currently, we simply reuse the Linux / autotools script, which is neat.",
+      "created_at": "2023-08-15T13:37:54Z",
+      "updated_at": "2023-08-15T13:37:54Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1398#discussion_r1294608154",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1294608154"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1398"
+        }
+      },
+      "start_line": 133,
+      "original_start_line": 133,
+      "start_side": "RIGHT",
+      "line": 143,
+      "original_line": 143,
       "side": "RIGHT"
     }
   ]
