@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-04-11T19:41:40Z",
-    "updated_at": "2023-08-17T13:28:56Z",
+    "updated_at": "2023-08-17T14:10:12Z",
     "closed_at": "2023-08-16T17:04:44Z",
     "mergeable_state": "unknown",
     "merged_at": "2023-08-16T17:04:44Z",
@@ -290,7 +290,7 @@
         "watchers_count": 1813,
         "size": 10416,
         "default_branch": "master",
-        "open_issues_count": 147,
+        "open_issues_count": 148,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-17T13:37:18Z",
+        "pushed_at": "2023-08-17T14:05:14Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2023-08-16T16:37:56Z",
         "license": {
@@ -333,7 +333,7 @@
     "changed_files": 1,
     "commits": 1,
     "review_comments": 2,
-    "comments": 10
+    "comments": 11
   },
   "events": [
     {
@@ -1554,6 +1554,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1274#issuecomment-1682289471",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1274"
+    },
+    {
+      "event": "commented",
+      "id": 1682358254,
+      "node_id": "IC_kwDOAP4Jqs5kRr_u",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1682358254",
+      "actor": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-17T14:10:12Z",
+      "updated_at": "2023-08-17T14:10:12Z",
+      "author_association": "MEMBER",
+      "body": "It's hard to know, given the PR doesn't actually outline what the warnings where, but I'm pretty sure the issue is that the valgrind/memcheck headers have identifiers starting with `__`, and any warnings are correct, regardless of anything (Apple) Clang, or macOS, or system include related.\r\n\r\ni.e compiling this code:\r\n```c\r\n#include <valgrind.h>\r\n#include <memcheck.h>\r\n\r\nint main() { return 0;}\r\n```\r\nwith clang on ubuntu: `clang test.c -I/usr/include/valgrind -Wreserved-macro-identifier -Wreserved-identifier`, outputs warnings as expected:\r\n```bash\r\nIn file included from test.c:1:\r\n/usr/include/valgrind/valgrind.h:74:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __VALGRIND_H\r\n        ^\r\n/usr/include/valgrind/valgrind.h:91:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __VALGRIND_MAJOR__    3\r\n        ^\r\n/usr/include/valgrind/valgrind.h:92:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __VALGRIND_MINOR__    19\r\n        ^\r\n/usr/include/valgrind/valgrind.h:416:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __SPECIAL_INSTRUCTION_PREAMBLE                            \\\r\n        ^\r\n/usr/include/valgrind/valgrind.h:1666:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __CALLER_SAVED_REGS /*\"rax\",*/ \"rcx\", \"rdx\", \"rsi\",       \\\r\n        ^\r\n/usr/include/valgrind/valgrind.h:1724:11: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#  define __FRAME_POINTER                                         \\\r\n          ^\r\nIn file included from test.c:2:\r\n/usr/include/valgrind/memcheck.h:61:9: warning: macro name is a reserved identifier [-Wreserved-macro-identifier]\r\n#define __MEMCHECK_H\r\n        ^\r\n/usr/include/valgrind/memcheck.h:103:7: warning: identifier '_VG_USERREQ__MEMCHECK_RECORD_OVERLAP_ERROR' is reserved because it starts with '_' followed by a capital letter [-Wreserved-identifier]\r\n      _VG_USERREQ__MEMCHECK_RECORD_OVERLAP_ERROR \r\n      ^\r\n8 warnings generated.\r\n```\r\n",
+      "user": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1274#issuecomment-1682358254",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1274"
     }
   ],
