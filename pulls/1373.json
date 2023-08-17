@@ -51,10 +51,10 @@
       }
     ],
     "created_at": "2023-07-06T08:48:10Z",
-    "updated_at": "2023-07-27T17:03:47Z",
+    "updated_at": "2023-08-17T22:53:30Z",
     "mergeable": true,
     "mergeable_state": "clean",
-    "merge_commit_sha": "0a4d948fc9985f909a0f4820716f8474e326ad74",
+    "merge_commit_sha": "83cd441a9631de4dd8b44ff56f07bdaa7351dfb1",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -285,12 +285,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 974,
+        "stargazers_count": 1813,
+        "watchers_count": 1813,
+        "size": 10525,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 144,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,9 +301,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2023-08-17T20:50:03Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2023-08-16T16:37:56Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 24,
     "changed_files": 7,
     "commits": 3,
-    "review_comments": 9,
+    "review_comments": 10,
     "comments": 9
   },
   "events": [
@@ -1375,6 +1375,42 @@
       "submitted_at": "2023-07-27T17:03:47Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1373"
+    },
+    {
+      "event": "reviewed",
+      "id": 1583598911,
+      "node_id": "PRR_kwDOAP4Jqs5eY80_",
+      "url": null,
+      "actor": null,
+      "commit_id": "d23da6d55714271c720fee58fbff5e5ef2fe193f",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "Code-review ACK d23da6d55714271c720fee58fbff5e5ef2fe193f",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1373#pullrequestreview-1583598911",
+      "submitted_at": "2023-08-17T22:53:29Z",
+      "state": "APPROVED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1373"
     }
   ],
   "comments": [
@@ -1845,6 +1881,58 @@
       "line": 200,
       "original_line": 200,
       "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1297824629",
+      "pull_request_review_id": 1583598911,
+      "id": 1297824629,
+      "node_id": "PRRC_kwDOAP4Jqs5NWzt1",
+      "diff_hunk": "@@ -110,15 +110,15 @@ static void test_exhaustive_schnorrsig_verify(const secp256k1_context *ctx, cons\n                 if (!e_done[e]) {\n                     /* Iterate over the possible valid last 32 bytes in the signature.\n                        0..order=that s value; order+1=random bytes */\n-                    int count_valid = 0, s;\n+                    int count_valid = 0;\n+                    unsigned int s;\n                     for (s = 0; s <= EXHAUSTIVE_TEST_ORDER + 1; ++s) {\n                         int expect_valid, valid;\n                         if (s <= EXHAUSTIVE_TEST_ORDER) {\n-                            secp256k1_scalar s_s;\n-                            secp256k1_scalar_set_int(&s_s, s);\n-                            secp256k1_scalar_get_b32(sig64 + 32, &s_s);\n+                            memset(sig64 + 32, 0, 32);\n+                            secp256k1_write_be32(sig64 + 60, s);\n                             expect_valid = actual_k != -1 && s != EXHAUSTIVE_TEST_ORDER &&\n-                                           (s_s == (actual_k + actual_d * e) % EXHAUSTIVE_TEST_ORDER);",
+      "path": "src/modules/schnorrsig/tests_exhaustive_impl.h",
+      "position": 16,
+      "original_position": 16,
+      "commit_id": "d23da6d55714271c720fee58fbff5e5ef2fe193f",
+      "original_commit_id": "ad152151b06a40aaf6cd90561356ff451996455d",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Unrelated note: looking at that replaced line, I was confused for a moment that comparing `secp256k1_scalar` directly with an integer is possible, until I realized that it's simply a uint32_t typedef in the scalar_low implementation (would have expected that it's still wrapped in a struct), and that's of course the only one used in exhaustive tests.",
+      "created_at": "2023-08-17T22:53:23Z",
+      "updated_at": "2023-08-17T22:53:29Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1373#discussion_r1297824629",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1297824629"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1373"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 121,
+      "original_line": 121,
+      "side": "LEFT"
     }
   ]
 }
