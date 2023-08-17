@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-08-15T21:50:07Z",
-    "updated_at": "2023-08-16T20:08:19Z",
+    "updated_at": "2023-08-17T07:56:07Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "60918df37b6363b8605aa58b7907f4056538bfd7",
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-16T20:08:33Z",
+        "pushed_at": "2023-08-17T07:49:46Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2023-05-05T16:09:11Z",
         "license": {
@@ -285,7 +285,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 973,
+        "forks_count": 974,
         "stargazers_count": 1813,
         "watchers_count": 1813,
         "size": 10412,
@@ -332,7 +332,7 @@
     "deletions": 67,
     "changed_files": 4,
     "commits": 2,
-    "review_comments": 16,
+    "review_comments": 20,
     "comments": 2
   },
   "events": [
@@ -927,6 +927,41 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-08-16T20:32:24Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 1581944986,
+      "node_id": "PRR_kwDOAP4Jqs5eSpCa",
+      "url": null,
+      "actor": null,
+      "commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1401#pullrequestreview-1581944986",
+      "submitted_at": "2023-08-17T07:21:23Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1401"
     }
   ],
   "comments": [
@@ -1760,6 +1795,214 @@
       "start_side": "RIGHT",
       "line": 60,
       "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296771133",
+      "pull_request_review_id": 1581929707,
+      "id": 1296771133,
+      "node_id": "PRRC_kwDOAP4Jqs5NSyg9",
+      "diff_hunk": "@@ -12,32 +12,53 @@ env:\n \n jobs:\n   win64-native:\n-    name: \"x86_64: Windows, VS 2022\"\n+    name: ${{ matrix.configuration.job_name }}\n     # See: https://github.com/actions/runner-images#available-images.\n     runs-on: windows-2022\n \n     strategy:\n       fail-fast: false\n       matrix:\n-        lib_type: ['shared', 'static']\n+        configuration:\n+          - job_name: 'x64 (MSVC): Windows (VS 2022, shared)'\n+            cmake_options: '-A x64 -DBUILD_SHARED_LIBS=ON'\n+          - job_name: 'x64 (MSVC): Windows (VS 2022, static)'\n+            cmake_options: '-A x64 -DBUILD_SHARED_LIBS=OFF'\n+          - job_name: 'x64 (MSVC): Windows (VS 2022, int128_struct)'\n+            cmake_options: '-A x64 -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'\n+          - job_name: 'x64 (MSVC): Windows (VS 2022, int128_struct with __(u)mulh)'\n+            cmake_options: '-A x64 -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'\n+            cpp_flags: '/DSECP256K1_MSVC_MULH_TEST_OVERRIDE'\n+          - job_name: 'x86 (MSVC): Windows (VS 2022)'\n+            cmake_options: '-A Win32'\n \n     steps:\n       - name: Checkout\n         uses: actions/checkout@v3\n \n       - name: Generate buildsystem\n-        run: cmake -E env CFLAGS=\"/WX\" cmake -B build -A x64 -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON -DBUILD_SHARED_LIBS=${{ matrix.lib_type == 'shared' && 'ON' || 'OFF' }}\n+        run: cmake -E env CFLAGS=\"/WX ${{ matrix.configuration.cpp_flags }}\" cmake -B build -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON ${{ matrix.configuration.cmake_options }}\n \n       - name: Build\n         run: cmake --build build --config RelWithDebInfo -- /p:UseMultiToolTask=true /maxCpuCount\n \n+      - name: Binaries info\n+        # Use the bash shell included with Git for Windows.\n+        shell: bash\n+        run: |\n+          cd build/src/RelWithDebInfo && file *tests.exe bench*.exe libsecp256k1-*.dll || true\n+\n       - name: Check\n         run: |\n           ctest -C RelWithDebInfo --test-dir build -j ([int]$env:NUMBER_OF_PROCESSORS + 1)\n           build\\src\\RelWithDebInfo\\bench_ecmult.exe\n           build\\src\\RelWithDebInfo\\bench_internal.exe\n           build\\src\\RelWithDebInfo\\bench.exe\n \n+      - uses: ilammy/msvc-dev-cmd@v1\n+      - name: C++ (public headers)\n+        run: cl.exe -c -WX -TP include/*.h",
+      "path": ".github/workflows/ci.yml",
+      "position": 52,
+      "original_position": 52,
+      "commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "original_commit_id": "82b59f0ece0f9a18f5af5907fe4e7eef0882f2aa",
+      "in_reply_to_id": 1295590509,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Ok, makes sense. Keeping them together also self-documents the fact that the external action is only required for that single line of code.",
+      "created_at": "2023-08-17T07:12:30Z",
+      "updated_at": "2023-08-17T07:12:30Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1401#discussion_r1296771133",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296771133"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1401"
+        }
+      },
+      "start_line": 58,
+      "original_start_line": 58,
+      "start_side": "RIGHT",
+      "line": 60,
+      "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296780175",
+      "pull_request_review_id": 1581944986,
+      "id": 1296780175,
+      "node_id": "PRRC_kwDOAP4Jqs5NS0uP",
+      "diff_hunk": "@@ -31,13 +31,10 @@ print_environment() {\n }\n print_environment\n \n-# Start persistent wineserver if necessary.\n-# This speeds up jobs with many invocations of wine (e.g., ./configure with MSVC) tremendously.\n case \"$WRAPPER_CMD\" in\n     *wine*)\n         # Make sure to shutdown wineserver whenever we exit.\n         trap \"wineserver -k || true\" EXIT INT HUP\n-        wineserver -p\n         ;;\n esac",
+      "path": "ci/cirrus.sh",
+      "position": 12,
+      "original_position": 12,
+      "commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "original_commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Oh, I didn't mean to remove this code. Starting the wineserver is still useful, because it speeds up the tests.  I just meant that we can drop these lines (which you did now):\r\n```\r\n        # Wait until the wineserver process has\r\n        # exited, to avoid corrupting the wine prefix.\r\n        while (ps -A | grep wineserver) > /dev/null; do sleep 1; done\r\n```\r\n",
+      "created_at": "2023-08-17T07:21:23Z",
+      "updated_at": "2023-08-17T07:21:43Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1401#discussion_r1296780175",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296780175"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1401"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 39,
+      "original_line": 39,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296794592",
+      "pull_request_review_id": 1581968009,
+      "id": 1296794592,
+      "node_id": "PRRC_kwDOAP4Jqs5NS4Pg",
+      "diff_hunk": "@@ -31,13 +31,10 @@ print_environment() {\n }\n print_environment\n \n-# Start persistent wineserver if necessary.\n-# This speeds up jobs with many invocations of wine (e.g., ./configure with MSVC) tremendously.\n case \"$WRAPPER_CMD\" in\n     *wine*)\n         # Make sure to shutdown wineserver whenever we exit.\n         trap \"wineserver -k || true\" EXIT INT HUP\n-        wineserver -p\n         ;;\n esac",
+      "path": "ci/cirrus.sh",
+      "position": 12,
+      "original_position": 12,
+      "commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "original_commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "in_reply_to_id": 1296780175,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "With `wineserver -p` script [fails](https://cirrus-ci.com/build/4865261803667456):\r\n```\r\n+ trap wineserver -k || true EXIT INT HUP\r\n+ wineserver -p\r\n+ wineserver -k\r\nExit status: 2\r\n```",
+      "created_at": "2023-08-17T07:34:06Z",
+      "updated_at": "2023-08-17T07:34:07Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1401#discussion_r1296794592",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296794592"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1401"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 39,
+      "original_line": 39,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296824671",
+      "pull_request_review_id": 1582010587,
+      "id": 1296824671,
+      "node_id": "PRRC_kwDOAP4Jqs5NS_lf",
+      "diff_hunk": "@@ -31,13 +31,10 @@ print_environment() {\n }\n print_environment\n \n-# Start persistent wineserver if necessary.\n-# This speeds up jobs with many invocations of wine (e.g., ./configure with MSVC) tremendously.\n case \"$WRAPPER_CMD\" in\n     *wine*)\n         # Make sure to shutdown wineserver whenever we exit.\n         trap \"wineserver -k || true\" EXIT INT HUP\n-        wineserver -p\n         ;;\n esac",
+      "path": "ci/cirrus.sh",
+      "position": 12,
+      "original_position": 12,
+      "commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "original_commit_id": "71fc13ae0bb6c903902763ece37a80d46601828c",
+      "in_reply_to_id": 1296780175,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "oops, let me have a look in the Cirrus console",
+      "created_at": "2023-08-17T07:56:07Z",
+      "updated_at": "2023-08-17T07:56:07Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1401#discussion_r1296824671",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1296824671"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1401"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 39,
+      "original_line": 39,
       "side": "RIGHT"
     }
   ]
