@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/1eb6fb98f413b817fb45762d014653a01a82a796",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/4ad4914bd15bd856eddb306d86588bdacabb1184",
     "number": 1396,
     "state": "open",
     "locked": false,
@@ -51,10 +51,10 @@
       }
     ],
     "created_at": "2023-08-07T06:59:02Z",
-    "updated_at": "2023-08-18T15:48:26Z",
+    "updated_at": "2023-08-18T16:40:48Z",
     "mergeable": true,
     "mergeable_state": "unstable",
-    "merge_commit_sha": "49590b67ba5a13aea1bcec807a19bde59c5d51da",
+    "merge_commit_sha": "8abb60dcc20f057c650c77aae6531e31af55d5f2",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -62,7 +62,7 @@
     "head": {
       "label": "hebasto:230806-gha-linux",
       "ref": "230806-gha-linux",
-      "sha": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "sha": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -157,7 +157,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 11150,
+        "size": 11149,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-18T15:02:15Z",
+        "pushed_at": "2023-08-18T16:05:51Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2023-05-05T16:09:11Z",
         "license": {
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-18T15:02:05Z",
+        "pushed_at": "2023-08-18T16:05:34Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2023-08-18T08:12:10Z",
         "license": {
@@ -333,7 +333,7 @@
     "changed_files": 4,
     "commits": 4,
     "review_comments": 12,
-    "comments": 32
+    "comments": 36
   },
   "events": [
     {
@@ -379,7 +379,7 @@
           "state": "open",
           "state_reason": null,
           "title": "ci: Future of CI after Cirrus pricing change ",
-          "body": "Roadmap (keeping this up to date):\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [x] Move SageMath task to GitHub Actions (#1399)\r\n - [x] Move native macOS tasks to GitHub Actions, this will convert them to x86_64 unfortunately (#1394, #1404)\r\n - [ ] (optional): ...but it will unlock Valgrind on macOS again (#1151)\r\n - Move Linux tasks to the Bitcoin Core persistent workers or alternatively to GitHub Actions\r\n   - [x] wine/msvc tasks (converting them to native windows in #1401)\r\n   - [ ] wine/mingw tasks (#1398)\r\n   - [ ] actual normal Linux tasks (#1396)\r\n   - [ ] special tasks like qemu/sanitizers\r\n - (optional:) Bring back some ARM testing (see for details: https://github.com/bitcoin-core/secp256k1/pull/1394#issuecomment-1682321329)\r\n   - [ ] Add a task for ctimetest on ARM64/Linux/Valgrind on Cirrus CI using free minutes or the self-hosted runner  (#1163)\r\n   - [ ] Add more ARM64 tests (cttimetests only supported on Clang/MSan) on QEMU\r\n\r\n\r\nOther related PRs:\r\n - [x] https://github.com/bitcoin-core/secp256k1/pull/1403\r\n\r\n----\r\n\r\nCorresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
+          "body": "Roadmap (keeping this up to date):\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [x] Move SageMath task to GitHub Actions (#1399)\r\n - [x] Move native macOS tasks to GitHub Actions, this will convert them to x86_64 unfortunately (#1394, #1404)\r\n - Move Linux tasks to the Bitcoin Core persistent workers or alternatively to GitHub Actions\r\n   - [x] wine/msvc tasks (converting them to native windows in #1401)\r\n   - [ ] wine/mingw tasks (#1398)\r\n   - [ ] actual normal Linux tasks (#1396)\r\n   - [ ] special tasks like qemu/sanitizers \r\n\r\nPossible follow-ups:\r\n - [ ] Consider using [artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts) to move the Docker image from the Docker build task to the actual CI task (for Linux tasks). This should be a [cleaner solution](https://github.com/bitcoin-core/secp256k1/pull/1398#issuecomment-1677074743). It's also worth checking if this avoids [network issues](https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684108729), and how it compares in terms of delay to the current solution that relies purely on the GHA cache (#1398), both in the case of a cache hit and a cache miss.  \r\n - [ ] Enable Valgrind on macOS again now that the macOS tasks run on x86_64 (#1151)\r\n - [ ] Bring back some ARM testing (see for details: https://github.com/bitcoin-core/secp256k1/pull/1394#issuecomment-1682321329)\r\n   - [ ] Add a task for ctimetest on ARM64/Linux/Valgrind on Cirrus CI using free minutes or the self-hosted runner  (#1163)\r\n   - [ ] Add more ARM64 tests (cttimetests only supported on Clang/MSan) on QEMU\r\n\r\n\r\n\r\nOther related PRs:\r\n - [x] https://github.com/bitcoin-core/secp256k1/pull/1403\r\n\r\n----\r\n\r\nCorresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
           "user": {
             "login": "real-or-random",
             "id": 1071625,
@@ -416,7 +416,7 @@
           "locked": false,
           "comments": 13,
           "created_at": "2023-08-04T14:03:09Z",
-          "updated_at": "2023-08-18T10:06:10Z"
+          "updated_at": "2023-08-18T16:31:38Z"
         },
         "type": "issue"
       }
@@ -3097,46 +3097,6 @@
       "created_at": "2023-08-18T13:52:19Z"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDFlYjZmYjk4ZjQxM2I4MTdmYjQ1NzYyZDAxNDY1M2EwMWE4MmE3OTY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1eb6fb98f413b817fb45762d014653a01a82a796",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1eb6fb98f413b817fb45762d014653a01a82a796",
-      "tree": {
-        "sha": "0ea313d49e68f342b2dcb88440822b2085a2d2b5",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/0ea313d49e68f342b2dcb88440822b2085a2d2b5"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 0ea313d49e68f342b2dcb88440822b2085a2d2b5\nparent 6617a620d95743f51486daf6c33be9cead89a32a\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1692370915 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1692370915 +0100\n\nci, gha: Add a fallback Docker image builder\n\nThis change is aimed at significantly reducing the frequency of failures\ncaused by network timeouts.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmTfh+MACgkQQQEIES5+\nqB912g/7BgnKDAJxziJcb2LayeLpY3wDDfn/UneghEtfWXX38F0hLo517g2ufvkp\nltrsPs5AP/brdyw0cyEe9xdvCxSHlLMbp+UMhUxeNDwa4IpJq2L+F7hlP61ACc5c\nHkzgdGKa00EEVZOOzEw4IPw+EN8EuvgOuGsPOnE/CW3oMnoAqWjNfjnM3u9s9lBo\nZvHe2l/EkLNtSjOLRYBpy4lIoxKYDA8Rw23GdQBpamdK6LV3kCc+tV+H4A61Q8FX\npbDh6MlBZccjbanEnFshcQWsyCw792xNXSKCkz5y+dg98H2Xud0ycUkQ1NC2ftQi\nog6KnsRxDlv4GpDXbzNnZrxVfGsyqVzZvS/RG6rZQPwlBLCHdC73s+2yyunYFZBL\nF5fuLDeN1WGGcT+Pbf2ptrPOvDzj4EDs1QVOwZZi+lb+F6YI4jKJ3a/C1zwLIg0X\nWZPOAEHWg+i2DJeiON6eLSwVaHSXXunUyEHyaIsBIxiJ7UIweURvjewLr8qLK9Mf\njCoc9TEAimg/XSM6cH2oBm6tqlFb1I3ldhEyhCPa33d+RoO3VZIWEdTqQH/oGVCL\nNZbVM3Ysh2o1Q4Pl+WilXu6lb5gZ4Cl5UmakvNqjQTNSBXkfwZGzEFu4+8FNMDQ4\nDAYv/+vWjYQjmAgvc7QlMPcl0XE7jpWHHSqEDwZyuafv8Icfwgw=\n=uU2s\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6617a620d95743f51486daf6c33be9cead89a32a",
-          "sha": "6617a620d95743f51486daf6c33be9cead89a32a",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6617a620d95743f51486daf6c33be9cead89a32a"
-        }
-      ],
-      "message": "ci, gha: Add a fallback Docker image builder\n\nThis change is aimed at significantly reducing the frequency of failures\ncaused by network timeouts.",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2023-08-18T15:01:55Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2023-08-18T15:01:55Z"
-      },
-      "sha": "1eb6fb98f413b817fb45762d014653a01a82a796"
-    },
-    {
       "event": "closed",
       "id": 10131257991,
       "node_id": "CE_lADOAP4Jqs5tmgoizwAAAAJb3rqH",
@@ -3247,6 +3207,327 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684108729",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396"
+    },
+    {
+      "event": "commented",
+      "id": 1684123771,
+      "node_id": "IC_kwDOAP4Jqs5kYbB7",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1684123771",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-18T16:00:54Z",
+      "updated_at": "2023-08-18T16:00:54Z",
+      "author_association": "CONTRIBUTOR",
+      "body": " - Hm, yeah, sad that we need retries...(nit: Call I it `retry_builder`? `fallback` sounds like it's doing something else)\r\n - I wonder if artifacts will be a more reliable way of transferring the image from the builder job to the other job. Do you think it's worth trying? It would be interesting to see if it's slower or faster.  ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684123771",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDRhZDQ5MTRiZDE1YmQ4NTZlZGRiMzA2ZDg2NTg4YmRhY2FiYjExODQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4ad4914bd15bd856eddb306d86588bdacabb1184",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4ad4914bd15bd856eddb306d86588bdacabb1184",
+      "tree": {
+        "sha": "ef426fee9dec082ddeb9b071683f9edef576fe08",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ef426fee9dec082ddeb9b071683f9edef576fe08"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree ef426fee9dec082ddeb9b071683f9edef576fe08\nparent 6617a620d95743f51486daf6c33be9cead89a32a\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1692374725 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1692374725 +0100\n\nci, gha: Add `retry_builder` Docker image builder\n\nThis change is aimed at significantly reducing the frequency of failures\ncaused by intermittent network timeouts.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmTflsUACgkQQQEIES5+\nqB+LuA/+KH7PlSot9lcE1j425DFlqj4yg3+R2H6b2Wy8coxpyy7M1euprTSoEgdM\no5frvgeRO1MrfFcBnSxo6QtjrNgzAbcSWqodLNTNMw3aogwmMwBSNb0jrHRcYI4F\nnGLhX12fe2GUTSQAzYDDd2EvLPsRbcjnqjlmWRhAAC67jnyn4K13fZDQZ/vmMAoz\nIf34HLmtqy/IJytPhwV1fRjRYNgnY9bPrglY9yQNwYxD9gFurcDbfG2sm7Bc0zDE\nFdXWDGBnpoXLq4HUmTlZpdgSx6/c8E6egIsTF5AEF4WUq7XfF9aVDzbHVoqBjmpy\naBKd6u071pvneeOoEl6qB01HneBQHllklPTLOmqS1DYKDr/Hig4/URcUYMLX97OC\nW9t86rsjAAD16YjFr5Af+NsD93yOGzDm4eCETSLAYkf6VdQeqj+BLAIAOM1cmGhc\nIPDCSemKWixHlLOo5dqdoUmYG8/nJ7aRKb/BSGLtEcaI8d+iZ002PIvp/hnBcbpI\nDpX7PLcRG8n3Bliv0qySgU7Td6ZYaFeyZ6aPzM/vXePDh2vT/0cnXSlXuDgtmOGZ\nENGsxm/foqRRzI1oZ6j0UkdXYKBb8UQuRt5W0vw46x1bkJmAfTZpRLtxuhHu5obB\nFok9nw083ziZ/ExDl2iGG+McwcJf0VWSsvmfAUQqbmLusBktQ3I=\n=PJb+\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6617a620d95743f51486daf6c33be9cead89a32a",
+          "sha": "6617a620d95743f51486daf6c33be9cead89a32a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6617a620d95743f51486daf6c33be9cead89a32a"
+        }
+      ],
+      "message": "ci, gha: Add `retry_builder` Docker image builder\n\nThis change is aimed at significantly reducing the frequency of failures\ncaused by intermittent network timeouts.",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2023-08-18T16:05:25Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2023-08-18T16:05:25Z"
+      },
+      "sha": "4ad4914bd15bd856eddb306d86588bdacabb1184"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 10131511402,
+      "node_id": "HRFPE_lADOAP4Jqs5tmgoizwAAAAJb4phq",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10131511402",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-18T16:05:34Z"
+    },
+    {
+      "event": "commented",
+      "id": 1684134832,
+      "node_id": "IC_kwDOAP4Jqs5kYduw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1684134832",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-18T16:09:37Z",
+      "updated_at": "2023-08-18T16:09:37Z",
+      "author_association": "MEMBER",
+      "body": "> * Hm, yeah, sad that we need retries...(nit: Call I it `retry_builder`? `fallback` sounds like it's doing something else)\r\n\r\nDone.\r\n\r\n>   * I wonder if artifacts will be a more reliable way of transferring the image from the builder job to the other job. Do you think it's worth trying? It would be interesting to see if it's slower or faster.\r\n\r\nI agree with you. It's definitely worth trying.\r\n\r\nConsidering the 1st Sept. deadline, it would be nice to postpone until all tasks are migrated from Cirrus CI. ",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684134832",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396"
+    },
+    {
+      "event": "commented",
+      "id": 1684149942,
+      "node_id": "IC_kwDOAP4Jqs5kYha2",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1684149942",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-18T16:22:18Z",
+      "updated_at": "2023-08-18T16:22:18Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > *\r\n> \r\n> I agree with you. It's definitely worth trying.\r\n> \r\n> Considering the 1st Sept. deadline, it would be nice to postpone until all tasks are migrated from Cirrus CI.\r\n\r\nAgreed, I'll add an item to the tracking issue.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684149942",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396"
+    },
+    {
+      "event": "reviewed",
+      "id": 1584867561,
+      "node_id": "PRR_kwDOAP4Jqs5edyjp",
+      "url": null,
+      "actor": null,
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK 4ad4914bd15bd856eddb306d86588bdacabb1184 (assuming CI finishes successfully)",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#pullrequestreview-1584867561",
+      "submitted_at": "2023-08-18T16:23:55Z",
+      "state": "APPROVED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1396"
+    },
+    {
+      "event": "commented",
+      "id": 1684170425,
+      "node_id": "IC_kwDOAP4Jqs5kYma5",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1684170425",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-08-18T16:40:47Z",
+      "updated_at": "2023-08-18T16:40:47Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Well, now one job failed even with the retrying... Perhaps failure probability within a single job are correlated. https://github.com/bitcoin-core/secp256k1/actions/runs/5904705284/job/16017365422?pr=1396\r\n\r\nIdk, I think we should accept some flakiness and move on for now... Cirrus was also not perfect in that regard, even though they improved their automatic re-running. So my ACK stands.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684170425",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1396"
     }
   ],
   "comments": [
@@ -3259,7 +3540,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 61,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "a6ba359cc5f92f20093c00453f335ad0d6084f10",
       "in_reply_to_id": null,
       "user": {
@@ -3311,7 +3592,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 61,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "a6ba359cc5f92f20093c00453f335ad0d6084f10",
       "in_reply_to_id": 1285572943,
       "user": {
@@ -3363,7 +3644,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 61,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "a6ba359cc5f92f20093c00453f335ad0d6084f10",
       "in_reply_to_id": 1285572943,
       "user": {
@@ -3415,7 +3696,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 61,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "a6ba359cc5f92f20093c00453f335ad0d6084f10",
       "in_reply_to_id": 1285572943,
       "user": {
@@ -3467,7 +3748,7 @@
       "path": "ci/cirrus.sh",
       "position": null,
       "original_position": 7,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "7ea529c40bc890cc8c398bb410413010350ee29b",
       "in_reply_to_id": null,
       "user": {
@@ -3519,7 +3800,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 16,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
       "in_reply_to_id": null,
       "user": {
@@ -3571,7 +3852,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 61,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "a6ba359cc5f92f20093c00453f335ad0d6084f10",
       "in_reply_to_id": 1285572943,
       "user": {
@@ -3623,7 +3904,7 @@
       "path": "ci/cirrus.sh",
       "position": null,
       "original_position": 7,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "7ea529c40bc890cc8c398bb410413010350ee29b",
       "in_reply_to_id": 1286159462,
       "user": {
@@ -3675,7 +3956,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 16,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
       "in_reply_to_id": 1286161786,
       "user": {
@@ -3727,7 +4008,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 16,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
       "in_reply_to_id": 1286161786,
       "user": {
@@ -3779,7 +4060,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 16,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
       "in_reply_to_id": 1286161786,
       "user": {
@@ -3831,7 +4112,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 16,
-      "commit_id": "1eb6fb98f413b817fb45762d014653a01a82a796",
+      "commit_id": "4ad4914bd15bd856eddb306d86588bdacabb1184",
       "original_commit_id": "6d3d4b971339555fbddb7d09ecb259a3c25668ff",
       "in_reply_to_id": 1286161786,
       "user": {
