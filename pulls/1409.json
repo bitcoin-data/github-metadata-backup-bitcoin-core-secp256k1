@@ -51,9 +51,9 @@
       }
     ],
     "created_at": "2023-08-22T13:58:55Z",
-    "updated_at": "2023-08-22T14:52:10Z",
+    "updated_at": "2023-08-22T15:24:08Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "fb0627984979fd11554285cf3193eb5c9a343717",
     "assignees": [],
     "requested_reviewers": [],
@@ -332,7 +332,7 @@
     "deletions": 159,
     "changed_files": 2,
     "commits": 4,
-    "review_comments": 1,
+    "review_comments": 5,
     "comments": 0
   },
   "events": [
@@ -528,7 +528,304 @@
         "name": "ci",
         "color": "006B75"
       }
+    },
+    {
+      "event": "reviewed",
+      "id": 1589636669,
+      "node_id": "PRR_kwDOAP4Jqs5ev-49",
+      "url": null,
+      "actor": null,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#pullrequestreview-1589636669",
+      "submitted_at": "2023-08-22T15:06:05Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301767281",
+      "pull_request_review_id": 1589636669,
+      "id": 1301767281,
+      "node_id": "PRRC_kwDOAP4Jqs5Nl2Rx",
+      "diff_hunk": "@@ -373,6 +373,138 @@ jobs:\n         run: env\n         if: ${{ always() }}\n \n+  sanitizers_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'Valgrind (memcheck)'\n+            env_vars:\n+              # The `--error-exitcode` is required to make the test fail if valgrind found errors,\n+              # otherwise it will return 0 (https://www.valgrind.org/docs/manual/manual-core.html).\n+              WRAPPER_CMD: 'valgrind --error-exitcode=42'\n+              SECP256K1_TEST_ITERS: 2\n+          - job_name: 'UBSan, ASan, LSan'\n+            env_vars:\n+              CFLAGS: '-fsanitize=undefined,address -g'\n+              UBSAN_OPTIONS: 'print_stacktrace=1:halt_on_error=1'\n+              ASAN_OPTIONS: 'strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1'\n+              LSAN_OPTIONS: 'use_unaligned=1'\n+              SECP256K1_TEST_ITERS: 32\n+        asm:\n+          - env_vars: { ASM: 'auto' }\n+          - env_vars: { ASM: 'no', ECMULTGENPRECISION: 2, ECMULTWINDOW: 2 }\n+        cc:\n+          - env_vars: { CC: 'clang' }\n+          - env_vars: { HOST: 'i686-linux-gnu', CC: 'i686-linux-gnu-gcc' }\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Set environment variables\n+        run: |\n+          for var in \"$(jq -s 'add' <<< '${{ toJSON(matrix.configuration.env_vars) }} ${{ toJSON(matrix.asm.env_vars) }} ${{ toJSON(matrix.cc.env_vars) }}' | jq -r 'to_entries | .[] | \"\\(.key)=\\(.value)\"')\"; do\n+            echo \"$var\" >> \"$GITHUB_ENV\"\n+          done          \n+\n+      - name: CI script\n+        uses: ./.github/actions/run-in-docker-action\n+        with:\n+          dockerfile: ./ci/linux-debian.Dockerfile\n+          tag: linux-debian-image\n+          command: >\n+            git config --global --add safe.directory ${{ github.workspace }} &&\n+            ./ci/ci.sh\n+\n+      - run: cat tests.log || true\n+        if: ${{ always() }}\n+      - run: cat noverify_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat exhaustive_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat ctime_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat bench.log || true\n+        if: ${{ always() }}\n+      - run: cat config.log || true\n+        if: ${{ always() }}\n+      - run: cat test_env.log || true\n+        if: ${{ always() }}\n+      - name: CI env\n+        run: env\n+        if: ${{ always() }}\n+\n+  msan_debian:\n+    name: \"MSan\"\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - env_vars:\n+              CFLAGS: '-fsanitize=memory -g'\n+          - env_vars:\n+              ECMULTGENPRECISION: 2\n+              ECMULTWINDOW: 2\n+              CFLAGS: '-fsanitize=memory -g -O3'\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'yes'\n+      CC: 'clang'\n+      SECP256K1_TEST_ITERS: 32\n+      ASM: 'no'\n+      WITH_VALGRIND: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: CI script\n+        env: ${{ matrix.configuration.env_vars }}\n+        uses: ./.github/actions/run-in-docker-action\n+        with:\n+          dockerfile: ./ci/linux-debian.Dockerfile\n+          tag: linux-debian-image\n+          command: >\n+            git config --global --add safe.directory ${{ github.workspace }} &&",
+      "path": ".github/workflows/ci.yml",
+      "position": 115,
+      "original_position": 115,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "original_commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Not this PR, but now that I see this, couldn't we add this to `run-in-docker-action` to avoid duplication?\r\n\r\n(did I ask this before?)",
+      "created_at": "2023-08-22T14:48:02Z",
+      "updated_at": "2023-08-22T15:06:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#discussion_r1301767281",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301767281"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 487,
+      "original_line": 487,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301794501",
+      "pull_request_review_id": 1589636669,
+      "id": 1301794501,
+      "node_id": "PRRC_kwDOAP4Jqs5Nl87F",
+      "diff_hunk": "@@ -373,6 +373,138 @@ jobs:\n         run: env\n         if: ${{ always() }}\n \n+  sanitizers_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'Valgrind (memcheck)'\n+            env_vars:\n+              # The `--error-exitcode` is required to make the test fail if valgrind found errors,\n+              # otherwise it will return 0 (https://www.valgrind.org/docs/manual/manual-core.html).\n+              WRAPPER_CMD: 'valgrind --error-exitcode=42'\n+              SECP256K1_TEST_ITERS: 2\n+          - job_name: 'UBSan, ASan, LSan'\n+            env_vars:\n+              CFLAGS: '-fsanitize=undefined,address -g'\n+              UBSAN_OPTIONS: 'print_stacktrace=1:halt_on_error=1'\n+              ASAN_OPTIONS: 'strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1'\n+              LSAN_OPTIONS: 'use_unaligned=1'\n+              SECP256K1_TEST_ITERS: 32\n+        asm:\n+          - env_vars: { ASM: 'auto' }\n+          - env_vars: { ASM: 'no', ECMULTGENPRECISION: 2, ECMULTWINDOW: 2 }\n+        cc:\n+          - env_vars: { CC: 'clang' }\n+          - env_vars: { HOST: 'i686-linux-gnu', CC: 'i686-linux-gnu-gcc' }\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Set environment variables\n+        run: |\n+          for var in \"$(jq -s 'add' <<< '${{ toJSON(matrix.configuration.env_vars) }} ${{ toJSON(matrix.asm.env_vars) }} ${{ toJSON(matrix.cc.env_vars) }}' | jq -r 'to_entries | .[] | \"\\(.key)=\\(.value)\"')\"; do\n+            echo \"$var\" >> \"$GITHUB_ENV\"\n+          done          ",
+      "path": ".github/workflows/ci.yml",
+      "position": 48,
+      "original_position": 48,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "original_commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "A bit ugly, hm... There's no better way to merge this, I guess.\r\n\r\nI think it makes sense to split this job into two jobs \"Valgrind (memcheck)\" and \"UBSan, ASan, LSan\". Then for each of these jobs, we can expand the remaining 2x2 combinations, i.e., list the 4 resulting combinations explicitly. This is probably a good idea anyway, it will also make it a bit easier to add variety to the jobs.\r\n\r\nWhat do you think?",
+      "created_at": "2023-08-22T15:05:48Z",
+      "updated_at": "2023-08-22T15:06:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#discussion_r1301794501",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301794501"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
+        }
+      },
+      "start_line": 417,
+      "original_start_line": 417,
+      "start_side": "RIGHT",
+      "line": 420,
+      "original_line": 420,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301802232",
+      "pull_request_review_id": 1589692954,
+      "id": 1301802232,
+      "node_id": "PRRC_kwDOAP4Jqs5Nl-z4",
+      "diff_hunk": "@@ -373,6 +373,138 @@ jobs:\n         run: env\n         if: ${{ always() }}\n \n+  sanitizers_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'Valgrind (memcheck)'\n+            env_vars:\n+              # The `--error-exitcode` is required to make the test fail if valgrind found errors,\n+              # otherwise it will return 0 (https://www.valgrind.org/docs/manual/manual-core.html).\n+              WRAPPER_CMD: 'valgrind --error-exitcode=42'\n+              SECP256K1_TEST_ITERS: 2\n+          - job_name: 'UBSan, ASan, LSan'\n+            env_vars:\n+              CFLAGS: '-fsanitize=undefined,address -g'\n+              UBSAN_OPTIONS: 'print_stacktrace=1:halt_on_error=1'\n+              ASAN_OPTIONS: 'strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1'\n+              LSAN_OPTIONS: 'use_unaligned=1'\n+              SECP256K1_TEST_ITERS: 32\n+        asm:\n+          - env_vars: { ASM: 'auto' }\n+          - env_vars: { ASM: 'no', ECMULTGENPRECISION: 2, ECMULTWINDOW: 2 }\n+        cc:\n+          - env_vars: { CC: 'clang' }\n+          - env_vars: { HOST: 'i686-linux-gnu', CC: 'i686-linux-gnu-gcc' }\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Set environment variables\n+        run: |\n+          for var in \"$(jq -s 'add' <<< '${{ toJSON(matrix.configuration.env_vars) }} ${{ toJSON(matrix.asm.env_vars) }} ${{ toJSON(matrix.cc.env_vars) }}' | jq -r 'to_entries | .[] | \"\\(.key)=\\(.value)\"')\"; do\n+            echo \"$var\" >> \"$GITHUB_ENV\"\n+          done          ",
+      "path": ".github/workflows/ci.yml",
+      "position": 48,
+      "original_position": 48,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "original_commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "in_reply_to_id": 1301794501,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> I think it makes sense to split this job into two jobs \"Valgrind (memcheck)\" and \"UBSan, ASan, LSan\".\r\n\r\nI was thinking about the same. But it won't help.\r\n\r\nOnly one `env` property is allowed job-wide and step-wide. Job-wide `env` is already busy with global variables. Therefore, even 2 sets won't fit one step-wide `env`.",
+      "created_at": "2023-08-22T15:11:23Z",
+      "updated_at": "2023-08-22T15:11:24Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#discussion_r1301802232",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301802232"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
+        }
+      },
+      "start_line": 417,
+      "original_start_line": 417,
+      "start_side": "RIGHT",
+      "line": 420,
+      "original_line": 420,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301804745",
+      "pull_request_review_id": 1589697023,
+      "id": 1301804745,
+      "node_id": "PRRC_kwDOAP4Jqs5Nl_bJ",
+      "diff_hunk": "@@ -373,6 +373,138 @@ jobs:\n         run: env\n         if: ${{ always() }}\n \n+  sanitizers_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'Valgrind (memcheck)'\n+            env_vars:\n+              # The `--error-exitcode` is required to make the test fail if valgrind found errors,\n+              # otherwise it will return 0 (https://www.valgrind.org/docs/manual/manual-core.html).\n+              WRAPPER_CMD: 'valgrind --error-exitcode=42'\n+              SECP256K1_TEST_ITERS: 2\n+          - job_name: 'UBSan, ASan, LSan'\n+            env_vars:\n+              CFLAGS: '-fsanitize=undefined,address -g'\n+              UBSAN_OPTIONS: 'print_stacktrace=1:halt_on_error=1'\n+              ASAN_OPTIONS: 'strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1'\n+              LSAN_OPTIONS: 'use_unaligned=1'\n+              SECP256K1_TEST_ITERS: 32\n+        asm:\n+          - env_vars: { ASM: 'auto' }\n+          - env_vars: { ASM: 'no', ECMULTGENPRECISION: 2, ECMULTWINDOW: 2 }\n+        cc:\n+          - env_vars: { CC: 'clang' }\n+          - env_vars: { HOST: 'i686-linux-gnu', CC: 'i686-linux-gnu-gcc' }\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Set environment variables\n+        run: |\n+          for var in \"$(jq -s 'add' <<< '${{ toJSON(matrix.configuration.env_vars) }} ${{ toJSON(matrix.asm.env_vars) }} ${{ toJSON(matrix.cc.env_vars) }}' | jq -r 'to_entries | .[] | \"\\(.key)=\\(.value)\"')\"; do\n+            echo \"$var\" >> \"$GITHUB_ENV\"\n+          done          \n+\n+      - name: CI script\n+        uses: ./.github/actions/run-in-docker-action\n+        with:\n+          dockerfile: ./ci/linux-debian.Dockerfile\n+          tag: linux-debian-image\n+          command: >\n+            git config --global --add safe.directory ${{ github.workspace }} &&\n+            ./ci/ci.sh\n+\n+      - run: cat tests.log || true\n+        if: ${{ always() }}\n+      - run: cat noverify_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat exhaustive_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat ctime_tests.log || true\n+        if: ${{ always() }}\n+      - run: cat bench.log || true\n+        if: ${{ always() }}\n+      - run: cat config.log || true\n+        if: ${{ always() }}\n+      - run: cat test_env.log || true\n+        if: ${{ always() }}\n+      - name: CI env\n+        run: env\n+        if: ${{ always() }}\n+\n+  msan_debian:\n+    name: \"MSan\"\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - env_vars:\n+              CFLAGS: '-fsanitize=memory -g'\n+          - env_vars:\n+              ECMULTGENPRECISION: 2\n+              ECMULTWINDOW: 2\n+              CFLAGS: '-fsanitize=memory -g -O3'\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'yes'\n+      CC: 'clang'\n+      SECP256K1_TEST_ITERS: 32\n+      ASM: 'no'\n+      WITH_VALGRIND: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: CI script\n+        env: ${{ matrix.configuration.env_vars }}\n+        uses: ./.github/actions/run-in-docker-action\n+        with:\n+          dockerfile: ./ci/linux-debian.Dockerfile\n+          tag: linux-debian-image\n+          command: >\n+            git config --global --add safe.directory ${{ github.workspace }} &&",
+      "path": ".github/workflows/ci.yml",
+      "position": 115,
+      "original_position": 115,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "original_commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "in_reply_to_id": 1301767281,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> (did I ask this before?)\r\n\r\nWe discussed whether it should be placed in `ci.sh`.\r\n\r\nUPD. ... as it's done in bitcoin repo.",
+      "created_at": "2023-08-22T15:13:20Z",
+      "updated_at": "2023-08-22T15:24:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#discussion_r1301804745",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301804745"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 487,
+      "original_line": 487,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301808157",
+      "pull_request_review_id": 1589702140,
+      "id": 1301808157,
+      "node_id": "PRRC_kwDOAP4Jqs5NmAQd",
+      "diff_hunk": "@@ -373,6 +373,138 @@ jobs:\n         run: env\n         if: ${{ always() }}\n \n+  sanitizers_debian:\n+    name: ${{ matrix.configuration.job_name }}\n+    runs-on: ubuntu-latest\n+    needs: docker_cache\n+\n+    strategy:\n+      fail-fast: false\n+      matrix:\n+        configuration:\n+          - job_name: 'Valgrind (memcheck)'\n+            env_vars:\n+              # The `--error-exitcode` is required to make the test fail if valgrind found errors,\n+              # otherwise it will return 0 (https://www.valgrind.org/docs/manual/manual-core.html).\n+              WRAPPER_CMD: 'valgrind --error-exitcode=42'\n+              SECP256K1_TEST_ITERS: 2\n+          - job_name: 'UBSan, ASan, LSan'\n+            env_vars:\n+              CFLAGS: '-fsanitize=undefined,address -g'\n+              UBSAN_OPTIONS: 'print_stacktrace=1:halt_on_error=1'\n+              ASAN_OPTIONS: 'strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1'\n+              LSAN_OPTIONS: 'use_unaligned=1'\n+              SECP256K1_TEST_ITERS: 32\n+        asm:\n+          - env_vars: { ASM: 'auto' }\n+          - env_vars: { ASM: 'no', ECMULTGENPRECISION: 2, ECMULTWINDOW: 2 }\n+        cc:\n+          - env_vars: { CC: 'clang' }\n+          - env_vars: { HOST: 'i686-linux-gnu', CC: 'i686-linux-gnu-gcc' }\n+\n+    env:\n+      ECDH: 'yes'\n+      RECOVERY: 'yes'\n+      SCHNORRSIG: 'yes'\n+      ELLSWIFT: 'yes'\n+      CTIMETESTS: 'no'\n+\n+    steps:\n+      - name: Checkout\n+        uses: actions/checkout@v3\n+\n+      - name: Set environment variables\n+        run: |\n+          for var in \"$(jq -s 'add' <<< '${{ toJSON(matrix.configuration.env_vars) }} ${{ toJSON(matrix.asm.env_vars) }} ${{ toJSON(matrix.cc.env_vars) }}' | jq -r 'to_entries | .[] | \"\\(.key)=\\(.value)\"')\"; do\n+            echo \"$var\" >> \"$GITHUB_ENV\"\n+          done          ",
+      "path": ".github/workflows/ci.yml",
+      "position": 48,
+      "original_position": 48,
+      "commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "original_commit_id": "1961f18a7f3905c6d7308fe5f5fedd0cef9840a2",
+      "in_reply_to_id": 1301794501,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> list the 4 resulting combinations explicitly\r\n\r\n... but that is completely feasible.",
+      "created_at": "2023-08-22T15:15:47Z",
+      "updated_at": "2023-08-22T15:15:47Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1409#discussion_r1301808157",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1301808157"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1409"
+        }
+      },
+      "start_line": 417,
+      "original_start_line": 417,
+      "start_side": "RIGHT",
+      "line": 420,
+      "original_line": 420,
+      "side": "RIGHT"
+    }
+  ]
 }
