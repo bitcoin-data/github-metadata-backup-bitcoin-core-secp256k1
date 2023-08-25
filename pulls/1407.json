@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-08-21T12:09:04Z",
-    "updated_at": "2023-08-24T21:55:26Z",
+    "updated_at": "2023-08-25T14:30:23Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "c4c1fa0b5f77865afb35fcd57c6621616922efed",
@@ -285,9 +285,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 981,
-        "stargazers_count": 1815,
-        "watchers_count": 1815,
+        "forks_count": 982,
+        "stargazers_count": 1818,
+        "watchers_count": 1818,
         "size": 10575,
         "default_branch": "master",
         "open_issues_count": 139,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2023-08-24T20:35:46Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-22T21:28:37Z",
+        "updated_at": "2023-08-25T13:12:20Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 1,
     "commits": 2,
-    "review_comments": 8,
+    "review_comments": 9,
     "comments": 1
   },
   "events": [
@@ -1134,6 +1134,58 @@
       "start_side": null,
       "line": 268,
       "original_line": 270,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1305739417",
+      "pull_request_review_id": 1595859175,
+      "id": 1305739417,
+      "node_id": "PRRC_kwDOAP4Jqs5N1ACZ",
+      "diff_hunk": "@@ -0,0 +1,693 @@\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+#include <assert.h>\n+#include <stdbool.h>\n+\n+#include \"secp256k1.c\"\n+\n+/*** Scalar Operation ***/\n+/* Test commutativity of scalar addition */ \n+static void fuzz_scalar_add_commutativty(const uint8_t *data, size_t size) {\n+    if (size >= 64) {        \n+        secp256k1_scalar a, b, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        secp256k1_scalar_add(&r1, &a, &b);\n+        secp256k1_scalar_add(&r2, &b, &a);\n+        CHECK(secp256k1_scalar_eq(&r1, &r2));\n+    }\n+}\n+\n+/* Test associativity of scalar addition */\n+static void fuzz_scalar_add_associativity(const uint8_t *data, size_t size) {\n+    if (size >= 96) {     \n+        secp256k1_scalar a, b, c, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        secp256k1_scalar_set_b32(&c, data + 64, NULL);       \n+        secp256k1_scalar_add(&r1, &a, &b);\n+        secp256k1_scalar_add(&r1, &r1, &c);\n+        secp256k1_scalar_add(&r2, &b, &c);\n+        secp256k1_scalar_add(&r2, &r2, &a);\n+        CHECK(secp256k1_scalar_eq(&r1, &r2));\n+    }\n+}\n+\n+/* Test identity addition */ \n+static void fuzz_scalar_add_zero(const uint8_t *data, size_t size) {\n+    if (size >= 32) {        \n+        secp256k1_scalar a, r1;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_add(&r1, &a, &secp256k1_scalar_zero);\n+        CHECK(secp256k1_scalar_eq(&r1, &a));\n+    }\n+}\n+\n+/* Test scalar addition with its complement */ \n+static void fuzz_scalar_add_complements(const uint8_t *data, size_t size) {\n+    if (size >= 32) {        \n+        secp256k1_scalar a, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_negate(&r1, &a);\n+        secp256k1_scalar_add(&r2, &a, &r1);\n+        CHECK(secp256k1_scalar_is_zero(&r2));\n+    }\n+}\n+\n+/* Test commutativity of scalar multiplication */\n+static void fuzz_scalar_mul_commutativity(const uint8_t *data, size_t size) {\n+    if (size >= 64) {        \n+        secp256k1_scalar a, b, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        secp256k1_scalar_mul(&r1, &a, &b);\n+        secp256k1_scalar_mul(&r2, &b, &a);\n+        CHECK(secp256k1_scalar_eq(&r1, &r2));\n+    }\n+}\n+\n+/* Test associativity of scalar multiplication */\n+static void fuzz_scalar_mul_associativity(const uint8_t *data, size_t size) {\n+    if (size >= 96) {     \n+        secp256k1_scalar a, b, c, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        secp256k1_scalar_set_b32(&c, data + 64, NULL);       \n+        secp256k1_scalar_mul(&r1, &a, &b);\n+        secp256k1_scalar_mul(&r1, &r1, &c);\n+        secp256k1_scalar_mul(&r2, &b, &c);\n+        secp256k1_scalar_mul(&r2, &r2, &a);\n+        CHECK(secp256k1_scalar_eq(&r1, &r2));\n+    }\n+}\n+\n+/* Test distributivity of scalar multiplication */\n+static void fuzz_scalar_mul_distributivity(const uint8_t *data, size_t size) {\n+    if (size >= 96) {     \n+        secp256k1_scalar a, b, c, r1, r2, r3;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        secp256k1_scalar_set_b32(&c, data + 64, NULL);       \n+        secp256k1_scalar_add(&r1, &a, &b);\n+        secp256k1_scalar_mul(&r1, &r1, &c);\n+        secp256k1_scalar_mul(&r2, &a, &c);\n+        secp256k1_scalar_mul(&r3, &b, &c);\n+        secp256k1_scalar_add(&r2, &r2, &r3);\n+        CHECK(secp256k1_scalar_eq(&r1, &r2));\n+    }\n+}\n+\n+/* Test identity multiplication */ \n+static void fuzz_scalar_mul_one(const uint8_t *data, size_t size) {\n+    if (size >= 32) {        \n+        secp256k1_scalar a, r1;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_mul(&r1, &a, &secp256k1_scalar_one);\n+        CHECK(secp256k1_scalar_eq(&r1, &a));\n+    }\n+}\n+\n+/* Test scalar multiplication with zero */ \n+static void fuzz_scalar_mul_zero(const uint8_t *data, size_t size) {\n+    if (size >= 32) {        \n+        secp256k1_scalar a, r1;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_mul(&r1, &a, &secp256k1_scalar_zero);\n+        CHECK(secp256k1_scalar_is_zero(&r1));\n+    }\n+}\n+\n+/* Test scalar inverse */\n+static void fuzz_scalar_inverse(const uint8_t *data, size_t size) {\n+    if (size >= 32) {     \n+        secp256k1_scalar a, r1, r2, r3;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_inverse(&r1, &a);\n+        if (secp256k1_scalar_is_zero(&a)) {\n+            CHECK(secp256k1_scalar_is_zero(&r1));\n+        } else {\n+            secp256k1_scalar_mul(&r2, &a, &r1);\n+            CHECK(secp256k1_scalar_is_one(&r2));\n+        }\n+    }\n+} \n+\n+/* Test scalar inverse (without constant-time guarantee) */\n+static void fuzz_scalar_inverse_var(const uint8_t *data, size_t size) {\n+    if (size >= 32) {     \n+        secp256k1_scalar a, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_inverse_var(&r1, &a);\n+        if (secp256k1_scalar_is_zero(&a)) {\n+            CHECK(secp256k1_scalar_is_zero(&r1));\n+        } else {\n+            secp256k1_scalar_mul(&r2, &a, &r1);\n+            CHECK(secp256k1_scalar_is_one(&r2));\n+        }\n+    }\n+}             \n+\n+/* Test scalar complement */ \n+static void fuzz_scalar_negate(const uint8_t *data, size_t size) {\n+    if (size >= 32) {        \n+        secp256k1_scalar a, r1, r2;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_negate(&r1, &a);\n+        secp256k1_scalar_negate(&r2, &r1);\n+        CHECK(secp256k1_scalar_eq(&a, &r2));\n+    }\n+}\n+\n+/* Test low bits shifted off */\n+static void fuzz_scalar_shift(const uint8_t *data, size_t size) {\n+    if (size >= 32) {\n+        int bit, r1, r2;     \n+        secp256k1_scalar a;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        bit = 1 + (data[31] % 15);\n+        r2 = a.d[0] % (1ULL << bit);\n+        r1 = secp256k1_scalar_shr_int(&a, bit);\n+        CHECK(r1 == r2);\n+    }\n+}\n+\n+/* Test r1+r2*lambda = a */\n+static void fuzz_scalar_split_lambda(const uint8_t *data, size_t size) {\n+    if (size >= 32) {\n+        secp256k1_scalar a, r1, r2, r3;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_split_lambda(&r1, &r2, &a);\n+        secp256k1_scalar_mul(&r3, &secp256k1_const_lambda, &r2);\n+        secp256k1_scalar_add(&r3, &r3, &r1);\n+        CHECK(secp256k1_scalar_eq(&r3, &a));\n+    }    \n+}\n+\n+/* Test conditional move of scalars  */\n+static void fuzz_scalar_cmov(const uint8_t *data, size_t size) {\n+    if (size >= 64) {        \n+        secp256k1_scalar a, b, r1;\n+        secp256k1_scalar_set_b32(&a, data, NULL);\n+        secp256k1_scalar_set_b32(&b, data + 32, NULL);\n+        int flag = size % 2;\n+        r1 = a;\n+        if (flag) {            \n+            secp256k1_scalar_cmov(&r1, &b, 1);\n+            CHECK(secp256k1_scalar_eq(&r1, &b));\n+        } else {\n+            secp256k1_scalar_cmov(&r1, &b, 0);\n+            CHECK(secp256k1_scalar_eq(&r1, &a));\n+        }\n+    }\n+}\n+\n+/*** Field Operation ***/\n+/* Construct a valid field element from fuzzer with random magnitude  */\n+static void fuzz_field_construct(const uint8_t *data, size_t size, secp256k1_fe *r) {    \n+    if (size>=32) {\n+        secp256k1_fe a, zero;      \n+        secp256k1_fe_set_b32_mod(r, data);\n+        int rand_magnitude = data[31] % 33;\n+        secp256k1_fe_normalize(r);\n+        if (rand_magnitude == 0) {\n+            return;\n+        }\n+        secp256k1_fe_clear(&zero);\n+        secp256k1_fe_negate(&zero, &zero, 0);\n+        secp256k1_fe_mul_int_unchecked(&zero, rand_magnitude - 1);",
+      "path": "src/fuzz.c",
+      "position": 218,
+      "original_position": 218,
+      "commit_id": "a0b3d0a0dee1171d8c0330a9971e3363e3505663",
+      "original_commit_id": "3874a937a9240f5c654cab84450a697d1982c2dc",
+      "in_reply_to_id": 1304906607,
+      "user": {
+        "login": "YafeiXie1",
+        "id": 114428701,
+        "node_id": "U_kgDOBtILHQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/114428701?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/YafeiXie1",
+        "html_url": "https://github.com/YafeiXie1",
+        "followers_url": "https://api.github.com/users/YafeiXie1/followers",
+        "following_url": "https://api.github.com/users/YafeiXie1/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/YafeiXie1/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/YafeiXie1/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/YafeiXie1/subscriptions",
+        "organizations_url": "https://api.github.com/users/YafeiXie1/orgs",
+        "repos_url": "https://api.github.com/users/YafeiXie1/repos",
+        "events_url": "https://api.github.com/users/YafeiXie1/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/YafeiXie1/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Thanks for your suggestions! I will modify this fuzz_field_construct function and other errors. ",
+      "created_at": "2023-08-25T14:30:22Z",
+      "updated_at": "2023-08-25T14:30:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1407#discussion_r1305739417",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1305739417"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1407"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 218,
+      "original_line": 218,
       "side": "RIGHT"
     }
   ]
