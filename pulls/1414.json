@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2023-08-30T17:01:19Z",
-    "updated_at": "2023-08-31T10:43:20Z",
+    "updated_at": "2023-08-31T12:43:50Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "008dad2a99aa5d6d8f049ea3ef537a50d1022538",
@@ -341,7 +341,7 @@
     "deletions": 22,
     "changed_files": 2,
     "commits": 5,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 2
   },
   "events": [
@@ -747,7 +747,95 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1414#issuecomment-1700799684",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1414"
+    },
+    {
+      "event": "reviewed",
+      "id": 1604668977,
+      "node_id": "PRR_kwDOAP4Jqs5fpU4x",
+      "url": null,
+      "actor": null,
+      "commit_id": "869a465701a3fb102fdcb9abb36fa396af50e550",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "MEMBER",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1414#pullrequestreview-1604668977",
+      "submitted_at": "2023-08-31T12:43:50Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1414"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1311572211",
+      "pull_request_review_id": 1604668977,
+      "id": 1311572211,
+      "node_id": "PRRC_kwDOAP4Jqs5OLQDz",
+      "diff_hunk": "@@ -37,26 +47,31 @@ RUN mkdir gcc && cd gcc && \\\n     [[ $(ls *.tar.xz | wc -l) -eq \"1\" ]] && \\\n     tar xf *.tar.xz && \\\n     mkdir gcc-build && cd gcc-build && \\\n-    apt-get update && apt-get install --no-install-recommends -y libgmp-dev libmpfr-dev libmpc-dev flex && \\\n     ../*/configure --prefix=/opt/gcc-snapshot --enable-languages=c --disable-bootstrap --disable-multilib --without-isl && \\\n     make -j $(nproc) && \\\n     make install && \\\n-    apt-get autoremove -y libgmp-dev libmpfr-dev libmpc-dev flex && \\\n-    apt-get clean && \\\n     cd ../.. && rm -rf gcc && \\\n-    ln -s /opt/gcc-snapshot/bin/gcc /usr/bin/gcc-snapshot\n+    ln -s /opt/gcc-snapshot/bin/gcc /usr/bin/gcc-snapshot && \\\n+    apt-get autoremove -y wget libgmp-dev libmpfr-dev libmpc-dev flex && \\\n+    apt-get clean && rm -rf /var/lib/apt/lists/*\n \n-# Install clang snapshot\n-RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \\\n+# Install clang snapshot and related packages, see https://apt.llvm.org/\n+RUN \\\n+    # Setup GPG keys of LLVM repository\n+    apt-get update && apt-get install --no-install-recommends -y wget && \\\n+    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \\\n     # Add repository for this Debian release\n     . /etc/os-release && echo \"deb http://apt.llvm.org/${VERSION_CODENAME} llvm-toolchain-${VERSION_CODENAME} main\" >> /etc/apt/sources.list && \\\n-    # Install clang snapshot\n-    apt-get update && apt-get install --no-install-recommends -y clang && \\\n-    # Remove just the \"clang\" symlink again\n-    apt-get remove -y clang && \\\n-    # We should have exactly two clang versions now\n-    ls /usr/bin/clang* && \\\n-    [[    $(ls /usr/bin/clang-?? | sort | wc -l) -eq \"2\" ]] && \\\n-    # Create symlinks for them\n-    ln -s $(ls /usr/bin/clang-?? | sort | tail -1) /usr/bin/clang-snapshot && \\\n-    ln -s $(ls /usr/bin/clang-?? | sort | head -1) /usr/bin/clang\n+    apt-get update && \\\n+    # Determine the version number of the LLVM development branch\n+    LLVM_VERSION=$(apt-cache search --names-only '^clang-[0-9]+$' | sort | tail -1 | cut -f1 -d\" \" | cut -f2 -d\"-\" ) && \\\n+    # Install packages\n+    apt-get install --no-install-recommends -y \"clang-${LLVM_VERSION}\" \"libclang-rt-${LLVM_VERSION}-dev:arm64\" && \\\n+    # Assert that we have exactly two clang versions now\n+    ls /usr/bin/clang* && [[ $(ls /usr/bin/clang-?? | sort | wc -l) -eq \"2\" ]] && \\",
+      "path": "ci/linux-debian.Dockerfile",
+      "position": 82,
+      "original_position": 82,
+      "commit_id": "869a465701a3fb102fdcb9abb36fa396af50e550",
+      "original_commit_id": "869a465701a3fb102fdcb9abb36fa396af50e550",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Why this code is needed now?",
+      "created_at": "2023-08-31T12:43:50Z",
+      "updated_at": "2023-08-31T12:43:51Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1414#discussion_r1311572211",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1311572211"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1414"
+        }
+      },
+      "start_line": 70,
+      "original_start_line": 70,
+      "start_side": "RIGHT",
+      "line": 71,
+      "original_line": 71,
+      "side": "RIGHT"
+    }
+  ]
 }
