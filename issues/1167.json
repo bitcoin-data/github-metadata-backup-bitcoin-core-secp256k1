@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1167/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1167",
     "number": 1167,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Setting counting_illegal_callback may hide failing tests",
     "body": "The following code snippet very roughly resembles what happens in the libsecp test harness and illustrates the issue:\r\n\r\n```C\r\n/* in the tests we have access to a global context */\r\nstatic secp256k1_context *ctx = NULL;\r\n\r\nvoid test_foo() {\r\n  int ecount;\r\n  context_set_error_callback(ctx, counting_illegal_callback_fn, &ecount);\r\n  /* do some tests with ecount */\r\n}\r\nvoid test_bar() {\r\n  /* we don't set the counting_illegal_callback here because we don't want to test that here */\r\n  some_function(ctx);\r\n}\r\nvoid main() {\r\n  test_foo();\r\n  test_bar();\r\n}\r\n```\r\n\r\nThe code is fine, until one day `some_function(ctx)` results in the illegal callback being called.\r\nThen we'd want the test to fail but instead what happens is that some stack region formerly known as `ecount` is modified, which does not necessarily result in a crash.\r\n\r\nOne solution would be to never add the `counting_illegal_callback` to the global context and instead create a local context for counting.",
     "user": {
@@ -58,8 +58,9 @@
     "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 4,
+    "closed_at": "2023-09-04T16:59:08Z",
     "created_at": "2022-12-01T22:03:03Z",
-    "updated_at": "2023-07-26T13:34:02Z"
+    "updated_at": "2023-09-04T16:59:08Z"
   },
   "events": [
     {
@@ -717,7 +718,7 @@
           "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1390/events",
           "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1390",
           "number": 1390,
-          "state": "open",
+          "state": "closed",
           "state_reason": null,
           "title": "tests: Replace counting_illegal_callbacks with CHECK_ILLEGAL_VOID",
           "body": "Fixes #1167",
@@ -764,18 +765,48 @@
           "assignees": [],
           "author_association": "CONTRIBUTOR",
           "locked": false,
-          "comments": 3,
+          "comments": 7,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1390",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1390",
             "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1390.diff",
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1390.patch"
           },
+          "closed_at": "2023-09-04T16:59:08Z",
           "created_at": "2023-07-28T22:04:09Z",
-          "updated_at": "2023-08-01T09:21:22Z"
+          "updated_at": "2023-09-04T16:59:09Z"
         },
         "type": "issue"
       }
+    },
+    {
+      "event": "closed",
+      "id": 10275970547,
+      "node_id": "CE_lADOAP4Jqs5XvS1tzwAAAAJkft3z",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10275970547",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "49be5be9e85da178537c325f4ae1b6a4d80c8ed9",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/49be5be9e85da178537c325f4ae1b6a4d80c8ed9",
+      "created_at": "2023-09-04T16:59:08Z"
     }
   ]
 }
