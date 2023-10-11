@@ -38,9 +38,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 1,
+    "comments": 2,
     "created_at": "2023-10-01T02:02:50Z",
-    "updated_at": "2023-10-02T17:31:47Z"
+    "updated_at": "2023-10-11T13:12:33Z"
   },
   "events": [
     {
@@ -126,7 +126,7 @@
             }
           ],
           "assignees": [],
-          "author_association": "CONTRIBUTOR",
+          "author_association": "MEMBER",
           "locked": false,
           "comments": 5,
           "created_at": "2023-09-26T11:59:59Z",
@@ -275,6 +275,60 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-10-02T17:31:48Z"
+    },
+    {
+      "event": "commented",
+      "id": 1757675172,
+      "node_id": "IC_kwDOAP4Jqs5ow_6k",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1757675172",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-10-11T13:12:33Z",
+      "updated_at": "2023-10-11T13:12:33Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "I haven't really thought holistically about how a silent payment module would look like, but here are some direct answers without taking the full context into account.\r\n\r\n> 1. calculate the outpoints hash (both sender and receiver sides)\r\n\r\nI think it's ok to do outpoint hashing outside of the module. As you point out, callers can hash faster (as long as we don't have https://github.com/bitcoin-core/secp256k1/issues/702). And the consequences of not hashing (correctly) are limited (as opposed to ECDSA, for example).\r\n\r\nAs for sorting, the MuSig2 module (currently only in -zkp) adds an in-place, iterative `O(n*log(n))` heapsort function that could potentially be used in the module. The reason we did this is that there's no guarantee that `qsort` is fast for maliciously crafted inputs.\r\n\r\n> 2. calculate the sum tweak of input private keys (sender side)\r\n\r\nPassing \"two different lists\" sounds workable to me. To avoid having to recompute the points corresponding to the secret keys in the xonly list, they should not be passed as byte arrays but as part of keypairs.\r\n\r\n```\r\nsecp256k1_spay_receiver_pubkey(..., unsigned char *plain_seckeys, secp256k1_keypair *xonly_keypairs, ...)\r\n```\r\n\r\nIt is arguably difficult to explain how this function is supposed to be called, but this complexity seems inherent in having the caller designate pubkeys used in taproot (and potentially future segwit versions that do xonly).\r\n\r\nIf I understand the [algorithm](https://github.com/josibake/bips/blob/silent-payments-bip/bip-0352.mediawiki#creating-outputs) correctly, the libsecp function would return an array of tweaked pubkeys, one for each Bm and change output.\r\n\r\n> 3. calculate the sum tweak of input public keys (receiver side)\r\n\r\nPassing two lists seems like an okay approach. Conversion functions may just lead to additional confusion. Without them, we maintain this relatively straightforward model:\r\n```\r\nxonly pubkey encoding -> use xonly_parse -> use in functions that accept xonly_pubkeys\r\ncompressed pubkey encoding -> use ec_pubkey_parse -> use in functions that accept ec_pubkeys\r\n```",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1427"
     }
   ]
 }
