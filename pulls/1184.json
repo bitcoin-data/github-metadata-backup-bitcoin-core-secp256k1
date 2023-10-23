@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1184/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/f773744172e998786e93877b2109b5d21156fbb5",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/c8eb787cd96995aefa79bf4bab18903c409db026",
     "number": 1184,
     "state": "open",
     "locked": false,
@@ -38,7 +38,7 @@
       "type": "User",
       "site_admin": false
     },
-    "body": "Using some insights learned from #1058, this replaces the fixed-wnaf ecmult_const algorithm with a signed-digit based one. Conceptually both algorithms are very similar, in that they boil down to summing precomputed odd multiples of the input points. Practically however, the new algorithm is simpler because it's just using scalar operations, rather than relying on wnaf machinery with skew terms to guarantee odd multipliers.\r\n\r\nThe idea is that we can compute $q \\cdot A$ as follows:\r\n* Let $s = f(q)$, for some function $f()$.\r\n* Compute $(s_1, s_2)$ such that $s = s_1 + \\lambda s_2$, using `secp256k1_scalar_lambda_split`.\r\n* Let $v_1 = s_1 + 2^{128}$ and $v_2 = s_2 + 2^{128}$ (such that the $v_i$ are positive and $n_i$ bits long).\r\n* Computing the result as $$\\sum_{i=0}^{n-1} (2v_1[i]-1) 2^i A + \\sum_{i=0}^{n-1} (2v_2[i]-1) 2^i \\lambda A$$ where $x[i]$ stands for the *i*'th bit of $x$, so summing positive and negative powers of two times $A$, based on the bits of $v_1.$\r\n\r\nThe comments in `ecmult_const_impl.h` show that if $f(q) = (q + (1+\\lambda)(2^n - 2^{129} - 1))/2 \\mod n$, the result will equal $q \\cdot A$.\r\n\r\nThis last step can be performed in groups of multiple bits at once, by looking up entries in a precomputed table of odd multiples of $A$ and $\\lambda A$, and then multiplying by a power of two before proceeding to the next group.\r\n\r\nThe result is slightly faster (I measure ~2% speedup), but significantly simpler as it only uses scalar arithmetic to determine the table lookup values. The speedup is due to the fact that no skew corrections at the end are needed, and less overhead to determine table indices. The precomputed table sizes are also made independent from the `ecmult` ones, after observing that the optimal table size is bigger here (which also gives a small speedup).",
+    "body": "Using some insights learned from #1058, this replaces the fixed-wnaf ecmult_const algorithm with a signed-digit based one. Conceptually both algorithms are very similar, in that they boil down to summing precomputed odd multiples of the input points. Practically however, the new algorithm is simpler because it's just using scalar operations, rather than relying on wnaf machinery with skew terms to guarantee odd multipliers.\r\n\r\nThe idea is that we can compute $q \\cdot A$ as follows:\r\n* Let $s = f(q)$, for some function $f()$.\r\n* Compute $(s_1, s_2)$ such that $s = s_1 + \\lambda s_2$, using `secp256k1_scalar_lambda_split`.\r\n* Let $v_1 = s_1 + 2^{128}$ and $v_2 = s_2 + 2^{128}$ (such that the $v_i$ are positive and $n$ bits long).\r\n* Computing the result as $$\\sum_{i=0}^{n-1} (2v_1[i]-1) 2^i A + \\sum_{i=0}^{n-1} (2v_2[i]-1) 2^i \\lambda A$$ where $x[i]$ stands for the *i*'th bit of $x$, so summing positive and negative powers of two times $A$, based on the bits of $v_1.$\r\n\r\nThe comments in `ecmult_const_impl.h` show that if $f(q) = (q + (1+\\lambda)(2^n - 2^{129} - 1))/2 \\mod n$, the result will equal $q \\cdot A$.\r\n\r\nThis last step can be performed in groups of multiple bits at once, by looking up entries in a precomputed table of odd multiples of $A$ and $\\lambda A$, and then multiplying by a power of two before proceeding to the next group.\r\n\r\nThe result is slightly faster (I measure ~2% speedup), but significantly simpler as it only uses scalar arithmetic to determine the table lookup values. The speedup is due to the fact that no skew corrections at the end are needed, and less overhead to determine table indices. The precomputed table sizes are also made independent from the `ecmult` ones, after observing that the optimal table size is bigger here (which also gives a small speedup).",
     "labels": [
       {
         "id": 4975389731,
@@ -96,10 +96,10 @@
       "due_on": "2023-12-01T08:00:00Z"
     },
     "created_at": "2022-12-30T06:39:21Z",
-    "updated_at": "2023-10-21T13:34:16Z",
+    "updated_at": "2023-10-23T15:30:49Z",
     "mergeable": true,
-    "mergeable_state": "clean",
-    "merge_commit_sha": "b4a3461c6eedfdb2a563c5b76732d572aa57a9f1",
+    "mergeable_state": "unstable",
+    "merge_commit_sha": "d7203bcf56b644de10e6c139c67e93eda8cf3f9d",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -107,7 +107,7 @@
     "head": {
       "label": "sipa:202212_sd_ecmult_const",
       "ref": "202212_sd_ecmult_const",
-      "sha": "f773744172e998786e93877b2109b5d21156fbb5",
+      "sha": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "user": {
         "login": "sipa",
         "id": 548488,
@@ -215,7 +215,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-09-19T16:57:17Z",
+        "pushed_at": "2023-10-23T15:28:10Z",
         "created_at": "2014-02-08T17:33:30Z",
         "updated_at": "2023-05-11T11:08:51Z",
         "license": {
@@ -238,7 +238,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "ea26b71c3a3e1a5c39a4fbdaf2f0b787c5139f56",
+      "sha": "b314cf28334a91db2fe144d04f86077e2bfd7a25",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -330,12 +330,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1022,
+        "forks_count": 1023,
         "stargazers_count": 1847,
         "watchers_count": 1847,
         "size": 10635,
         "default_branch": "master",
-        "open_issues_count": 137,
+        "open_issues_count": 136,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -346,9 +346,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-10-18T12:40:11Z",
+        "pushed_at": "2023-10-23T15:49:52Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-10-20T10:28:01Z",
+        "updated_at": "2023-10-23T11:06:14Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -373,12 +373,12 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 423,
+    "additions": 427,
     "deletions": 330,
     "changed_files": 9,
     "commits": 7,
-    "review_comments": 39,
-    "comments": 20
+    "review_comments": 42,
+    "comments": 21
   },
   "events": [
     {
@@ -2868,286 +2868,6 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1184"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGY1ODFlMjIyZGIyYzYwNDA0ZjMyNDhmNTM0YjFhYWZlZGQ3YjUyMmM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f581e222db2c60404f3248f534b1aafedd7b522c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f581e222db2c60404f3248f534b1aafedd7b522c",
-      "tree": {
-        "sha": "c30c68cdc1676c5a11753c26675f1be208c3119d",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c30c68cdc1676c5a11753c26675f1be208c3119d"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ea26b71c3a3e1a5c39a4fbdaf2f0b787c5139f56",
-          "sha": "ea26b71c3a3e1a5c39a4fbdaf2f0b787c5139f56",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ea26b71c3a3e1a5c39a4fbdaf2f0b787c5139f56"
-        }
-      ],
-      "message": "Add secp256k1_scalar_half for halving scalars (+ tests/benchmarks).\n\nCo-authored-by: Jonas Nick <jonasd.nick@gmail.com>\nCo-authored-by: Tim Ruffing <crypto@timruffing.de>",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:12Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-29T16:48:06Z"
-      },
-      "sha": "f581e222db2c60404f3248f534b1aafedd7b522c"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDU4MWNlODQ5OWYwMTJlM2E3MmVlNmViOWMxODY5ZDBmMjIzYWQwZWE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/581ce8499f012e3a72ee6eb9c1869d0f223ad0ea",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/581ce8499f012e3a72ee6eb9c1869d0f223ad0ea",
-      "tree": {
-        "sha": "311b8c82d542c9a1c86a453c73f63d628c6af19a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/311b8c82d542c9a1c86a453c73f63d628c6af19a"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f581e222db2c60404f3248f534b1aafedd7b522c",
-          "sha": "f581e222db2c60404f3248f534b1aafedd7b522c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f581e222db2c60404f3248f534b1aafedd7b522c"
-        }
-      ],
-      "message": "make SECP256K1_SCALAR_CONST reduce modulo exhaustive group order",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-30T17:13:46Z"
-      },
-      "sha": "581ce8499f012e3a72ee6eb9c1869d0f223ad0ea"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDVkYmYyNTI5MzUzYjFlYzBhZjMxMWNiZDdhOTFiOTg1OWUzODUwNzc",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5dbf2529353b1ec0af311cbd7a91b9859e385077",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5dbf2529353b1ec0af311cbd7a91b9859e385077",
-      "tree": {
-        "sha": "91a623be3e6b9a6124e5be25d8aae845778ef2cf",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/91a623be3e6b9a6124e5be25d8aae845778ef2cf"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/581ce8499f012e3a72ee6eb9c1869d0f223ad0ea",
-          "sha": "581ce8499f012e3a72ee6eb9c1869d0f223ad0ea",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/581ce8499f012e3a72ee6eb9c1869d0f223ad0ea"
-        }
-      ],
-      "message": "Signed-digit based ecmult_const algorithm",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-30T19:43:37Z"
-      },
-      "sha": "5dbf2529353b1ec0af311cbd7a91b9859e385077"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDdmZTE0MGY3MGY1NThhZGZiMzIzZDBkM2IzYjNlMmM5ODRiY2MxMjg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fe140f70f558adfb323d0d3b3b3e2c984bcc128",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fe140f70f558adfb323d0d3b3b3e2c984bcc128",
-      "tree": {
-        "sha": "d899c474efa54c2d8f32ab12bfdd81eb4e2488c1",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d899c474efa54c2d8f32ab12bfdd81eb4e2488c1"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5dbf2529353b1ec0af311cbd7a91b9859e385077",
-          "sha": "5dbf2529353b1ec0af311cbd7a91b9859e385077",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5dbf2529353b1ec0af311cbd7a91b9859e385077"
-        }
-      ],
-      "message": "ecmult_const: add/improve tests\n\n* add test case for a=infinity\n\n  The corresponding ecmult_const branch was not tested before this commit.\n\n* add test for edge cases",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2023-06-20T20:16:30Z"
-      },
-      "sha": "7fe140f70f558adfb323d0d3b3b3e2c984bcc128"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDhlODk4ZWMxMjRmMzhkYjQ2MjkzNTRlODE4NjY5ZTUyMzFjYTBlODI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8e898ec124f38db4629354e818669e5231ca0e82",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8e898ec124f38db4629354e818669e5231ca0e82",
-      "tree": {
-        "sha": "dd769cdeace69dd7f7db7953354adcfd4f4860d8",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/dd769cdeace69dd7f7db7953354adcfd4f4860d8"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fe140f70f558adfb323d0d3b3b3e2c984bcc128",
-          "sha": "7fe140f70f558adfb323d0d3b3b3e2c984bcc128",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fe140f70f558adfb323d0d3b3b3e2c984bcc128"
-        }
-      ],
-      "message": "Remove unused secp256k1_wnaf_const",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-30T19:44:14Z"
-      },
-      "sha": "8e898ec124f38db4629354e818669e5231ca0e82"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDlkMzA5ODA0MzVjMDljMDZjZTJhODM2ZTQ5ZTcwM2ZmNWMxNzdhM2U",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9d30980435c09c06ce2a836e49e703ff5c177a3e",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9d30980435c09c06ce2a836e49e703ff5c177a3e",
-      "tree": {
-        "sha": "6dfb6720270324e9c14ae3bde5d57151f54cb38a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6dfb6720270324e9c14ae3bde5d57151f54cb38a"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8e898ec124f38db4629354e818669e5231ca0e82",
-          "sha": "8e898ec124f38db4629354e818669e5231ca0e82",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8e898ec124f38db4629354e818669e5231ca0e82"
-        }
-      ],
-      "message": "Remove unused secp256k1_scalar_shr_int",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-30T19:17:42Z"
-      },
-      "sha": "9d30980435c09c06ce2a836e49e703ff5c177a3e"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGY3NzM3NDQxNzJlOTk4Nzg2ZTkzODc3YjIxMDliNWQyMTE1NmZiYjU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f773744172e998786e93877b2109b5d21156fbb5",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f773744172e998786e93877b2109b5d21156fbb5",
-      "tree": {
-        "sha": "4e4e5fbad607ece1ab5b806b225efc8e6c093d30",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4e4e5fbad607ece1ab5b806b225efc8e6c093d30"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9d30980435c09c06ce2a836e49e703ff5c177a3e",
-          "sha": "9d30980435c09c06ce2a836e49e703ff5c177a3e",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9d30980435c09c06ce2a836e49e703ff5c177a3e"
-        }
-      ],
-      "message": "Add changelog entry for signed-digit ecmult_const algorithm",
-      "committer": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2023-08-24T20:32:18Z"
-      },
-      "author": {
-        "name": "Pieter Wuille",
-        "email": "pieter@wuille.net",
-        "date": "2022-12-30T20:31:39Z"
-      },
-      "sha": "f773744172e998786e93877b2109b5d21156fbb5"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 10185791780,
       "node_id": "HRFPE_lADOAP4Jqs5aQiuazwAAAAJfHtkk",
@@ -3362,6 +3082,369 @@
       "submitted_at": "2023-10-21T13:34:16Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDg3OGI0OTM4M2NkMmMxOTdiZWFlYWFhMTM1NzU0MWUyYjg1YjA1MTU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/878b49383cd2c197beaeaaa1357541e2b85b0515",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/878b49383cd2c197beaeaaa1357541e2b85b0515",
+      "tree": {
+        "sha": "8c0b0651309a72f7e5297911c1f1c14f9e938a3f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8c0b0651309a72f7e5297911c1f1c14f9e938a3f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b314cf28334a91db2fe144d04f86077e2bfd7a25",
+          "sha": "b314cf28334a91db2fe144d04f86077e2bfd7a25",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b314cf28334a91db2fe144d04f86077e2bfd7a25"
+        }
+      ],
+      "message": "Add secp256k1_scalar_half for halving scalars (+ tests/benchmarks).\n\nCo-authored-by: Jonas Nick <jonasd.nick@gmail.com>\nCo-authored-by: Tim Ruffing <crypto@timruffing.de>",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:11:35Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-29T16:48:06Z"
+      },
+      "sha": "878b49383cd2c197beaeaaa1357541e2b85b0515"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGZkNTg0NTRmMmJhYWMyYTUzMTdjYWU4OWNiN2JmZDJjOTAzZTNiN2I",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fd58454f2baac2a5317cae89cb7bfd2c903e3b7b",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fd58454f2baac2a5317cae89cb7bfd2c903e3b7b",
+      "tree": {
+        "sha": "2f1ac4561876038fb3d2b9759f576c335bc7fc06",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2f1ac4561876038fb3d2b9759f576c335bc7fc06"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/878b49383cd2c197beaeaaa1357541e2b85b0515",
+          "sha": "878b49383cd2c197beaeaaa1357541e2b85b0515",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/878b49383cd2c197beaeaaa1357541e2b85b0515"
+        }
+      ],
+      "message": "make SECP256K1_SCALAR_CONST reduce modulo exhaustive group order",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:11:35Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-30T17:13:46Z"
+      },
+      "sha": "fd58454f2baac2a5317cae89cb7bfd2c903e3b7b"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQwMmIzNzc2YTg5YmIyOTdkNDdhODg3NzE1Mzk4NjFhY2M2ZTdmZDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/402b3776a89bb297d47a88771539861acc6e7fd3",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/402b3776a89bb297d47a88771539861acc6e7fd3",
+      "tree": {
+        "sha": "fc77b2ea370e229536089ab2f26ffab80461229c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/fc77b2ea370e229536089ab2f26ffab80461229c"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fd58454f2baac2a5317cae89cb7bfd2c903e3b7b",
+          "sha": "fd58454f2baac2a5317cae89cb7bfd2c903e3b7b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fd58454f2baac2a5317cae89cb7bfd2c903e3b7b"
+        }
+      ],
+      "message": "Signed-digit based ecmult_const algorithm",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:22:35Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-30T19:43:37Z"
+      },
+      "sha": "402b3776a89bb297d47a88771539861acc6e7fd3"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDMxOTY5YjViODFmMjVmM2NiY2YwNGI1OWVmYzlmNzJjMzM4YTAyYmI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/31969b5b81f25f3cbcf04b59efc9f72c338a02bb",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/31969b5b81f25f3cbcf04b59efc9f72c338a02bb",
+      "tree": {
+        "sha": "989c08c9d24bc9eb086da71fe9a96c8cb3d9b4c7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/989c08c9d24bc9eb086da71fe9a96c8cb3d9b4c7"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/402b3776a89bb297d47a88771539861acc6e7fd3",
+          "sha": "402b3776a89bb297d47a88771539861acc6e7fd3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/402b3776a89bb297d47a88771539861acc6e7fd3"
+        }
+      ],
+      "message": "ecmult_const: add/improve tests\n\n* add test case for a=infinity\n\n  The corresponding ecmult_const branch was not tested before this commit.\n\n* add test for edge cases",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:22:39Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2023-06-20T20:16:30Z"
+      },
+      "sha": "31969b5b81f25f3cbcf04b59efc9f72c338a02bb"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDVlODVlMTE2MGEyYmM5MTJkM2Y3MGNiNDU0OGI3ZTI0ZjRjMjNjMjc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5e85e1160a2bc912d3f70cb4548b7e24f4c23c27",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5e85e1160a2bc912d3f70cb4548b7e24f4c23c27",
+      "tree": {
+        "sha": "c2b866c1331e1e30dae0e5ebc5dea14a0fd09f76",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c2b866c1331e1e30dae0e5ebc5dea14a0fd09f76"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/31969b5b81f25f3cbcf04b59efc9f72c338a02bb",
+          "sha": "31969b5b81f25f3cbcf04b59efc9f72c338a02bb",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/31969b5b81f25f3cbcf04b59efc9f72c338a02bb"
+        }
+      ],
+      "message": "Remove unused secp256k1_wnaf_const",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:22:39Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-30T19:44:14Z"
+      },
+      "sha": "5e85e1160a2bc912d3f70cb4548b7e24f4c23c27"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDRjZDYzNzU2YjgyNDk2Yzg1OTU3ZGQ4ZWJmYzI1NTZhYzBlOTE5NmY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4cd63756b82496c85957dd8ebfc2556ac0e9196f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4cd63756b82496c85957dd8ebfc2556ac0e9196f",
+      "tree": {
+        "sha": "48daef0810f92b2c0cba0d09f4ccc58f25f72025",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/48daef0810f92b2c0cba0d09f4ccc58f25f72025"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5e85e1160a2bc912d3f70cb4548b7e24f4c23c27",
+          "sha": "5e85e1160a2bc912d3f70cb4548b7e24f4c23c27",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5e85e1160a2bc912d3f70cb4548b7e24f4c23c27"
+        }
+      ],
+      "message": "Remove unused secp256k1_scalar_shr_int",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:22:39Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-30T19:17:42Z"
+      },
+      "sha": "4cd63756b82496c85957dd8ebfc2556ac0e9196f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGM4ZWI3ODdjZDk2OTk1YWVmYTc5YmY0YmFiMTg5MDNjNDA5ZGIwMjY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c8eb787cd96995aefa79bf4bab18903c409db026",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c8eb787cd96995aefa79bf4bab18903c409db026",
+      "tree": {
+        "sha": "7e72c8e536cfe5bddc9a384d17e1bfbaa7e10ad1",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7e72c8e536cfe5bddc9a384d17e1bfbaa7e10ad1"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4cd63756b82496c85957dd8ebfc2556ac0e9196f",
+          "sha": "4cd63756b82496c85957dd8ebfc2556ac0e9196f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4cd63756b82496c85957dd8ebfc2556ac0e9196f"
+        }
+      ],
+      "message": "Add changelog entry for signed-digit ecmult_const algorithm",
+      "committer": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2023-10-23T15:23:10Z"
+      },
+      "author": {
+        "name": "Pieter Wuille",
+        "email": "pieter@wuille.net",
+        "date": "2022-12-30T20:31:39Z"
+      },
+      "sha": "c8eb787cd96995aefa79bf4bab18903c409db026"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 10742622196,
+      "node_id": "HRFPE_lADOAP4Jqs5aQiuazwAAAAKAT2f0",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10742622196",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-10-23T15:28:15Z"
+    },
+    {
+      "event": "commented",
+      "id": 1775463904,
+      "node_id": "IC_kwDOAP4Jqs5p023g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1775463904",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-10-23T15:29:13Z",
+      "updated_at": "2023-10-23T15:29:21Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Rebased and addressed the comments above.\r\n",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#issuecomment-1775463904",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1184"
     }
   ],
   "comments": [
@@ -3374,7 +3457,7 @@
       "path": "src/tests.c",
       "position": null,
       "original_position": 32,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "b4387056a50fabc5a36c092a522636b032d4b378",
       "in_reply_to_id": null,
       "user": {
@@ -3426,7 +3509,7 @@
       "path": "src/tests.c",
       "position": null,
       "original_position": 32,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "b4387056a50fabc5a36c092a522636b032d4b378",
       "in_reply_to_id": 1059346476,
       "user": {
@@ -3478,7 +3561,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 208,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": null,
       "user": {
@@ -3530,7 +3613,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 246,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": null,
       "user": {
@@ -3582,7 +3665,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 210,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": null,
       "user": {
@@ -3634,7 +3717,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 212,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": null,
       "user": {
@@ -3686,7 +3769,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 235,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": null,
       "user": {
@@ -3738,7 +3821,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 246,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102294858,
       "user": {
@@ -3790,7 +3873,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 208,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102279813,
       "user": {
@@ -3842,7 +3925,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 246,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102294858,
       "user": {
@@ -3894,7 +3977,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 210,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102302801,
       "user": {
@@ -3946,7 +4029,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 212,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102304254,
       "user": {
@@ -3998,7 +4081,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 235,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102306814,
       "user": {
@@ -4050,7 +4133,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 246,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "1c48861222a2293185529ce354f2f27d5d83a4d7",
       "in_reply_to_id": 1102294858,
       "user": {
@@ -4102,7 +4185,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 217,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "dd21e2c5ca2f9e76a2d2717c26a83f6ab4d2651f",
       "in_reply_to_id": null,
       "user": {
@@ -4154,7 +4237,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 219,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "dd21e2c5ca2f9e76a2d2717c26a83f6ab4d2651f",
       "in_reply_to_id": null,
       "user": {
@@ -4206,7 +4289,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 217,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "dd21e2c5ca2f9e76a2d2717c26a83f6ab4d2651f",
       "in_reply_to_id": 1103664830,
       "user": {
@@ -4258,7 +4341,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 219,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "dd21e2c5ca2f9e76a2d2717c26a83f6ab4d2651f",
       "in_reply_to_id": 1103673032,
       "user": {
@@ -4310,7 +4393,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 183,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": null,
       "user": {
@@ -4362,7 +4445,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 72,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": null,
       "user": {
@@ -4414,7 +4497,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 356,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": null,
       "user": {
@@ -4466,7 +4549,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 326,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": null,
       "user": {
@@ -4518,7 +4601,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 73,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": null,
       "user": {
@@ -4558,7 +4641,7 @@
       "original_start_line": 63,
       "start_side": "RIGHT",
       "line": null,
-      "original_line": 64,
+      "original_line": 66,
       "side": "RIGHT"
     },
     {
@@ -4570,7 +4653,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 326,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": 1230547315,
       "user": {
@@ -4622,7 +4705,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 356,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": 1230109862,
       "user": {
@@ -4674,7 +4757,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 72,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": 1230109130,
       "user": {
@@ -4726,7 +4809,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": null,
       "original_position": 183,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f22eb66c078790d075e10c4895e6eaf62e78c2dc",
       "in_reply_to_id": 1230108926,
       "user": {
@@ -4778,7 +4861,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": 4,
       "original_position": 4,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": null,
       "user": {
@@ -4830,7 +4913,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": null,
       "original_position": 19,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": null,
       "user": {
@@ -4882,7 +4965,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": null,
       "original_position": 32,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": null,
       "user": {
@@ -4934,7 +5017,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": 4,
       "original_position": 4,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": 1238625064,
       "user": {
@@ -4986,7 +5069,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": null,
       "original_position": 32,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": 1239566294,
       "user": {
@@ -5038,7 +5121,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": null,
       "original_position": 19,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": 1238630727,
       "user": {
@@ -5090,7 +5173,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": 4,
       "original_position": 4,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": 1238625064,
       "user": {
@@ -5142,7 +5225,7 @@
       "path": "src/scalar_8x32_impl.h",
       "position": 4,
       "original_position": 4,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "e6b14b947f04e3fbcb48113b942c24b279c59cee",
       "in_reply_to_id": 1238625064,
       "user": {
@@ -5194,7 +5277,7 @@
       "path": "src/ecmult_const_impl.h",
       "position": 18,
       "original_position": 18,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "5dbf2529353b1ec0af311cbd7a91b9859e385077",
       "in_reply_to_id": null,
       "user": {
@@ -5244,9 +5327,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5Pt6pt",
       "diff_hunk": "@@ -12,45 +12,74 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\\n     secp256k1_fe neg_y; \\\n-    VERIFY_CHECK(((n) & 1) == 1); \\\n-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \\\n-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \\\n+    VERIFY_CHECK((n) >> ECMULT_CONST_GROUP_SIZE == 0); \\\n+    VERIFY_CHECK(index >> (ECMULT_CONST_GROUP_SIZE - 1) == 0); \\",
       "path": "src/ecmult_const_impl.h",
-      "position": 79,
+      "position": null,
       "original_position": 79,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "5dbf2529353b1ec0af311cbd7a91b9859e385077",
       "in_reply_to_id": null,
       "user": {
@@ -5282,10 +5365,10 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
         }
       },
-      "start_line": 66,
+      "start_line": null,
       "original_start_line": 66,
       "start_side": "RIGHT",
-      "line": 67,
+      "line": null,
       "original_line": 67,
       "side": "RIGHT"
     },
@@ -5296,9 +5379,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5RhetR",
       "diff_hunk": "@@ -12,208 +12,251 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\\n     secp256k1_fe neg_y; \\\n-    VERIFY_CHECK(((n) & 1) == 1); \\\n-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \\\n-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \\\n+    VERIFY_CHECK((n) >> ECMULT_CONST_GROUP_SIZE == 0); \\\n+    VERIFY_CHECK(index >> (ECMULT_CONST_GROUP_SIZE - 1) == 0); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->x)); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->y)); \\\n-    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one \\\n+    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one\n      * or will get replaced in the later iterations, this is needed to make sure `r` is initialized. */ \\\n     (r)->x = (pre)[m].x; \\\n     (r)->y = (pre)[m].y; \\\n-    for (m = 1; m < ECMULT_TABLE_SIZE(w); m++) { \\\n+    for (m = 1; m < ECMULT_CONST_TABLE_SIZE; m++) { \\\n         /* This loop is used to avoid secret data in array indices. See\n          * the comment in ecmult_gen_impl.h for rationale. */ \\\n-        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == idx_n); \\\n-        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == idx_n); \\\n+        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == index); \\\n+        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == index); \\\n     } \\\n     (r)->infinity = 0; \\\n     secp256k1_fe_negate(&neg_y, &(r)->y, 1); \\\n-    secp256k1_fe_cmov(&(r)->y, &neg_y, (n) != abs_n); \\\n+    secp256k1_fe_cmov(&(r)->y, &neg_y, negative); \\\n } while(0)\n \n-/** Convert a number to WNAF notation.\n- *  The number becomes represented by sum(2^{wi} * wnaf[i], i=0..WNAF_SIZE(w)+1) - return_val.\n- *  It has the following guarantees:\n- *  - each wnaf[i] an odd integer between -(1 << w) and (1 << w)\n- *  - each wnaf[i] is nonzero\n- *  - the number of words set is always WNAF_SIZE(w) + 1\n- *\n- *  Adapted from `The Width-w NAF Method Provides Small Memory and Fast Elliptic Scalar\n- *  Multiplications Secure against Side Channel Attacks`, Okeya and Tagaki. M. Joye (Ed.)\n- *  CT-RSA 2003, LNCS 2612, pp. 328-443, 2003. Springer-Verlag Berlin Heidelberg 2003\n- *\n- *  Numbers reference steps of `Algorithm SPA-resistant Width-w NAF with Odd Scalar` on pp. 335\n- */\n-static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w, int size) {\n-    int global_sign;\n-    int skew;\n-    int word = 0;\n-\n-    /* 1 2 3 */\n-    int u_last;\n-    int u;\n-\n-    int flip;\n-    secp256k1_scalar s = *scalar;\n-\n-    VERIFY_CHECK(w > 0);\n-    VERIFY_CHECK(size > 0);\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    /* Note that we cannot handle even numbers by negating them to be odd, as is\n-     * done in other implementations, since if our scalars were specified to have\n-     * width < 256 for performance reasons, their negations would have width 256\n-     * and we'd lose any performance benefit. Instead, we use a variation of a\n-     * technique from Section 4.2 of the Okeya/Tagaki paper, which is to add 1 to the\n-     * number we are encoding when it is even, returning a skew value indicating\n-     * this, and having the caller compensate after doing the multiplication.\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n      *\n-     * In fact, we _do_ want to negate numbers to minimize their bit-lengths (and in\n-     * particular, to ensure that the outputs from the endomorphism-split fit into\n-     * 128 bits). If we negate, the parity of our number flips, affecting whether\n-     * we want to add to the scalar to ensure that it's odd. */\n-    flip = secp256k1_scalar_is_high(&s);\n-    skew = flip ^ secp256k1_scalar_is_even(&s);\n-    secp256k1_scalar_cadd_bit(&s, 0, skew);\n-    global_sign = secp256k1_scalar_cond_negate(&s, flip);\n-\n-    /* 4 */\n-    u_last = secp256k1_scalar_shr_int(&s, w);\n-    do {\n-        int even;\n-\n-        /* 4.1 4.4 */\n-        u = secp256k1_scalar_shr_int(&s, w);\n-        /* 4.2 */\n-        even = ((u & 1) == 0);\n-        /* In contrast to the original algorithm, u_last is always > 0 and\n-         * therefore we do not need to check its sign. In particular, it's easy\n-         * to see that u_last is never < 0 because u is never < 0. Moreover,\n-         * u_last is never = 0 because u is never even after a loop\n-         * iteration. The same holds analogously for the initial value of\n-         * u_last (in the first loop iteration). */\n-        VERIFY_CHECK(u_last > 0);\n-        VERIFY_CHECK((u_last & 1) == 1);\n-        u += even;\n-        u_last -= even * (1 << w);\n-\n-        /* 4.3, adapted for global sign change */\n-        wnaf[word++] = u_last * global_sign;\n-\n-        u_last = u;\n-    } while (word * w < size);\n-    wnaf[word] = u * global_sign;\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^l - 1) / 2, A). This is the basis for the",
       "path": "src/ecmult_const_impl.h",
-      "position": 205,
+      "position": null,
       "original_position": 205,
-      "commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
       "original_commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
       "in_reply_to_id": null,
       "user": {
@@ -5337,7 +5420,163 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 119,
+      "line": null,
+      "original_line": 119,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874418",
+      "pull_request_review_id": 1692879841,
+      "id": 1368874418,
+      "node_id": "PRRC_kwDOAP4Jqs5Rl12y",
+      "diff_hunk": "@@ -12,45 +12,74 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3",
+      "path": "src/ecmult_const_impl.h",
+      "position": 18,
+      "original_position": 18,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "5dbf2529353b1ec0af311cbd7a91b9859e385077",
+      "in_reply_to_id": 1337429408,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Done. This PR (or its code) may have predated the test order 7 introduction.",
+      "created_at": "2023-10-23T15:28:49Z",
+      "updated_at": "2023-10-23T15:28:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1368874418",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874418"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": 21,
+      "original_start_line": 21,
+      "start_side": "RIGHT",
+      "line": 22,
+      "original_line": 22,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874560",
+      "pull_request_review_id": 1692880057,
+      "id": 1368874560,
+      "node_id": "PRRC_kwDOAP4Jqs5Rl15A",
+      "diff_hunk": "@@ -12,45 +12,74 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\\n     secp256k1_fe neg_y; \\\n-    VERIFY_CHECK(((n) & 1) == 1); \\\n-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \\\n-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \\\n+    VERIFY_CHECK((n) >> ECMULT_CONST_GROUP_SIZE == 0); \\\n+    VERIFY_CHECK(index >> (ECMULT_CONST_GROUP_SIZE - 1) == 0); \\",
+      "path": "src/ecmult_const_impl.h",
+      "position": null,
+      "original_position": 79,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "5dbf2529353b1ec0af311cbd7a91b9859e385077",
+      "in_reply_to_id": 1337436781,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Done.",
+      "created_at": "2023-10-23T15:28:55Z",
+      "updated_at": "2023-10-23T15:28:55Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1368874560",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874560"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 66,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 67,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874757",
+      "pull_request_review_id": 1692880339,
+      "id": 1368874757,
+      "node_id": "PRRC_kwDOAP4Jqs5Rl18F",
+      "diff_hunk": "@@ -12,208 +12,251 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\\n     secp256k1_fe neg_y; \\\n-    VERIFY_CHECK(((n) & 1) == 1); \\\n-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \\\n-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \\\n+    VERIFY_CHECK((n) >> ECMULT_CONST_GROUP_SIZE == 0); \\\n+    VERIFY_CHECK(index >> (ECMULT_CONST_GROUP_SIZE - 1) == 0); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->x)); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->y)); \\\n-    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one \\\n+    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one\n      * or will get replaced in the later iterations, this is needed to make sure `r` is initialized. */ \\\n     (r)->x = (pre)[m].x; \\\n     (r)->y = (pre)[m].y; \\\n-    for (m = 1; m < ECMULT_TABLE_SIZE(w); m++) { \\\n+    for (m = 1; m < ECMULT_CONST_TABLE_SIZE; m++) { \\\n         /* This loop is used to avoid secret data in array indices. See\n          * the comment in ecmult_gen_impl.h for rationale. */ \\\n-        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == idx_n); \\\n-        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == idx_n); \\\n+        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == index); \\\n+        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == index); \\\n     } \\\n     (r)->infinity = 0; \\\n     secp256k1_fe_negate(&neg_y, &(r)->y, 1); \\\n-    secp256k1_fe_cmov(&(r)->y, &neg_y, (n) != abs_n); \\\n+    secp256k1_fe_cmov(&(r)->y, &neg_y, negative); \\\n } while(0)\n \n-/** Convert a number to WNAF notation.\n- *  The number becomes represented by sum(2^{wi} * wnaf[i], i=0..WNAF_SIZE(w)+1) - return_val.\n- *  It has the following guarantees:\n- *  - each wnaf[i] an odd integer between -(1 << w) and (1 << w)\n- *  - each wnaf[i] is nonzero\n- *  - the number of words set is always WNAF_SIZE(w) + 1\n- *\n- *  Adapted from `The Width-w NAF Method Provides Small Memory and Fast Elliptic Scalar\n- *  Multiplications Secure against Side Channel Attacks`, Okeya and Tagaki. M. Joye (Ed.)\n- *  CT-RSA 2003, LNCS 2612, pp. 328-443, 2003. Springer-Verlag Berlin Heidelberg 2003\n- *\n- *  Numbers reference steps of `Algorithm SPA-resistant Width-w NAF with Odd Scalar` on pp. 335\n- */\n-static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w, int size) {\n-    int global_sign;\n-    int skew;\n-    int word = 0;\n-\n-    /* 1 2 3 */\n-    int u_last;\n-    int u;\n-\n-    int flip;\n-    secp256k1_scalar s = *scalar;\n-\n-    VERIFY_CHECK(w > 0);\n-    VERIFY_CHECK(size > 0);\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    /* Note that we cannot handle even numbers by negating them to be odd, as is\n-     * done in other implementations, since if our scalars were specified to have\n-     * width < 256 for performance reasons, their negations would have width 256\n-     * and we'd lose any performance benefit. Instead, we use a variation of a\n-     * technique from Section 4.2 of the Okeya/Tagaki paper, which is to add 1 to the\n-     * number we are encoding when it is even, returning a skew value indicating\n-     * this, and having the caller compensate after doing the multiplication.\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n      *\n-     * In fact, we _do_ want to negate numbers to minimize their bit-lengths (and in\n-     * particular, to ensure that the outputs from the endomorphism-split fit into\n-     * 128 bits). If we negate, the parity of our number flips, affecting whether\n-     * we want to add to the scalar to ensure that it's odd. */\n-    flip = secp256k1_scalar_is_high(&s);\n-    skew = flip ^ secp256k1_scalar_is_even(&s);\n-    secp256k1_scalar_cadd_bit(&s, 0, skew);\n-    global_sign = secp256k1_scalar_cond_negate(&s, flip);\n-\n-    /* 4 */\n-    u_last = secp256k1_scalar_shr_int(&s, w);\n-    do {\n-        int even;\n-\n-        /* 4.1 4.4 */\n-        u = secp256k1_scalar_shr_int(&s, w);\n-        /* 4.2 */\n-        even = ((u & 1) == 0);\n-        /* In contrast to the original algorithm, u_last is always > 0 and\n-         * therefore we do not need to check its sign. In particular, it's easy\n-         * to see that u_last is never < 0 because u is never < 0. Moreover,\n-         * u_last is never = 0 because u is never even after a loop\n-         * iteration. The same holds analogously for the initial value of\n-         * u_last (in the first loop iteration). */\n-        VERIFY_CHECK(u_last > 0);\n-        VERIFY_CHECK((u_last & 1) == 1);\n-        u += even;\n-        u_last -= even * (1 << w);\n-\n-        /* 4.3, adapted for global sign change */\n-        wnaf[word++] = u_last * global_sign;\n-\n-        u_last = u;\n-    } while (word * w < size);\n-    wnaf[word] = u * global_sign;\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^l - 1) / 2, A). This is the basis for the",
+      "path": "src/ecmult_const_impl.h",
+      "position": null,
+      "original_position": 205,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "f773744172e998786e93877b2109b5d21156fbb5",
+      "in_reply_to_id": 1367731025,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Fixed.",
+      "created_at": "2023-10-23T15:29:02Z",
+      "updated_at": "2023-10-23T15:29:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1368874757",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1368874757"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
       "original_line": 119,
       "side": "RIGHT"
     }
