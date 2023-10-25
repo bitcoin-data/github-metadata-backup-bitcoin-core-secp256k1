@@ -96,7 +96,7 @@
       "due_on": "2023-12-01T08:00:00Z"
     },
     "created_at": "2022-12-30T06:39:21Z",
-    "updated_at": "2023-10-25T14:49:47Z",
+    "updated_at": "2023-10-25T15:43:25Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "d7203bcf56b644de10e6c139c67e93eda8cf3f9d",
@@ -377,7 +377,7 @@
     "deletions": 330,
     "changed_files": 9,
     "commits": 7,
-    "review_comments": 47,
+    "review_comments": 51,
     "comments": 21
   },
   "events": [
@@ -3481,6 +3481,42 @@
       "submitted_at": "2023-10-24T12:53:10Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+    },
+    {
+      "event": "reviewed",
+      "id": 1697415270,
+      "node_id": "PRR_kwDOAP4Jqs5lLIBm",
+      "url": null,
+      "actor": null,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "utACK mod these nits\r\n\r\nalso utACK on jonas' fixups (except a typo and one further comment here: https://github.com/jonasnick/secp256k1/commit/cdf545a9d30cf3805b6e0c34d1baeacefdbf9323 )\r\n\r\nI believe I've done a thorough review, but I really have only nits.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#pullrequestreview-1697415270",
+      "submitted_at": "2023-10-25T15:43:25Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
     }
   ],
   "comments": [
@@ -5614,6 +5650,474 @@
       "start_side": null,
       "line": null,
       "original_line": 119,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371803481",
+      "pull_request_review_id": 1697415270,
+      "id": 1371803481,
+      "node_id": "PRRC_kwDOAP4Jqs5RxA9Z",
+      "diff_hunk": "@@ -245,6 +245,56 @@ static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar\n     secp256k1_scalar_verify(r);\n }\n \n+static void secp256k1_scalar_half(secp256k1_scalar *r, const secp256k1_scalar *a) {\n+    /* Writing `/` for field division and `//` for integer division, we compute\n+     *\n+     *   a/2 = (a - (a&1))/2 + (a&1)/2\n+     *       = (a >> 1) + (a&1 ?    1/2 : 0)\n+     *       = (a >> 1) + (a&1 ? n//2+1 : 0),\n+     *\n+     * where n is the group order and in the last equality we have used 1/2 = n//2+1 (mod n).\n+     * For n//2, we have the constants SECP256K1_N_H_0, ...\n+     *\n+     * This sum does not overflow. The most extreme case is a = -2, the largest odd scalar. Here:\n+     * - the left summand is:  a >> 1 = (a - a&1)/2 = (n-2-1)//2           = (n-3)//2\n+     * - the right summand is: a&1 ? n//2+1 : 0 = n//2+1 = (n-1)//2 + 2//2 = (n+1)//2\n+     * Together they sum to (n-3)//2 + (n+1)//2 = (2n-2)//2 = n - 1, which is less than n.\n+     */\n+    uint32_t mask = -(uint32_t)(a->d[0] & 1U);\n+    uint64_t t = (uint32_t)((a->d[0] >> 1) | (a->d[1] << 31));\n+    secp256k1_scalar_verify(a);\n+\n+    t += (SECP256K1_N_H_0 + 1U) & mask;\n+    r->d[0] = t; t >>= 32;\n+    t += (uint32_t)((a->d[1] >> 1) | (a->d[2] << 31));\n+    t += SECP256K1_N_H_1 & mask;\n+    r->d[1] = t; t >>= 32;\n+    t += (uint32_t)((a->d[2] >> 1) | (a->d[3] << 31));\n+    t += SECP256K1_N_H_2 & mask;\n+    r->d[2] = t; t >>= 32;\n+    t += (uint32_t)((a->d[3] >> 1) | (a->d[4] << 31));\n+    t += SECP256K1_N_H_3 & mask;\n+    r->d[3] = t; t >>= 32;\n+    t += (uint32_t)((a->d[4] >> 1) | (a->d[5] << 31));\n+    t += SECP256K1_N_H_4 & mask;\n+    r->d[4] = t; t >>= 32;\n+    t += (uint32_t)((a->d[5] >> 1) | (a->d[6] << 31));\n+    t += SECP256K1_N_H_5 & mask;\n+    r->d[5] = t; t >>= 32;\n+    t += (uint32_t)((a->d[6] >> 1) | (a->d[7] << 31));\n+    t += SECP256K1_N_H_6 & mask;\n+    r->d[6] = t; t >>= 32;\n+    r->d[7] = (uint32_t)t + (uint32_t)(a->d[7] >> 1) + (SECP256K1_N_H_7 & mask);\n+#ifdef VERIFY\n+    /* The line above only computed the bottom 32 bits of r->d[7]. Redo the computation\n+     * in full 64 bits to make sure no overflow occured. */\n+    VERIFY_CHECK((t + (a->d[7] >> 1) + (SECP256K1_N_H_7 & mask)) >> 32 == 0);\n+    VERIFY_CHECK(secp256k1_scalar_check_overflow(r) == 0);",
+      "path": "src/scalar_8x32_impl.h",
+      "position": 48,
+      "original_position": 48,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "878b49383cd2c197beaeaaa1357541e2b85b0515",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: This is redundant because it's done by `secp256k1_scalar_verify`. (Same in 64 bit version)",
+      "created_at": "2023-10-25T13:52:48Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371803481",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371803481"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 292,
+      "original_line": 292,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371805509",
+      "pull_request_review_id": 1697415270,
+      "id": 1371805509,
+      "node_id": "PRRC_kwDOAP4Jqs5RxBdF",
+      "diff_hunk": "@@ -245,6 +245,56 @@ static void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar\n     secp256k1_scalar_verify(r);\n }\n \n+static void secp256k1_scalar_half(secp256k1_scalar *r, const secp256k1_scalar *a) {\n+    /* Writing `/` for field division and `//` for integer division, we compute\n+     *\n+     *   a/2 = (a - (a&1))/2 + (a&1)/2\n+     *       = (a >> 1) + (a&1 ?    1/2 : 0)\n+     *       = (a >> 1) + (a&1 ? n//2+1 : 0),\n+     *\n+     * where n is the group order and in the last equality we have used 1/2 = n//2+1 (mod n).\n+     * For n//2, we have the constants SECP256K1_N_H_0, ...\n+     *\n+     * This sum does not overflow. The most extreme case is a = -2, the largest odd scalar. Here:\n+     * - the left summand is:  a >> 1 = (a - a&1)/2 = (n-2-1)//2           = (n-3)//2\n+     * - the right summand is: a&1 ? n//2+1 : 0 = n//2+1 = (n-1)//2 + 2//2 = (n+1)//2\n+     * Together they sum to (n-3)//2 + (n+1)//2 = (2n-2)//2 = n - 1, which is less than n.\n+     */\n+    uint32_t mask = -(uint32_t)(a->d[0] & 1U);\n+    uint64_t t = (uint32_t)((a->d[0] >> 1) | (a->d[1] << 31));\n+    secp256k1_scalar_verify(a);\n+\n+    t += (SECP256K1_N_H_0 + 1U) & mask;\n+    r->d[0] = t; t >>= 32;\n+    t += (uint32_t)((a->d[1] >> 1) | (a->d[2] << 31));\n+    t += SECP256K1_N_H_1 & mask;\n+    r->d[1] = t; t >>= 32;\n+    t += (uint32_t)((a->d[2] >> 1) | (a->d[3] << 31));\n+    t += SECP256K1_N_H_2 & mask;\n+    r->d[2] = t; t >>= 32;\n+    t += (uint32_t)((a->d[3] >> 1) | (a->d[4] << 31));\n+    t += SECP256K1_N_H_3 & mask;\n+    r->d[3] = t; t >>= 32;\n+    t += (uint32_t)((a->d[4] >> 1) | (a->d[5] << 31));\n+    t += SECP256K1_N_H_4 & mask;\n+    r->d[4] = t; t >>= 32;\n+    t += (uint32_t)((a->d[5] >> 1) | (a->d[6] << 31));\n+    t += SECP256K1_N_H_5 & mask;\n+    r->d[5] = t; t >>= 32;\n+    t += (uint32_t)((a->d[6] >> 1) | (a->d[7] << 31));\n+    t += SECP256K1_N_H_6 & mask;\n+    r->d[6] = t; t >>= 32;\n+    r->d[7] = (uint32_t)t + (uint32_t)(a->d[7] >> 1) + (SECP256K1_N_H_7 & mask);\n+#ifdef VERIFY\n+    /* The line above only computed the bottom 32 bits of r->d[7]. Redo the computation\n+     * in full 64 bits to make sure no overflow occured. */",
+      "path": "src/scalar_8x32_impl.h",
+      "position": 46,
+      "original_position": 46,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "878b49383cd2c197beaeaaa1357541e2b85b0515",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: I think the comment is slightly misleading. Unless I'm mistaken, we redo the computation to check that indeed we didn't need to compute the upper 32 bits explicitly, because we know they're zero. I don't see how this is related to overflow.",
+      "created_at": "2023-10-25T13:54:05Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371805509",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371805509"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": 289,
+      "original_start_line": 289,
+      "start_side": "RIGHT",
+      "line": 290,
+      "original_line": 290,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371839112",
+      "pull_request_review_id": 1697415270,
+      "id": 1371839112,
+      "node_id": "PRRC_kwDOAP4Jqs5RxJqI",
+      "diff_hunk": "@@ -12,45 +12,76 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  elif EXHAUSTIVE_TEST_ORDER == 7\n+#    define ECMULT_CONST_GROUP_SIZE 2\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\",
+      "path": "src/ecmult_const_impl.h",
+      "position": 75,
+      "original_position": 75,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "402b3776a89bb297d47a88771539861acc6e7fd3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: It's purely stylistic, but I suggest preferring `unsigned int` over just `unsigned`, as we do almost everywhere.\r\n\r\n(There are few more instances below.)",
+      "created_at": "2023-10-25T14:09:01Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371839112",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371839112"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": 62,
+      "original_start_line": 62,
+      "start_side": "RIGHT",
+      "line": 66,
+      "original_line": 66,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371878893",
+      "pull_request_review_id": 1697415270,
+      "id": 1371878893,
+      "node_id": "PRRC_kwDOAP4Jqs5RxTXt",
+      "diff_hunk": "@@ -130,90 +161,181 @@ static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w\n     return skew;\n }\n \n-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {\n-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    secp256k1_ge tmpa;\n-    secp256k1_fe Z;\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    int skew_1;\n-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];\n-    int skew_lam;\n-    secp256k1_scalar q_1, q_lam;\n-    int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n+     *\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^256 - 1) / 2, A). This is the basis for the\n+     * paper's signed-digit multi-comb algorithm for multiplication using a precomputed table.\n+     *\n+     * It is appealing to try to combine this with the GLV optimization: the idea that a scalar\n+     * s can be written as s1 + lambda*s2, where lambda is a curve-specific constant such that\n+     * lambda*A is easy to compute, and where s1 and s2 are small. In particular we have the\n+     * secp256k1_scalar_split_lambda function which performs such a split with the resulting s1\n+     * and s2 in range (-2^128, 2^128) mod n. This does work, but is uninteresting:\n+     *\n+     *   To compute q*A:\n+     *   - Let s1, s2 = split_lambda(q)\n+     *   - Let R1 = C_256((s1 + 2^256 - 1) / 2, A)\n+     *   - Let R2 = C_256((s2 + 2^256 - 1) / 2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * The issue is that while s1 and s2 are small-range numbers, (s1 + 2^256 - 1) / 2 (mod n)\n+     * and (s2 + 2^256 - 1) / 2 (mod n) are not, undoing the benefit of the splitting.\n+     *\n+     * To make it work, we want to modify the input scalar q first, before splitting, and then only\n+     * add a 2^128 offset of the split results (so that they end up in the single 129-bit range\n+     * [0,2^129]). A slightly smaller offset would work due to the bounds on the split, but we pick\n+     * 2^128 for simplicity. Let s be the scalar fed to split_lambda, and f(q) the function to\n+     * compute it from q:\n+     *\n+     *   To compute q*A:\n+     *   - Compute s = f(q)\n+     *   - Let s1, s2 = split_lambda(s)\n+     *   - Let v1 = s1 + 2^128 (mod n)\n+     *   - Let v2 = s2 + 2^128 (mod n)\n+     *   - Let R1 = C_l(v1, A)\n+     *   - Let R2 = C_l(v2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * l will thus need to be at least 129, but we may overshoot by a few bits (see\n+     * further), so keep it as a variable.\n+     *\n+     * To solve for s, we reason:\n+     *     q*A  = R1 + R2\n+     * <=> q*A  = C_l(s1 + 2^128, A) + C_l(s2 + 2^128, lambda*A)\n+     * <=> q*A  = (2*(s1 + 2^128) + 1 - 2^l) * A + (2*(s2 + 2^128) + 1 - 2^l) * lambda*A\n+     * <=> q*A  = (2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda)) * A\n+     * <=> q    = 2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> q    = 2*s + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> s    = (q + (2^l - 2^129 - 1) * (1 + lambda)) / 2 (mod n)\n+     * <=> f(q) = (q + K) / 2 (mod n)\n+     *            where K = (2^l - 2^129 - 1)*(1 + lambda) (mod n)\n+     *\n+     * We will process the computation of C_l(v1, A) and C_l(v2, lambda*A) in groups of\n+     * ECMULT_CONST_GROUP_SIZE, so we set l to the smallest multiple of ECMULT_CONST_GROUP_SIZE\n+     * that is not less than 129; this equals ECMULT_CONST_BITS.\n+     */\n \n-    int i;\n+    /* The offset to add to s1 and s2 to make them non-negative. Equal to 2^128. */\n \n+    static const secp256k1_scalar S_OFFSET = SECP256K1_SCALAR_CONST(0, 0, 0, 1, 0, 0, 0, 0);",
+      "path": "src/ecmult_const_impl.h",
+      "position": null,
+      "original_position": 208,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "402b3776a89bb297d47a88771539861acc6e7fd3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: Drop the empty line here?",
+      "created_at": "2023-10-25T14:35:01Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371878893",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371878893"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 250,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 252,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371901422",
+      "pull_request_review_id": 1697415270,
+      "id": 1371901422,
+      "node_id": "PRRC_kwDOAP4Jqs5RxY3u",
+      "diff_hunk": "@@ -130,90 +161,181 @@ static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w\n     return skew;\n }\n \n-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {\n-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    secp256k1_ge tmpa;\n-    secp256k1_fe Z;\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    int skew_1;\n-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];\n-    int skew_lam;\n-    secp256k1_scalar q_1, q_lam;\n-    int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n+     *\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^256 - 1) / 2, A). This is the basis for the\n+     * paper's signed-digit multi-comb algorithm for multiplication using a precomputed table.\n+     *\n+     * It is appealing to try to combine this with the GLV optimization: the idea that a scalar\n+     * s can be written as s1 + lambda*s2, where lambda is a curve-specific constant such that\n+     * lambda*A is easy to compute, and where s1 and s2 are small. In particular we have the\n+     * secp256k1_scalar_split_lambda function which performs such a split with the resulting s1\n+     * and s2 in range (-2^128, 2^128) mod n. This does work, but is uninteresting:\n+     *\n+     *   To compute q*A:\n+     *   - Let s1, s2 = split_lambda(q)\n+     *   - Let R1 = C_256((s1 + 2^256 - 1) / 2, A)\n+     *   - Let R2 = C_256((s2 + 2^256 - 1) / 2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * The issue is that while s1 and s2 are small-range numbers, (s1 + 2^256 - 1) / 2 (mod n)\n+     * and (s2 + 2^256 - 1) / 2 (mod n) are not, undoing the benefit of the splitting.\n+     *\n+     * To make it work, we want to modify the input scalar q first, before splitting, and then only\n+     * add a 2^128 offset of the split results (so that they end up in the single 129-bit range\n+     * [0,2^129]). A slightly smaller offset would work due to the bounds on the split, but we pick\n+     * 2^128 for simplicity. Let s be the scalar fed to split_lambda, and f(q) the function to\n+     * compute it from q:\n+     *\n+     *   To compute q*A:\n+     *   - Compute s = f(q)\n+     *   - Let s1, s2 = split_lambda(s)\n+     *   - Let v1 = s1 + 2^128 (mod n)\n+     *   - Let v2 = s2 + 2^128 (mod n)\n+     *   - Let R1 = C_l(v1, A)\n+     *   - Let R2 = C_l(v2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * l will thus need to be at least 129, but we may overshoot by a few bits (see\n+     * further), so keep it as a variable.\n+     *\n+     * To solve for s, we reason:\n+     *     q*A  = R1 + R2\n+     * <=> q*A  = C_l(s1 + 2^128, A) + C_l(s2 + 2^128, lambda*A)\n+     * <=> q*A  = (2*(s1 + 2^128) + 1 - 2^l) * A + (2*(s2 + 2^128) + 1 - 2^l) * lambda*A\n+     * <=> q*A  = (2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda)) * A\n+     * <=> q    = 2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> q    = 2*s + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> s    = (q + (2^l - 2^129 - 1) * (1 + lambda)) / 2 (mod n)\n+     * <=> f(q) = (q + K) / 2 (mod n)\n+     *            where K = (2^l - 2^129 - 1)*(1 + lambda) (mod n)\n+     *\n+     * We will process the computation of C_l(v1, A) and C_l(v2, lambda*A) in groups of\n+     * ECMULT_CONST_GROUP_SIZE, so we set l to the smallest multiple of ECMULT_CONST_GROUP_SIZE\n+     * that is not less than 129; this equals ECMULT_CONST_BITS.\n+     */\n \n-    int i;\n+    /* The offset to add to s1 and s2 to make them non-negative. Equal to 2^128. */\n \n+    static const secp256k1_scalar S_OFFSET = SECP256K1_SCALAR_CONST(0, 0, 0, 1, 0, 0, 0, 0);\n+    secp256k1_scalar s, v1, v2;\n+    secp256k1_ge pre_a[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_ge pre_a_lam[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_fe Z;\n+    secp256k1_gej res;\n+    int group, i;\n+\n+    /* Compute v1 and v2. */\n+    secp256k1_scalar_add(&s, q, &secp256k1_ecmult_const_K);\n+    secp256k1_scalar_half(&s, &s);\n+    secp256k1_scalar_split_lambda(&v1, &v2, &s);\n+    secp256k1_scalar_add(&v1, &v1, &S_OFFSET);\n+    secp256k1_scalar_add(&v2, &v2, &S_OFFSET);\n+\n+    /* We're allowed to be non-constant time in the point, and the code below (in particular,\n+     * secp256k1_ecmult_const_odd_multiples_table_globalz) cannot deal with infinity in a\n+     * constant-time manner anyway. */\n     if (secp256k1_ge_is_infinity(a)) {\n         secp256k1_gej_set_infinity(r);\n         return;\n     }",
+      "path": "src/ecmult_const_impl.h",
+      "position": 299,
+      "original_position": 229,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "402b3776a89bb297d47a88771539861acc6e7fd3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: Want to move this to the top of the function? This will make the return earlier, but I also think it's generally more readable. (At the moment, this block is between computing v1, v2 and VERIFYing their range. That's a bit unnatural.)",
+      "created_at": "2023-10-25T14:49:47Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371901422",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371901422"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": 190,
+      "original_start_line": 267,
+      "start_side": "RIGHT",
+      "line": 196,
+      "original_line": 273,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371927379",
+      "pull_request_review_id": 1697415270,
+      "id": 1371927379,
+      "node_id": "PRRC_kwDOAP4Jqs5RxfNT",
+      "diff_hunk": "@@ -130,90 +161,181 @@ static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w\n     return skew;\n }\n \n-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {\n-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    secp256k1_ge tmpa;\n-    secp256k1_fe Z;\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    int skew_1;\n-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];\n-    int skew_lam;\n-    secp256k1_scalar q_1, q_lam;\n-    int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n+     *\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^256 - 1) / 2, A). This is the basis for the\n+     * paper's signed-digit multi-comb algorithm for multiplication using a precomputed table.\n+     *\n+     * It is appealing to try to combine this with the GLV optimization: the idea that a scalar\n+     * s can be written as s1 + lambda*s2, where lambda is a curve-specific constant such that\n+     * lambda*A is easy to compute, and where s1 and s2 are small. In particular we have the\n+     * secp256k1_scalar_split_lambda function which performs such a split with the resulting s1\n+     * and s2 in range (-2^128, 2^128) mod n. This does work, but is uninteresting:\n+     *\n+     *   To compute q*A:\n+     *   - Let s1, s2 = split_lambda(q)\n+     *   - Let R1 = C_256((s1 + 2^256 - 1) / 2, A)\n+     *   - Let R2 = C_256((s2 + 2^256 - 1) / 2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * The issue is that while s1 and s2 are small-range numbers, (s1 + 2^256 - 1) / 2 (mod n)\n+     * and (s2 + 2^256 - 1) / 2 (mod n) are not, undoing the benefit of the splitting.\n+     *\n+     * To make it work, we want to modify the input scalar q first, before splitting, and then only\n+     * add a 2^128 offset of the split results (so that they end up in the single 129-bit range\n+     * [0,2^129]). A slightly smaller offset would work due to the bounds on the split, but we pick\n+     * 2^128 for simplicity. Let s be the scalar fed to split_lambda, and f(q) the function to\n+     * compute it from q:\n+     *\n+     *   To compute q*A:\n+     *   - Compute s = f(q)\n+     *   - Let s1, s2 = split_lambda(s)\n+     *   - Let v1 = s1 + 2^128 (mod n)\n+     *   - Let v2 = s2 + 2^128 (mod n)\n+     *   - Let R1 = C_l(v1, A)\n+     *   - Let R2 = C_l(v2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * l will thus need to be at least 129, but we may overshoot by a few bits (see\n+     * further), so keep it as a variable.\n+     *\n+     * To solve for s, we reason:\n+     *     q*A  = R1 + R2\n+     * <=> q*A  = C_l(s1 + 2^128, A) + C_l(s2 + 2^128, lambda*A)\n+     * <=> q*A  = (2*(s1 + 2^128) + 1 - 2^l) * A + (2*(s2 + 2^128) + 1 - 2^l) * lambda*A\n+     * <=> q*A  = (2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda)) * A\n+     * <=> q    = 2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> q    = 2*s + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> s    = (q + (2^l - 2^129 - 1) * (1 + lambda)) / 2 (mod n)\n+     * <=> f(q) = (q + K) / 2 (mod n)\n+     *            where K = (2^l - 2^129 - 1)*(1 + lambda) (mod n)\n+     *\n+     * We will process the computation of C_l(v1, A) and C_l(v2, lambda*A) in groups of\n+     * ECMULT_CONST_GROUP_SIZE, so we set l to the smallest multiple of ECMULT_CONST_GROUP_SIZE\n+     * that is not less than 129; this equals ECMULT_CONST_BITS.\n+     */\n \n-    int i;\n+    /* The offset to add to s1 and s2 to make them non-negative. Equal to 2^128. */\n \n+    static const secp256k1_scalar S_OFFSET = SECP256K1_SCALAR_CONST(0, 0, 0, 1, 0, 0, 0, 0);\n+    secp256k1_scalar s, v1, v2;\n+    secp256k1_ge pre_a[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_ge pre_a_lam[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_fe Z;",
+      "path": "src/ecmult_const_impl.h",
+      "position": 272,
+      "original_position": 212,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "402b3776a89bb297d47a88771539861acc6e7fd3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: I think we should reserve uppercase for macros.",
+      "created_at": "2023-10-25T15:06:26Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371927379",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371927379"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 179,
+      "original_line": 256,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371930708",
+      "pull_request_review_id": 1697415270,
+      "id": 1371930708,
+      "node_id": "PRRC_kwDOAP4Jqs5RxgBU",
+      "diff_hunk": "@@ -130,90 +161,181 @@ static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w\n     return skew;\n }\n \n-static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *scalar) {\n-    secp256k1_ge pre_a[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    secp256k1_ge tmpa;\n-    secp256k1_fe Z;\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);\n+#elif ECMULT_CONST_BITS == 132\n+    /* For GROUP_SIZE = 4,6 */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0x76b1d93dul, 0x0fae3c6bul, 0x3215874bul, 0x94e93813ul, 0x7937fe0dul, 0xb66bcaaful, 0xb3749ca5ul, 0xd7b6171b);\n+#else\n+#  error \"Unknown ECMULT_CONST_BITS\"\n+#endif\n \n-    int skew_1;\n-    secp256k1_ge pre_a_lam[ECMULT_TABLE_SIZE(WINDOW_A)];\n-    int wnaf_lam[1 + WNAF_SIZE(WINDOW_A - 1)];\n-    int skew_lam;\n-    secp256k1_scalar q_1, q_lam;\n-    int wnaf_1[1 + WNAF_SIZE(WINDOW_A - 1)];\n+static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, const secp256k1_scalar *q) {\n+    /* The approach below combines the signed-digit logic from Mike Hamburg's\n+     * \"Fast and compact elliptic-curve cryptography\" (https://eprint.iacr.org/2012/309)\n+     * Section 3.3, with the GLV endomorphism.\n+     *\n+     * The idea there is to interpret the bits of a scalar as signs (1 = +, 0 = -), and compute a\n+     * point multiplication in that fashion. Let v be an n-bit non-negative integer (0 <= v < 2^n),\n+     * and v[i] its i'th bit (so v = sum(v[i] * 2^i, i=0..n-1)). Then define:\n+     *\n+     *   C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *\n+     * Then it holds that C_l(v, A) = sum((2*v[i] - 1) * 2^i*A, i=0..l-1)\n+     *                              = (2*sum(v[i] * 2^i, i=0..l-1) + 1 - 2^l) * A\n+     *                              = (2*v + 1 - 2^l) * A\n+     *\n+     * Thus, one can compute q*A as C_256((q + 2^256 - 1) / 2, A). This is the basis for the\n+     * paper's signed-digit multi-comb algorithm for multiplication using a precomputed table.\n+     *\n+     * It is appealing to try to combine this with the GLV optimization: the idea that a scalar\n+     * s can be written as s1 + lambda*s2, where lambda is a curve-specific constant such that\n+     * lambda*A is easy to compute, and where s1 and s2 are small. In particular we have the\n+     * secp256k1_scalar_split_lambda function which performs such a split with the resulting s1\n+     * and s2 in range (-2^128, 2^128) mod n. This does work, but is uninteresting:\n+     *\n+     *   To compute q*A:\n+     *   - Let s1, s2 = split_lambda(q)\n+     *   - Let R1 = C_256((s1 + 2^256 - 1) / 2, A)\n+     *   - Let R2 = C_256((s2 + 2^256 - 1) / 2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * The issue is that while s1 and s2 are small-range numbers, (s1 + 2^256 - 1) / 2 (mod n)\n+     * and (s2 + 2^256 - 1) / 2 (mod n) are not, undoing the benefit of the splitting.\n+     *\n+     * To make it work, we want to modify the input scalar q first, before splitting, and then only\n+     * add a 2^128 offset of the split results (so that they end up in the single 129-bit range\n+     * [0,2^129]). A slightly smaller offset would work due to the bounds on the split, but we pick\n+     * 2^128 for simplicity. Let s be the scalar fed to split_lambda, and f(q) the function to\n+     * compute it from q:\n+     *\n+     *   To compute q*A:\n+     *   - Compute s = f(q)\n+     *   - Let s1, s2 = split_lambda(s)\n+     *   - Let v1 = s1 + 2^128 (mod n)\n+     *   - Let v2 = s2 + 2^128 (mod n)\n+     *   - Let R1 = C_l(v1, A)\n+     *   - Let R2 = C_l(v2, lambda*A)\n+     *   - Return R1 + R2\n+     *\n+     * l will thus need to be at least 129, but we may overshoot by a few bits (see\n+     * further), so keep it as a variable.\n+     *\n+     * To solve for s, we reason:\n+     *     q*A  = R1 + R2\n+     * <=> q*A  = C_l(s1 + 2^128, A) + C_l(s2 + 2^128, lambda*A)\n+     * <=> q*A  = (2*(s1 + 2^128) + 1 - 2^l) * A + (2*(s2 + 2^128) + 1 - 2^l) * lambda*A\n+     * <=> q*A  = (2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda)) * A\n+     * <=> q    = 2*(s1 + s2*lambda) + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> q    = 2*s + (2^129 + 1 - 2^l) * (1 + lambda) (mod n)\n+     * <=> s    = (q + (2^l - 2^129 - 1) * (1 + lambda)) / 2 (mod n)\n+     * <=> f(q) = (q + K) / 2 (mod n)\n+     *            where K = (2^l - 2^129 - 1)*(1 + lambda) (mod n)\n+     *\n+     * We will process the computation of C_l(v1, A) and C_l(v2, lambda*A) in groups of\n+     * ECMULT_CONST_GROUP_SIZE, so we set l to the smallest multiple of ECMULT_CONST_GROUP_SIZE\n+     * that is not less than 129; this equals ECMULT_CONST_BITS.\n+     */\n \n-    int i;\n+    /* The offset to add to s1 and s2 to make them non-negative. Equal to 2^128. */\n \n+    static const secp256k1_scalar S_OFFSET = SECP256K1_SCALAR_CONST(0, 0, 0, 1, 0, 0, 0, 0);\n+    secp256k1_scalar s, v1, v2;\n+    secp256k1_ge pre_a[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_ge pre_a_lam[ECMULT_CONST_TABLE_SIZE];\n+    secp256k1_fe Z;\n+    secp256k1_gej res;",
+      "path": "src/ecmult_const_impl.h",
+      "position": 283,
+      "original_position": 213,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "402b3776a89bb297d47a88771539861acc6e7fd3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: Is there a reason not to work on `r` directly?",
+      "created_at": "2023-10-25T15:08:54Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371930708",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371930708"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 180,
+      "original_line": 257,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371942983",
+      "pull_request_review_id": 1697415270,
+      "id": 1371942983,
+      "node_id": "PRRC_kwDOAP4Jqs5RxjBH",
+      "diff_hunk": "@@ -4463,25 +4463,75 @@ static void ecmult_const_commutativity(void) {\n }\n \n static void ecmult_const_mult_zero_one(void) {\n+    secp256k1_scalar s;\n     secp256k1_scalar negone;\n     secp256k1_gej res1;\n     secp256k1_ge res2;\n     secp256k1_ge point;\n-    secp256k1_scalar_negate(&negone, &secp256k1_scalar_one);\n+    secp256k1_ge inf;\n \n+    random_scalar_order_test(&s);\n+    secp256k1_scalar_negate(&negone, &secp256k1_scalar_one);\n     random_group_element_test(&point);\n+    secp256k1_ge_set_infinity(&inf);\n+\n+    /* 0*point */\n     secp256k1_ecmult_const(&res1, &point, &secp256k1_scalar_zero);\n-    secp256k1_ge_set_gej(&res2, &res1);\n-    CHECK(secp256k1_ge_is_infinity(&res2));\n+    CHECK(secp256k1_gej_is_infinity(&res1));\n+\n+    /* s*inf */\n+    secp256k1_ecmult_const(&res1, &inf, &s);\n+    CHECK(secp256k1_gej_is_infinity(&res1));\n+\n+    /* 1*point */\n     secp256k1_ecmult_const(&res1, &point, &secp256k1_scalar_one);\n     secp256k1_ge_set_gej(&res2, &res1);\n     ge_equals_ge(&res2, &point);\n+\n+    /* -1*point */\n     secp256k1_ecmult_const(&res1, &point, &negone);\n     secp256k1_gej_neg(&res1, &res1);\n     secp256k1_ge_set_gej(&res2, &res1);\n     ge_equals_ge(&res2, &point);\n }\n \n+static void ecmult_const_check_result(const secp256k1_ge *A, const secp256k1_scalar* q, const secp256k1_gej *res) {\n+    secp256k1_scalar zero = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 0);",
+      "path": "src/tests.c",
+      "position": 114,
+      "original_position": 40,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "31969b5b81f25f3cbcf04b59efc9f72c338a02bb",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: `secp256k1_scalar_zero`?",
+      "created_at": "2023-10-25T15:17:27Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371942983",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371942983"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 4485,
+      "original_line": 4499,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371978533",
+      "pull_request_review_id": 1697415270,
+      "id": 1371978533,
+      "node_id": "PRRC_kwDOAP4Jqs5Rxrsl",
+      "diff_hunk": "@@ -12,208 +12,253 @@\n #include \"ecmult_const.h\"\n #include \"ecmult_impl.h\"\n \n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need 2^ECMULT_CONST_GROUP_SIZE - 1 to be less than EXHAUSTIVE_TEST_ORDER, because\n+ * the tables cannot have infinities in them (this breaks the effective-affine technique's\n+ * z-ratio tracking) */\n+#  if EXHAUSTIVE_TEST_ORDER == 199\n+#    define ECMULT_CONST_GROUP_SIZE 4\n+#  elif EXHAUSTIVE_TEST_ORDER == 13\n+#    define ECMULT_CONST_GROUP_SIZE 3\n+#  elif EXHAUSTIVE_TEST_ORDER == 7\n+#    define ECMULT_CONST_GROUP_SIZE 2\n+#  else\n+#    error \"Unknown EXHAUSTIVE_TEST_ORDER\"\n+#  endif\n+#else\n+/* Group size 4 or 5 appears optimal. */\n+#  define ECMULT_CONST_GROUP_SIZE 5\n+#endif\n+\n+#define ECMULT_CONST_TABLE_SIZE (1L << (ECMULT_CONST_GROUP_SIZE - 1))\n+#define ECMULT_CONST_GROUPS ((129 + ECMULT_CONST_GROUP_SIZE - 1) / ECMULT_CONST_GROUP_SIZE)\n+#define ECMULT_CONST_BITS (ECMULT_CONST_GROUPS * ECMULT_CONST_GROUP_SIZE)\n+\n /** Fill a table 'pre' with precomputed odd multiples of a.\n  *\n  *  The resulting point set is brought to a single constant Z denominator, stores the X and Y\n- *  coordinates as ge_storage points in pre, and stores the global Z in globalz.\n- *  It only operates on tables sized for WINDOW_A wnaf multiples.\n+ *  coordinates as ge points in pre, and stores the global Z in globalz.\n+ *\n+ *  'pre' must be an array of size ECMULT_CONST_TABLE_SIZE.\n  */\n-static void secp256k1_ecmult_odd_multiples_table_globalz_windowa(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n-    secp256k1_fe zr[ECMULT_TABLE_SIZE(WINDOW_A)];\n+static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre, secp256k1_fe *globalz, const secp256k1_gej *a) {\n+    secp256k1_fe zr[ECMULT_CONST_TABLE_SIZE];\n \n-    secp256k1_ecmult_odd_multiples_table(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr, globalz, a);\n-    secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A), pre, zr);\n+    secp256k1_ecmult_odd_multiples_table(ECMULT_CONST_TABLE_SIZE, pre, zr, globalz, a);\n+    secp256k1_ge_table_set_globalz(ECMULT_CONST_TABLE_SIZE, pre, zr);\n }\n \n-/* This is like `ECMULT_TABLE_GET_GE` but is constant time */\n-#define ECMULT_CONST_TABLE_GET_GE(r,pre,n,w) do { \\\n-    int m = 0; \\\n-    /* Extract the sign-bit for a constant time absolute-value. */ \\\n-    int volatile mask = (n) >> (sizeof(n) * CHAR_BIT - 1); \\\n-    int abs_n = ((n) + mask) ^ mask; \\\n-    int idx_n = abs_n >> 1; \\\n+/* Given a table 'pre' with odd multiples of a point, put in r the signed-bit multiplication of n with that point.\n+ *\n+ * For example, if ECMULT_CONST_GROUP_SIZE is 4, then pre is expected to contain 8 entries:\n+ * [1*P, 3*P, 5*P, 7*P, 9*P, 11*P, 13*P, 15*P]. n is then expected to be a 4-bit integer (range 0-15), and its\n+ * bits are interpreted as signs of powers of two to look up.\n+ *\n+ * For example, if n=4, which is 0100 in binary, which is interpreted as [- + - -], so the looked up value is\n+ * [ -(2^3) + (2^2) - (2^1) - (2^0) ]*P = -7*P. Every valid n translates to an odd number in range [-15,15],\n+ * which means we just need to look up one of the precomputed values, and optionally negate it.\n+ */\n+#define ECMULT_CONST_TABLE_GET_GE(r,pre,n) do { \\\n+    unsigned m = 0; \\\n+    /* If the top bit of n is 0, we want the negation. */ \\\n+    volatile unsigned negative = ((n) >> (ECMULT_CONST_GROUP_SIZE - 1)) ^ 1; \\\n+    /* The index is computed by looking at the bottom bits, after making positive. */ \\\n+    unsigned index = ((unsigned)(-negative) ^ n) & ((1U << (ECMULT_CONST_GROUP_SIZE - 1)) - 1U); \\\n     secp256k1_fe neg_y; \\\n-    VERIFY_CHECK(((n) & 1) == 1); \\\n-    VERIFY_CHECK((n) >= -((1 << ((w)-1)) - 1)); \\\n-    VERIFY_CHECK((n) <=  ((1 << ((w)-1)) - 1)); \\\n+    VERIFY_CHECK((n) < (1U << ECMULT_CONST_GROUP_SIZE)); \\\n+    VERIFY_CHECK(index < (1U << (ECMULT_CONST_GROUP_SIZE - 1))); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->x)); \\\n     VERIFY_SETUP(secp256k1_fe_clear(&(r)->y)); \\\n-    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one \\\n+    /* Unconditionally set r->x = (pre)[m].x. r->y = (pre)[m].y. because it's either the correct one\n      * or will get replaced in the later iterations, this is needed to make sure `r` is initialized. */ \\\n     (r)->x = (pre)[m].x; \\\n     (r)->y = (pre)[m].y; \\\n-    for (m = 1; m < ECMULT_TABLE_SIZE(w); m++) { \\\n+    for (m = 1; m < ECMULT_CONST_TABLE_SIZE; m++) { \\\n         /* This loop is used to avoid secret data in array indices. See\n          * the comment in ecmult_gen_impl.h for rationale. */ \\\n-        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == idx_n); \\\n-        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == idx_n); \\\n+        secp256k1_fe_cmov(&(r)->x, &(pre)[m].x, m == index); \\\n+        secp256k1_fe_cmov(&(r)->y, &(pre)[m].y, m == index); \\\n     } \\\n     (r)->infinity = 0; \\\n     secp256k1_fe_negate(&neg_y, &(r)->y, 1); \\\n-    secp256k1_fe_cmov(&(r)->y, &neg_y, (n) != abs_n); \\\n+    secp256k1_fe_cmov(&(r)->y, &neg_y, negative); \\\n } while(0)\n \n-/** Convert a number to WNAF notation.\n- *  The number becomes represented by sum(2^{wi} * wnaf[i], i=0..WNAF_SIZE(w)+1) - return_val.\n- *  It has the following guarantees:\n- *  - each wnaf[i] an odd integer between -(1 << w) and (1 << w)\n- *  - each wnaf[i] is nonzero\n- *  - the number of words set is always WNAF_SIZE(w) + 1\n- *\n- *  Adapted from `The Width-w NAF Method Provides Small Memory and Fast Elliptic Scalar\n- *  Multiplications Secure against Side Channel Attacks`, Okeya and Tagaki. M. Joye (Ed.)\n- *  CT-RSA 2003, LNCS 2612, pp. 328-443, 2003. Springer-Verlag Berlin Heidelberg 2003\n- *\n- *  Numbers reference steps of `Algorithm SPA-resistant Width-w NAF with Odd Scalar` on pp. 335\n- */\n-static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w, int size) {\n-    int global_sign;\n-    int skew;\n-    int word = 0;\n-\n-    /* 1 2 3 */\n-    int u_last;\n-    int u;\n-\n-    int flip;\n-    secp256k1_scalar s = *scalar;\n-\n-    VERIFY_CHECK(w > 0);\n-    VERIFY_CHECK(size > 0);\n+/* For K as defined in the comment of secp256k1_ecmult_const, we have several precomputed\n+ * formulas/constants.\n+ * - in exhaustive test mode, we give an explicit expression to compute it at compile time: */\n+#ifdef EXHAUSTIVE_TEST_ORDER\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = ((SECP256K1_SCALAR_CONST(0, 0, 0, (1U << (ECMULT_CONST_BITS - 128)) - 2U, 0, 0, 0, 0) + EXHAUSTIVE_TEST_ORDER - 1U) * (1U + EXHAUSTIVE_TEST_LAMBDA)) % EXHAUSTIVE_TEST_ORDER;\n+/* - for the real secp256k1 group we have constants for various ECMULT_CONST_BITS values. */\n+#elif ECMULT_CONST_BITS == 129\n+    /* For GROUP_SIZE = 1,3. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xac9c52b3ul, 0x3fa3cf1ful, 0x5ad9e3fdul, 0x77ed9ba4ul, 0xa880b9fcul, 0x8ec739c2ul, 0xe0cfc810ul, 0xb51283ceul);\n+#elif ECMULT_CONST_BITS == 130\n+    /* For GROUP_SIZE = 2,5. */\n+    static const secp256k1_scalar secp256k1_ecmult_const_K = SECP256K1_SCALAR_CONST(0xa4e88a7dul, 0xcb13034eul, 0xc2bdd6bful, 0x7c118d6bul, 0x589ae848ul, 0x26ba29e4ul, 0xb5c2c1dcul, 0xde9798d9ul);",
+      "path": "src/ecmult_const_impl.h",
+      "position": 142,
+      "original_position": 142,
+      "commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "original_commit_id": "c8eb787cd96995aefa79bf4bab18903c409db026",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "This K is odd, which means one strategy for computing `(q + K) / 2` is\r\n```\r\n(q + K) / 2 = if q is even then q/2 + K/2 else (q+K)/2\r\n```\r\nHalving even scalars wouldn't even require our `half` function, it's just a shift. But I don't think we should do this because it works only for group sizes 2,5...\r\n\r\n\r\nedit: Okay, after I wrote the above, I noticed that we want the algorithm to be constant-time in q. So this would save a `half`, but at the costs of two shifts, an additional add, and a cmov. That's probably worse in performance anyway...\r\n",
+      "created_at": "2023-10-25T15:43:14Z",
+      "updated_at": "2023-10-25T15:43:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1184#discussion_r1371978533",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1371978533"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1184"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 98,
+      "original_line": 98,
       "side": "RIGHT"
     }
   ]
