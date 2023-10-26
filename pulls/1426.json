@@ -59,7 +59,7 @@
       }
     ],
     "created_at": "2023-09-20T12:26:05Z",
-    "updated_at": "2023-10-26T09:24:11Z",
+    "updated_at": "2023-10-26T10:54:20Z",
     "closed_at": "2023-09-20T23:14:27Z",
     "mergeable_state": "unknown",
     "merged_at": "2023-09-20T23:14:27Z",
@@ -308,7 +308,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-10-26T09:20:49Z",
+        "pushed_at": "2023-10-26T10:47:13Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2023-10-24T12:07:42Z",
         "license": {
@@ -339,7 +339,7 @@
     "deletions": 3,
     "changed_files": 2,
     "commits": 2,
-    "review_comments": 5,
+    "review_comments": 6,
     "comments": 10
   },
   "events": [
@@ -2389,6 +2389,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1372859605"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1426"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 59,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1372969580",
+      "pull_request_review_id": 1699299710,
+      "id": 1372969580,
+      "node_id": "PRRC_kwDOAP4Jqs5R1dps",
+      "diff_hunk": "@@ -0,0 +1,95 @@\n+env:\n+  ### cirrus config\n+  CIRRUS_CLONE_DEPTH: 1\n+  ### compiler options\n+  HOST:\n+  WRAPPER_CMD:\n+  # Specific warnings can be disabled with -Wno-error=foo.\n+  # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.\n+  WERROR_CFLAGS: -Werror -pedantic-errors\n+  MAKEFLAGS: -j4\n+  BUILD: check\n+  ### secp256k1 config\n+  ECMULTWINDOW: auto\n+  ECMULTGENPRECISION: auto\n+  ASM: no\n+  WIDEMUL: auto\n+  WITH_VALGRIND: yes\n+  EXTRAFLAGS:\n+  ### secp256k1 modules\n+  EXPERIMENTAL: no\n+  ECDH: no\n+  RECOVERY: no\n+  SCHNORRSIG: no\n+  ELLSWIFT: no\n+  ### test options\n+  SECP256K1_TEST_ITERS:\n+  BENCH: yes\n+  SECP256K1_BENCH_ITERS: 2\n+  CTIMETESTS: yes\n+  # Compile and run the tests\n+  EXAMPLES: yes\n+\n+cat_logs_snippet: &CAT_LOGS\n+  always:\n+    cat_tests_log_script:\n+      - cat tests.log || true\n+    cat_noverify_tests_log_script:\n+      - cat noverify_tests.log || true\n+    cat_exhaustive_tests_log_script:\n+      - cat exhaustive_tests.log || true\n+    cat_ctime_tests_log_script:\n+      - cat ctime_tests.log || true\n+    cat_bench_log_script:\n+      - cat bench.log || true\n+    cat_config_log_script:\n+      - cat config.log || true\n+    cat_test_env_script:\n+      - cat test_env.log || true\n+    cat_ci_env_script:\n+      - env\n+\n+linux_arm64_container_snippet: &LINUX_ARM64_CONTAINER\n+  env_script:\n+    - env | tee /tmp/env\n+  build_script:\n+    - DOCKER_BUILDKIT=1 docker build --file \"ci/linux-debian.Dockerfile\" --tag=\"ci_secp256k1_arm\"\n+    - docker image prune --force  # Cleanup stale layers\n+  test_script:\n+    - docker run --rm --mount \"type=bind,src=./,dst=/ci_secp256k1\" --env-file /tmp/env --replace --name \"ci_secp256k1_arm\" \"ci_secp256k1_arm\" bash -c \"cd /ci_secp256k1/ && ./ci/ci.sh\"",
+      "path": ".cirrus.yml",
+      "position": 59,
+      "original_position": 59,
+      "commit_id": "fa4d6c76b6dc249d02c926ad75725556614fdddd",
+      "original_commit_id": "fa4d6c76b6dc249d02c926ad75725556614fdddd",
+      "in_reply_to_id": 1372859605,
+      "user": {
+        "login": "maflcko",
+        "id": 6399679,
+        "node_id": "MDQ6VXNlcjYzOTk2Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6399679?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/maflcko",
+        "html_url": "https://github.com/maflcko",
+        "followers_url": "https://api.github.com/users/maflcko/followers",
+        "following_url": "https://api.github.com/users/maflcko/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/maflcko/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/maflcko/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/maflcko/subscriptions",
+        "organizations_url": "https://api.github.com/users/maflcko/orgs",
+        "repos_url": "https://api.github.com/users/maflcko/repos",
+        "events_url": "https://api.github.com/users/maflcko/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/maflcko/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Yes, if you prefer to call `podman` here, you can do that.\r\n\r\nBoth commands will redirect to `podman`, currently.",
+      "created_at": "2023-10-26T10:54:20Z",
+      "updated_at": "2023-10-26T10:54:20Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1426#discussion_r1372969580",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1372969580"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1426"
