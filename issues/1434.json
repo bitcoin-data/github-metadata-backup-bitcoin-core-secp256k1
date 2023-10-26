@@ -1,0 +1,132 @@
+{
+  "type": "issue",
+  "issue": {
+    "id": 1963956382,
+    "node_id": "I_kwDOAP4Jqs51D5ie",
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1434",
+    "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+    "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1434/labels%7B/name%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1434/comments",
+    "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1434/events",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1434",
+    "number": 1434,
+    "state": "open",
+    "state_reason": null,
+    "title": "ARM assembly: \"missing .note.GNU-stack section implies executable stack\" with recent ld",
+    "body": "Recent ld versions emit this warning when linking the (object file) created from ARM assembly:\r\n```\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n```\r\n\r\n\"Executable stack\" sounds like something we should try to avoid.\r\n\r\nTo reproduce, try `./configure --host=arm-linux-gnueabihf  --enable-experimental --with-asm=arm32` (e.g, in the CI image):\r\n\r\n```\r\nroot@ad8b1ab4bedc:/tmp/secp256k1# make\r\nmake  all-am\r\nmake[1]: Entering directory '/tmp/secp256k1'\r\n  CC       src/bench-bench.o\r\n  CC       src/libsecp256k1_la-secp256k1.lo\r\n  CCAS     src/asm/field_10x26_arm.lo\r\n  CCLD     libsecp256k1_common.la\r\n  CC       src/libsecp256k1_precomputed_la-precomputed_ecmult.lo\r\n  CC       src/libsecp256k1_precomputed_la-precomputed_ecmult_gen.lo\r\n  CCLD     libsecp256k1_precomputed.la\r\n  CCLD     libsecp256k1.la\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n  CCLD     bench\r\n  CC       src/bench_internal-bench_internal.o\r\n  CCLD     bench_internal\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n  CC       src/bench_ecmult-bench_ecmult.o\r\n  CCLD     bench_ecmult\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n  CC       src/noverify_tests-tests.o\r\n  CCLD     noverify_tests\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n  CC       src/tests-tests.o\r\n  CCLD     tests\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\n  CC       src/ctime_tests-ctime_tests.o\r\n  CCLD     ctime_tests\r\n  CC       src/exhaustive_tests-tests_exhaustive.o\r\n  CCLD     exhaustive_tests\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: warning: field_10x26_arm.o: missing .note.GNU-stack section implies executable stack\r\n/usr/lib/gcc-cross/arm-linux-gnueabihf/12/../../../../arm-linux-gnueabihf/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker\r\nmake[1]: Leaving directory '/tmp/secp256k1'\r\n\r\n\r\nroot@ad8b1ab4bedc:/tmp/secp256k1# ld -version\r\nGNU ld (GNU Binutils for Debian) 2.40\r\nCopyright (C) 2023 Free Software Foundation, Inc.\r\nThis program is free software; you may redistribute it under the terms of\r\nthe GNU General Public License version 3 or (at your option) a later version.\r\nThis program has absolutely no warranty.```",
+    "user": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      },
+      {
+        "id": 4975362431,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI4Bfw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/build",
+        "name": "build",
+        "description": "",
+        "color": "2F66C4",
+        "default": false
+      }
+    ],
+    "assignees": [],
+    "author_association": "CONTRIBUTOR",
+    "locked": false,
+    "comments": 0,
+    "created_at": "2023-10-26T16:46:16Z",
+    "updated_at": "2023-10-26T16:46:16Z"
+  },
+  "events": [
+    {
+      "event": "labeled",
+      "id": 10782401797,
+      "node_id": "LE_lADOAP4Jqs51D5iezwAAAAKCrmUF",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10782401797",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-10-26T16:46:16Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 10782401804,
+      "node_id": "LE_lADOAP4Jqs51D5iezwAAAAKCrmUM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/10782401804",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-10-26T16:46:16Z",
+      "label": {
+        "name": "build",
+        "color": "2F66C4"
+      }
+    }
+  ]
+}
