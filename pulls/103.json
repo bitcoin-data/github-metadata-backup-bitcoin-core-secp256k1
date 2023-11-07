@@ -41,7 +41,7 @@
     "body": "",
     "labels": [],
     "created_at": "2014-11-13T15:53:28Z",
-    "updated_at": "2023-11-06T21:03:45Z",
+    "updated_at": "2023-11-07T15:30:10Z",
     "closed_at": "2014-11-15T00:29:53Z",
     "mergeable_state": "unknown",
     "merged_at": "2014-11-15T00:29:53Z",
@@ -275,12 +275,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1037,
+        "forks_count": 1038,
         "stargazers_count": 1854,
         "watchers_count": 1854,
         "size": 10543,
         "default_branch": "master",
-        "open_issues_count": 138,
+        "open_issues_count": 141,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -291,7 +291,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-11-04T19:56:30Z",
+        "pushed_at": "2023-11-07T12:25:47Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2023-11-04T23:45:50Z",
         "license": {
@@ -322,7 +322,7 @@
     "deletions": 334,
     "changed_files": 2,
     "commits": 4,
-    "review_comments": 4,
+    "review_comments": 5,
     "comments": 8
   },
   "events": [
@@ -1481,6 +1481,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1383985630"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/103"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 90,
+      "original_line": 90,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1385110313",
+      "pull_request_review_id": 1718001697,
+      "id": 1385110313,
+      "node_id": "PRRC_kwDOAP4Jqs5Sjxsp",
+      "diff_hunk": "@@ -7,99 +7,269 @@\n \n #include <stdint.h>\n \n+#ifdef VERIFY\n+#define VERIFY_BITS(x, n) VERIFY_CHECK(((x) >> (n)) == 0)\n+#else\n+#define VERIFY_BITS(x, n) do { } while(0)\n+#endif\n+\n SECP256K1_INLINE static void secp256k1_fe_mul_inner(const uint64_t *a, const uint64_t *b, uint64_t *r) {\n-    __int128 c = (__int128)a[0] * b[0];\n-    uint64_t t0 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 0FFFFFFFFFFFFFE0\n-    c = c + (__int128)a[0] * b[1] +\n-            (__int128)a[1] * b[0];\n-    uint64_t t1 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 20000000000000BF\n-    c = c + (__int128)a[0] * b[2] +\n-            (__int128)a[1] * b[1] +\n-            (__int128)a[2] * b[0];\n-    uint64_t t2 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 30000000000001A0\n-    c = c + (__int128)a[0] * b[3] +\n-            (__int128)a[1] * b[2] +\n-            (__int128)a[2] * b[1] +\n-            (__int128)a[3] * b[0];\n-    uint64_t t3 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 4000000000000280\n-    c = c + (__int128)a[0] * b[4] +\n-            (__int128)a[1] * b[3] +\n-            (__int128)a[2] * b[2] +\n-            (__int128)a[3] * b[1] +\n-            (__int128)a[4] * b[0];\n-    uint64_t t4 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 320000000000037E\n-    c = c + (__int128)a[1] * b[4] +\n-            (__int128)a[2] * b[3] +\n-            (__int128)a[3] * b[2] +\n-            (__int128)a[4] * b[1];\n-    uint64_t t5 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 22000000000002BE\n-    c = c + (__int128)a[2] * b[4] +\n-            (__int128)a[3] * b[3] +\n-            (__int128)a[4] * b[2];\n-    uint64_t t6 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 12000000000001DE\n-    c = c + (__int128)a[3] * b[4] +\n-            (__int128)a[4] * b[3];\n-    uint64_t t7 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 02000000000000FE\n-    c = c + (__int128)a[4] * b[4];\n-    uint64_t t8 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 001000000000001E\n-    uint64_t t9 = c;\n-\n-    c = t0 + (__int128)t5 * 0x1000003D10ULL;\n-    t0 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 0000001000003D10\n-    c = c + t1 + (__int128)t6 * 0x1000003D10ULL;\n-    t1 = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 0000001000003D10\n-    c = c + t2 + (__int128)t7 * 0x1000003D10ULL;\n-    r[2] = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 0000001000003D10\n-    c = c + t3 + (__int128)t8 * 0x1000003D10ULL;\n-    r[3] = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 0000001000003D10\n-    c = c + t4 + (__int128)t9 * 0x1000003D10ULL;\n-    r[4] = c & 0x0FFFFFFFFFFFFULL; c = c >> 48; // c max 000001000003D110\n-    c = t0 + (__int128)c * 0x1000003D1ULL;\n-    r[0] = c & 0xFFFFFFFFFFFFFULL; c = c >> 52; // c max 1000008\n-    r[1] = t1 + c;\n+    VERIFY_BITS(a[0], 56);\n+    VERIFY_BITS(a[1], 56);\n+    VERIFY_BITS(a[2], 56);\n+    VERIFY_BITS(a[3], 56);\n+    VERIFY_BITS(a[4], 52);\n+    VERIFY_BITS(b[0], 56);\n+    VERIFY_BITS(b[1], 56);\n+    VERIFY_BITS(b[2], 56);\n+    VERIFY_BITS(b[3], 56);\n+    VERIFY_BITS(b[4], 52);\n+\n+    const uint64_t M = 0xFFFFFFFFFFFFFULL, R = 0x1000003D10ULL;\n+    // [... a b c] is a shorthand for ... + a<<104 + b<<52 + c<<0 mod n.\n+    // px is a shorthand for sum(a[i]*b[x-i], i=0..x).\n+    // Note that [x 0 0 0 0 0] = [x*R].\n+\n+    __int128 c, d;\n+\n+    d  = (__int128)a[0] * b[3]\n+       + (__int128)a[1] * b[2]\n+       + (__int128)a[2] * b[1]\n+       + (__int128)a[3] * b[0];\n+    VERIFY_BITS(d, 114);\n+    // [d 0 0 0] = [p3 0 0 0]\n+    c  = (__int128)a[4] * b[4];\n+    VERIFY_BITS(c, 112);\n+    // [c 0 0 0 0 d 0 0 0] = [p8 0 0 0 0 p3 0 0 0]\n+    d += (c & M) * R; c >>= 52;\n+    VERIFY_BITS(d, 115);\n+    VERIFY_BITS(c, 60);\n+    // [c 0 0 0 0 0 d 0 0 0] = [p8 0 0 0 0 p3 0 0 0]\n+    uint64_t t3 = d & M; d >>= 52;\n+    VERIFY_BITS(t3, 52);\n+    VERIFY_BITS(d, 63);\n+    // [c 0 0 0 0 d t3 0 0 0] = [p8 0 0 0 0 p3 0 0 0]\n+\n+    d += (__int128)a[0] * b[4]\n+       + (__int128)a[1] * b[3]\n+       + (__int128)a[2] * b[2]\n+       + (__int128)a[3] * b[1]\n+       + (__int128)a[4] * b[0];\n+    VERIFY_BITS(d, 115);\n+    // [c 0 0 0 0 d t3 0 0 0] = [p8 0 0 0 p4 p3 0 0 0]\n+    d += c * R;\n+    VERIFY_BITS(d, 116);\n+    // [d t3 0 0 0] = [p8 0 0 0 p4 p3 0 0 0]\n+    uint64_t t4 = d & M; d >>= 52;\n+    VERIFY_BITS(t4, 52);\n+    VERIFY_BITS(d, 64);\n+    // [d t4 t3 0 0 0] = [p8 0 0 0 p4 p3 0 0 0]\n+    uint64_t tx = (t4 >> 48); t4 &= (M >> 4);\n+    VERIFY_BITS(tx, 4);\n+    VERIFY_BITS(t4, 48);\n+    // [d t4+(tx<<48) t3 0 0 0] = [p8 0 0 0 p4 p3 0 0 0]\n+\n+    c  = (__int128)a[0] * b[0];\n+    VERIFY_BITS(c, 112);\n+    // [d t4+(tx<<48) t3 0 0 c] = [p8 0 0 0 p4 p3 0 0 p0]\n+    d += (__int128)a[1] * b[4]\n+       + (__int128)a[2] * b[3]\n+       + (__int128)a[3] * b[2]\n+       + (__int128)a[4] * b[1];\n+    VERIFY_BITS(d, 115);\n+    // [d t4+(tx<<48) t3 0 0 c] = [p8 0 0 p5 p4 p3 0 0 p0]\n+    uint64_t u0 = d & M; d >>= 52;\n+    VERIFY_BITS(u0, 52);\n+    VERIFY_BITS(d, 63);\n+    // [d u0 t4+(tx<<48) t3 0 0 c] = [p8 0 0 p5 p4 p3 0 0 p0]\n+    // [d 0 t4+(tx<<48)+(u0<<52) t3 0 0 c] = [p8 0 0 p5 p4 p3 0 0 p0]\n+    u0 = (u0 << 4) | tx;\n+    VERIFY_BITS(u0, 56);\n+    // [d 0 t4+(u0<<48) t3 0 0 c] = [p8 0 0 p5 p4 p3 0 0 p0]\n+    c += (__int128)u0 * (R >> 4);\n+    VERIFY_BITS(c, 115);",
+      "path": "src/field_5x52_int128_impl.h",
+      "position": 133,
+      "original_position": 133,
+      "commit_id": "f8cce9565014a3e892b346eb48c384148ff67093",
+      "original_commit_id": "f8cce9565014a3e892b346eb48c384148ff67093",
+      "in_reply_to_id": 1383956697,
+      "user": {
+        "login": "roconnor-blockstream",
+        "id": 21371712,
+        "node_id": "MDQ6VXNlcjIxMzcxNzEy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/21371712?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/roconnor-blockstream",
+        "html_url": "https://github.com/roconnor-blockstream",
+        "followers_url": "https://api.github.com/users/roconnor-blockstream/followers",
+        "following_url": "https://api.github.com/users/roconnor-blockstream/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/roconnor-blockstream/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/roconnor-blockstream/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/roconnor-blockstream/subscriptions",
+        "organizations_url": "https://api.github.com/users/roconnor-blockstream/orgs",
+        "repos_url": "https://api.github.com/users/roconnor-blockstream/repos",
+        "events_url": "https://api.github.com/users/roconnor-blockstream/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/roconnor-blockstream/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "https://github.com/bitcoin-core/secp256k1/pull/1438",
+      "created_at": "2023-11-07T15:30:10Z",
+      "updated_at": "2023-11-07T15:30:11Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/103#discussion_r1385110313",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1385110313"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/103"
