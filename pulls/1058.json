@@ -51,14 +51,14 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2023-12-01T06:06:32Z",
-    "mergeable": true,
-    "mergeable_state": "blocked",
+    "updated_at": "2023-12-01T16:45:28Z",
+    "mergeable": false,
+    "mergeable_state": "dirty",
     "merge_commit_sha": "9bb48250c804c65332627f709886daae8300203f",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
-    "rebaseable": true,
+    "rebaseable": false,
     "head": {
       "label": "sipa:202112_sdmc",
       "ref": "202112_sdmc",
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-11-11T22:58:36Z",
+        "pushed_at": "2023-12-01T16:39:12Z",
         "created_at": "2014-02-08T17:33:30Z",
         "updated_at": "2023-05-11T11:08:51Z",
         "license": {
@@ -288,7 +288,7 @@
         "forks_count": 1044,
         "stargazers_count": 1865,
         "watchers_count": 1865,
-        "size": 10600,
+        "size": 10613,
         "default_branch": "master",
         "open_issues_count": 138,
         "is_template": false,
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-12-01T00:45:40Z",
+        "pushed_at": "2023-12-01T16:43:37Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2023-11-29T16:06:45Z",
         "license": {
@@ -332,7 +332,7 @@
     "deletions": 9943,
     "changed_files": 18,
     "commits": 15,
-    "review_comments": 20,
+    "review_comments": 21,
     "comments": 31
   },
   "events": [
@@ -5406,6 +5406,58 @@
       "start_side": null,
       "line": 188,
       "original_line": 186,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1412350546",
+      "pull_request_review_id": 1760207865,
+      "id": 1412350546,
+      "node_id": "PRRC_kwDOAP4Jqs5ULsJS",
+      "diff_hunk": "@@ -5548,32 +5561,35 @@ static void test_ecmult_gen_blind(void) {\n     unsigned char seed32[32];\n     secp256k1_gej pgej;\n     secp256k1_gej pgej2;\n-    secp256k1_gej i;\n+    secp256k1_ge f;\n     secp256k1_ge pge;\n     random_scalar_order_test(&key);\n     secp256k1_ecmult_gen(&CTX->ecmult_gen_ctx, &pgej, &key);\n     secp256k1_testrand256(seed32);\n-    b = CTX->ecmult_gen_ctx.blind;\n-    i = CTX->ecmult_gen_ctx.initial;\n+    b = CTX->ecmult_gen_ctx.scalar_offset;\n+    f = CTX->ecmult_gen_ctx.final_point_add;\n     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, seed32);\n-    CHECK(!secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.blind));\n+    CHECK(!secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.scalar_offset));\n     secp256k1_ecmult_gen(&CTX->ecmult_gen_ctx, &pgej2, &key);\n     CHECK(!gej_xyz_equals_gej(&pgej, &pgej2));\n-    CHECK(!gej_xyz_equals_gej(&i, &CTX->ecmult_gen_ctx.initial));\n+    CHECK(!ge_cmp_ge(&f, &CTX->ecmult_gen_ctx.final_point_add));\n     secp256k1_ge_set_gej(&pge, &pgej);\n     ge_equals_gej(&pge, &pgej2);\n }\n \n static void test_ecmult_gen_blind_reset(void) {\n     /* Test ecmult_gen() blinding reset and confirm that the blinding is consistent. */\n     secp256k1_scalar b;\n-    secp256k1_gej initial;\n+    secp256k1_ge final1, final2;\n     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, 0);\n-    b = CTX->ecmult_gen_ctx.blind;\n-    initial = CTX->ecmult_gen_ctx.initial;\n+    b = CTX->ecmult_gen_ctx.scalar_offset;\n+    final1 = CTX->ecmult_gen_ctx.final_point_add;\n+    secp256k1_fe_normalize_var(&final1.y);\n     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, 0);\n-    CHECK(secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.blind));\n-    CHECK(gej_xyz_equals_gej(&initial, &CTX->ecmult_gen_ctx.initial));\n+    CHECK(secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.scalar_offset));\n+    final2 = CTX->ecmult_gen_ctx.final_point_add;\n+    secp256k1_fe_normalize_var(&final2.y);\n+    ge_equals_ge(&final1, &final2);",
+      "path": "src/tests.c",
+      "position": 74,
+      "original_position": 73,
+      "commit_id": "4e125ea4489777d2c721cb299eac06774008708b",
+      "original_commit_id": "764efa4eb4bd6ddc18262e79192ed9802c3f8eb1",
+      "in_reply_to_id": 1411626664,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Ok, this comment made me take the time to just get rid of these strange test-only functions. See #1450.",
+      "created_at": "2023-12-01T16:45:28Z",
+      "updated_at": "2023-12-01T16:45:29Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1412350546",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1412350546"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 5593,
+      "original_line": 5592,
       "side": "RIGHT"
     }
   ]
