@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/726",
     "number": 726,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Consider removing x86_64 field assembly",
     "body": "I noticed that turning off x86_64 assembly on my laptop actually speeds up `ecdsa_verify`. The internal benchmarks show that `--without-asm` scalar operations are slower, but field operations are faster. In order to investigate this I created a branch that includes the configurable benchmark iterations from #722, a test_matrix.sh script and allows turning on field assembly individually (https://github.com/jonasnick/secp256k1/tree/eval-asm).\r\n\r\nHere are the results with gcc 9.3.0 (got similar results with clang 9.0.1):\r\n```\r\nSECP256K1_BENCH_ITERS=200000\r\n\r\nbench config CFLAGS=-DUSE_ASM_X86_64_FIELD ./configure --disable-openssl-tests --with-asm=x86_64\r\nscalar_sqr: min 0.0331us / avg 0.0332us / max 0.0337us\r\nscalar_mul: min 0.0342us / avg 0.0343us / max 0.0345us\r\nfield_sqr: min 0.0165us / avg 0.0165us / max 0.0167us\r\nfield_mul: min 0.0204us / avg 0.0205us / max 0.0209us\r\necdsa_sign: min 40.3us / avg 40.3us / max 40.4us\r\necdsa_verify: min 56.9us / avg 56.9us / max 56.9us\r\n\r\nbench config CFLAGS= ./configure --disable-openssl-tests --without-asm\r\nscalar_sqr: min 0.0375us / avg 0.0376us / max 0.0383us\r\nscalar_mul: min 0.0362us / avg 0.0366us / max 0.0396us\r\nfield_sqr: min 0.0152us / avg 0.0152us / max 0.0152us\r\nfield_mul: min 0.0177us / avg 0.0178us / max 0.0178us\r\necdsa_sign: min 41.8us / avg 41.8us / max 41.9us\r\necdsa_verify: min 54.6us / avg 54.7us / max 54.7us\r\n\r\nbench config CFLAGS= ./configure --disable-openssl-tests --with-asm=x86_64\r\nscalar_sqr: min 0.0331us / avg 0.0331us / max 0.0333us\r\nscalar_mul: min 0.0342us / avg 0.0343us / max 0.0347us\r\nfield_sqr: min 0.0152us / avg 0.0153us / max 0.0154us\r\nfield_mul: min 0.0178us / avg 0.0178us / max 0.0180us\r\necdsa_sign: min 40.3us / avg 40.3us / max 40.4us\r\necdsa_verify: min 53.2us / avg 53.2us / max 53.2us\r\n```\r\n\r\nNote the 6.5% ecdsa_verify speedup. However, I don't fully understand this:\r\n\r\n1. There's assembly for field_sqr and field_mul. If we remove it, both functions are faster. But, some other internal functions are slower. For example:\r\n    ```\r\n    SECP256K1_BENCH_ITERS=200000\r\n    group_add_affine: min 0.257us / avg 0.257us / max 0.259us\r\n    vs.\r\n    group_add_affine: min 0.263us / avg 0.263us / max 0.264us\r\n    ```\r\n    This could just be an artifact of micro-benching and I have not tested this with #667.\r\n2. Removing field arithmetic also makes ecdsa verification slower if endomorphism is enabled.\r\n    ```\r\n    SECP256K1_BENCH_ITERS=200000\r\n    ecdsa_verify: min 41.1us / avg 41.1us / max 41.1us\r\n    vs.\r\n    ecdsa_verify: min 41.5us / avg 41.6us / max 41.6us\r\n    ```\r\n\r\nIt should be noted that without field arithmetic assembly, in order to use 64 bit field arithmetic you need to have `__int128` support (or use field=32bit with a 40% verification slowdown). I did not check where this is supported (MSVC?). Also we should try this with older compilers.\r\n",
     "user": {
@@ -48,9 +48,10 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 21,
+    "comments": 22,
+    "closed_at": "2023-12-04T12:20:19Z",
     "created_at": "2020-03-24T09:54:10Z",
-    "updated_at": "2023-11-24T19:59:48Z"
+    "updated_at": "2023-12-04T12:20:19Z"
   },
   "events": [
     {
@@ -1686,7 +1687,7 @@
           "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1446/events",
           "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1446",
           "number": 1446,
-          "state": "open",
+          "state": "closed",
           "state_reason": null,
           "title": "field: Remove x86_64 asm ",
           "body": "Widely available versions of GCC and Clang beat our field asm on -O2.\r\nIn particular, GCC 10.5.0, which is Bitcoin Core's current compiler\r\nfor official x86_64 builds, produces code that is > 20% faster for\r\nfe_mul and > 10% faster for signature verification (see #726).\r\n\r\nThese are the alternatives to this PR:\r\n\r\nWe could replace our current asm with the fastest compiler output\r\nthat we can find. This is potentially faster, but it has multiple\r\ndrawbacks:\r\n - It's more coding work because it needs detailed benchmarks (e.g.,\r\n   with many compiler/options).\r\n - It's more review work because we need to deal with inline asm\r\n   (including clobbers etc.) and there's a lack of experts reviewers\r\n   in this area.\r\n - It's not unlikely that we'll fall behind again in a few compiler\r\n   versions, and then we have to deal with this again, i.e., redo the\r\n   benchmarks. Given our history here, I doubt that we'll revolve\r\n   this timely.\r\n\r\nWe could change the default of the asm build option to off. But this\r\nwill also disable the scalar asm, which is still faster.\r\n\r\nWe could split the build option into two separate options for field\r\nand scalar asm and only disable the field asm by default. But this\r\nadds complexity to the build and to the test matrix.\r\n\r\nMy conclusion is that this PR gets the low-hanging fruit in terms of\r\nperformance. It simplifies our code significantly. It's clearly an\r\nimprovement, and it's very easy to review. Whether re-introducing\r\nbetter asm (whether from a compiler or from CryptOpt) is worth the\r\nhassle can be evaluated separately, and should not hold up this\r\nimprovement.\r\n\r\nSolves #726.",
@@ -1719,20 +1720,66 @@
               "description": "",
               "color": "DE3CCC",
               "default": false
+            },
+            {
+              "id": 5492210333,
+              "node_id": "LA_kwDOAP4Jqs8AAAABR1x6nQ",
+              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/needs-changelog",
+              "name": "needs-changelog",
+              "description": "",
+              "color": "DBD8F4",
+              "default": false
             }
           ],
           "assignees": [],
           "author_association": "CONTRIBUTOR",
+          "milestone": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/5",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/milestone/5",
+            "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/5/labels",
+            "id": 9880835,
+            "node_id": "MI_kwDOAP4Jqs4AlsUD",
+            "number": 5,
+            "state": "open",
+            "title": "0.4.1 or 0.5.0",
+            "description": "",
+            "creator": {
+              "login": "jonasnick",
+              "id": 2582071,
+              "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+              "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/jonasnick",
+              "html_url": "https://github.com/jonasnick",
+              "followers_url": "https://api.github.com/users/jonasnick/followers",
+              "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+              "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+              "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+              "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+              "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+              "repos_url": "https://api.github.com/users/jonasnick/repos",
+              "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+              "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+              "type": "User",
+              "site_admin": false
+            },
+            "open_issues": 3,
+            "closed_issues": 2,
+            "created_at": "2023-09-04T14:30:28Z",
+            "updated_at": "2023-12-01T18:50:06Z",
+            "due_on": "2023-12-15T08:00:00Z"
+          },
           "locked": false,
-          "comments": 2,
+          "comments": 7,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1446",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1446",
             "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1446.diff",
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1446.patch"
           },
+          "closed_at": "2023-12-01T18:50:06Z",
           "created_at": "2023-11-23T21:59:33Z",
-          "updated_at": "2023-11-24T19:54:01Z"
+          "updated_at": "2023-12-01T23:02:16Z"
         },
         "type": "issue"
       }
@@ -1873,6 +1920,89 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/726#issuecomment-1826048292",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726"
+    },
+    {
+      "event": "commented",
+      "id": 1838522635,
+      "node_id": "IC_kwDOAP4Jqs5tlaEL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1838522635",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-12-04T12:20:19Z",
+      "updated_at": "2023-12-04T12:20:19Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "We have removed the field assembly in https://github.com/bitcoin-core/secp256k1/pull/1446",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/726#issuecomment-1838522635",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726"
+    },
+    {
+      "event": "closed",
+      "id": 11138348573,
+      "node_id": "CE_lADOAP4Jqs4i-luqzwAAAAKX5bYd",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11138348573",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-12-04T12:20:19Z"
     }
   ]
 }
