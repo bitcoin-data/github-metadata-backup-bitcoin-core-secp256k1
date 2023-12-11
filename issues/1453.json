@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1453/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1453",
     "number": 1453,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "secp256k1_fe_set_b32_mod doesn't actually reduce anything",
     "body": "`secp256k1_fe_set_b32_mod` method name and comment suggest that it reduces the value mod p and the result is supposed to be `r ≡ a (mod p)`  \r\nhttps://github.com/bitcoin-core/secp256k1/blob/d3e29db8bbf81600fe0a6bd70b12fe57a0121b83/src/field.h#L187-L192  \r\n\r\nHowever looking at the implementations they don't actually perform any reduction. It's just a simple conversion from byte[] to uint[] in radix 26 or 52.  \r\nhttps://github.com/bitcoin-core/secp256k1/blob/d3e29db8bbf81600fe0a6bd70b12fe57a0121b83/src/field_impl.h#L270-L277  \r\nhttps://github.com/bitcoin-core/secp256k1/blob/d3e29db8bbf81600fe0a6bd70b12fe57a0121b83/src/field_10x26_impl.h#L293-L304   \r\nhttps://github.com/bitcoin-core/secp256k1/blob/d3e29db8bbf81600fe0a6bd70b12fe57a0121b83/src/field_5x52_impl.h#L235-L270  \r\n\r\nAfter this change the old method (`secp256k1_fe_set_b32_limit`) is still used in most places except something like this \r\nhttps://github.com/bitcoin-core/secp256k1/commit/5b32602295ff7ad9e1973f96b8ee8344b82f4af0#diff-6f71b0372be086d45b4f2740508c03a21835d87008840032fbb767f419fd988a  \r\nAnd it just assumes `secp256k1_fe_set_b32_mod` reduces the result while it doesn't.  \r\n\r\n@sipa ",
     "user": {
@@ -46,11 +46,12 @@
       }
     ],
     "assignees": [],
-    "author_association": "NONE",
+    "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 4,
+    "closed_at": "2023-12-11T08:33:34Z",
     "created_at": "2023-12-06T06:23:56Z",
-    "updated_at": "2023-12-07T08:30:51Z"
+    "updated_at": "2023-12-11T08:33:34Z"
   },
   "events": [
     {
@@ -223,7 +224,7 @@
       "commit_url": null,
       "created_at": "2023-12-06T17:23:20Z",
       "updated_at": "2023-12-06T17:23:20Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "> So the only difference between `secp256k1_fe_set_b32_mod` and `secp256k1_fe_set_b32_limit` is that the latter detects and fails if the input exceeds p\r\n\r\nWouldn't it be better to rename the methods to something like `_set_b32` and `set_b32_check`?",
       "user": {
         "login": "Coding-Enthusiast",
@@ -446,6 +447,156 @@
         "name": "refactor/smell",
         "color": "FBCA04"
       }
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "Coding-Enthusiast",
+        "id": 20510382,
+        "node_id": "MDQ6VXNlcjIwNTEwMzgy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/20510382?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Coding-Enthusiast",
+        "html_url": "https://github.com/Coding-Enthusiast",
+        "followers_url": "https://api.github.com/users/Coding-Enthusiast/followers",
+        "following_url": "https://api.github.com/users/Coding-Enthusiast/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Coding-Enthusiast/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Coding-Enthusiast/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Coding-Enthusiast/subscriptions",
+        "organizations_url": "https://api.github.com/users/Coding-Enthusiast/orgs",
+        "repos_url": "https://api.github.com/users/Coding-Enthusiast/repos",
+        "events_url": "https://api.github.com/users/Coding-Enthusiast/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Coding-Enthusiast/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-12-08T04:53:06Z",
+      "updated_at": "2023-12-08T04:53:06Z",
+      "source": {
+        "issue": {
+          "id": 2031925867,
+          "node_id": "PR_kwDOAP4Jqs5hfCLb",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1455",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1455/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1455/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1455/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1455",
+          "number": 1455,
+          "state": "closed",
+          "state_reason": null,
+          "title": "doc: improve secp256k1_fe_set_b32_mod doc",
+          "body": "As discussed in #1453  \r\nThis only changes the `secp256k1_fe_impl_set_b32_mod` comment since I think `secp256k1_fe_set_b32_limit` doc is clear enough.",
+          "user": {
+            "login": "Coding-Enthusiast",
+            "id": 20510382,
+            "node_id": "MDQ6VXNlcjIwNTEwMzgy",
+            "avatar_url": "https://avatars.githubusercontent.com/u/20510382?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/Coding-Enthusiast",
+            "html_url": "https://github.com/Coding-Enthusiast",
+            "followers_url": "https://api.github.com/users/Coding-Enthusiast/followers",
+            "following_url": "https://api.github.com/users/Coding-Enthusiast/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/Coding-Enthusiast/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/Coding-Enthusiast/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/Coding-Enthusiast/subscriptions",
+            "organizations_url": "https://api.github.com/users/Coding-Enthusiast/orgs",
+            "repos_url": "https://api.github.com/users/Coding-Enthusiast/repos",
+            "events_url": "https://api.github.com/users/Coding-Enthusiast/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/Coding-Enthusiast/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [
+            {
+              "id": 5492448291,
+              "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
+              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/refactor/smell",
+              "name": "refactor/smell",
+              "description": "",
+              "color": "FBCA04",
+              "default": false
+            }
+          ],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 1,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1455",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1455",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1455.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1455.patch"
+          },
+          "closed_at": "2023-12-11T08:20:22Z",
+          "created_at": "2023-12-08T04:53:05Z",
+          "updated_at": "2023-12-11T08:20:22Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "referenced",
+      "id": 11206791757,
+      "node_id": "REFE_lADOAP4Jqs543Q6szwAAAAKb-hJN",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11206791757",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "77af1da9f631fa622fb5b5895fd27be431432368",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/77af1da9f631fa622fb5b5895fd27be431432368",
+      "created_at": "2023-12-11T08:20:23Z"
+    },
+    {
+      "event": "closed",
+      "id": 11206932472,
+      "node_id": "CE_lADOAP4Jqs543Q6szwAAAAKb_Df4",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11206932472",
+      "actor": {
+        "login": "Coding-Enthusiast",
+        "id": 20510382,
+        "node_id": "MDQ6VXNlcjIwNTEwMzgy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/20510382?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Coding-Enthusiast",
+        "html_url": "https://github.com/Coding-Enthusiast",
+        "followers_url": "https://api.github.com/users/Coding-Enthusiast/followers",
+        "following_url": "https://api.github.com/users/Coding-Enthusiast/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Coding-Enthusiast/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Coding-Enthusiast/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Coding-Enthusiast/subscriptions",
+        "organizations_url": "https://api.github.com/users/Coding-Enthusiast/orgs",
+        "repos_url": "https://api.github.com/users/Coding-Enthusiast/repos",
+        "events_url": "https://api.github.com/users/Coding-Enthusiast/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Coding-Enthusiast/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-12-11T08:33:34Z"
     }
   ]
 }
