@@ -41,9 +41,9 @@
     "body": "This is supposed to resolve #1095 and help with restricted settings such as embedded systems or WASM. \r\n\r\nThe approach is to detect the availability of `<stdio.h>` and `<stdio.h>`, both when building the library or building against the API. The effects depend on the case:   \r\n\r\nWhen building the library:\r\n - If `<stdio.h>` is not available, disable `fprintf(stderr, ...)` in callbacks and emit a note during compilation (`#pragma message`)\r\n - If `<stdlib.h>` is not available and external default callbacks are not used, then we don't have `abort`. Raise an error in compilation and tell the user to use external callbacks\r\n -  If `<stdlib.h>` is not available, we don't have `malloc` (and `free`). Disable all API functions that need it.\r\n\r\nWhen building against our API:\r\n -  If `<stdlib.h>` is not available, make an educated guess that it wasn't available when the library was built, and tell the user that certain API functions are not available.\r\n\r\nWe use different methods of detecting the presence of the headers, see the code. The user can always override our detection mechanism as a last resort. \r\n\r\nThe other kind of standard library functionality we use is `memset` and `memcpy` from `<string.h>` (but not `memcmp` because it's a policy to use `secp256k1_memcmp_var). There's not much we can do for these two, unless we want to provide our own implementations, but in practice these functions are pretty common. [C23](https://www.iso-9899.info/n3047.html#4.) has adopted [a proposal](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2524.htm) to make these mandatory even for freestanding implementations (i.e., embedded systems in standard-speak).  \r\n\r\nA good way to test this is to change the filename in `_has_include` to simulate the case when headers are unavailable. \r\n\r\n---\r\n\r\nI went through a lot of back and forth when working on this. Here are some alternatives and why I didn't choose them for now:\r\n - Detecting `<stdlib.h>` for both `abort`  and `malloc` and is rather crude. I'm sure there are embedded platforms out there which have `malloc` and no `abort`, or the other way around. However, dealing with this will probably need more machinery (e.g., special non-standard headers), and compilers don't have automatic mechanism to detect the availability of functions. Moreover, I don't want to overshoot in the dark with my limited experience in embedded system and given the fact that noone has complained so far. After this PR, if you have a nonstandard `<stdlib.h>` with `malloc` but without `abort`, you can get away with providing external callbacks. If you have a nonstandard `<stdlib.h>` with `abort` but without `malloc`, you can get away with overriding the detection of `<stdlib.h>` to \"no\" while at the same time providing external callbacks (that may still call `abort` then.) For a different,  much more flexible approach, see for example [Mbed TLS](https://github.com/Mbed-TLS/mbedtls/blob/development/include/mbedtls/platform.h), which has a focus on embedded system.\r\n - I'm not entirely convinced that it's a good idea to warn the user when building against our API. We could be wrong and headers were available when building the library and just not now. But in that case, the user can still override, so I think it's better to loud here.\r\n - I'm also not sure that it's a good idea to let the compiler issue a \"note\" message when we disable features when compiling the library, also taking into account that it's apparently difficult to disable this kind of messages in GCC. But again, I felt it's a bit better to be loud here.   \r\n\r\n---\r\n\r\n@tcharding This is supposed to improve the situation for rust-secp256k1 wasm significantly. Perhaps except for the aforementioned string.h, but if you're using [wasi](https://github.com/rust-bitcoin/rust-secp256k1/issues/485), then I think you should just use the [wabi sysroot](https://github.com/WebAssembly/wasi-libc#building-from-source) and not your own sysroot then. Searching the web also tells me that clang may need [some compiler option](https://stackoverflow.com/questions/67068195/does-clang-provide-intrinsics-for-webassemblys-memory-fill-and-memory-copy/67084011#67084011). I don't know, I haven't tried this.\r\n\r\n",
     "labels": [],
     "created_at": "2023-12-13T20:43:00Z",
-    "updated_at": "2023-12-13T20:43:00Z",
+    "updated_at": "2023-12-13T23:18:27Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "4315eb126dcceb1bcd44de89f826ee7697013229",
     "assignees": [],
     "requested_reviewers": [],
@@ -323,7 +323,7 @@
     "changed_files": 9,
     "commits": 5,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -583,6 +583,60 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-12-13T20:43:01Z"
+    },
+    {
+      "event": "commented",
+      "id": 1854843374,
+      "node_id": "IC_kwDOAP4Jqs5ujqnu",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1854843374",
+      "actor": {
+        "login": "tcharding",
+        "id": 12626037,
+        "node_id": "MDQ6VXNlcjEyNjI2MDM3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/12626037?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/tcharding",
+        "html_url": "https://github.com/tcharding",
+        "followers_url": "https://api.github.com/users/tcharding/followers",
+        "following_url": "https://api.github.com/users/tcharding/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/tcharding/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/tcharding/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/tcharding/subscriptions",
+        "organizations_url": "https://api.github.com/users/tcharding/orgs",
+        "repos_url": "https://api.github.com/users/tcharding/repos",
+        "events_url": "https://api.github.com/users/tcharding/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/tcharding/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2023-12-13T23:18:26Z",
+      "updated_at": "2023-12-13T23:18:26Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Epic, this is awesome. I can confirm that I was able to build the code on this branch in `rust-secp256k1` after using a modified version of the vendor script in `rust-secp256k1/secp256k1-sys` (that removed all the source file patching). I was also able to remove the `printf` stuff from `build.rs` and delete the `stdio.h` and `stdlib.h` files from `rust-secp256k1/secp256k1-sys/wasm/wasm-sysroot`. Massive win, thanks man.",
+      "user": {
+        "login": "tcharding",
+        "id": 12626037,
+        "node_id": "MDQ6VXNlcjEyNjI2MDM3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/12626037?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/tcharding",
+        "html_url": "https://github.com/tcharding",
+        "followers_url": "https://api.github.com/users/tcharding/followers",
+        "following_url": "https://api.github.com/users/tcharding/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/tcharding/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/tcharding/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/tcharding/subscriptions",
+        "organizations_url": "https://api.github.com/users/tcharding/orgs",
+        "repos_url": "https://api.github.com/users/tcharding/repos",
+        "events_url": "https://api.github.com/users/tcharding/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/tcharding/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1461#issuecomment-1854843374",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1461"
     }
   ],
   "comments": []
