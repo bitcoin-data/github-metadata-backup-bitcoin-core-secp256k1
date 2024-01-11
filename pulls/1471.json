@@ -39,9 +39,19 @@
       "site_admin": false
     },
     "body": "This PR adds a new Silent Payments ([BIP352](https://github.com/bitcoin/bips/pull/1458)) module to secp256k1. At this early stage, this is meant primarily for demo purposes and to hopefully spark the scope/interface discussion started in #1427 with a more practical approach. The BIP is not finished yet, in particular the question on how the outpoint hash is calculated is still open. The PR assumes that the outpoint hash is provided by the caller, but this could change in the future if its calculation involves elliptic-curve operations that would be a good fit for being done within the module as well. The actual module is quite small with about ~450 LOC, a good part of it is API documentation.\r\n\r\nThe following routines are provided ($a_i$ are input private keys, $A_i$ are input public keys, $b$ and $B$ denote recipient privkeys/pubkeys that would be encoded in silent payment addresses, $d$ and $P$ the keypair for the actual transaction taproot x-only output):\r\n- [sender] `..._create_private_tweak_data`: calculate $a_{tweaked} = (a_0 + a_1 + ... + a_{n-1}) * outpointhash $\r\n- [sender] `..._send_create_shared_secret`: calculate $SS = a_{tweaked} * B_{scan}$ (ECDH)\r\n- [receiver] `..._create_public_tweak_data`: calculate $A_{tweaked} = (A_0 + A_1 + ... + A_{n-1}) * outpointhash $\r\n- [receiver] `..._receive_create_shared_shared`: calculate $SS = A_{tweaked} * b_{scan}$ (ECDH)\r\n- [both] `..._create_output_pubkey`: calculate $P = B_{spend} + sha256(SS \\ || \\ ser_{32}(k)) * G$\r\n- [receiver] `..._create_output_privkey`: calculate $d = b_{spend} + sha256(SS \\ || \\  ser_{32}(k))$ (mod n)\r\n\r\nFor ending up with output key material used for sending to / scanning for / spending from, both sides would follow the chain of `tweak_data -> shared_secret -> output key`. The public tweak data can be useful for faster scanning of output transactions by storing them in an index, see e.g. Bitcoin Core PR https://github.com/bitcoin/bitcoin/pull/28241. Private tweak data is arguably less useful, so in theory one could collapse the tweak data and shared secret creation functions into a single one, but IMHO it's nicer if the API is symmetric.\r\n\r\nAs discussed in https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172, the approach of passing in two separate key pairs for taproot and non-taproot inputs is followed here. This may seem a bit confusing at first, but has the advantage that the caller doesn't have to deal with enforcing even y-parity for key material manually (e.g. negating private keys of taproot outputs if they would end up in an odd point), which seems error-prone.\r\n\r\nLabels are not supported yet. At least for me, it's still unclear how exactly are they calculated (see e.g. https://github.com/bitcoin/bips/pull/1458#discussion_r1432028671 and https://github.com/bitcoin/bips/pull/1458#discussion_r1432030187).\r\n\r\nThe last commit includes a small test suite written in Python that runs the BIP352 test vectors by calling into the secp256k1 shared library using [ctypes](https://docs.python.org/3/library/ctypes.html). All sending tests and the non-labels receiving tests currently pass.\r\n```\r\n$ ./configure --enable-module-silentpayments\r\n$ make\r\n$ cd bip352-testsuite\r\n$ ./run_bip352_tests.py\r\n```\r\n\r\nThis test suite is not meant to be actually included in the repo, but it hopefully shouldn't be too much effort to automatically generate the test code for `tests_impl.h`.\r\n\r\nHappy to receive comments, even if it's only bike-shedding ones (I'm fully aware that the current naming kind of sucks). Next step is to open a Bitcoin Core PR which uses this module in [#28122](https://github.com/bitcoin/bitcoin/pull/28122), which should be ready within the next days.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975353639,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+        "name": "feature",
+        "description": "",
+        "color": "731E95",
+        "default": false
+      }
+    ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-01-10T22:42:23Z",
+    "updated_at": "2024-01-11T15:25:15Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "2da552e5fd3f284d55ad1628656194e55d4f9a68",
@@ -275,11 +285,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1061,
-        "stargazers_count": 1898,
-        "watchers_count": 1898,
+        "stargazers_count": 1899,
+        "watchers_count": 1899,
         "size": 10673,
         "default_branch": "master",
-        "open_issues_count": 135,
+        "open_issues_count": 136,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -290,9 +300,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-01-09T17:59:43Z",
+        "pushed_at": "2024-01-11T15:24:06Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-01-09T20:32:57Z",
+        "updated_at": "2024-01-11T13:29:06Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -1114,6 +1124,39 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-1885861017",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "labeled",
+      "id": 11458132991,
+      "node_id": "LE_lADOAP4Jqs56epE0zwAAAAKq9Tv_",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11458132991",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-01-11T15:25:15Z",
+      "label": {
+        "name": "feature",
+        "color": "731E95"
+      }
     }
   ],
   "comments": []
