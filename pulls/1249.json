@@ -38,7 +38,7 @@
       "type": "User",
       "site_admin": false
     },
-    "body": "This PR enables users to override compiler flags that have been set by the CMake-based build system, such as warning flags.\r\n\r\nThe Autotools-based build system has the same feature out-of-the-box.\r\n\r\nSee more details [here](https://github.com/bitcoin-core/secp256k1/issues/1235#issuecomment-1465330925).\r\n\r\nBesides a general benefit to give the last word to the user, it makes possible to implement some other ideas, such as described [here](https://github.com/bitcoin-core/secp256k1/issues/1235#issuecomment-1484045062).\r\n\r\nHere are some examples of the new option usage:\r\n```\r\ncmake -S . -B build -DSECP256K1_LATE_CFLAGS=\"-Wno-extra -Wlong-long\"\r\n```\r\n\r\n```\r\ncmake -S . -B build -DSECP256K1_BUILD_EXAMPLES=ON -DSECP256K1_LATE_CFLAGS=-O1\r\ncmake --build build\r\n...\r\nIn function ‘secp256k1_ecmult_strauss_wnaf’,\r\n    inlined from ‘secp256k1_ecmult’ at /home/hebasto/git/secp256k1/src/ecmult_impl.h:353:5:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h:291:5: warning: ‘aux’ may be used uninitialized [-Wmaybe-uninitialized]\r\n  291 |     secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A) * no, state->pre_a, state->aux);\r\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\nIn file included from /home/hebasto/git/secp256k1/src/secp256k1.c:29:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h: In function ‘secp256k1_ecmult’:\r\n/home/hebasto/git/secp256k1/src/group_impl.h:174:13: note: by argument 3 of type ‘const secp256k1_fe *’ to ‘secp256k1_ge_table_set_globalz’ declared here\r\n  174 | static void secp256k1_ge_table_set_globalz(size_t len, secp256k1_ge *a, const secp256k1_fe *zr) {\r\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\nIn file included from /home/hebasto/git/secp256k1/src/secp256k1.c:30:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h:345:18: note: ‘aux’ declared here\r\n  345 |     secp256k1_fe aux[ECMULT_TABLE_SIZE(WINDOW_A)];\r\n      |                  ^~~\r\n...\r\n```\r\n\r\nPlease note that in the last case providing `env CFLAGS=-O1` or `-DCMAKE_C_FLAGS=-O1` won't work.\r\n",
+    "body": "This PR enables users to override compiler flags that have been set by the CMake-based build system, such as warning flags.\r\n\r\nThe Autotools-based build system has the same feature out-of-the-box.\r\n\r\nSee more details [here](https://github.com/bitcoin-core/secp256k1/issues/1235#issuecomment-1465330925).\r\n\r\nHere are some examples of the new option usage:\r\n```\r\ncmake -S . -B build -DSECP256K1_LATE_CFLAGS=\"-Wno-extra -Wlong-long\"\r\n```\r\n\r\n```\r\ncmake -S . -B build -DSECP256K1_BUILD_EXAMPLES=ON -DSECP256K1_LATE_CFLAGS=-O1\r\ncmake --build build\r\n...\r\nIn function ‘secp256k1_ecmult_strauss_wnaf’,\r\n    inlined from ‘secp256k1_ecmult’ at /home/hebasto/git/secp256k1/src/ecmult_impl.h:353:5:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h:291:5: warning: ‘aux’ may be used uninitialized [-Wmaybe-uninitialized]\r\n  291 |     secp256k1_ge_table_set_globalz(ECMULT_TABLE_SIZE(WINDOW_A) * no, state->pre_a, state->aux);\r\n      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\nIn file included from /home/hebasto/git/secp256k1/src/secp256k1.c:29:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h: In function ‘secp256k1_ecmult’:\r\n/home/hebasto/git/secp256k1/src/group_impl.h:174:13: note: by argument 3 of type ‘const secp256k1_fe *’ to ‘secp256k1_ge_table_set_globalz’ declared here\r\n  174 | static void secp256k1_ge_table_set_globalz(size_t len, secp256k1_ge *a, const secp256k1_fe *zr) {\r\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\nIn file included from /home/hebasto/git/secp256k1/src/secp256k1.c:30:\r\n/home/hebasto/git/secp256k1/src/ecmult_impl.h:345:18: note: ‘aux’ declared here\r\n  345 |     secp256k1_fe aux[ECMULT_TABLE_SIZE(WINDOW_A)];\r\n      |                  ^~~\r\n...\r\n```\r\n\r\nPlease note that in the last case providing `env CFLAGS=-O1` or `-DCMAKE_C_FLAGS=-O1` won't work.\r\n",
     "labels": [
       {
         "id": 4975353639,
@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2023-03-26T18:52:59Z",
-    "updated_at": "2024-01-17T09:46:15Z",
+    "updated_at": "2024-01-17T11:25:30Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "70d7357a0ebe9d7537d295a5e86d70e078774a4c",
@@ -342,7 +342,7 @@
     "changed_files": 2,
     "commits": 1,
     "review_comments": 4,
-    "comments": 5
+    "comments": 6
   },
   "events": [
     {
@@ -1052,6 +1052,118 @@
         "name": "feature",
         "color": "731E95"
       }
+    },
+    {
+      "event": "commented",
+      "id": 1895613219,
+      "node_id": "IC_kwDOAP4Jqs5w_MMj",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1895613219",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-01-17T11:25:29Z",
+      "updated_at": "2024-01-17T11:25:29Z",
+      "author_association": "MEMBER",
+      "body": "> @hebasto Is there a specific reason to keep every function in a separate file? ... I don't have a strong opinion, it just looks a bit uncommon to me to have separate files. But there's nothing wrong with it, I guess.\r\n\r\nIt is an accepted practice, for example, in https://github.com/llvm/llvm-project/.\r\n\r\n> We could also just have a single file for all the util functions. \r\n\r\nHow should that single file be named in such a case?",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1249#issuecomment-1895613219",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1249"
+    },
+    {
+      "event": "mentioned",
+      "id": 11510137997,
+      "node_id": "MEE_lADOAP4Jqs5h0Cr_zwAAAAKuDsSN",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11510137997",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-01-17T11:25:29Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 11510138014,
+      "node_id": "SE_lADOAP4Jqs5h0Cr_zwAAAAKuDsSe",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11510138014",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-01-17T11:25:29Z"
     }
   ],
   "comments": [
