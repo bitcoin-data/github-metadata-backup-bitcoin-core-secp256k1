@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-01-26T18:18:37Z",
+    "updated_at": "2024-01-27T01:31:26Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "53e1be3fb40c064a30e0ac1e0145465b0ffb27f3",
@@ -1576,9 +1576,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-01-26T18:14:31Z",
-      "updated_at": "2024-01-26T18:18:37Z",
+      "updated_at": "2024-01-27T01:31:26Z",
       "author_association": "CONTRIBUTOR",
-      "body": "@josibake: Thanks for the initial review, very much appreciated!\r\n\r\n> Another thought I had (need to actually re-review more carefully to confirm) is we might be able to minimize the de-serializations of keys (moving from bytes -> point). From my understanding, this is one of the \"expensive\" operations as it involves calculating the y value. This would mean either combining things into larger routines, or having the functions return points instead of serialized pubkeys. Curious what you think @theStack\r\n\r\nGood point, that's also something I've been asking myself. I think the expensive part of calculating the y-value only applies for loading `secp256k1_xonly_pubkey` objects though (not for regular `secp256k1_pubkey`s), and since those are not used for any intermediate results, it (hopefully) shouldn't be too bad. Directly using the group element type is not possible I think, as that datatype (`secp265k1_ge`) is internal and not exposed by the API. Would be great to get input from experienced long-term contributors in that subject.\r\n// EDIT: oh, you probably meant the raw 33-byte results of the shared secret creation and public tweak data. Maybe those should be changed to `secp256k1_pubkey` instead.",
+      "body": "@josibake: Thanks for the initial review, very much appreciated!\r\n\r\n> Another thought I had (need to actually re-review more carefully to confirm) is we might be able to minimize the de-serializations of keys (moving from bytes -> point). From my understanding, this is one of the \"expensive\" operations as it involves calculating the y value. This would mean either combining things into larger routines, or having the functions return points instead of serialized pubkeys. Curious what you think @theStack\r\n\r\nGood point, that's also something I've been asking myself. I think the expensive part of calculating the y-value only applies for loading `secp256k1_xonly_pubkey` objects though (not for regular `secp256k1_pubkey`s), and since those are not used for any intermediate results, it (hopefully) shouldn't be too bad. Directly using the group element type is not possible I think, as that datatype (`secp265k1_ge`) is internal and not exposed by the API. Would be great to get input from experienced long-term contributors in that subject.\r\n// EDIT: oh, you probably meant the raw 33-byte results of the ~~shared secret creation and~~ public tweak data. Maybe those should be changed to `secp256k1_pubkey` instead.",
       "user": {
         "login": "theStack",
         "id": 91535,
