@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-01-28T11:52:02Z",
+    "updated_at": "2024-01-28T18:48:21Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "64cee9810802d66107612b4252444da20528e636",
@@ -285,8 +285,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1063,
-        "stargazers_count": 1908,
-        "watchers_count": 1908,
+        "stargazers_count": 1909,
+        "watchers_count": 1909,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 134,
@@ -302,7 +302,7 @@
         "visibility": "public",
         "pushed_at": "2024-01-27T03:09:24Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-01-28T02:21:02Z",
+        "updated_at": "2024-01-28T12:42:06Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -331,8 +331,8 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 13,
-    "comments": 9
+    "review_comments": 14,
+    "comments": 10
   },
   "events": [
     {
@@ -1943,6 +1943,60 @@
       "submitted_at": "2024-01-28T11:52:02Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+    },
+    {
+      "event": "commented",
+      "id": 1913683879,
+      "node_id": "IC_kwDOAP4Jqs5yEH-n",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1913683879",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-01-28T18:30:45Z",
+      "updated_at": "2024-01-28T18:34:31Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > It might make sense to have a return code signalling \"ignore this tx, it's not suitable for silent payments\" to differentiate it from an actual error that happened.\r\n> \r\n> Thinking about this a bit more, the errors that can happen are:\r\n> \r\n> 1. De-serialization errors: I pass some bytes that cannot be de-serialized into a valid public key\r\n> 2. Hash returns something greater than the curve order: extremely unlikely to _ever_ happen\r\n> 3. Pubkey / private key sum is point at infinity / 0: extremely unlikely or malicious\r\n\r\nLeaving 2. aside (from what I understand, it's fine to just ignore those unlikely hash-not-within-curve-order cases), I think the difference between 1. and 3. is that the first suggests that the user is using the API in a wrong way (i.e. shouldn't ever happen in a correct implementation), while 3. can be triggered externally for the pubkey sum case, see below.\r\n\r\n> \r\n> I think in all cases the expected user behavior is to move on. For the sender, if they run into any of these errors they would need to pick a different set of inputs (i.e. make a new transaction). For the receiver, their only recourse is to skip the transaction.\r\n> \r\n> I'm not sure what the added value to the user is here if we return different error codes.\r\n\r\nYeah, I tend to agree. The rationale behind introducing those TODOs was to consider differentiating between the cases \"invalid input data is passed\", indicating that the user did something wrong (case 1 above) and \"the individual input data passed is fine, but we still can't continue\" (case 3 above). Since the transactions appearing in the mempool / block chain are not in the control of the user, such a \"point of infinity\" case could be triggered externally in the course of scanning for silent payments.\r\n\r\nIn Bitcoin Core, at some places we call secp256k1 functions with an additional `assert(ret)`, as we are confident that the input data passed is fine and the function always succeeds, e.g. several times in `CKey::SignCompact`: https://github.com/bitcoin/bitcoin/blob/5fbcc8f0560cce36abafb8467339276b7c0d62b6/src/key.cpp#L255\r\n\r\nIn case of the pubkey tweak data creation routine, that would be a mistake as an external transaction could make a node crash in the course of e.g. the silent payment index creation. I guess we can avoid this though by just properly documenting in the API that the return code 0 also could mean \"tx is not eligible for silent payments\"? Maybe I'm overthinking here and users would hopefully always check for return values for more complex routines.",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-1913683879",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
     }
   ],
   "comments": [
@@ -2610,6 +2664,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1468836824"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 116,
+      "original_line": 116,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1468918444",
+      "pull_request_review_id": 1847612605,
+      "id": 1468918444,
+      "node_id": "PRRC_kwDOAP4Jqs5Xjeqs",
+      "diff_hunk": "@@ -89,7 +89,39 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_send_cre\n     const secp256k1_pubkey *receiver_scan_pubkey\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n-/* TODO: add function API for receiver side. */\n+/** Create Silent Payment tweak data from input public keys.\n+ *\n+ * Given a list of n public keys A_1...A_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input public keys tweak data:\n+ *\n+ * A_tweaked = (A_1 + A_2 + ... + A_n) * hash(outpoint_lowest || A)\n+ *\n+ * The public keys have to be passed in via two different parameter pairs,\n+ * one for regular and one for x-only public keys, in order to avoid the need\n+ * of users converting to a common pubkey format before calling this function.\n+ * The resulting data is needed to create a shared secret for the receiver's side.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:     public_tweak_data: pointer to the resulting public keys tweak data\n+ *  In:          plain_pubkeys: pointer to an array of non-taproot public keys\n+ *                              (can be NULL if no non-taproot inputs are used)\n+ *             n_plain_pubkeys: the number of non-taproot input public keys\n+ *               xonly_pubkeys: pointer to an array of taproot x-only public keys\n+ *                              (can be NULL if no taproot input public keys are used)\n+ *             n_xonly_pubkeys: the number of taproot input public keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_public_tweak_data(",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 116,
+      "original_position": 29,
+      "commit_id": "fa96a4a33de4729a975ecce31ad5d2fae10c514e",
+      "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
+      "in_reply_to_id": 1468836824,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Good point! I assumed that full node clients using silent payments would usually also be interested in the public tweak data to maintain a tweak index (like e.g. https://github.com/bitcoin/bitcoin/pull/28241), both for the purpose of serving the data to light clients and for faster silent payment rescans, but didn't consider that this might not be the case for _all_ full nodes.\r\n\r\n> What if we had a single function that is used by both the sender and receiver, e.g.silentpayments_create_shared_secret, which takes the input_hash_scalar as an input and a private key (can be b_scan or a_sum) as inputs along with a public key (can be A_sum or B_scan). This function would multiply the private key and scalar and then do the ECDH step. We would then need separate function for the light client receiver only which takes b_scan and A_tweaked and does the ECDH step.\r\n\r\nSeems reasonable, though currently we don't expose `input_hash_scalar`, so we'd need extra routines to also calculate that. Have to think more about it, open for all suggestions. Glad that the interface discussion is unleashed!\r\n\r\n> Just brainstorming, open to other suggestions! Also might be prematurely optimizing but from what I understand ECC Multiplication is expensive, so keeping it to one for both sender and receiver seems worth it even at this stage.\r\n\r\nAgree that we should avoid these extra multiplications if possible.",
+      "created_at": "2024-01-28T18:48:21Z",
+      "updated_at": "2024-01-28T18:48:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1468918444",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1468918444"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
