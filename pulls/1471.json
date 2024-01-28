@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-01-27T10:46:44Z",
+    "updated_at": "2024-01-28T11:52:02Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "64cee9810802d66107612b4252444da20528e636",
@@ -285,8 +285,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1063,
-        "stargazers_count": 1907,
-        "watchers_count": 1907,
+        "stargazers_count": 1908,
+        "watchers_count": 1908,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 134,
@@ -302,7 +302,7 @@
         "visibility": "public",
         "pushed_at": "2024-01-27T03:09:24Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-01-26T09:52:18Z",
+        "updated_at": "2024-01-28T02:21:02Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -331,7 +331,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 12,
+    "review_comments": 13,
     "comments": 9
   },
   "events": [
@@ -1908,6 +1908,41 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-1913112388",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "reviewed",
+      "id": 1847514647,
+      "node_id": "PRR_kwDOAP4Jqs5uHtYX",
+      "url": null,
+      "actor": null,
+      "commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "MEMBER",
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#pullrequestreview-1847514647",
+      "submitted_at": "2024-01-28T11:52:02Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
     }
   ],
   "comments": [
@@ -2533,6 +2568,58 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 103,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1468836824",
+      "pull_request_review_id": 1847514647,
+      "id": 1468836824,
+      "node_id": "PRRC_kwDOAP4Jqs5XjKvY",
+      "diff_hunk": "@@ -89,7 +89,39 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_send_cre\n     const secp256k1_pubkey *receiver_scan_pubkey\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n-/* TODO: add function API for receiver side. */\n+/** Create Silent Payment tweak data from input public keys.\n+ *\n+ * Given a list of n public keys A_1...A_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input public keys tweak data:\n+ *\n+ * A_tweaked = (A_1 + A_2 + ... + A_n) * hash(outpoint_lowest || A)\n+ *\n+ * The public keys have to be passed in via two different parameter pairs,\n+ * one for regular and one for x-only public keys, in order to avoid the need\n+ * of users converting to a common pubkey format before calling this function.\n+ * The resulting data is needed to create a shared secret for the receiver's side.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:     public_tweak_data: pointer to the resulting public keys tweak data\n+ *  In:          plain_pubkeys: pointer to an array of non-taproot public keys\n+ *                              (can be NULL if no non-taproot inputs are used)\n+ *             n_plain_pubkeys: the number of non-taproot input public keys\n+ *               xonly_pubkeys: pointer to an array of taproot x-only public keys\n+ *                              (can be NULL if no taproot input public keys are used)\n+ *             n_xonly_pubkeys: the number of taproot input public keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_public_tweak_data(",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 116,
+      "original_position": 29,
+      "commit_id": "fa96a4a33de4729a975ecce31ad5d2fae10c514e",
+      "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "in https://github.com/bitcoin-core/secp256k1/pull/1471/commits/2290e80067b9127ca7931ed4677f688070ec3c5a:\r\n\r\nThis function covers a very important use case: preparing *public* transaction input data so that it can be served to a light client (a light client in this scenario is any client that does not have access to the blockchain but does have access to their `b_scan` private key).\r\n\r\nHowever, if used by a full node client, this function would cause the receiver to do two ECC multiplications:\r\n\r\n1. `A_sum * input_hash_scalar`\r\n2. `(A_sum * input_hash_Scalar) * b_scan`\r\n\r\nIn https://github.com/bitcoin-core/secp256k1/pull/1471/commits/d7250503aca9d0cfc0c2df12d3f98c02945bcf33 the sender only does one ECC multiplication by first doing the less expensive scalar multiplication of `a_sum * input_hash_scalar`. \r\n\r\nWhat if we had a single function that is used by both the sender and receiver, e.g.`silentpayments_create_shared_secret`, which takes the `input_hash_scalar` as an input and a private key (can be `b_scan` or `a_sum`) as inputs along with a public key (can be `A_sum` or `B_scan`). This function would multiply the private key and scalar and then do the ECDH step. We would then need *separate* function for the light client receiver only which takes `b_scan` and `A_tweaked` and does the ECDH step.\r\n\r\nJust brainstorming, open to other suggestions! Also might be prematurely optimizing but from what I understand ECC Multiplication is expensive, so keeping it to one for both sender and receiver seems worth it even at this stage.",
+      "created_at": "2024-01-28T11:52:02Z",
+      "updated_at": "2024-01-28T11:52:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1468836824",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1468836824"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 116,
+      "original_line": 116,
       "side": "RIGHT"
     }
   ]
