@@ -38,7 +38,7 @@
       "type": "User",
       "site_admin": false
     },
-    "body": "In the course of looking into #1472, I discovered the function `check_fe_equal` and noticed that at two call-sites there is no `CHECK` macro around, i.e. the return value is just thrown away and a failed test would go unnoticed. This seems to be easy to miss, as the name of the function suggests that a check happens, but it's merely a wrapper around `secp256k1_fe_equal` that takes care of normalization.\r\n\r\n(Maybe doing the actual CHECK in `check_fe_equal` would be an option? On the other hand, I guess this makes it harder to spot the cause of a failed assertion, as the line number wouldn't tell anything about from where the function was called.)",
+    "body": "In the course of looking into #1472, I discovered the function `check_fe_equal` and noticed that at two call-sites (from 18 in total) there is no `CHECK` macro around, i.e. the return value is just thrown away and a failed test would go unnoticed. This seems to be easy to miss, as the name of the function suggests that a check happens, but it's merely a wrapper around `secp256k1_fe_equal` that takes care of normalization.\r\n\r\n(Maybe doing the actual CHECK in `check_fe_equal` would be an option? On the other hand, I guess this makes it harder to spot the cause of a failed assertion, as the line number wouldn't tell anything about from where the function was called.)",
     "labels": [
       {
         "id": 165017692,
@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2024-02-01T00:15:59Z",
-    "updated_at": "2024-02-01T09:06:24Z",
+    "updated_at": "2024-02-01T10:13:45Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "1ad39f8964490488896d5ccff1d0211384649a33",
@@ -295,8 +295,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1063,
-        "stargazers_count": 1910,
-        "watchers_count": 1910,
+        "stargazers_count": 1911,
+        "watchers_count": 1911,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 138,
@@ -312,7 +312,7 @@
         "visibility": "public",
         "pushed_at": "2024-02-01T01:05:29Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-01-29T10:53:16Z",
+        "updated_at": "2024-02-01T10:05:08Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -342,7 +342,7 @@
     "changed_files": 1,
     "commits": 1,
     "review_comments": 0,
-    "comments": 1
+    "comments": 2
   },
   "events": [
     {
@@ -503,6 +503,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1489#issuecomment-1920835506",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1489"
+    },
+    {
+      "event": "commented",
+      "id": 1920958086,
+      "node_id": "IC_kwDOAP4Jqs5yf36G",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1920958086",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-02-01T10:06:03Z",
+      "updated_at": "2024-02-01T10:13:45Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > but it's merely a wrapper around `secp256k1_fe_equal` that takes care of normalization.\r\n> \r\n> Perhaps we should just get rid of it. I don't think it's worth having a test function if it's only used in two call sites, and anyway, people will forget that it exists when writing new tests.\r\n\r\nIt's used 18 times in total, it's just in two of those cases the return value isn't `CHECK`ed (the ones that are touched in this PR). // EDIT: added the total number of call-sites to the PR description",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1489#issuecomment-1920958086",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1489"
     }
   ],
