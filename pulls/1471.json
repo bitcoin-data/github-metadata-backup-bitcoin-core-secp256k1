@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-01T19:21:47Z",
+    "updated_at": "2024-02-01T23:38:50Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "64cee9810802d66107612b4252444da20528e636",
@@ -286,8 +286,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1064,
-        "stargazers_count": 1911,
-        "watchers_count": 1911,
+        "stargazers_count": 1912,
+        "watchers_count": 1912,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 139,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-02-01T14:38:58Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-02-01T10:05:08Z",
+        "updated_at": "2024-02-01T23:16:48Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 17,
+    "review_comments": 19,
     "comments": 11
   },
   "events": [
@@ -2117,6 +2117,35 @@
       "submitted_at": "2024-02-01T19:21:47Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+    },
+    {
+      "event": "referenced",
+      "id": 11676721440,
+      "node_id": "REFE_lADOAP4Jqs56epE0zwAAAAK3_KEg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11676721440",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": "5f73bf36ec81c1ddc50bf029bb62617bd1b26ceb",
+      "commit_url": "https://api.github.com/repos/theStack/bitcoin/commits/5f73bf36ec81c1ddc50bf029bb62617bd1b26ceb",
+      "created_at": "2024-02-01T22:40:44Z"
     }
   ],
   "comments": [
@@ -2992,6 +3021,110 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1475018645"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": 60,
+      "original_start_line": 59,
+      "start_side": "RIGHT",
+      "line": 61,
+      "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1475303392",
+      "pull_request_review_id": 1857903313,
+      "id": 1475303392,
+      "node_id": "PRRC_kwDOAP4Jqs5X71fg",
+      "diff_hunk": "@@ -28,7 +28,41 @@ extern \"C\" {\n  * operations.\n  */\n \n-/* TODO: add function API for sender side. */\n+/** Create Silent Payment tweak data from input private keys.\n+ *\n+ * Given a list of n private keys a_1...a_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input private keys tweak data:\n+ *\n+ * a_tweaked = (a_1 + a_2 + ... + a_n) * hash(outpoint_smallest || A)\n+ *\n+ * (where A = A_1 + A_2 + ... + A_n)\n+ *\n+ * If necessary, the private keys are negated to enforce the right y-parity.\n+ * For that reason, the private keys have to be passed in via two different parameter\n+ * pairs, depending on whether they were used for creating taproot outputs or not.\n+ * The resulting data is needed to create a shared secret for the sender side.\n+ *\n+ *  Returns: 1 if shared secret creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:  private_tweak_data32: pointer to the resulting 32-byte private tweak data\n+ *  In:          plain_seckeys: pointer to an array of 32-byte private keys of non-taproot inputs\n+ *                              (can be NULL if no private keys of non-taproot inputs are used)\n+ *             n_plain_seckeys: the number of sender's non-taproot input private keys\n+ *             taproot_seckeys: pointer to an array of 32-byte private keys of taproot inputs\n+ *                              (can be NULL if no private keys of taproot inputs are used)\n+ *           n_taproot_seckeys: the number of sender's taproot input private keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_private_tweak_data(\n+    const secp256k1_context *ctx,\n+    unsigned char *private_tweak_data32,\n+    const unsigned char *plain_seckeys,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 61,
+      "original_position": 34,
+      "commit_id": "fa96a4a33de4729a975ecce31ad5d2fae10c514e",
+      "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
+      "in_reply_to_id": 1475018645,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "That's actually also one of the interface questions where I'm not sure what's the right way to do it. As we don't have a fancy dynamic list type in C (like e.g. `std::vector` in C++), we will anyhow have to pass two arguments per list: one pointing to the data, the other one for the number of elements, but the question is how to structure the data. I chose flat-concatenated-bytes/pubkey-objects in a contiguous memory area, but on a second thought it's a pretty bad idea to demand from the user to concatenate all the keys before calling, involving a lot of copying. It seems a list of _pointers_ (ending up in a double-pointer) makes more sense?\r\n\r\nThat's also how other public secp256k1 routines do it, e.g. `secp256k1_ec_pubkey_combine`, where a list of pubkeys is passed in:\r\n```\r\n    const secp256k1_pubkey * const *ins,\r\n    size_t n\r\n```\r\n\r\nFor a list of private keys, I presume this would look like\r\n```\r\n    const unsigned char * const *ins,\r\n    size_t,\r\n```\r\n\r\n(note that there is no dedicated \"seckey\" data type in the secp256k1 API, it's just an `unsigned char` pointer to memory location where the 32 bytes key data is expected).\r\n\r\nI think the users would then use that somehow like this in C++ (untested):\r\n```\r\nvoid foobar(const std::vector<CKey>& keys)\r\n{    \r\n    std::vector<unsigned char*> privkey_pointers;\r\n    for (auto& key : keys) privkey_pointers.push_back(key.data());\r\n    secp256k1_create_private_tweak_data(..., ..., privkey_pointers.data(), privkey_pointers.size(), ...);\r\n}\r\n```\r\nShould I change the interface to list of pointers? That seems strictly better than the current interface. Or is there another method of passing in key lists that you could think of?",
+      "created_at": "2024-02-01T23:32:22Z",
+      "updated_at": "2024-02-01T23:32:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1475303392",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1475303392"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": 60,
+      "original_start_line": 59,
+      "start_side": "RIGHT",
+      "line": 61,
+      "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1475314253",
+      "pull_request_review_id": 1857919119,
+      "id": 1475314253,
+      "node_id": "PRRC_kwDOAP4Jqs5X74JN",
+      "diff_hunk": "@@ -28,7 +28,41 @@ extern \"C\" {\n  * operations.\n  */\n \n-/* TODO: add function API for sender side. */\n+/** Create Silent Payment tweak data from input private keys.\n+ *\n+ * Given a list of n private keys a_1...a_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input private keys tweak data:\n+ *\n+ * a_tweaked = (a_1 + a_2 + ... + a_n) * hash(outpoint_smallest || A)\n+ *\n+ * (where A = A_1 + A_2 + ... + A_n)\n+ *\n+ * If necessary, the private keys are negated to enforce the right y-parity.\n+ * For that reason, the private keys have to be passed in via two different parameter\n+ * pairs, depending on whether they were used for creating taproot outputs or not.\n+ * The resulting data is needed to create a shared secret for the sender side.\n+ *\n+ *  Returns: 1 if shared secret creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:  private_tweak_data32: pointer to the resulting 32-byte private tweak data\n+ *  In:          plain_seckeys: pointer to an array of 32-byte private keys of non-taproot inputs\n+ *                              (can be NULL if no private keys of non-taproot inputs are used)\n+ *             n_plain_seckeys: the number of sender's non-taproot input private keys\n+ *             taproot_seckeys: pointer to an array of 32-byte private keys of taproot inputs\n+ *                              (can be NULL if no private keys of taproot inputs are used)\n+ *           n_taproot_seckeys: the number of sender's taproot input private keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_private_tweak_data(\n+    const secp256k1_context *ctx,\n+    unsigned char *private_tweak_data32,\n+    const unsigned char *plain_seckeys,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 61,
+      "original_position": 34,
+      "commit_id": "fa96a4a33de4729a975ecce31ad5d2fae10c514e",
+      "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
+      "in_reply_to_id": 1475018645,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Oh btw, I found an old Bitcoin Core branch from December where I already tried to use this module in #28122. It felt too early back then to publish it, as it was based on a not-even-draft module and I didn't want to trigger another interface discussion on top of an interface discussion, but it might be helpful for giving an idea how the module is used: https://github.com/theStack/bitcoin/tree/pr28122_using_secp256k1-silentpayments-outdated (obviously, it's outdated and the interface has changed a bit now).",
+      "created_at": "2024-02-01T23:38:50Z",
+      "updated_at": "2024-02-01T23:38:50Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1475314253",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1475314253"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
