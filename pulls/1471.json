@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-04T22:24:56Z",
+    "updated_at": "2024-02-05T01:12:58Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "f152c50d2c0cdf04168ac2c2266ab1daaa742eba",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 20,
+    "review_comments": 21,
     "comments": 12
   },
   "events": [
@@ -3270,6 +3270,58 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1477540377",
+      "pull_request_review_id": 1861687289,
+      "id": 1477540377,
+      "node_id": "PRRC_kwDOAP4Jqs5YEXoZ",
+      "diff_hunk": "@@ -89,7 +89,39 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_send_cre\n     const secp256k1_pubkey *receiver_scan_pubkey\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n-/* TODO: add function API for receiver side. */\n+/** Create Silent Payment tweak data from input public keys.\n+ *\n+ * Given a list of n public keys A_1...A_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input public keys tweak data:\n+ *\n+ * A_tweaked = (A_1 + A_2 + ... + A_n) * hash(outpoint_lowest || A)\n+ *\n+ * The public keys have to be passed in via two different parameter pairs,\n+ * one for regular and one for x-only public keys, in order to avoid the need\n+ * of users converting to a common pubkey format before calling this function.\n+ * The resulting data is needed to create a shared secret for the receiver's side.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:     public_tweak_data: pointer to the resulting public keys tweak data\n+ *  In:          plain_pubkeys: pointer to an array of non-taproot public keys\n+ *                              (can be NULL if no non-taproot inputs are used)\n+ *             n_plain_pubkeys: the number of non-taproot input public keys\n+ *               xonly_pubkeys: pointer to an array of taproot x-only public keys\n+ *                              (can be NULL if no taproot input public keys are used)\n+ *             n_xonly_pubkeys: the number of taproot input public keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_public_tweak_data(",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 118,
+      "original_position": 29,
+      "commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
+      "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
+      "in_reply_to_id": 1468836824,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "One easy possibility to avoid the extra point multiplication on the receiver side for full node clients:\r\n- change `_create_public_tweak_data` to only calculate and return a tuple (A_sum, input_hash), without doing the multiplication. E.g. with a new struct data type:\r\n```\r\ntypedef struct {\r\n    secp256k1_pubkey pubkey_sum;\r\n    unsigned char input_hash[32];\r\n} secp256k1_silentpayments_pubkey_tweak_data;\r\n```\r\n- change `_receive_create_shared_secret` to take an instance of this struct (instead of $A_{tweaked}$) accordingly, e.g.:\r\n```\r\nint secp256k1_silentpayments_receive_create_shared_secret(\r\n    const secp256k1_context *ctx,\r\n    unsigned char *shared_secret33,\r\n    const secp256k1_silentpayments_pubkey_tweak_data *public_tweak_data,\r\n    const unsigned char *receiver_scan_seckey\r\n)\r\n```\r\nIn that function, the shared secret would then be calculated via $SS = (b_{scan} * inputhash) * A_{sum}$\r\n\r\nThat would be a straightforward change. The only thing needed then for light clients (or nodes that want to create a silent payments tweak index) is an additional routine to calculate $A_{tweaked} = inputhash * A_{sum}$, given a `_pubkey_tweak_data` instance, and a possibility to calculate the shared secret from that $A_{tweaked}$. Should we have an extra shared secret creation routine for the receiver side that takes $A_{tweaked}$ (instead of the `pubkey_tweak_data` instance) and $b_{scan}$ (basically exactly what we have right now in the current PR state), or somehow abuse the `pubkey_tweak_data` structure to be also able to calculate and hold $A_{tweaked}$ already, e.g. with a flag (0=pubkey is sum, 1=pubkey is already tweaked with hash)?\r\n\r\nJust some ideas and mostly thinking out loud, happy to receive further input.",
+      "created_at": "2024-02-05T01:12:57Z",
+      "updated_at": "2024-02-05T01:12:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1477540377",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1477540377"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 118,
+      "original_line": 118,
       "side": "RIGHT"
     }
   ]
