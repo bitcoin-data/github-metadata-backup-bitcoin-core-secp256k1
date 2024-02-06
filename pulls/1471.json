@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-05T16:50:59Z",
+    "updated_at": "2024-02-06T16:33:44Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "f152c50d2c0cdf04168ac2c2266ab1daaa742eba",
@@ -286,8 +286,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1064,
-        "stargazers_count": 1914,
-        "watchers_count": 1914,
+        "stargazers_count": 1915,
+        "watchers_count": 1915,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 140,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-02-04T21:51:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-02-02T20:14:12Z",
+        "updated_at": "2024-02-05T17:30:04Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 23,
+    "review_comments": 24,
     "comments": 12
   },
   "events": [
@@ -3416,6 +3416,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1478572607"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 118,
+      "original_line": 118,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1480186475",
+      "pull_request_review_id": 1865791930,
+      "id": 1480186475,
+      "node_id": "PRRC_kwDOAP4Jqs5YOdpr",
+      "diff_hunk": "@@ -89,7 +89,39 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_send_cre\n     const secp256k1_pubkey *receiver_scan_pubkey\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n-/* TODO: add function API for receiver side. */\n+/** Create Silent Payment tweak data from input public keys.\n+ *\n+ * Given a list of n public keys A_1...A_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input public keys tweak data:\n+ *\n+ * A_tweaked = (A_1 + A_2 + ... + A_n) * hash(outpoint_lowest || A)\n+ *\n+ * The public keys have to be passed in via two different parameter pairs,\n+ * one for regular and one for x-only public keys, in order to avoid the need\n+ * of users converting to a common pubkey format before calling this function.\n+ * The resulting data is needed to create a shared secret for the receiver's side.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:     public_tweak_data: pointer to the resulting public keys tweak data\n+ *  In:          plain_pubkeys: pointer to an array of non-taproot public keys\n+ *                              (can be NULL if no non-taproot inputs are used)\n+ *             n_plain_pubkeys: the number of non-taproot input public keys\n+ *               xonly_pubkeys: pointer to an array of taproot x-only public keys\n+ *                              (can be NULL if no taproot input public keys are used)\n+ *             n_xonly_pubkeys: the number of taproot input public keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_public_tweak_data(",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 118,
+      "original_position": 29,
+      "commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
+      "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
+      "in_reply_to_id": 1468836824,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> One drawback could be though that it is likely more confusing for the user and it's a bit easier to use it wrong; since the paramters can't be named exactly after what is expected anymore\r\n\r\nTrue, but as you said, I think we can address this with good documentation. Another for using the same routine for both sender and receiver is we ensure that sender and receiver will arrive at the same shared secret (provided they give correct inputs), since they are using the same routine. If we use separate routines, there is a small chance of introducing a bug in one of the routines that would cause the sender and receiver to arrive at different shared secrets despite giving the correct inputs.\r\n\r\n> Even the shared secret creation for light clients (passing ) case could be done by that same routine, by making one parameter optional (i.e. if input_hash is NULL, that signals that the tweak is already included in the passed pubkey)\r\n\r\nAlso not a bad idea! I'd say we can go with this for now and always revert to multiple routines if there are objections.\r\n\r\n> Those two calculations are different in the sense that the shared secret creation one does a full ECDH including the call of the ECDH hash function, while the other one is just a normal point multiplication\r\n\r\nGood point, I forgot about that. I think the main difference here is that ECDH is done in constant time whereas point multiplication is not. Regardless, you're correct that these should remain separate routines and I agree we should just return the 33 byte serialized pubkey for the routine creating the light client/index data.",
+      "created_at": "2024-02-06T16:33:44Z",
+      "updated_at": "2024-02-06T16:33:44Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1480186475",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1480186475"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
