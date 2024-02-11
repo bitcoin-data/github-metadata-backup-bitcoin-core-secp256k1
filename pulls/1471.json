@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-10T23:09:39Z",
+    "updated_at": "2024-02-11T15:44:36Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "0fdbd07ab089bd918560745dfc4c82ef4ceba72f",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 11,
-    "review_comments": 27,
+    "review_comments": 28,
     "comments": 13
   },
   "events": [
@@ -3761,6 +3761,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1485131949"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 207,
+      "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1485617714",
+      "pull_request_review_id": 1874391470,
+      "id": 1485617714,
+      "node_id": "PRRC_kwDOAP4Jqs5YjLoy",
+      "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 207,
+      "original_position": 16,
+      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
+      "in_reply_to_id": 1484563895,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Thanks for clarifying, this helped me a lot in understanding. IIUC, trying to summarize:\r\n1. calculating $P_k$ (from $SS$, $B_{spend}$ and $k$) is always needed as bare minimum for both sides, i.e. either for output creation (sender) or as first step for scanning (receiver)\r\n2. for the receiver, the tweak $t_k$ is also relevant (to be stored in the wallet for spending later, without the need to involve $b_{spend}$ yet)\r\n3. only receivers with labels support have to process $P_k$ further (together with the actual output of the scanned tx) and calculate `label` and `label_negated`\r\n\r\nTo add another interface possibility, would it work to have steps 1. and 2. done in one routine (basically the one we have already now, with the only change that it also optionally returns $t_k$), and step 3. in a separate one?\r\n\r\nThe interface would look like\r\n```\r\nint secp256k1_silentpayments_create_output_pubkey(\r\n    const secp256k1_context *ctx,\r\n    secp256k1_xonly_pubkey *output_xonly_pubkey,\r\n    unsigned char *t_k,\r\n    const unsigned char *shared_secret33,\r\n    const secp256k1_pubkey *receiver_spend_pubkey,\r\n    unsigned int k\r\n);\r\n```\r\n(senders can pass in NULL for `t_k` as they don't have any use for it), and\r\n```\r\nint secp256k1_silentpayments_create_scan_labels(\r\n    const secp256k1_context *ctx,\r\n    secp256k1_pubkey *label,\r\n    secp256k1_pubkey *label_negated,\r\n    const secp256k1_xonly_pubkey *P_output,\r\n    const secp256k1_xonly_pubkey *tx_output\r\n);\r\n```\r\n\r\nDepending on the role and labels support, the following needs to be done:\r\n* Sender: call `secp256k1_silentpayments_create_output_pubkey` (with `t_k` set to NULL to avoid having to store dummy data), create tx with output $P_{output}$\r\n* Receiver:\r\n    * call `secp256k1_silentpayments_create_output_pubkey` (with `t_k` set to non-NULL)\r\n    * if $P_{output}$ equals $tx_{output}$, add $t_k$ to wallet and proceed with next `k` value\r\n    * if labels are supported\r\n        * call `secp256k1_silentpayments_create_scan_labels` with $P_{output}$ and $tx_{output}$\r\n        * if any of the results match the labels cache, add $t_k + labeltweak$ to the wallet\r\n     * proceed with next `k` value\r\n\r\nThat way we would only have to calculate the scan label data if it's needed / supported. What do you prefer, especially w.r.t. using it in #28122? Grouping by dedicated `sender_` and `receiver_` routines also has its advantages though in terms of readability for the user. I'm fine with either approach.",
+      "created_at": "2024-02-11T15:44:36Z",
+      "updated_at": "2024-02-11T15:44:36Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1485617714",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1485617714"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
