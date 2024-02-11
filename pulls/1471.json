@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-11T15:44:36Z",
+    "updated_at": "2024-02-11T18:40:50Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "0fdbd07ab089bd918560745dfc4c82ef4ceba72f",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 11,
-    "review_comments": 28,
+    "review_comments": 29,
     "comments": 13
   },
   "events": [
@@ -3823,6 +3823,58 @@
       "start_side": null,
       "line": 207,
       "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1485643621",
+      "pull_request_review_id": 1874415223,
+      "id": 1485643621,
+      "node_id": "PRRC_kwDOAP4Jqs5YjR9l",
+      "diff_hunk": "@@ -0,0 +1,227 @@\n+#!/usr/bin/env python3\n+import bech32m\n+import hashlib\n+import json\n+import ripemd160\n+import secp256k1_glue\n+\n+def sha256(s):\n+    return hashlib.sha256(s).digest()\n+\n+def hash160(s):\n+    return ripemd160.ripemd160(sha256(s))\n+\n+def TaggedHash(tag, data):\n+    return sha256(sha256(tag) + sha256(tag) + data)\n+\n+def smallest_outpoint(outpoints):\n+    serialized_outpoints = [bytes.fromhex(txid)[::-1] + n.to_bytes(4, 'little') for txid, n in outpoints]\n+    return sorted(serialized_outpoints)[0]\n+\n+def encode_silent_payment_address(scan_pubkey, spend_pubkey):\n+    assert len(scan_pubkey) == 33\n+    assert len(spend_pubkey) == 33\n+    data = bech32m.convertbits(scan_pubkey + spend_pubkey, 8, 5)\n+    return bech32m.bech32_encode(\"sp\", [0] + data, bech32m.Encoding.BECH32M)\n+\n+def decode_silent_payments_address(address):\n+    version, data = bech32m.decode(\"sp\", address)\n+    data = bytes(data)  # convert from list to bytes\n+    assert len(data) == 66\n+    return data[:33], data[33:]\n+\n+def is_p2tr(s):  # OP_1 OP_PUSHBYTES_32 <32 bytes>\n+    return (len(s) == 34) and (s[0] == 0x51) and (s[1] == 0x20)\n+\n+def is_p2wpkh(s):  # OP_0 OP_PUSHBYTES_20 <20 bytes>\n+    return (len(s) == 22) and (s[0] == 0x00) and (s[1] == 0x14)\n+\n+def is_p2sh(s):  # OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUAL\n+    return (len(s) == 23) and (s[0] == 0xA9) and (s[1] == 0x14) and (s[-1] == 0x87)\n+\n+def is_p2pkh(s):  # OP_DUP OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG\n+    return (len(s) == 25) and (s[0] == 0x76) and (s[1] == 0xA9) and (s[2] == 0x14) and (s[-2] == 0x88) and (s[-1] == 0xAC)\n+\n+def get_pubkey_from_input(spk, script_sig, witness):\n+    if is_p2pkh(spk):\n+        spk_pkh = spk[3:3 + 20]\n+        for i in range(len(script_sig), 0, -1):\n+            if i - 33 >= 0:\n+                pk = script_sig[i - 33:i]\n+                if hash160(pk) == spk_pkh:\n+                    return pk\n+        # should never happen, as this would be an invalid spend\n+        assert False\n+    if is_p2sh(spk):\n+        redeem_script = script_sig[1:]\n+        if is_p2wpkh(redeem_script):\n+            return redeem_script[-33:]\n+    if is_p2wpkh(spk):\n+        # the witness must contain two items and the second item is the pubkey\n+        return witness[-33:]\n+    if is_p2tr(spk):\n+        return spk[2:]\n+    assert False\n+\n+with open('./bip352-send_and_receive_test_vectors.json') as f:\n+    test_vectors = json.load(f)\n+\n+passed_send, passed_receive = 0, 0\n+for test_nr, test_vector in enumerate(test_vectors):\n+    print(f\"----- Test vector: \\'{test_vector['comment']}\\' {test_nr+1}/{len(test_vectors)} -----\")\n+    ###################### sending #########################\n+    assert len(test_vector['sending']) == 1\n+    send_data_given = test_vector['sending'][0]['given']\n+    send_data_expected = test_vector['sending'][0]['expected']\n+    input_priv_keys = []\n+    outpoints = []\n+    for i in send_data_given['vin']:\n+        priv_key = i['private_key']\n+        pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+            bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+        input_priv_keys.append((i['private_key'], len(pub_key) == 32))\n+        outpoints.append((i['txid'], i['vout']))\n+    outpoint_L = smallest_outpoint(outpoints)\n+    outputs_calculated = []\n+\n+    groups = {}\n+    for recipient_address, recipient_value in send_data_given['recipients']:\n+        recipient_B_scan, recipient_B_spend = decode_silent_payments_address(recipient_address)\n+        groups.setdefault(recipient_B_scan, []).append((recipient_B_spend, recipient_value))\n+\n+    for recipient_B_scan, recipient_spend_data in groups.items():\n+        plain_seckeys, xonly_seckeys = [], []\n+        for seckey_hex, is_taproot in input_priv_keys:\n+            (xonly_seckeys if is_taproot else plain_seckeys).append(bytes.fromhex(seckey_hex))\n+        tweak_data = secp256k1_glue.silentpayments_create_private_tweak_data(\n+            plain_seckeys, xonly_seckeys, outpoint_L)\n+        shared_secret = secp256k1_glue.silentpayments_send_create_shared_secret(tweak_data, recipient_B_scan)\n+        k = 0\n+        for recipient_B_spend in recipient_spend_data:\n+            output = secp256k1_glue.silentpayments_create_output_pubkey(shared_secret, recipient_B_spend[0], k)\n+            outputs_calculated.append(output.hex())\n+            k += 1\n+    outputs_expected = [o[0] for o in send_data_expected['outputs']]\n+    if outputs_calculated == outputs_expected:\n+        print(\"Sending test \\033[0;32mPASSED. ✓\\033[0m\")\n+        passed_send += 1\n+    else:\n+        print(\"Sending test \\033[0;31mFAILED. ✖\\033[0m\")\n+        print(f\"Calculated outputs: {outputs_calculated}\")\n+        print(f\"Expected outputs: {outputs_expected}\")\n+\n+    ###################### receiving ########################\n+    assert len(test_vector['receiving']) >= 1\n+    for subtest_nr, receive_data in enumerate(test_vector['receiving']):\n+        receive_data_given = receive_data['given']\n+        receive_data_expected = receive_data['expected']\n+\n+        input_pub_keys = []\n+        outpoints = []\n+        for i in receive_data_given['vin']:\n+            pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+                bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+            input_pub_keys.append(pub_key)\n+            outpoints.append((i['txid'], i['vout']))\n+        receive_outpoint_L = smallest_outpoint(outpoints)\n+\n+        # test data sanity check: outpoint_L of send and receive has to match\n+        assert receive_outpoint_L == outpoint_L\n+        # derive tweak_data and shared_secret\n+        plain_pubkeys, xonly_pubkeys = [], []\n+        for pubkey in input_pub_keys:\n+            if len(pubkey) == 32:\n+                xonly_pubkeys.append(pubkey)\n+            elif len(pubkey) == 33:\n+                plain_pubkeys.append(pubkey)\n+            else:\n+                assert False\n+        tweak_data = secp256k1_glue.silentpayments_create_tweak_data(plain_pubkeys, xonly_pubkeys, receive_outpoint_L)\n+        scan_privkey = bytes.fromhex(receive_data_given['key_material']['scan_priv_key'])\n+        spend_privkey = bytes.fromhex(receive_data_given['key_material']['spend_priv_key'])\n+        # spend pubkey is not in the given data of the receiver part, so let's compute it\n+        scan_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(scan_privkey)))\n+        spend_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(spend_privkey)))\n+        shared_secret = secp256k1_glue.silentpayments_receive_create_shared_secret(tweak_data, scan_privkey)\n+        outputs_pubkeys_expected = [o['pub_key'] for o in receive_data_expected['outputs']]\n+        outputs_privkeys_expected = [o['priv_key_tweak'] for o in receive_data_expected['outputs']]\n+        outputs_scanned = []\n+        outputs_privkeys = []\n+\n+        # scan through outputs\n+        k = 0\n+        outputs_to_check = receive_data_given['outputs'].copy()\n+        while True:\n+            if len(outputs_to_check) == 0:\n+                break\n+            for output_to_check in outputs_to_check:\n+                found_sth = False\n+                for label_m in [None] + receive_data_given['labels']:",
+      "path": "bip352-testsuite/run_bip352_tests.py",
+      "position": 160,
+      "original_position": 159,
+      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "original_commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
+      "in_reply_to_id": 1484574143,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "True, good point. Will adapt that in the next force-push, when the output pubkey creation / scanning routines are updated (according to the discussion above: https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1484563895).",
+      "created_at": "2024-02-11T18:40:50Z",
+      "updated_at": "2024-02-11T18:40:50Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1485643621",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1485643621"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 160,
+      "original_line": 160,
       "side": "RIGHT"
     }
   ]
