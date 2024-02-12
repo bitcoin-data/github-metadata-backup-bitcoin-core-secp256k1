@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-11T18:40:50Z",
+    "updated_at": "2024-02-12T11:52:51Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "0fdbd07ab089bd918560745dfc4c82ef4ceba72f",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 11,
-    "review_comments": 29,
+    "review_comments": 30,
     "comments": 13
   },
   "events": [
@@ -3875,6 +3875,58 @@
       "start_side": null,
       "line": 160,
       "original_line": 160,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1486078960",
+      "pull_request_review_id": 1875073781,
+      "id": 1486078960,
+      "node_id": "PRRC_kwDOAP4Jqs5Yk8Pw",
+      "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 207,
+      "original_position": 16,
+      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
+      "in_reply_to_id": 1484563895,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> senders can pass in NULL for t_k as they don't have any use for it\r\n\r\nNice, I like this. \r\n\r\n> only receivers with labels support have to process further\r\n\r\nSmall correction: per the BIP, it is recommended the receiver *always* check for the change label. That being said, I somewhat prefer what you're proposing here with a separate routine for generating the label data. Initially, my thinking was its better to keep it all in one routine because we avoid needing to save `P_output` as a `secp256k1_pubkey` only to load it back into a `secp256k1_ge/gej` group element for label processing, but I suspect this conversion is trivial enough.\r\n\r\nLet's go with the interface you proposed and keep the functions separate for now.",
+      "created_at": "2024-02-12T11:52:51Z",
+      "updated_at": "2024-02-12T11:53:28Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1486078960",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1486078960"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 207,
+      "original_line": 207,
       "side": "RIGHT"
     }
   ]
