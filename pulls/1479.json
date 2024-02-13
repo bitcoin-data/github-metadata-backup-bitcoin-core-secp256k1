@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-02-06T10:21:12Z",
+    "updated_at": "2024-02-13T04:19:25Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "08f7d3ee55a414da774b5c860758b9a1955fd133",
@@ -285,9 +285,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1064,
-        "stargazers_count": 1915,
-        "watchers_count": 1915,
+        "forks_count": 1067,
+        "stargazers_count": 1916,
+        "watchers_count": 1916,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 140,
@@ -301,9 +301,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-02-04T21:51:35Z",
+        "pushed_at": "2024-02-13T03:05:18Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-02-05T17:30:04Z",
+        "updated_at": "2024-02-10T17:44:10Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -1613,7 +1613,7 @@
           "state": "open",
           "state_reason": null,
           "title": "[DRAFT] Add silentpayments (BIP352) module",
-          "body": "This PR adds a new Silent Payments ([BIP352](https://github.com/bitcoin/bips/pull/1458)) module to secp256k1. At this early stage, this is meant primarily for demo purposes and to hopefully spark the scope/interface discussion started in #1427 with a more practical approach. The actual module is quite small with about ~600 LOC, a good part of it is API documentation.\r\n\r\nThe following routines are provided ($a_i$ are input private keys, $A_i$ are input public keys, $b$ and $B$ denote recipient privkeys/pubkeys that would be encoded in silent payment addresses, $d$ and $P$ the keypair for the actual transaction taproot x-only output):\r\n\r\n| Side     | Function                        | Inputs                           | Output                                                                    |\r\n|----------|---------------------------------|----------------------------------|---------------------------------------------------------------------------|\r\n|  Sender  | `_create_private_tweak_data`    | $a_1...a_n$, $outpoint_L$        | $a_{tweaked} = (a_1 + a_2 + ... + a_n) * hash_I(outpoint_L \\|\\| A_{sum})$ |\r\n| Receiver | `_create_public_tweak_data`     | $A_1...A_n$, $outpoint_L$        | $A_{tweaked} = (A_1 + A_2 + ... + A_n) * hash_I(outpoint_L \\|\\| A_{sum})$ |\r\n|  Sender  | `_send_create_shared_secret`    | $a_{tweaked}$, $B_{scan}$        | $SS = a_{tweaked} * B_{scan}$ (ECDH)                                      |\r\n| Receiver | `_receive_create_shared_secret` | $A_{tweaked}$, $b_{scan}$        | $SS = A_{tweaked} * b_{scan}$ (ECDH)                                      |\r\n| Receiver | `_create_label_tweak`           | $b_{scan}, m$                    | $labeltweak = hash_L(b_{scan} \\|\\| m)$                                    |\r\n| Receiver | `_create_address_spend_pubkey`  | $B_{spend}, labeltweak$          | $B_m = B_{spend} + labeltweak * G$                                        |\r\n| Both     | `_create_output_pubkey`         | $B_{spend}, SS, k, (labeltweak)$ | $P_{xonly} = (B_{spend} + labeltweak * G) + hash_S(SS \\|\\| k) * G$        |\r\n| Receiver | `_create_output_seckey`         | $b_{spend}, SS, k, (labeltweak)$ | $d = (b_{spend} + labeltweak) + hash_S(SS \\|\\| k)$                        |\r\n\r\nwhere\r\n* $hash_I$ denotes a SHA256 tagged hash with tag \"BIP0352/Inputs\"\r\n* $hash_L$ denotes a SHA256 tagged hash with tag \"BIP0352/Label\"\r\n* $hash_S$ denotes a SHA256 tagged hash with tag \"BIP0352/SharedSecret\"\r\n\r\nFor ending up with output key material used for sending to / scanning for / spending from, both sides would follow the chain of `tweak_data -> shared_secret -> output key`. The public tweak data can be useful for faster scanning of output transactions by storing them in an index, see e.g. Bitcoin Core PR https://github.com/bitcoin/bitcoin/pull/28241. Private tweak data is arguably less useful, so in theory one could collapse the tweak data and shared secret creation functions into a single one, but IMHO it's nicer if the API is symmetric.\r\n\r\nAs discussed in https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172, the approach of passing in two separate key pairs for taproot and non-taproot inputs is followed here. This may seem a bit confusing at first, but has the advantage that the caller doesn't have to deal with enforcing even y-parity for key material manually (e.g. negating private keys of taproot outputs if they would end up in an odd point), which seems error-prone.\r\n\r\nThe last commit includes a small test suite written in Python that runs the BIP352 test vectors by calling into the secp256k1 shared library using [ctypes](https://docs.python.org/3/library/ctypes.html). All sending tests and the non-labels receiving tests currently pass.\r\n```\r\n$ ./configure --enable-module-silentpayments\r\n$ make\r\n$ cd bip352-testsuite\r\n$ ./run_bip352_tests.py\r\n```\r\n\r\nThis test suite is not meant to be actually included in the repo, but it hopefully shouldn't be too much effort to automatically generate the test code for `tests_impl.h`.\r\n\r\nHappy to receive comments, even if it's only bike-shedding ones (I'm fully aware that the current naming kind of sucks). Next step is to open a Bitcoin Core PR which uses this module in [#28122](https://github.com/bitcoin/bitcoin/pull/28122), which should be ready within the next days.",
+          "body": "This PR adds a new Silent Payments ([BIP352](https://github.com/bitcoin/bips/pull/1458)) module to secp256k1. At this early stage, this is meant primarily for demo purposes and to hopefully spark the scope/interface discussion started in #1427 with a more practical approach. The actual module is quite small with about ~600 LOC, a good part of it is API documentation.\r\n\r\nThe following routines are provided ($a_i$ are input private keys, $A_i$ are input public keys, $b$ and $B$ denote recipient privkeys/pubkeys that would be encoded in silent payment addresses, $d$ and $P$ the keypair for the actual transaction taproot x-only output):\r\n\r\n| Side     | Function                        | Inputs                           | Outputs                                                                   |\r\n|----------|---------------------------------|----------------------------------|---------------------------------------------------------------------------|\r\n|  Sender  | `_create_private_tweak_data`    | $a_1...a_n$, $outpoint_L$        | $a_{sum} = (a_1 + a_2 + ... + a_n)$<br>$inputhash =  hash_I(outpoint_L \\|\\| (a_{sum} * G))$ |\r\n| Receiver | `_create_public_tweak_data`     | $A_1...A_n$, $outpoint_L$        | $A_{sum} = (A_1 + A_2 + ... + A_n)$<br>$inputhash = hash_I(outpoint_L \\|\\| A_{sum})$ |\r\n|  Both  | `_create_shared_secret`    | $Pub$, $sec$, $inputhash$        | $SS = (inputhash * sec) * Pub$ (ECDH)                                      |\r\n| Receiver | `_create_label_tweak`           | $b_{scan}, m$                    | $labeltweak = hash_L(b_{scan} \\|\\| m)$<br>$label = labeltweak * G$                                    |\r\n| Receiver | `_create_address_spend_pubkey`  | $B_{spend}, labeltweak$          | $B_m = B_{spend} + labeltweak * G$                                        |\r\n| Both     | `_create_output_pubkey`         | $B_m, SS, k$ | $t_k = hash_S(SS \\|\\| k)$<br>$P_{xonly} = B_m + t_k * G$        |\r\n| Receiver | `_create_scan_labels`               | $P_{output}, tx_{output}$        | $label1 = tx_{output} - P_{output}$<br>$label2 = -tx_{output} - P_{output}$\r\n| Receiver | `_create_output_seckey`         | $b_{spend}, t_k, (labeltweak)$ | $d = (b_{spend} + labeltweak) + t_k$                        |\r\n\r\nwhere\r\n* $hash_I$ denotes a SHA256 tagged hash with tag \"BIP0352/Inputs\"\r\n* $hash_L$ denotes a SHA256 tagged hash with tag \"BIP0352/Label\"\r\n* $hash_S$ denotes a SHA256 tagged hash with tag \"BIP0352/SharedSecret\"\r\n\r\nFor ending up with output key material used for sending to / scanning for / spending from, both sides would follow the chain of `tweak_data -> shared_secret -> output key`. The public tweak data can be useful for faster scanning of output transactions by storing them in an index, see e.g. Bitcoin Core PR https://github.com/bitcoin/bitcoin/pull/28241. Private tweak data is arguably less useful, so in theory one could collapse the tweak data and shared secret creation functions into a single one, but IMHO it's nicer if the API is symmetric.\r\n\r\nAs discussed in https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172, the approach of passing in two separate key pairs for taproot and non-taproot inputs is followed here. This may seem a bit confusing at first, but has the advantage that the caller doesn't have to deal with enforcing even y-parity for key material manually (e.g. negating private keys of taproot outputs if they would end up in an odd point), which seems error-prone.\r\n\r\nThe last commit includes a small test suite written in Python that runs the BIP352 test vectors by calling into the secp256k1 shared library using [ctypes](https://docs.python.org/3/library/ctypes.html). All sending tests and the non-labels receiving tests currently pass.\r\n```\r\n$ ./configure --enable-module-silentpayments\r\n$ make\r\n$ cd bip352-testsuite\r\n$ ./run_bip352_tests.py\r\n```\r\n\r\nThis test suite is not meant to be actually included in the repo, but it hopefully shouldn't be too much effort to automatically generate the test code for `tests_impl.h`.\r\n\r\nHappy to receive comments, even if it's only bike-shedding ones (I'm fully aware that the current naming kind of sucks). Next step is to open a Bitcoin Core PR which uses this module in [#28122](https://github.com/bitcoin/bitcoin/pull/28122), which should be ready within the next days.",
           "user": {
             "login": "theStack",
             "id": 91535,
@@ -1648,7 +1648,7 @@
           "assignees": [],
           "author_association": "CONTRIBUTOR",
           "locked": false,
-          "comments": 12,
+          "comments": 13,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471",
@@ -1656,7 +1656,7 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1471.patch"
           },
           "created_at": "2023-12-23T17:39:21Z",
-          "updated_at": "2024-02-05T16:50:59Z"
+          "updated_at": "2024-02-13T03:58:05Z"
         },
         "type": "issue"
       }
@@ -1689,9 +1689,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-02-01T05:21:26Z",
-      "updated_at": "2024-02-05T09:03:13Z",
+      "updated_at": "2024-02-13T04:19:25Z",
       "author_association": "CONTRIBUTOR",
-      "body": "Attaching a visualization for the API flow.\r\n\r\n![musig2-api-flowchart](https://github.com/bitcoin-core/secp256k1/assets/56887198/9a7ce10a-4803-4ffe-aaf8-8832dc6ba108)\r\n\r\n",
+      "body": "Attaching a visualization for the API flow.\r\n\r\n![musig2-api-flowchart](https://github.com/bitcoin-core/secp256k1/assets/56887198/9a7ce10a-4803-4ffe-aaf8-8832dc6ba108)\r\n\r\nEdit: The above visualization is incorrect. I will update it with the correct one soon.",
       "user": {
         "login": "siv2r",
         "id": 56887198,
@@ -1786,6 +1786,81 @@
       "submitted_at": "2024-02-06T10:21:12Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "Roasbeef",
+        "id": 998190,
+        "node_id": "MDQ6VXNlcjk5ODE5MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/998190?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Roasbeef",
+        "html_url": "https://github.com/Roasbeef",
+        "followers_url": "https://api.github.com/users/Roasbeef/followers",
+        "following_url": "https://api.github.com/users/Roasbeef/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Roasbeef/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Roasbeef/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Roasbeef/subscriptions",
+        "organizations_url": "https://api.github.com/users/Roasbeef/orgs",
+        "repos_url": "https://api.github.com/users/Roasbeef/repos",
+        "events_url": "https://api.github.com/users/Roasbeef/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Roasbeef/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-02-12T20:02:04Z",
+      "updated_at": "2024-02-12T20:02:04Z",
+      "source": {
+        "issue": {
+          "id": 2117855924,
+          "node_id": "I_kwDOBGUq285-O-q0",
+          "url": "https://api.github.com/repos/lightning/bolts/issues/1134",
+          "repository_url": "https://api.github.com/repos/lightning/bolts",
+          "labels_url": "https://api.github.com/repos/lightning/bolts/issues/1134/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/lightning/bolts/issues/1134/comments",
+          "events_url": "https://api.github.com/repos/lightning/bolts/issues/1134/events",
+          "html_url": "https://github.com/lightning/bolts/issues/1134",
+          "number": 1134,
+          "state": "open",
+          "state_reason": null,
+          "title": " Lightning Specification Meeting 2024/02/12",
+          "body": "The meeting will take place on Monday 2024/02/12 at 7pm UTC (5:30am Adelaide time) on Libera Chat IRC [#lightning-dev](irc://irc.libera.chat/lightning-dev). It is open to the public.\r\n\r\nA video link is available for higher bandwidth communication: https://meet.jit.si/Lightning-Spec-Meeting\r\n\r\n## Special topics\r\n\r\n- [x] v3 transactions usage in lightning: https://delvingbitcoin.org/t/lightning-transactions-with-v3-and-ephemeral-anchors/418\r\n- [x] DNS-based payment information resolution #1136 https://github.com/lightning/blips/pull/32\r\n\r\n## Recently Updated Proposals / Seeking Review\r\n\r\nThis section contains changes that have been opened or updated recently and need feedback from the meeting participants.\r\n\r\n- [x] Relax channel reserve requirements #1133\r\n- [x] Dual funding #851 \r\n- [x] Simplified mutual close #1096 \r\n- [x] Trampoline routing #829 and #836 (2024 is going to be the year of trampoline :tada:)\r\n- [x] Channel jamming #1043 #1071 https://github.com/lightning/blips/pull/27\r\n- [x] Liquidity ads #878\r\n- [x] Quiescence #869\r\n- [ ] Offers #798\r\n- [x] Taproot #995\r\n- [x] Taproot gossip #1059\r\n- [ ] Attributable errors #1044\r\n- [ ] Splicing #863 vs Dynamic Commitments #1117 vs Upgrade on reestablish #868\r\n- [ ] Peer storage backup #881 or #1110\r\n- [ ] Clarify `channel_reestablish` requirements #1049 or #1051\r\n\r\n## Stale Proposals\r\n\r\nThis section contains pending changes that may not need feedback from the meeting participants, unless someone explicitly asks for it during the meeting. These changes are usually waiting for implementation work to happen to drive more feedback.\r\n\r\n- [ ] Inbound fees https://github.com/lightning/blips/pull/18 and https://github.com/lightning/blips/pull/22\r\n\r\n## Waiting for interop\r\n\r\nThis section contains changes that have been conceptually ACKed and are waiting for at least two implementations to fully interoperate.\r\nThey most likely don't need to be covered during the meeting, unless someone asks for updates.\r\n\r\n- [ ] Spec clean-up #1092\r\n- [ ] Don't force close until error is received after `channel_reestablish` #934\r\n\r\n## Long Term Updates\r\n\r\nThis section contains long-term changes that need review, but require a substantial implementation effort.\r\n\r\n- [ ] Simplified commitment #867\r\n- [ ] Hold htlcs before forwarding #989\r\n- [ ] lnprototest (https://github.com/rustyrussell/lnprototest)",
+          "user": {
+            "login": "t-bast",
+            "id": 31281497,
+            "node_id": "MDQ6VXNlcjMxMjgxNDk3",
+            "avatar_url": "https://avatars.githubusercontent.com/u/31281497?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/t-bast",
+            "html_url": "https://github.com/t-bast",
+            "followers_url": "https://api.github.com/users/t-bast/followers",
+            "following_url": "https://api.github.com/users/t-bast/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/t-bast/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/t-bast/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/t-bast/subscriptions",
+            "organizations_url": "https://api.github.com/users/t-bast/orgs",
+            "repos_url": "https://api.github.com/users/t-bast/repos",
+            "events_url": "https://api.github.com/users/t-bast/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/t-bast/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "COLLABORATOR",
+          "locked": false,
+          "comments": 1,
+          "created_at": "2024-02-05T07:27:12Z",
+          "updated_at": "2024-02-12T20:02:05Z"
+        },
+        "type": "issue"
+      }
     }
   ],
   "comments": [
