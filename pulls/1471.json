@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-13T19:20:51Z",
+    "updated_at": "2024-02-13T22:02:28Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "d98235467397fdaec1d724b9dc6568fe678c3700",
@@ -285,9 +285,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1067,
-        "stargazers_count": 1918,
-        "watchers_count": 1918,
+        "forks_count": 1068,
+        "stargazers_count": 1919,
+        "watchers_count": 1919,
         "size": 10717,
         "default_branch": "master",
         "open_issues_count": 140,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-02-13T17:35:03Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-02-13T18:50:13Z",
+        "updated_at": "2024-02-13T20:55:30Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 36,
+    "review_comments": 37,
     "comments": 14
   },
   "events": [
@@ -4381,6 +4381,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1488463757"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1488641041",
+      "pull_request_review_id": 1879013261,
+      "id": 1488641041,
+      "node_id": "PRRC_kwDOAP4Jqs5YutwR",
+      "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": null,
+      "original_position": 16,
+      "commit_id": "c541071488c8132e5897e3eb74b010fc80a74b85",
+      "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
+      "in_reply_to_id": 1484563895,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Heh, then we had similar thoughts, that's what is actually done right now:\r\n\r\nhttps://github.com/theStack/secp256k1/blob/c541071488c8132e5897e3eb74b010fc80a74b85/src/modules/silentpayments/main_impl.h#L340-L344\r\n\r\nBut I'm also not sure about whether doing this check in the function is something we want. _If_ we decide to do it, then it seems redundant to return the output x-only pubkey and we could just return a boolean (e.g. `int *direct_match`, set to 0 or 1) instead? Otherwise the `P_output == tx_output` comparison happens twice, once inside the function, and another time on the caller. We could state in the API description that the label data is only relevant out if no direct match was found and has to be ignored otherwise. Have to think more about it, happy to hear more suggestions.",
+      "created_at": "2024-02-13T22:02:27Z",
+      "updated_at": "2024-02-13T22:02:28Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1488641041",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1488641041"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
