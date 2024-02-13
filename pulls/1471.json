@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/0be24e0971961c0694a6bff1e901b9a139146516",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
     "number": 1471,
     "state": "open",
     "locked": false,
@@ -38,7 +38,7 @@
       "type": "User",
       "site_admin": false
     },
-    "body": "This PR adds a new Silent Payments ([BIP352](https://github.com/bitcoin/bips/pull/1458)) module to secp256k1. At this early stage, this is meant primarily for demo purposes and to hopefully spark the scope/interface discussion started in #1427 with a more practical approach. The actual module is quite small with about ~600 LOC, a good part of it is API documentation.\r\n\r\nThe following routines are provided ($a_i$ are input private keys, $A_i$ are input public keys, $b$ and $B$ denote recipient privkeys/pubkeys that would be encoded in silent payment addresses, $d$ and $P$ the keypair for the actual transaction taproot x-only output):\r\n\r\n| Side     | Function                        | Inputs                           | Outputs                                                                   |\r\n|----------|---------------------------------|----------------------------------|---------------------------------------------------------------------------|\r\n|  Sender  | `_create_private_tweak_data`    | $a_1...a_n$, $outpoint_L$        | $a_{sum} = (a_1 + a_2 + ... + a_n)$<br>$inputhash =  hash_I(outpoint_L \\|\\| (a_{sum} * G))$ |\r\n| Receiver | `_create_public_tweak_data`     | $A_1...A_n$, $outpoint_L$        | $A_{sum} = (A_1 + A_2 + ... + A_n)$<br>$inputhash = hash_I(outpoint_L \\|\\| A_{sum})$ |\r\n|  Both  | `_create_shared_secret`    | $Pub$, $sec$, $inputhash$        | $SS = (inputhash * sec) * Pub$ (ECDH)                                      |\r\n| Receiver | `_create_label_tweak`           | $b_{scan}, m$                    | $labeltweak = hash_L(b_{scan} \\|\\| m)$                                    |\r\n| Receiver | `_create_address_spend_pubkey`  | $B_{spend}, labeltweak$          | $B_m = B_{spend} + labeltweak * G$                                        |\r\n| Both     | `_create_output_pubkey`         | $B_{spend}, SS, k, (labeltweak)$ | $P_{xonly} = (B_{spend} + labeltweak * G) + hash_S(SS \\|\\| k) * G$        |\r\n| Receiver | `_create_output_seckey`         | $b_{spend}, SS, k, (labeltweak)$ | $d = (b_{spend} + labeltweak) + hash_S(SS \\|\\| k)$                        |\r\n\r\nwhere\r\n* $hash_I$ denotes a SHA256 tagged hash with tag \"BIP0352/Inputs\"\r\n* $hash_L$ denotes a SHA256 tagged hash with tag \"BIP0352/Label\"\r\n* $hash_S$ denotes a SHA256 tagged hash with tag \"BIP0352/SharedSecret\"\r\n\r\nFor ending up with output key material used for sending to / scanning for / spending from, both sides would follow the chain of `tweak_data -> shared_secret -> output key`. The public tweak data can be useful for faster scanning of output transactions by storing them in an index, see e.g. Bitcoin Core PR https://github.com/bitcoin/bitcoin/pull/28241. Private tweak data is arguably less useful, so in theory one could collapse the tweak data and shared secret creation functions into a single one, but IMHO it's nicer if the API is symmetric.\r\n\r\nAs discussed in https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172, the approach of passing in two separate key pairs for taproot and non-taproot inputs is followed here. This may seem a bit confusing at first, but has the advantage that the caller doesn't have to deal with enforcing even y-parity for key material manually (e.g. negating private keys of taproot outputs if they would end up in an odd point), which seems error-prone.\r\n\r\nThe last commit includes a small test suite written in Python that runs the BIP352 test vectors by calling into the secp256k1 shared library using [ctypes](https://docs.python.org/3/library/ctypes.html). All sending tests and the non-labels receiving tests currently pass.\r\n```\r\n$ ./configure --enable-module-silentpayments\r\n$ make\r\n$ cd bip352-testsuite\r\n$ ./run_bip352_tests.py\r\n```\r\n\r\nThis test suite is not meant to be actually included in the repo, but it hopefully shouldn't be too much effort to automatically generate the test code for `tests_impl.h`.\r\n\r\nHappy to receive comments, even if it's only bike-shedding ones (I'm fully aware that the current naming kind of sucks). Next step is to open a Bitcoin Core PR which uses this module in [#28122](https://github.com/bitcoin/bitcoin/pull/28122), which should be ready within the next days.",
+    "body": "This PR adds a new Silent Payments ([BIP352](https://github.com/bitcoin/bips/pull/1458)) module to secp256k1. At this early stage, this is meant primarily for demo purposes and to hopefully spark the scope/interface discussion started in #1427 with a more practical approach. The actual module is quite small with about ~600 LOC, a good part of it is API documentation.\r\n\r\nThe following routines are provided ($a_i$ are input private keys, $A_i$ are input public keys, $b$ and $B$ denote recipient privkeys/pubkeys that would be encoded in silent payment addresses, $d$ and $P$ the keypair for the actual transaction taproot x-only output):\r\n\r\n| Side     | Function                        | Inputs                           | Outputs                                                                   |\r\n|----------|---------------------------------|----------------------------------|---------------------------------------------------------------------------|\r\n|  Sender  | `_create_private_tweak_data`    | $a_1...a_n$, $outpoint_L$        | $a_{sum} = (a_1 + a_2 + ... + a_n)$<br>$inputhash =  hash_I(outpoint_L \\|\\| (a_{sum} * G))$ |\r\n| Receiver | `_create_public_tweak_data`     | $A_1...A_n$, $outpoint_L$        | $A_{sum} = (A_1 + A_2 + ... + A_n)$<br>$inputhash = hash_I(outpoint_L \\|\\| A_{sum})$ |\r\n|  Both  | `_create_shared_secret`    | $Pub$, $sec$, $inputhash$        | $SS = (inputhash * sec) * Pub$ (ECDH)                                      |\r\n| Receiver | `_create_label_tweak`           | $b_{scan}, m$                    | $labeltweak = hash_L(b_{scan} \\|\\| m)$<br>$label = labeltweak * G$                                    |\r\n| Receiver | `_create_address_spend_pubkey`  | $B_{spend}, labeltweak$          | $B_m = B_{spend} + labeltweak * G$                                        |\r\n| Both     | `_create_output_pubkey`         | $B_m, SS, k$ | $t_k = hash_S(SS \\|\\| k)$<br>$P_{xonly} = B_m + t_k * G$        |\r\n| Receiver | `_create_scan_labels`               | $P_{output}, tx_{output}$        | $label1 = tx_{output} - P_{output}$<br>$label2 = -tx_{output} - P_{output}$\r\n| Receiver | `_create_output_seckey`         | $b_{spend}, t_k, (labeltweak)$ | $d = (b_{spend} + labeltweak) + t_k$                        |\r\n\r\nwhere\r\n* $hash_I$ denotes a SHA256 tagged hash with tag \"BIP0352/Inputs\"\r\n* $hash_L$ denotes a SHA256 tagged hash with tag \"BIP0352/Label\"\r\n* $hash_S$ denotes a SHA256 tagged hash with tag \"BIP0352/SharedSecret\"\r\n\r\nFor ending up with output key material used for sending to / scanning for / spending from, both sides would follow the chain of `tweak_data -> shared_secret -> output key`. The public tweak data can be useful for faster scanning of output transactions by storing them in an index, see e.g. Bitcoin Core PR https://github.com/bitcoin/bitcoin/pull/28241. Private tweak data is arguably less useful, so in theory one could collapse the tweak data and shared secret creation functions into a single one, but IMHO it's nicer if the API is symmetric.\r\n\r\nAs discussed in https://github.com/bitcoin-core/secp256k1/issues/1427#issuecomment-1757675172, the approach of passing in two separate key pairs for taproot and non-taproot inputs is followed here. This may seem a bit confusing at first, but has the advantage that the caller doesn't have to deal with enforcing even y-parity for key material manually (e.g. negating private keys of taproot outputs if they would end up in an odd point), which seems error-prone.\r\n\r\nThe last commit includes a small test suite written in Python that runs the BIP352 test vectors by calling into the secp256k1 shared library using [ctypes](https://docs.python.org/3/library/ctypes.html). All sending tests and the non-labels receiving tests currently pass.\r\n```\r\n$ ./configure --enable-module-silentpayments\r\n$ make\r\n$ cd bip352-testsuite\r\n$ ./run_bip352_tests.py\r\n```\r\n\r\nThis test suite is not meant to be actually included in the repo, but it hopefully shouldn't be too much effort to automatically generate the test code for `tests_impl.h`.\r\n\r\nHappy to receive comments, even if it's only bike-shedding ones (I'm fully aware that the current naming kind of sucks). Next step is to open a Bitcoin Core PR which uses this module in [#28122](https://github.com/bitcoin/bitcoin/pull/28122), which should be ready within the next days.",
     "labels": [
       {
         "id": 4975353639,
@@ -51,10 +51,10 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-12T11:52:51Z",
+    "updated_at": "2024-02-13T03:58:05Z",
     "mergeable": true,
     "mergeable_state": "clean",
-    "merge_commit_sha": "0fdbd07ab089bd918560745dfc4c82ef4ceba72f",
+    "merge_commit_sha": "f415d773a4b04f7364fa6a88b199b585b42a9171",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -62,7 +62,7 @@
     "head": {
       "label": "theStack:silentpayments-module-demo",
       "ref": "silentpayments-module-demo",
-      "sha": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "sha": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -157,7 +157,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 10749,
+        "size": 10762,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-02-10T22:56:32Z",
+        "pushed_at": "2024-02-13T03:05:16Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2024-01-31T23:58:39Z",
         "license": {
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-02-10T22:56:34Z",
+        "pushed_at": "2024-02-13T03:05:18Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-02-10T17:44:10Z",
         "license": {
@@ -328,11 +328,11 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": true,
-    "additions": 3582,
+    "additions": 3692,
     "deletions": 0,
     "changed_files": 14,
-    "commits": 11,
-    "review_comments": 30,
+    "commits": 12,
+    "review_comments": 32,
     "comments": 13
   },
   "events": [
@@ -1987,246 +1987,6 @@
       "sha": "26714a9b40164d15f53967e4782ce89056f2d64e"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDFkMmIxNThkZjdhNTMzZjRmZjE3MmMxNzBjOWY0N2Q4N2I5ZmEzNzI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1d2b158df7a533f4ff172c170c9f47d87b9fa372",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1d2b158df7a533f4ff172c170c9f47d87b9fa372",
-      "tree": {
-        "sha": "684624ab8494de78df3d031047f690cd9affbbf1",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/684624ab8494de78df3d031047f690cd9affbbf1"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26714a9b40164d15f53967e4782ce89056f2d64e",
-          "sha": "26714a9b40164d15f53967e4782ce89056f2d64e",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26714a9b40164d15f53967e4782ce89056f2d64e"
-        }
-      ],
-      "message": "silentpayments: add label tweak calculation routine",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-01-22T17:56:05Z"
-      },
-      "sha": "1d2b158df7a533f4ff172c170c9f47d87b9fa372"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGNjMjM5MjQyNTg2MmE4ZjJlZDc3NDdhMDY5MDRkMmJhMDczOGE5NWI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cc2392425862a8f2ed7747a06904d2ba0738a95b",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cc2392425862a8f2ed7747a06904d2ba0738a95b",
-      "tree": {
-        "sha": "a36b9ac5eec8351bb0be344cbece80cc246522c0",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a36b9ac5eec8351bb0be344cbece80cc246522c0"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1d2b158df7a533f4ff172c170c9f47d87b9fa372",
-          "sha": "1d2b158df7a533f4ff172c170c9f47d87b9fa372",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1d2b158df7a533f4ff172c170c9f47d87b9fa372"
-        }
-      ],
-      "message": "silentpayments: add routine for creating labelled spend pubkeys (for addresses)",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-01-23T17:43:06Z"
-      },
-      "sha": "cc2392425862a8f2ed7747a06904d2ba0738a95b"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGJlNjFlN2IzMjRjOWViYzlkMmY5OWEzMWNiNzM3ZTE0ODFlOTQ1Y2M",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/be61e7b324c9ebc9d2f99a31cb737e1481e945cc",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/be61e7b324c9ebc9d2f99a31cb737e1481e945cc",
-      "tree": {
-        "sha": "91445ead36fc0a853a2164a4275ab825649fa3ee",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/91445ead36fc0a853a2164a4275ab825649fa3ee"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cc2392425862a8f2ed7747a06904d2ba0738a95b",
-          "sha": "cc2392425862a8f2ed7747a06904d2ba0738a95b",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cc2392425862a8f2ed7747a06904d2ba0738a95b"
-        }
-      ],
-      "message": "silentpayments: implement output pubkey creation (both sender and receiver)",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2023-09-27T22:30:20Z"
-      },
-      "sha": "be61e7b324c9ebc9d2f99a31cb737e1481e945cc"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGQyNDc3ZmEyMDBkYjNlZjQzZWQ5ZDVjN2YxM2Q1Y2Y5OTMxNTFjYzE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d2477fa200db3ef43ed9d5c7f13d5cf993151cc1",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d2477fa200db3ef43ed9d5c7f13d5cf993151cc1",
-      "tree": {
-        "sha": "7c3f754a476d3dcaffb3f50b8eca9f758bfb2078",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7c3f754a476d3dcaffb3f50b8eca9f758bfb2078"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/be61e7b324c9ebc9d2f99a31cb737e1481e945cc",
-          "sha": "be61e7b324c9ebc9d2f99a31cb737e1481e945cc",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/be61e7b324c9ebc9d2f99a31cb737e1481e945cc"
-        }
-      ],
-      "message": "silentpayments: implement output spending privkey creation (for receiver)",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2023-12-20T22:01:58Z"
-      },
-      "sha": "d2477fa200db3ef43ed9d5c7f13d5cf993151cc1"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBjMDc0Yzg0MGUyZjI0YmNjMzM3YTBhNWZhOGM1YmJkMjAwOTg1ZDU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c074c840e2f24bcc337a0a5fa8c5bbd200985d5",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c074c840e2f24bcc337a0a5fa8c5bbd200985d5",
-      "tree": {
-        "sha": "e14577ea711bbdc72d8d67d52315cd6b2e34c91a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e14577ea711bbdc72d8d67d52315cd6b2e34c91a"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d2477fa200db3ef43ed9d5c7f13d5cf993151cc1",
-          "sha": "d2477fa200db3ef43ed9d5c7f13d5cf993151cc1",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d2477fa200db3ef43ed9d5c7f13d5cf993151cc1"
-        }
-      ],
-      "message": "test: add simple BIP-352 test with mixed plain/taproot inputs",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2023-12-21T17:16:21Z"
-      },
-      "sha": "0c074c840e2f24bcc337a0a5fa8c5bbd200985d5"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBiZTI0ZTA5NzE5NjFjMDY5NGE2YmZmMWU5MDFiOWExMzkxNDY1MTY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0be24e0971961c0694a6bff1e901b9a139146516",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0be24e0971961c0694a6bff1e901b9a139146516",
-      "tree": {
-        "sha": "b5867be3a350da51a25d2124e5dfedfc837be60c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b5867be3a350da51a25d2124e5dfedfc837be60c"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c074c840e2f24bcc337a0a5fa8c5bbd200985d5",
-          "sha": "0c074c840e2f24bcc337a0a5fa8c5bbd200985d5",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c074c840e2f24bcc337a0a5fa8c5bbd200985d5"
-        }
-      ],
-      "message": "[DEMO-ONLY] add bip352 test vectors running suite using python and ctypes\n\nInstructions:\n\n$ ./configure --enable-module-silentpayments\n$ make\n$ cd bip352-testsuite\n$ ./run_bip352_tests.py\n\nAll sending tests and the non-labels receiving tests should pass.",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-10T22:23:40Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2023-12-23T16:17:42Z"
-      },
-      "sha": "0be24e0971961c0694a6bff1e901b9a139146516"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 11765810513,
       "node_id": "HRFPE_lADOAP4Jqs56epE0zwAAAAK9TAVR",
@@ -2366,6 +2126,315 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-02-10T22:56:43Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDcxOGQwMjZlNTBjYTkwODljYTZkYjc3NGQzMzA1ZTcyNzcwNmQxNGI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/718d026e50ca9089ca6db774d3305e727706d14b",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/718d026e50ca9089ca6db774d3305e727706d14b",
+      "tree": {
+        "sha": "724fef8764eced3c8443271c6eafba6716ae2483",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/724fef8764eced3c8443271c6eafba6716ae2483"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26714a9b40164d15f53967e4782ce89056f2d64e",
+          "sha": "26714a9b40164d15f53967e4782ce89056f2d64e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26714a9b40164d15f53967e4782ce89056f2d64e"
+        }
+      ],
+      "message": "silentpayments: add label tweak calculation routine",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T01:16:44Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-01-22T17:56:05Z"
+      },
+      "sha": "718d026e50ca9089ca6db774d3305e727706d14b"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDA3NmE0ZTM1NTRjMzAxZTdlZDlmZmE5NzgxODFiMjUxZWU1YTdlYzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/076a4e3554c301e7ed9ffa978181b251ee5a7ec2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/076a4e3554c301e7ed9ffa978181b251ee5a7ec2",
+      "tree": {
+        "sha": "09d5e44ca9dcef7c9cfb48a39b3712e8d84f9c61",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/09d5e44ca9dcef7c9cfb48a39b3712e8d84f9c61"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/718d026e50ca9089ca6db774d3305e727706d14b",
+          "sha": "718d026e50ca9089ca6db774d3305e727706d14b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/718d026e50ca9089ca6db774d3305e727706d14b"
+        }
+      ],
+      "message": "silentpayments: add routine for creating labelled spend pubkeys (for addresses)",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T01:16:51Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-01-23T17:43:06Z"
+      },
+      "sha": "076a4e3554c301e7ed9ffa978181b251ee5a7ec2"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDViNGM4NTAwZWYwYzc3OTgxM2M0OTE0NDdmM2NlMzkyNWU4NzMxODc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5b4c8500ef0c779813c491447f3ce3925e873187",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5b4c8500ef0c779813c491447f3ce3925e873187",
+      "tree": {
+        "sha": "ba4ab7326d0b8c61a32a3dd7868cb840aa7e0ac1",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ba4ab7326d0b8c61a32a3dd7868cb840aa7e0ac1"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/076a4e3554c301e7ed9ffa978181b251ee5a7ec2",
+          "sha": "076a4e3554c301e7ed9ffa978181b251ee5a7ec2",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/076a4e3554c301e7ed9ffa978181b251ee5a7ec2"
+        }
+      ],
+      "message": "silentpayments: implement output pubkey creation (both sender and receiver)",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T02:22:23Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2023-09-27T22:30:20Z"
+      },
+      "sha": "5b4c8500ef0c779813c491447f3ce3925e873187"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDFhMTQ1ZWI1ZGY1MjcyMGU0ZWI1Nzc3ZGIwMTY0OWNmYjZiYWJkNzU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1a145eb5df52720e4eb5777db01649cfb6babd75",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1a145eb5df52720e4eb5777db01649cfb6babd75",
+      "tree": {
+        "sha": "bee58f813f81a0e8a0eca0da87eec854556ef0e0",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/bee58f813f81a0e8a0eca0da87eec854556ef0e0"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5b4c8500ef0c779813c491447f3ce3925e873187",
+          "sha": "5b4c8500ef0c779813c491447f3ce3925e873187",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5b4c8500ef0c779813c491447f3ce3925e873187"
+        }
+      ],
+      "message": "silentpayments: add routine for creating scan labels (for receiver)\n\nCo-authored-by: josibake <josibake@protonmail.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T02:22:33Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-12T16:43:11Z"
+      },
+      "sha": "1a145eb5df52720e4eb5777db01649cfb6babd75"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGNiMWUwZjFmMGQ2ZTVjMmNhNmFjMGUwM2MxNzk2MTQ1OGM0Y2U1Njk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569",
+      "tree": {
+        "sha": "88aaa4869840eeb03a198f953d9e8d90bc760e18",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/88aaa4869840eeb03a198f953d9e8d90bc760e18"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1a145eb5df52720e4eb5777db01649cfb6babd75",
+          "sha": "1a145eb5df52720e4eb5777db01649cfb6babd75",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1a145eb5df52720e4eb5777db01649cfb6babd75"
+        }
+      ],
+      "message": "silentpayments: implement output spending privkey creation (for receiver)",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T02:56:16Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2023-12-20T22:01:58Z"
+      },
+      "sha": "cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQ4ZTFlZmE3OTUxOGMxNWMzMzhiMzk5MDAzMWJjZWY3NjFkYjAzOWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/48e1efa79518c15c338b3990031bcef761db039c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/48e1efa79518c15c338b3990031bcef761db039c",
+      "tree": {
+        "sha": "8aa267287bb3395b78c3f5523e2c058a2738ae88",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8aa267287bb3395b78c3f5523e2c058a2738ae88"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569",
+          "sha": "cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cb1e0f1f0d6e5c2ca6ac0e03c17961458c4ce569"
+        }
+      ],
+      "message": "test: add simple BIP-352 test with mixed plain/taproot inputs",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T02:56:20Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2023-12-21T17:16:21Z"
+      },
+      "sha": "48e1efa79518c15c338b3990031bcef761db039c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGIxMWI3YjdlYjBjYmMxMzNmNjc4MDZhNWM4MDhjYmY2YmU0NjdiZDI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
+      "tree": {
+        "sha": "eefb4e62ff7547f32a8f6b22b96447783e0e00de",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/eefb4e62ff7547f32a8f6b22b96447783e0e00de"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/48e1efa79518c15c338b3990031bcef761db039c",
+          "sha": "48e1efa79518c15c338b3990031bcef761db039c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/48e1efa79518c15c338b3990031bcef761db039c"
+        }
+      ],
+      "message": "[DEMO-ONLY] add bip352 test vectors running suite using python and ctypes\n\nInstructions:\n\n$ ./configure --enable-module-silentpayments\n$ make\n$ cd bip352-testsuite\n$ ./run_bip352_tests.py\n\nAll sending tests and the non-labels receiving tests should pass.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-13T02:57:50Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2023-12-23T16:17:42Z"
+      },
+      "sha": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 11782740939,
+      "node_id": "HRFPE_lADOAP4Jqs56epE0zwAAAAK-TlvL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/11782740939",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-02-13T03:05:17Z"
     }
   ],
   "comments": [
@@ -2378,7 +2447,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 7,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0b3ecd8f83ec589e5342dd0c769e6c419a7c583b",
       "in_reply_to_id": null,
       "user": {
@@ -2430,7 +2499,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 8,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0b3ecd8f83ec589e5342dd0c769e6c419a7c583b",
       "in_reply_to_id": null,
       "user": {
@@ -2482,7 +2551,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0b3ecd8f83ec589e5342dd0c769e6c419a7c583b",
       "in_reply_to_id": null,
       "user": {
@@ -2534,7 +2603,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 7,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": null,
       "user": {
@@ -2586,7 +2655,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 8,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": null,
       "user": {
@@ -2638,7 +2707,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 11,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": null,
       "user": {
@@ -2690,7 +2759,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": null,
       "user": {
@@ -2742,7 +2811,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": null,
       "user": {
@@ -2794,7 +2863,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 14,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "ac0f2b3387a5f473190489bdff8f06ff4f136da2",
       "in_reply_to_id": null,
       "user": {
@@ -2846,7 +2915,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": 1467904182,
       "user": {
@@ -2898,7 +2967,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": 1467907062,
       "user": {
@@ -2950,7 +3019,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "0acde7b47044a2c944420394e3627293113e9ef4",
       "in_reply_to_id": 1467904182,
       "user": {
@@ -3002,7 +3071,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": null,
       "user": {
@@ -3054,7 +3123,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3106,7 +3175,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3158,7 +3227,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3210,7 +3279,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
       "in_reply_to_id": null,
       "user": {
@@ -3262,7 +3331,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
       "in_reply_to_id": 1475018645,
       "user": {
@@ -3314,7 +3383,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
       "in_reply_to_id": 1475018645,
       "user": {
@@ -3366,7 +3435,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "d7250503aca9d0cfc0c2df12d3f98c02945bcf33",
       "in_reply_to_id": 1475018645,
       "user": {
@@ -3418,7 +3487,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3470,7 +3539,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3522,7 +3591,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3574,7 +3643,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 97,
       "original_position": 29,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "2290e80067b9127ca7931ed4677f688070ec3c5a",
       "in_reply_to_id": 1468836824,
       "user": {
@@ -3624,9 +3693,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5YfKW3",
       "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
       "path": "include/secp256k1_silentpayments.h",
-      "position": 207,
+      "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
       "in_reply_to_id": null,
       "user": {
@@ -3665,7 +3734,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 207,
+      "line": null,
       "original_line": 207,
       "side": "RIGHT"
     },
@@ -3676,9 +3745,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5YfM2_",
       "diff_hunk": "@@ -0,0 +1,227 @@\n+#!/usr/bin/env python3\n+import bech32m\n+import hashlib\n+import json\n+import ripemd160\n+import secp256k1_glue\n+\n+def sha256(s):\n+    return hashlib.sha256(s).digest()\n+\n+def hash160(s):\n+    return ripemd160.ripemd160(sha256(s))\n+\n+def TaggedHash(tag, data):\n+    return sha256(sha256(tag) + sha256(tag) + data)\n+\n+def smallest_outpoint(outpoints):\n+    serialized_outpoints = [bytes.fromhex(txid)[::-1] + n.to_bytes(4, 'little') for txid, n in outpoints]\n+    return sorted(serialized_outpoints)[0]\n+\n+def encode_silent_payment_address(scan_pubkey, spend_pubkey):\n+    assert len(scan_pubkey) == 33\n+    assert len(spend_pubkey) == 33\n+    data = bech32m.convertbits(scan_pubkey + spend_pubkey, 8, 5)\n+    return bech32m.bech32_encode(\"sp\", [0] + data, bech32m.Encoding.BECH32M)\n+\n+def decode_silent_payments_address(address):\n+    version, data = bech32m.decode(\"sp\", address)\n+    data = bytes(data)  # convert from list to bytes\n+    assert len(data) == 66\n+    return data[:33], data[33:]\n+\n+def is_p2tr(s):  # OP_1 OP_PUSHBYTES_32 <32 bytes>\n+    return (len(s) == 34) and (s[0] == 0x51) and (s[1] == 0x20)\n+\n+def is_p2wpkh(s):  # OP_0 OP_PUSHBYTES_20 <20 bytes>\n+    return (len(s) == 22) and (s[0] == 0x00) and (s[1] == 0x14)\n+\n+def is_p2sh(s):  # OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUAL\n+    return (len(s) == 23) and (s[0] == 0xA9) and (s[1] == 0x14) and (s[-1] == 0x87)\n+\n+def is_p2pkh(s):  # OP_DUP OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG\n+    return (len(s) == 25) and (s[0] == 0x76) and (s[1] == 0xA9) and (s[2] == 0x14) and (s[-2] == 0x88) and (s[-1] == 0xAC)\n+\n+def get_pubkey_from_input(spk, script_sig, witness):\n+    if is_p2pkh(spk):\n+        spk_pkh = spk[3:3 + 20]\n+        for i in range(len(script_sig), 0, -1):\n+            if i - 33 >= 0:\n+                pk = script_sig[i - 33:i]\n+                if hash160(pk) == spk_pkh:\n+                    return pk\n+        # should never happen, as this would be an invalid spend\n+        assert False\n+    if is_p2sh(spk):\n+        redeem_script = script_sig[1:]\n+        if is_p2wpkh(redeem_script):\n+            return redeem_script[-33:]\n+    if is_p2wpkh(spk):\n+        # the witness must contain two items and the second item is the pubkey\n+        return witness[-33:]\n+    if is_p2tr(spk):\n+        return spk[2:]\n+    assert False\n+\n+with open('./bip352-send_and_receive_test_vectors.json') as f:\n+    test_vectors = json.load(f)\n+\n+passed_send, passed_receive = 0, 0\n+for test_nr, test_vector in enumerate(test_vectors):\n+    print(f\"----- Test vector: \\'{test_vector['comment']}\\' {test_nr+1}/{len(test_vectors)} -----\")\n+    ###################### sending #########################\n+    assert len(test_vector['sending']) == 1\n+    send_data_given = test_vector['sending'][0]['given']\n+    send_data_expected = test_vector['sending'][0]['expected']\n+    input_priv_keys = []\n+    outpoints = []\n+    for i in send_data_given['vin']:\n+        priv_key = i['private_key']\n+        pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+            bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+        input_priv_keys.append((i['private_key'], len(pub_key) == 32))\n+        outpoints.append((i['txid'], i['vout']))\n+    outpoint_L = smallest_outpoint(outpoints)\n+    outputs_calculated = []\n+\n+    groups = {}\n+    for recipient_address, recipient_value in send_data_given['recipients']:\n+        recipient_B_scan, recipient_B_spend = decode_silent_payments_address(recipient_address)\n+        groups.setdefault(recipient_B_scan, []).append((recipient_B_spend, recipient_value))\n+\n+    for recipient_B_scan, recipient_spend_data in groups.items():\n+        plain_seckeys, xonly_seckeys = [], []\n+        for seckey_hex, is_taproot in input_priv_keys:\n+            (xonly_seckeys if is_taproot else plain_seckeys).append(bytes.fromhex(seckey_hex))\n+        tweak_data = secp256k1_glue.silentpayments_create_private_tweak_data(\n+            plain_seckeys, xonly_seckeys, outpoint_L)\n+        shared_secret = secp256k1_glue.silentpayments_send_create_shared_secret(tweak_data, recipient_B_scan)\n+        k = 0\n+        for recipient_B_spend in recipient_spend_data:\n+            output = secp256k1_glue.silentpayments_create_output_pubkey(shared_secret, recipient_B_spend[0], k)\n+            outputs_calculated.append(output.hex())\n+            k += 1\n+    outputs_expected = [o[0] for o in send_data_expected['outputs']]\n+    if outputs_calculated == outputs_expected:\n+        print(\"Sending test \\033[0;32mPASSED. ✓\\033[0m\")\n+        passed_send += 1\n+    else:\n+        print(\"Sending test \\033[0;31mFAILED. ✖\\033[0m\")\n+        print(f\"Calculated outputs: {outputs_calculated}\")\n+        print(f\"Expected outputs: {outputs_expected}\")\n+\n+    ###################### receiving ########################\n+    assert len(test_vector['receiving']) >= 1\n+    for subtest_nr, receive_data in enumerate(test_vector['receiving']):\n+        receive_data_given = receive_data['given']\n+        receive_data_expected = receive_data['expected']\n+\n+        input_pub_keys = []\n+        outpoints = []\n+        for i in receive_data_given['vin']:\n+            pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+                bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+            input_pub_keys.append(pub_key)\n+            outpoints.append((i['txid'], i['vout']))\n+        receive_outpoint_L = smallest_outpoint(outpoints)\n+\n+        # test data sanity check: outpoint_L of send and receive has to match\n+        assert receive_outpoint_L == outpoint_L\n+        # derive tweak_data and shared_secret\n+        plain_pubkeys, xonly_pubkeys = [], []\n+        for pubkey in input_pub_keys:\n+            if len(pubkey) == 32:\n+                xonly_pubkeys.append(pubkey)\n+            elif len(pubkey) == 33:\n+                plain_pubkeys.append(pubkey)\n+            else:\n+                assert False\n+        tweak_data = secp256k1_glue.silentpayments_create_tweak_data(plain_pubkeys, xonly_pubkeys, receive_outpoint_L)\n+        scan_privkey = bytes.fromhex(receive_data_given['key_material']['scan_priv_key'])\n+        spend_privkey = bytes.fromhex(receive_data_given['key_material']['spend_priv_key'])\n+        # spend pubkey is not in the given data of the receiver part, so let's compute it\n+        scan_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(scan_privkey)))\n+        spend_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(spend_privkey)))\n+        shared_secret = secp256k1_glue.silentpayments_receive_create_shared_secret(tweak_data, scan_privkey)\n+        outputs_pubkeys_expected = [o['pub_key'] for o in receive_data_expected['outputs']]\n+        outputs_privkeys_expected = [o['priv_key_tweak'] for o in receive_data_expected['outputs']]\n+        outputs_scanned = []\n+        outputs_privkeys = []\n+\n+        # scan through outputs\n+        k = 0\n+        outputs_to_check = receive_data_given['outputs'].copy()\n+        while True:\n+            if len(outputs_to_check) == 0:\n+                break\n+            for output_to_check in outputs_to_check:\n+                found_sth = False\n+                for label_m in [None] + receive_data_given['labels']:",
       "path": "bip352-testsuite/run_bip352_tests.py",
-      "position": 160,
+      "position": null,
       "original_position": 159,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
       "in_reply_to_id": null,
       "user": {
@@ -3717,7 +3786,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 160,
+      "line": null,
       "original_line": 160,
       "side": "RIGHT"
     },
@@ -3728,9 +3797,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5YhVCt",
       "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
       "path": "include/secp256k1_silentpayments.h",
-      "position": 207,
+      "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
       "in_reply_to_id": 1484563895,
       "user": {
@@ -3769,7 +3838,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 207,
+      "line": null,
       "original_line": 207,
       "side": "RIGHT"
     },
@@ -3780,9 +3849,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5YjLoy",
       "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
       "path": "include/secp256k1_silentpayments.h",
-      "position": 207,
+      "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
       "in_reply_to_id": 1484563895,
       "user": {
@@ -3821,7 +3890,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 207,
+      "line": null,
       "original_line": 207,
       "side": "RIGHT"
     },
@@ -3832,9 +3901,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5YjR9l",
       "diff_hunk": "@@ -0,0 +1,227 @@\n+#!/usr/bin/env python3\n+import bech32m\n+import hashlib\n+import json\n+import ripemd160\n+import secp256k1_glue\n+\n+def sha256(s):\n+    return hashlib.sha256(s).digest()\n+\n+def hash160(s):\n+    return ripemd160.ripemd160(sha256(s))\n+\n+def TaggedHash(tag, data):\n+    return sha256(sha256(tag) + sha256(tag) + data)\n+\n+def smallest_outpoint(outpoints):\n+    serialized_outpoints = [bytes.fromhex(txid)[::-1] + n.to_bytes(4, 'little') for txid, n in outpoints]\n+    return sorted(serialized_outpoints)[0]\n+\n+def encode_silent_payment_address(scan_pubkey, spend_pubkey):\n+    assert len(scan_pubkey) == 33\n+    assert len(spend_pubkey) == 33\n+    data = bech32m.convertbits(scan_pubkey + spend_pubkey, 8, 5)\n+    return bech32m.bech32_encode(\"sp\", [0] + data, bech32m.Encoding.BECH32M)\n+\n+def decode_silent_payments_address(address):\n+    version, data = bech32m.decode(\"sp\", address)\n+    data = bytes(data)  # convert from list to bytes\n+    assert len(data) == 66\n+    return data[:33], data[33:]\n+\n+def is_p2tr(s):  # OP_1 OP_PUSHBYTES_32 <32 bytes>\n+    return (len(s) == 34) and (s[0] == 0x51) and (s[1] == 0x20)\n+\n+def is_p2wpkh(s):  # OP_0 OP_PUSHBYTES_20 <20 bytes>\n+    return (len(s) == 22) and (s[0] == 0x00) and (s[1] == 0x14)\n+\n+def is_p2sh(s):  # OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUAL\n+    return (len(s) == 23) and (s[0] == 0xA9) and (s[1] == 0x14) and (s[-1] == 0x87)\n+\n+def is_p2pkh(s):  # OP_DUP OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG\n+    return (len(s) == 25) and (s[0] == 0x76) and (s[1] == 0xA9) and (s[2] == 0x14) and (s[-2] == 0x88) and (s[-1] == 0xAC)\n+\n+def get_pubkey_from_input(spk, script_sig, witness):\n+    if is_p2pkh(spk):\n+        spk_pkh = spk[3:3 + 20]\n+        for i in range(len(script_sig), 0, -1):\n+            if i - 33 >= 0:\n+                pk = script_sig[i - 33:i]\n+                if hash160(pk) == spk_pkh:\n+                    return pk\n+        # should never happen, as this would be an invalid spend\n+        assert False\n+    if is_p2sh(spk):\n+        redeem_script = script_sig[1:]\n+        if is_p2wpkh(redeem_script):\n+            return redeem_script[-33:]\n+    if is_p2wpkh(spk):\n+        # the witness must contain two items and the second item is the pubkey\n+        return witness[-33:]\n+    if is_p2tr(spk):\n+        return spk[2:]\n+    assert False\n+\n+with open('./bip352-send_and_receive_test_vectors.json') as f:\n+    test_vectors = json.load(f)\n+\n+passed_send, passed_receive = 0, 0\n+for test_nr, test_vector in enumerate(test_vectors):\n+    print(f\"----- Test vector: \\'{test_vector['comment']}\\' {test_nr+1}/{len(test_vectors)} -----\")\n+    ###################### sending #########################\n+    assert len(test_vector['sending']) == 1\n+    send_data_given = test_vector['sending'][0]['given']\n+    send_data_expected = test_vector['sending'][0]['expected']\n+    input_priv_keys = []\n+    outpoints = []\n+    for i in send_data_given['vin']:\n+        priv_key = i['private_key']\n+        pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+            bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+        input_priv_keys.append((i['private_key'], len(pub_key) == 32))\n+        outpoints.append((i['txid'], i['vout']))\n+    outpoint_L = smallest_outpoint(outpoints)\n+    outputs_calculated = []\n+\n+    groups = {}\n+    for recipient_address, recipient_value in send_data_given['recipients']:\n+        recipient_B_scan, recipient_B_spend = decode_silent_payments_address(recipient_address)\n+        groups.setdefault(recipient_B_scan, []).append((recipient_B_spend, recipient_value))\n+\n+    for recipient_B_scan, recipient_spend_data in groups.items():\n+        plain_seckeys, xonly_seckeys = [], []\n+        for seckey_hex, is_taproot in input_priv_keys:\n+            (xonly_seckeys if is_taproot else plain_seckeys).append(bytes.fromhex(seckey_hex))\n+        tweak_data = secp256k1_glue.silentpayments_create_private_tweak_data(\n+            plain_seckeys, xonly_seckeys, outpoint_L)\n+        shared_secret = secp256k1_glue.silentpayments_send_create_shared_secret(tweak_data, recipient_B_scan)\n+        k = 0\n+        for recipient_B_spend in recipient_spend_data:\n+            output = secp256k1_glue.silentpayments_create_output_pubkey(shared_secret, recipient_B_spend[0], k)\n+            outputs_calculated.append(output.hex())\n+            k += 1\n+    outputs_expected = [o[0] for o in send_data_expected['outputs']]\n+    if outputs_calculated == outputs_expected:\n+        print(\"Sending test \\033[0;32mPASSED. ✓\\033[0m\")\n+        passed_send += 1\n+    else:\n+        print(\"Sending test \\033[0;31mFAILED. ✖\\033[0m\")\n+        print(f\"Calculated outputs: {outputs_calculated}\")\n+        print(f\"Expected outputs: {outputs_expected}\")\n+\n+    ###################### receiving ########################\n+    assert len(test_vector['receiving']) >= 1\n+    for subtest_nr, receive_data in enumerate(test_vector['receiving']):\n+        receive_data_given = receive_data['given']\n+        receive_data_expected = receive_data['expected']\n+\n+        input_pub_keys = []\n+        outpoints = []\n+        for i in receive_data_given['vin']:\n+            pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+                bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+            input_pub_keys.append(pub_key)\n+            outpoints.append((i['txid'], i['vout']))\n+        receive_outpoint_L = smallest_outpoint(outpoints)\n+\n+        # test data sanity check: outpoint_L of send and receive has to match\n+        assert receive_outpoint_L == outpoint_L\n+        # derive tweak_data and shared_secret\n+        plain_pubkeys, xonly_pubkeys = [], []\n+        for pubkey in input_pub_keys:\n+            if len(pubkey) == 32:\n+                xonly_pubkeys.append(pubkey)\n+            elif len(pubkey) == 33:\n+                plain_pubkeys.append(pubkey)\n+            else:\n+                assert False\n+        tweak_data = secp256k1_glue.silentpayments_create_tweak_data(plain_pubkeys, xonly_pubkeys, receive_outpoint_L)\n+        scan_privkey = bytes.fromhex(receive_data_given['key_material']['scan_priv_key'])\n+        spend_privkey = bytes.fromhex(receive_data_given['key_material']['spend_priv_key'])\n+        # spend pubkey is not in the given data of the receiver part, so let's compute it\n+        scan_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(scan_privkey)))\n+        spend_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(spend_privkey)))\n+        shared_secret = secp256k1_glue.silentpayments_receive_create_shared_secret(tweak_data, scan_privkey)\n+        outputs_pubkeys_expected = [o['pub_key'] for o in receive_data_expected['outputs']]\n+        outputs_privkeys_expected = [o['priv_key_tweak'] for o in receive_data_expected['outputs']]\n+        outputs_scanned = []\n+        outputs_privkeys = []\n+\n+        # scan through outputs\n+        k = 0\n+        outputs_to_check = receive_data_given['outputs'].copy()\n+        while True:\n+            if len(outputs_to_check) == 0:\n+                break\n+            for output_to_check in outputs_to_check:\n+                found_sth = False\n+                for label_m in [None] + receive_data_given['labels']:",
       "path": "bip352-testsuite/run_bip352_tests.py",
-      "position": 160,
+      "position": null,
       "original_position": 159,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
       "in_reply_to_id": 1484574143,
       "user": {
@@ -3873,7 +3942,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 160,
+      "line": null,
       "original_line": 160,
       "side": "RIGHT"
     },
@@ -3884,9 +3953,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5Yk8Pw",
       "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
       "path": "include/secp256k1_silentpayments.h",
-      "position": 207,
+      "position": null,
       "original_position": 16,
-      "commit_id": "0be24e0971961c0694a6bff1e901b9a139146516",
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
       "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
       "in_reply_to_id": 1484563895,
       "user": {
@@ -3925,8 +3994,112 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 207,
+      "line": null,
       "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487131068",
+      "pull_request_review_id": 1876828391,
+      "id": 1487131068,
+      "node_id": "PRRC_kwDOAP4Jqs5Yo9G8",
+      "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": null,
+      "original_position": 16,
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
+      "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
+      "in_reply_to_id": 1484563895,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> Small correction: per the BIP, it is recommended the receiver always check for the change label. That being said, I somewhat prefer what you're proposing here with a separate routine for generating the label data. Initially, my thinking was its better to keep it all in one routine because we avoid needing to save P_output as a secp256k1_pubkey only to load it back into a secp256k1_ge/gej group element for label processing, but I suspect this conversion is trivial enough.\r\n\r\nFair point with the pubkey <-> ge/gej conversions, didn't think about that. I also presume that these are not hurting the performance in a significant way though.\r\n\r\n> Let's go with the interface you proposed and keep the functions separate for now.\r\n\r\nUpdated the PR with the proposed interface changes, with one caveat: my suggestion of returning `P_output` only as x-only pubkey in `_create_output_pubkey` doesn't work, as the parity is needed for the scan label calculation for the receiver. The x-only format OTOH is handy both for the sender (for creating the taproot output) and the receiver (for the first scanning step, where the tx's taproot output is directly compared to the calculated pubkey). So I've went now with returning P both in x-only and plain pubkey format, where the second is optional.\r\n\r\nThe alternative would be to only return the plain pubkey and document properly that users have to convert that to an x-only-pubkey via `secp256k1_xonly_pubkey_from_pubkey` after, for the purpose of output creation / the first scanning step. I feel that it's better if the users don't have to do any manual plain -> xonly pubkey conversions and having an interface with one parameter more is the lesser evil here, if the API documentation is clear enough. Thoughts?",
+      "created_at": "2024-02-13T03:52:24Z",
+      "updated_at": "2024-02-13T03:52:24Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1487131068",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487131068"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487136288",
+      "pull_request_review_id": 1876834803,
+      "id": 1487136288,
+      "node_id": "PRRC_kwDOAP4Jqs5Yo-Yg",
+      "diff_hunk": "@@ -0,0 +1,227 @@\n+#!/usr/bin/env python3\n+import bech32m\n+import hashlib\n+import json\n+import ripemd160\n+import secp256k1_glue\n+\n+def sha256(s):\n+    return hashlib.sha256(s).digest()\n+\n+def hash160(s):\n+    return ripemd160.ripemd160(sha256(s))\n+\n+def TaggedHash(tag, data):\n+    return sha256(sha256(tag) + sha256(tag) + data)\n+\n+def smallest_outpoint(outpoints):\n+    serialized_outpoints = [bytes.fromhex(txid)[::-1] + n.to_bytes(4, 'little') for txid, n in outpoints]\n+    return sorted(serialized_outpoints)[0]\n+\n+def encode_silent_payment_address(scan_pubkey, spend_pubkey):\n+    assert len(scan_pubkey) == 33\n+    assert len(spend_pubkey) == 33\n+    data = bech32m.convertbits(scan_pubkey + spend_pubkey, 8, 5)\n+    return bech32m.bech32_encode(\"sp\", [0] + data, bech32m.Encoding.BECH32M)\n+\n+def decode_silent_payments_address(address):\n+    version, data = bech32m.decode(\"sp\", address)\n+    data = bytes(data)  # convert from list to bytes\n+    assert len(data) == 66\n+    return data[:33], data[33:]\n+\n+def is_p2tr(s):  # OP_1 OP_PUSHBYTES_32 <32 bytes>\n+    return (len(s) == 34) and (s[0] == 0x51) and (s[1] == 0x20)\n+\n+def is_p2wpkh(s):  # OP_0 OP_PUSHBYTES_20 <20 bytes>\n+    return (len(s) == 22) and (s[0] == 0x00) and (s[1] == 0x14)\n+\n+def is_p2sh(s):  # OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUAL\n+    return (len(s) == 23) and (s[0] == 0xA9) and (s[1] == 0x14) and (s[-1] == 0x87)\n+\n+def is_p2pkh(s):  # OP_DUP OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG\n+    return (len(s) == 25) and (s[0] == 0x76) and (s[1] == 0xA9) and (s[2] == 0x14) and (s[-2] == 0x88) and (s[-1] == 0xAC)\n+\n+def get_pubkey_from_input(spk, script_sig, witness):\n+    if is_p2pkh(spk):\n+        spk_pkh = spk[3:3 + 20]\n+        for i in range(len(script_sig), 0, -1):\n+            if i - 33 >= 0:\n+                pk = script_sig[i - 33:i]\n+                if hash160(pk) == spk_pkh:\n+                    return pk\n+        # should never happen, as this would be an invalid spend\n+        assert False\n+    if is_p2sh(spk):\n+        redeem_script = script_sig[1:]\n+        if is_p2wpkh(redeem_script):\n+            return redeem_script[-33:]\n+    if is_p2wpkh(spk):\n+        # the witness must contain two items and the second item is the pubkey\n+        return witness[-33:]\n+    if is_p2tr(spk):\n+        return spk[2:]\n+    assert False\n+\n+with open('./bip352-send_and_receive_test_vectors.json') as f:\n+    test_vectors = json.load(f)\n+\n+passed_send, passed_receive = 0, 0\n+for test_nr, test_vector in enumerate(test_vectors):\n+    print(f\"----- Test vector: \\'{test_vector['comment']}\\' {test_nr+1}/{len(test_vectors)} -----\")\n+    ###################### sending #########################\n+    assert len(test_vector['sending']) == 1\n+    send_data_given = test_vector['sending'][0]['given']\n+    send_data_expected = test_vector['sending'][0]['expected']\n+    input_priv_keys = []\n+    outpoints = []\n+    for i in send_data_given['vin']:\n+        priv_key = i['private_key']\n+        pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+            bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+        input_priv_keys.append((i['private_key'], len(pub_key) == 32))\n+        outpoints.append((i['txid'], i['vout']))\n+    outpoint_L = smallest_outpoint(outpoints)\n+    outputs_calculated = []\n+\n+    groups = {}\n+    for recipient_address, recipient_value in send_data_given['recipients']:\n+        recipient_B_scan, recipient_B_spend = decode_silent_payments_address(recipient_address)\n+        groups.setdefault(recipient_B_scan, []).append((recipient_B_spend, recipient_value))\n+\n+    for recipient_B_scan, recipient_spend_data in groups.items():\n+        plain_seckeys, xonly_seckeys = [], []\n+        for seckey_hex, is_taproot in input_priv_keys:\n+            (xonly_seckeys if is_taproot else plain_seckeys).append(bytes.fromhex(seckey_hex))\n+        tweak_data = secp256k1_glue.silentpayments_create_private_tweak_data(\n+            plain_seckeys, xonly_seckeys, outpoint_L)\n+        shared_secret = secp256k1_glue.silentpayments_send_create_shared_secret(tweak_data, recipient_B_scan)\n+        k = 0\n+        for recipient_B_spend in recipient_spend_data:\n+            output = secp256k1_glue.silentpayments_create_output_pubkey(shared_secret, recipient_B_spend[0], k)\n+            outputs_calculated.append(output.hex())\n+            k += 1\n+    outputs_expected = [o[0] for o in send_data_expected['outputs']]\n+    if outputs_calculated == outputs_expected:\n+        print(\"Sending test \\033[0;32mPASSED. ✓\\033[0m\")\n+        passed_send += 1\n+    else:\n+        print(\"Sending test \\033[0;31mFAILED. ✖\\033[0m\")\n+        print(f\"Calculated outputs: {outputs_calculated}\")\n+        print(f\"Expected outputs: {outputs_expected}\")\n+\n+    ###################### receiving ########################\n+    assert len(test_vector['receiving']) >= 1\n+    for subtest_nr, receive_data in enumerate(test_vector['receiving']):\n+        receive_data_given = receive_data['given']\n+        receive_data_expected = receive_data['expected']\n+\n+        input_pub_keys = []\n+        outpoints = []\n+        for i in receive_data_given['vin']:\n+            pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),\n+                bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))\n+            input_pub_keys.append(pub_key)\n+            outpoints.append((i['txid'], i['vout']))\n+        receive_outpoint_L = smallest_outpoint(outpoints)\n+\n+        # test data sanity check: outpoint_L of send and receive has to match\n+        assert receive_outpoint_L == outpoint_L\n+        # derive tweak_data and shared_secret\n+        plain_pubkeys, xonly_pubkeys = [], []\n+        for pubkey in input_pub_keys:\n+            if len(pubkey) == 32:\n+                xonly_pubkeys.append(pubkey)\n+            elif len(pubkey) == 33:\n+                plain_pubkeys.append(pubkey)\n+            else:\n+                assert False\n+        tweak_data = secp256k1_glue.silentpayments_create_tweak_data(plain_pubkeys, xonly_pubkeys, receive_outpoint_L)\n+        scan_privkey = bytes.fromhex(receive_data_given['key_material']['scan_priv_key'])\n+        spend_privkey = bytes.fromhex(receive_data_given['key_material']['spend_priv_key'])\n+        # spend pubkey is not in the given data of the receiver part, so let's compute it\n+        scan_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(scan_privkey)))\n+        spend_pubkey = secp256k1_glue.pubkey_serialize((secp256k1_glue.pubkey_create(spend_privkey)))\n+        shared_secret = secp256k1_glue.silentpayments_receive_create_shared_secret(tweak_data, scan_privkey)\n+        outputs_pubkeys_expected = [o['pub_key'] for o in receive_data_expected['outputs']]\n+        outputs_privkeys_expected = [o['priv_key_tweak'] for o in receive_data_expected['outputs']]\n+        outputs_scanned = []\n+        outputs_privkeys = []\n+\n+        # scan through outputs\n+        k = 0\n+        outputs_to_check = receive_data_given['outputs'].copy()\n+        while True:\n+            if len(outputs_to_check) == 0:\n+                break\n+            for output_to_check in outputs_to_check:\n+                found_sth = False\n+                for label_m in [None] + receive_data_given['labels']:",
+      "path": "bip352-testsuite/run_bip352_tests.py",
+      "position": null,
+      "original_position": 159,
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
+      "original_commit_id": "3deeebd1b5d7f3684e6425be749c643504f7c471",
+      "in_reply_to_id": 1484574143,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Updated that as well by introducing a label cache and using the new routine for label scanning. The test should now more resemble what an actual wallet would do and the hacky constructs for getting the privkey tweak are also gone. One of the next steps is to also test against the \"signature\" field in the test vectors, I ignored that so far.",
+      "created_at": "2024-02-13T03:58:05Z",
+      "updated_at": "2024-02-13T03:58:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1487136288",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487136288"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 160,
       "side": "RIGHT"
     }
   ]
