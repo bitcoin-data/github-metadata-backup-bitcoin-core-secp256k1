@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-13T11:52:32Z",
+    "updated_at": "2024-02-13T13:09:55Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "f415d773a4b04f7364fa6a88b199b585b42a9171",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 14,
     "commits": 12,
-    "review_comments": 33,
+    "review_comments": 34,
     "comments": 14
   },
   "events": [
@@ -4196,6 +4196,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487697837"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 207,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487821480",
+      "pull_request_review_id": 1877898428,
+      "id": 1487821480,
+      "node_id": "PRRC_kwDOAP4Jqs5Yrlqo",
+      "diff_hunk": "@@ -192,6 +192,35 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_a\n     const unsigned char *label_tweak32\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Create Silent Payment output public key (both for sender and receiver).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, an output\n+ *  counter k, and an optional label_tweak, calculate the corresponding\n+ *  output public key:\n+ *\n+ *  B_m = B_spend + label_tweak * G\n+ *  (if no label tweak is used, then B_m = B_spend)\n+ *  P_output = B_m + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if outputs creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:   output_xonly_pubkey: pointer to the resulting output x-only pubkey",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": null,
+      "original_position": 16,
+      "commit_id": "b11b7b7eb0cbc133f67806a5c808cbf6be467bd2",
+      "original_commit_id": "e8cb4e74ff586d332eb023e157b69e38660668ce",
+      "in_reply_to_id": 1484563895,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> Hm, I completely forgot about the parity of P_output being relevant.\r\n\r\nYeah, same here. I only noticed the importance of the `P_output` parity at the very end of doing the changes, when about half of the receiving tests with labels were failing. As a quick-fix, I came up with this minimum-effort interface change of outputting the pubkey in two formats.\r\n\r\n> I'm not crazy about returning two encodings of the same public key, one of which is only relevant if you're the receiver and scanning for labels. This means the function now has an optional t_k parameter and an optional P_output_pubkey that are only used if you are a receiver, so it seems like it might be better to just have _sender/_receiver specific functions.\r\n\r\nAgree, dedicated `sender_` and `receiver_` routines make even more sense now! Considering that wallets following the BIP recommendation should always scan for the change label anyways, I think it's also simpler to have a single routine doing both the output and labels calculation (still with the option to skip the labels calculation though, as you suggested above).\r\n\r\n> Apologies for the back and forth on this, but what do you think about the following:\r\n> ....\r\n\r\nYour proposed interface SGTM, will adapt in a bit.",
+      "created_at": "2024-02-13T13:09:54Z",
+      "updated_at": "2024-02-13T13:09:55Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1487821480",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1487821480"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
