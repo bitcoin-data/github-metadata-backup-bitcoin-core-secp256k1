@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-02-21T16:45:12Z",
-    "updated_at": "2024-02-22T19:53:31Z",
+    "updated_at": "2024-02-22T20:03:51Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "8db79363c7e084c9663963c8210d0c4f00c03a4d",
@@ -893,9 +893,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-02-22T19:53:30Z",
-      "updated_at": "2024-02-22T19:53:30Z",
+      "updated_at": "2024-02-22T20:03:51Z",
       "author_association": "CONTRIBUTOR",
-      "body": "@real-or-random I didn't understand your question at first but I think maybe I know what you're asking now. I'll try to rephrase:\r\n\r\nBecause notation is necessary for msan but not valgrind (I don't know if that's true, I'm assuming based on your question), there should be a macro that is used only to notate for msan without affecting valgrind's detection? If that's right, sure, I can hook up a `SECP256K1_CHECKMEM_MSAN`. I'm unsure if other parts of the code would also benefit from one but not the other, but presumably if so we'd want to switch them over too.",
+      "body": "@real-or-random I didn't understand your question at first but I think maybe I know what you're asking now. I'll try to rephrase:\r\n\r\nBecause notation is necessary for msan but not valgrind (I don't know if that's true, I'm assuming based on your question), there should be a macro that is used only to notate for msan without affecting valgrind's detection? If that's right, sure, I can hook up a `SECP256K1_CHECKMEM_MSAN`. I'm unsure if other parts of the code would also benefit from one but not the other, but presumably if so we'd want to switch them over too.\r\n\r\nedit: Like this, I think? (untested)\r\n\r\n```diff\r\ndiff --git a/src/checkmem.h b/src/checkmem.h\r\nindex f2169de..68db9a7 100644\r\n--- a/src/checkmem.h\r\n+++ b/src/checkmem.h\r\n@@ -48,11 +48,16 @@\r\n #    define SECP256K1_CHECKMEM_ENABLED 1\r\n #    define SECP256K1_CHECKMEM_UNDEFINE(p, len) __msan_allocated_memory((p), (len))\r\n #    define SECP256K1_CHECKMEM_DEFINE(p, len) __msan_unpoison((p), (len))\r\n+#    define SECP256K1_CHECKMEM_MSAN(p, len) __msan_unpoison((p), (len))\r\n #    define SECP256K1_CHECKMEM_CHECK(p, len) __msan_check_mem_is_initialized((p), (len))\r\n #    define SECP256K1_CHECKMEM_RUNNING() (1)\r\n #  endif\r\n #endif\r\n\r\n+#ifndef SECP256K1_CHECKMEM_MSAN\r\n+#  define SECP256K1_CHECKMEM_MSAN(p, len) SECP256K1_CHECKMEM_NOOP((p), (len))\r\n+#endif\r\n+\r\n /* If valgrind integration is desired (through the VALGRIND define), implement the\r\n  * SECP256K1_CHECKMEM_* macros using valgrind. */\r\n #if !defined SECP256K1_CHECKMEM_ENABLED\r\n```\r\n\r\nLogically, wrapping it in an `#ifndef VALGRIND` would make sense too, but I didn't because of the comment above it:\r\n```c\r\n/* If compiling under msan, map the SECP256K1_CHECKMEM_* functionality to msan.\r\n * Choose this preferentially, even when VALGRIND is defined, as msan-compiled\r\n * binaries can't be run under valgrind anyway. */\r\n```\r\n\r\nNit: I think `SECP256K1_CHECKMEM_MSAN_DEFINE` would be a better name so the other macros could get the same treatment in the future if necessary.",
       "user": {
         "login": "theuni",
         "id": 417043,
