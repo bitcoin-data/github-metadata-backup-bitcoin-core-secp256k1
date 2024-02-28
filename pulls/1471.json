@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-02-27T18:27:05Z",
+    "updated_at": "2024-02-28T00:17:07Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "f090953bbe39eac5c11940d6e51f448f664c58a0",
@@ -333,7 +333,7 @@
     "changed_files": 16,
     "commits": 13,
     "review_comments": 59,
-    "comments": 21
+    "comments": 22
   },
   "events": [
     {
@@ -3574,6 +3574,60 @@
       "commit_id": "11420a7a2836114393b70f4d10bb81921403a360",
       "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/11420a7a2836114393b70f4d10bb81921403a360",
       "created_at": "2024-02-27T15:41:05Z"
+    },
+    {
+      "event": "commented",
+      "id": 1967953283,
+      "node_id": "IC_kwDOAP4Jqs51TJWD",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/1967953283",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-02-28T00:17:05Z",
+      "updated_at": "2024-02-28T00:17:05Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> I ended up abusing this function [secp256k1_silentpayments_create_output_seckey]\r\n\r\nYeah, this is basically `scalar_add`, with some high-level docs. \r\n\r\nThis is something we need to think about. A goal of the library is to provide safe high-level APIs. I guess we often assume that this is equivalent to avoiding access to low-level operations in the API. But as this functions shows, it's not equivalent. This function is part of a high-level API, but it happens to expose a simple low-level operation... Now, there's nothing wrong with this per se, but people will abuse this for all kinds of things.\r\n\r\nAnd let's be honest. If you need a `scalar_add`, and the library gives you a (disguised) `scalar_add`, it's just pragmatic to use it. The API docs won't prevent anyone from doing so. Is it their responsibility? Probably yes.\r\n\r\n---\r\n\r\nI think the entire module, as proposed, is a bit unusual for libsecp256k1 because it only wraps some ECC operations of a higher-level protocol (as explained in the header). This design makes sense, but it's different from what we usually have in libsecp256k1. \r\n\r\nYou could say that BIP340 signatures are also just some ECC parts of a higher-level protocol \"Bitcoin\", but the difference is that they implement a common interface of a signature scheme, what people call a cryptographic primitive (like public-key encryption, key exchange, hashing, etc.). But this here is merely the \"cryptographic core of silent payments\", and it's tightly coupled to it.\r\n\r\nAgain, there's per se nothing wrong with a more low-level module, but I think we'll need to spend some thoughts on how we make it fit the library best. Sometimes the potential for abuse can be reduced by having opaque data types that you can only pass from API function to API function.  We do something similar in the [proposed musig2 API](https://github.com/bitcoin-core/secp256k1/pull/1479) for example. I think this would be closest to the current spirit of the library.\r\n\r\nAnother design pattern is to have \"stage\" functions that perform all the different computation that should be done at a specific stage of the protocol. This doesn't seem elegant, but it prevents mistakes where the caller combines the API functions wrongly, e.g., calls them in the wrong order.\r\n\r\n---\r\n\r\nOff-topic ramblings about the library: \r\n\r\nSo if we expose the `silentpayments_create_output_seckey` function, we might as well go ahead and expose `scalar_add`  and possibly some more scalar and group functions as part of a mid-level, or \"hazmat API\" as it's called in some libraries (ignoring for a moment that this is work and raises more questions). We anyway have [ec_pubkey_combine](https://github.com/bitcoin-core/secp256k1/blob/427e86b9edcaa5cb19e71233ad93c2ec60dff10f/include/secp256k1.h#L864-L878) left as a relic. Then the caller at least won't have to abuse the silent payment API.\r\n\r\nAnd if we had hazmat API, then one could alternatively simply build some libsilentpayments around it, and other applications could do the same. This would certainly help some applications. But it's not obvious that this is the ideal solution. There are multiple related but different questions, e.g., in should stuff be a module, in which repo should it live, who should maintain it, how should it be linked, etc... (And lol, please don't be discouraged by my comments here. I see value in this as a libsecp256k1 module, it's just that the PR makes me think about the bigger picture again...)",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-1967953283",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
     }
   ],
   "comments": [
