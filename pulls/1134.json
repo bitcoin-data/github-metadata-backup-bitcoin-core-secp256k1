@@ -41,7 +41,7 @@
     "body": "### Overview\r\n\r\nThis PR adds support for batch verifying Schnorr signatures and tweaked x-only public key checks. It is based on the work of @jonasnick in #760. \r\n\r\n### Batch Verification\r\n\r\nThis implementation does not strictly follow the [BIP340 batch verification spec](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#batch-verification). The API design is loosely based on this suggestion: https://github.com/bitcoin-core/secp256k1/pull/760#issuecomment-809242311. Prior development discussion of this PR can be found in siv2r/secp256k1#2.\r\n\r\n### Speed Up\r\n - batch verifying Schnorr signatures is **_20% faster_** - [graph here](https://github.com/bitcoin-core/secp256k1/pull/1134/files#diff-583efe34fcab54bf7e5296bf65e522adc2345b3580e2a50ad5cccbd91dd82032)\r\n - batch verifying tweak pubkey checks is **_50% faster_** - [graph here](https://github.com/bitcoin-core/secp256k1/pull/1134/files#diff-1e73547c6cfbb18febec26224f0389d8ed1893ec7883f485a97caa583609b16b)\r\n\r\nFixes #1087",
     "labels": [],
     "created_at": "2022-08-21T08:55:46Z",
-    "updated_at": "2024-02-28T00:02:24Z",
+    "updated_at": "2024-02-28T13:01:59Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merge_commit_sha": "d8202d2981e704e70c6923caf43fed972d0cf3d9",
@@ -322,7 +322,7 @@
     "deletions": 76,
     "changed_files": 36,
     "commits": 9,
-    "review_comments": 4,
+    "review_comments": 5,
     "comments": 6
   },
   "events": [
@@ -1608,7 +1608,7 @@
           "assignees": [],
           "author_association": "CONTRIBUTOR",
           "locked": false,
-          "comments": 2,
+          "comments": 6,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin/bitcoin/pulls/29491",
             "html_url": "https://github.com/bitcoin/bitcoin/pull/29491",
@@ -1616,7 +1616,7 @@
             "patch_url": "https://github.com/bitcoin/bitcoin/pull/29491.patch"
           },
           "created_at": "2024-02-27T17:06:26Z",
-          "updated_at": "2024-02-27T17:25:14Z"
+          "updated_at": "2024-02-28T13:36:36Z"
         },
         "type": "issue"
       }
@@ -1855,6 +1855,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1505160540"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 27,
+      "original_line": 27,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1505929407",
+      "pull_request_review_id": 1906215194,
+      "id": 1505929407,
+      "node_id": "PRRC_kwDOAP4Jqs5Zwqi_",
+      "diff_hunk": "@@ -0,0 +1,110 @@\n+#ifndef SECP256K1_BATCH_H\n+#define SECP256K1_BATCH_H\n+\n+#include \"secp256k1.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/** This module implements a Batch Verification object that supports:\n+ *\n+ *  1. Schnorr signatures compliant with Bitcoin Improvement Proposal 340\n+ *     \"Schnorr Signatures for secp256k1\"\n+ *     (https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki).\n+ *\n+ *  2. Taproot commitments compliant with Bitcoin Improvemtn Proposal 341\n+ *     \"Taproot: SegWit version 1 spending rules\"\n+ *     (https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).\n+ */\n+\n+/** Opaque data structure that holds information required for the batch verification.\n+ *\n+ *  The purpose of this structure is to store elliptic curve points, their scalar\n+ *  coefficients, and scalar coefficient of generator point participating in Multi-Scalar\n+ *  Point Multiplication computation, which is done by `secp256k1_ecmult_strauss_batch_internal`\n+ */\n+typedef struct secp256k1_batch_struct secp256k1_batch;",
+      "path": "include/secp256k1_batch.h",
+      "position": 27,
+      "original_position": 27,
+      "commit_id": "eb49e93b50b3e40498789a500e2db8d9a20debbf",
+      "original_commit_id": "eb49e93b50b3e40498789a500e2db8d9a20debbf",
+      "in_reply_to_id": 1505160540,
+      "user": {
+        "login": "siv2r",
+        "id": 56887198,
+        "node_id": "MDQ6VXNlcjU2ODg3MTk4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56887198?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/siv2r",
+        "html_url": "https://github.com/siv2r",
+        "followers_url": "https://api.github.com/users/siv2r/followers",
+        "following_url": "https://api.github.com/users/siv2r/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/siv2r/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/siv2r/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/siv2r/subscriptions",
+        "organizations_url": "https://api.github.com/users/siv2r/orgs",
+        "repos_url": "https://api.github.com/users/siv2r/repos",
+        "events_url": "https://api.github.com/users/siv2r/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/siv2r/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Why do we need this? Currently, users can only create pointers to the `secp256k1_batch` object, which is the intended functionality of opaque objects, right?",
+      "created_at": "2024-02-28T13:01:59Z",
+      "updated_at": "2024-02-28T13:01:59Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1134#discussion_r1505929407",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1505929407"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
