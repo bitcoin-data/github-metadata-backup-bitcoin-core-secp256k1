@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-03-10T13:43:35Z",
+    "updated_at": "2024-03-10T14:54:30Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merge_commit_sha": "1a76926dd45642f66930cb1f565d5561f2f3d4e6",
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-03-08T19:54:27Z",
+        "pushed_at": "2024-03-10T14:57:47Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-03-09T10:50:19Z",
         "license": {
@@ -332,7 +332,7 @@
     "deletions": 9942,
     "changed_files": 18,
     "commits": 15,
-    "review_comments": 26,
+    "review_comments": 28,
     "comments": 32
   },
   "events": [
@@ -4478,6 +4478,42 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2023-12-06T17:20:47Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 1761684466,
+      "node_id": "PRR_kwDOAP4Jqs5pASvy",
+      "url": null,
+      "actor": null,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "",
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#pullrequestreview-1761684466",
+      "submitted_at": "2024-03-10T14:19:56Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
     }
   ],
   "comments": [
@@ -5623,6 +5659,266 @@
       "start_side": null,
       "line": 187,
       "original_line": 187,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1413425449",
+      "pull_request_review_id": 1761684466,
+      "id": 1413425449,
+      "node_id": "PRRC_kwDOAP4Jqs5UPykp",
+      "diff_hunk": "@@ -29,38 +29,154 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx\n     secp256k1_ge_clear(&ctx->final_point_add);\n }\n \n-/* For accelerating the computation of a*G:\n- * To harden against timing attacks, use the following mechanism:\n- * * Break up the multiplicand into groups of PREC_BITS bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).\n- * * Compute sum(n_i * (PREC_G)^i * G + U_i, i=0 ... PREC_N-1), where:\n- *   * U_i = U * 2^i, for i=0 ... PREC_N-2\n- *   * U_i = U * (1-2^(PREC_N-1)), for i=PREC_N-1\n- *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0 ... PREC_N-1) = 0.\n- * For each i, and each of the PREC_G possible values of n_i, (n_i * (PREC_G)^i * G + U_i) is\n- * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0 ... PREC_N-1).\n- * None of the resulting prec group elements have a known scalar, and neither do any of\n- * the intermediate sums while computing a*G.\n- * The prec values are stored in secp256k1_ecmult_gen_prec_table[i][n_i] = n_i * (PREC_G)^i * G + U_i.\n- */\n-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n-    int bits = ECMULT_GEN_PREC_BITS;\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+/* Compute the scalar (2^COMB_BITS - 1) / 2. */\n+static void secp256k1_ecmult_gen_scalar_diff(secp256k1_scalar* diff) {\n+    int i;\n+\n+    /* Compute scalar -1/2. */\n+    secp256k1_scalar neghalf = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    secp256k1_scalar_inverse_var(&neghalf, &neghalf);\n+    secp256k1_scalar_negate(&neghalf, &neghalf);\n+\n+    /* Compute offset = 2^(COMB_BITS - 1). */\n+    secp256k1_scalar_set_int(diff, 1);\n+    for (i = 0; i < COMB_BITS - 1; ++i) {\n+        secp256k1_scalar_add(diff, diff, diff);\n+    }\n \n+    /* The result is the sum of 2^(COMB_BITS - 1) + (-1/2). */\n+    secp256k1_scalar_add(diff, diff, &neghalf);\n+}\n+\n+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n+    uint32_t comb_off;\n     secp256k1_ge add;\n+    secp256k1_fe neg;\n     secp256k1_ge_storage adds;\n-    secp256k1_scalar gnb;\n-    int i, j, n_i;\n+    secp256k1_scalar recoded;\n \n     memset(&adds, 0, sizeof(adds));\n     secp256k1_gej_set_infinity(r);\n \n-    /* Blind scalar/point multiplication by computing (gn-b)*G + b*G instead of gn*G. */\n-    secp256k1_scalar_add(&gnb, gn, &ctx->scalar_offset);\n+    /* We want to compute R = gn*G.\n+     *\n+     * To blind the scalar used in the computation, we rewrite this to be R = (gn-b)*G + b*G, with\n+     * a value b determined by the context. b*G is precomputed as ctx->final_point_add, so we're\n+     * left with computing R = (gn-b)*G + ctx->final_point_add.\n+     *\n+     * The multiplication (gn-b)*G will be performed using a signed-digit multi-comb (see Section\n+     * 3.3 of \"Fast and compact elliptic-curve cryptography\" by Mike Hamburg\n+     * (https://eprint.iacr.org/2012/309).\n+     *\n+     * Let comb(s,P) = sum((2*s_i-1)*2^i*P for i=0..COMB_BITS-1), where s_i is the i'th bit of the\n+     * binary representation of scalar s. So the s_i values determine whether -2^i*P (s_i=0) or\n+     * +2^i*P (s_1) are added together. By manipulating:\n+     *\n+     *     comb(s,P) = sum((2*s_i-1)*2^i*P for i=0..COMB_BITS-1)\n+     * <=> comb(s,P) = sum((2*s_i-1)*2^i for i=0..COMB_BITS-1) * P\n+     * <=> comb(s,P) = (2*sum(s_i*2^i for i=0..COMB_BITS-1) - sum(2^i for i=0..COMB_BITS-1)) * P\n+     * <=> comb(s,P) = (2*s - (2^COMB_BITS - 1)) * P\n+     *\n+     * Thus (gn-b)*G can be written as comb(s,G) if gn-b = 2*s - (2^COMB_BITS - 1), or\n+     * s = (gn - b + (2^COMB_BITS - 1))/2 mod order.\n+     *\n+     * We use an alternative that avoids the modular division by two: we write (gn-b)*G =\n+     * comb(d,G/2). For that to hold it must be the case that\n+     * (gn-b)*G = (2*d + 2^COMB_BITS - 1) * (G/2), or",
+      "path": "src/ecmult_gen_impl.h",
+      "position": 108,
+      "original_position": 92,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "original_commit_id": "9fccdf352911d8a463aba09e3ece5e01d5c226c4",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "9fccdf3:\r\n```suggestion\r\n     * (gn-b)*G = (2*d - 2^COMB_BITS + 1) * (G/2), or\r\n```",
+      "created_at": "2023-12-04T06:37:49Z",
+      "updated_at": "2024-03-10T14:19:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1413425449",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1413425449"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 89,
+      "original_line": 89,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1446984133",
+      "pull_request_review_id": 1761684466,
+      "id": 1446984133,
+      "node_id": "PRRC_kwDOAP4Jqs5WPznF",
+      "diff_hunk": "@@ -1,83 +1,94 @@\n-/***********************************************************************\n- * Copyright (c) 2013, 2014, 2015 Pieter Wuille, Gregory Maxwell       *\n- * Distributed under the MIT software license, see the accompanying    *\n- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n- ***********************************************************************/\n+/*******************************************************************************\n+ * Copyright (c) 2013-2015, 2021 Pieter Wuille, Gregory Maxwell, Peter Dettman *\n+ * Distributed under the MIT software license, see the accompanying            *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.        *\n+ *******************************************************************************/\n \n #ifndef SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n #define SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n \n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    int spacing = (256 + blocks * teeth - 1) / (blocks * teeth);\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n-    {\n-        static const unsigned char nums_b32[33] = \"The scalar for this x is unknown\";\n-        secp256k1_fe nums_x;\n-        secp256k1_ge nums_ge;\n-        int r;\n-        r = secp256k1_fe_set_b32_limit(&nums_x, nums_b32);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        r = secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        secp256k1_gej_set_ge(&nums_gej, &nums_ge);\n-        /* Add G to make the bits in x uniformly distributed. */\n-        secp256k1_gej_add_ge_var(&nums_gej, &nums_gej, gen, NULL);\n+    /* u is the running power of two times gen we're working with, initially gen/2. */\n+    secp256k1_scalar_inverse_var(&half, &half);\n+    secp256k1_gej_set_infinity(&u);\n+    for (i = 255; i >= 0; --i) {\n+        /* Use a very simple multiplication ladder to avoid dependency on ecmult. */\n+        secp256k1_gej_double_var(&u, &u, NULL);\n+        if (secp256k1_scalar_get_bits(&half, i, 1)) {\n+            secp256k1_gej_add_ge_var(&u, &u, gen, NULL);\n+        }\n     }\n \n-    /* compute prec. */\n-    {\n-        secp256k1_gej gbase;\n-        secp256k1_gej numsbase;\n-        secp256k1_gej* precj = checked_malloc(&default_error_callback, n * g * sizeof(*precj));  /* Jacobian versions of prec. */\n-        gbase = gj; /* PREC_G^j * G */\n-        numsbase = nums_gej; /* 2^j * nums. */\n-        for (j = 0; j < n; j++) {\n-            /* Set precj[j*PREC_G .. j*PREC_G+(PREC_G-1)] to (numsbase, numsbase + gbase, ..., numsbase + (PREC_G-1)*gbase). */\n-            precj[j*g] = numsbase;\n-            for (i = 1; i < g; i++) {\n-                secp256k1_gej_add_var(&precj[j*g + i], &precj[j*g + i - 1], &gbase, NULL);\n-            }\n-            /* Multiply gbase by PREC_G. */\n-            for (i = 0; i < bits; i++) {\n-                secp256k1_gej_double_var(&gbase, &gbase, NULL);\n+    for (block = 0; block < blocks; ++block) {\n+        int tooth;\n+        /* Here u = 2^(block*teeth*spacing) * gen/2. */\n+        secp256k1_gej sum;\n+        secp256k1_gej_set_infinity(&sum);\n+        for (tooth = 0; tooth < teeth; ++tooth) {\n+            /* Here u = 2^((block*teeth + tooth)*spacing) * gen/2. */\n+            int bit_off;\n+            /* Make sum = sum(2^((block*teeth + t)*spacing), t=0..tooth). */\n+            secp256k1_gej_add_var(&sum, &sum, &u, NULL);\n+            /* Make u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            secp256k1_gej_double_var(&u, &u, NULL);\n+            /* Make ds[tooth] = u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            ds[tooth] = u;\n+            /* Make u = 2^((block*teeth + tooth + 1)*spacing). */\n+            for (bit_off = 1; bit_off < spacing; ++bit_off) {\n+                secp256k1_gej_double_var(&u, &u, NULL);\n             }\n-            /* Multiply numbase by 2. */\n-            secp256k1_gej_double_var(&numsbase, &numsbase, NULL);\n-            if (j == n - 2) {\n-                /* In the last iteration, numsbase is (1 - 2^j) * nums instead. */\n-                secp256k1_gej_neg(&numsbase, &numsbase);\n-                secp256k1_gej_add_var(&numsbase, &numsbase, &nums_gej, NULL);\n+        }\n+        /* Now u = 2^(block*(teeth + 1)*spacing) * gen/2. */",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 116,
+      "original_position": 115,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "original_commit_id": "da73fd9d51137e59f2a4f13807501ee23cc64956",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "da73fd9: block+1 would become next iteration's block\r\n```suggestion\r\n        /* Now u = 2^((block + 1)*teeth*spacing) * gen/2. */\r\n```",
+      "created_at": "2024-01-10T07:32:42Z",
+      "updated_at": "2024-03-10T14:19:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1446984133",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1446984133"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 60,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1448201103",
+      "pull_request_review_id": 1761684466,
+      "id": 1448201103,
+      "node_id": "PRRC_kwDOAP4Jqs5WUcuP",
+      "diff_hunk": "@@ -29,38 +29,154 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx\n     secp256k1_ge_clear(&ctx->final_point_add);\n }\n \n-/* For accelerating the computation of a*G:\n- * To harden against timing attacks, use the following mechanism:\n- * * Break up the multiplicand into groups of PREC_BITS bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).\n- * * Compute sum(n_i * (PREC_G)^i * G + U_i, i=0 ... PREC_N-1), where:\n- *   * U_i = U * 2^i, for i=0 ... PREC_N-2\n- *   * U_i = U * (1-2^(PREC_N-1)), for i=PREC_N-1\n- *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0 ... PREC_N-1) = 0.\n- * For each i, and each of the PREC_G possible values of n_i, (n_i * (PREC_G)^i * G + U_i) is\n- * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0 ... PREC_N-1).\n- * None of the resulting prec group elements have a known scalar, and neither do any of\n- * the intermediate sums while computing a*G.\n- * The prec values are stored in secp256k1_ecmult_gen_prec_table[i][n_i] = n_i * (PREC_G)^i * G + U_i.\n- */\n-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n-    int bits = ECMULT_GEN_PREC_BITS;\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+/* Compute the scalar (2^COMB_BITS - 1) / 2. */\n+static void secp256k1_ecmult_gen_scalar_diff(secp256k1_scalar* diff) {\n+    int i;\n+\n+    /* Compute scalar -1/2. */\n+    secp256k1_scalar neghalf = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    secp256k1_scalar_inverse_var(&neghalf, &neghalf);\n+    secp256k1_scalar_negate(&neghalf, &neghalf);\n+\n+    /* Compute offset = 2^(COMB_BITS - 1). */\n+    secp256k1_scalar_set_int(diff, 1);\n+    for (i = 0; i < COMB_BITS - 1; ++i) {\n+        secp256k1_scalar_add(diff, diff, diff);\n+    }\n \n+    /* The result is the sum of 2^(COMB_BITS - 1) + (-1/2). */\n+    secp256k1_scalar_add(diff, diff, &neghalf);\n+}\n+\n+static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n+    uint32_t comb_off;\n     secp256k1_ge add;\n+    secp256k1_fe neg;\n     secp256k1_ge_storage adds;\n-    secp256k1_scalar gnb;\n-    int i, j, n_i;\n+    secp256k1_scalar recoded;\n \n     memset(&adds, 0, sizeof(adds));\n     secp256k1_gej_set_infinity(r);\n \n-    /* Blind scalar/point multiplication by computing (gn-b)*G + b*G instead of gn*G. */\n-    secp256k1_scalar_add(&gnb, gn, &ctx->scalar_offset);\n+    /* We want to compute R = gn*G.\n+     *\n+     * To blind the scalar used in the computation, we rewrite this to be R = (gn-b)*G + b*G, with\n+     * a value b determined by the context. b*G is precomputed as ctx->final_point_add, so we're\n+     * left with computing R = (gn-b)*G + ctx->final_point_add.\n+     *\n+     * The multiplication (gn-b)*G will be performed using a signed-digit multi-comb (see Section\n+     * 3.3 of \"Fast and compact elliptic-curve cryptography\" by Mike Hamburg\n+     * (https://eprint.iacr.org/2012/309).\n+     *\n+     * Let comb(s,P) = sum((2*s_i-1)*2^i*P for i=0..COMB_BITS-1), where s_i is the i'th bit of the\n+     * binary representation of scalar s. So the s_i values determine whether -2^i*P (s_i=0) or\n+     * +2^i*P (s_1) are added together. By manipulating:\n+     *\n+     *     comb(s,P) = sum((2*s_i-1)*2^i*P for i=0..COMB_BITS-1)\n+     * <=> comb(s,P) = sum((2*s_i-1)*2^i for i=0..COMB_BITS-1) * P\n+     * <=> comb(s,P) = (2*sum(s_i*2^i for i=0..COMB_BITS-1) - sum(2^i for i=0..COMB_BITS-1)) * P\n+     * <=> comb(s,P) = (2*s - (2^COMB_BITS - 1)) * P\n+     *\n+     * Thus (gn-b)*G can be written as comb(s,G) if gn-b = 2*s - (2^COMB_BITS - 1), or\n+     * s = (gn - b + (2^COMB_BITS - 1))/2 mod order.\n+     *\n+     * We use an alternative that avoids the modular division by two: we write (gn-b)*G =\n+     * comb(d,G/2). For that to hold it must be the case that\n+     * (gn-b)*G = (2*d + 2^COMB_BITS - 1) * (G/2), or\n+     * d = (gn + (2^COMB_BITS - 1)/2 - b) mod order.\n+     *\n+     * -b is precomputed as ctx->scalar_offset, so our final equations become:\n+     *\n+     *   d = gn + ctx->scalar_offset + (2^COMB_BITS - 1)/2 (mod order)\n+     *   R = comb(d, G/2) + ctx->final_point_add.\n+     *\n+     * The comb function is computed by summing + or - 2^(i-1)*G, for i=0..COMB_BITS-1, depending\n+     * on the value of the bits d_i of the binary representation of scalar d.\n+     */\n+\n+    /* Compute the scalar (gn + ctx->scalar_offset + (2^COMB_BITS - 1)/2). */\n+    secp256k1_ecmult_gen_scalar_diff(&recoded);\n+    secp256k1_scalar_add(&recoded, &recoded, &ctx->scalar_offset);\n+    secp256k1_scalar_add(&recoded, &recoded, gn);\n+\n+    /* In secp256k1_ecmult_gen_prec_table we have precomputed sums of the\n+     * (2*d_i-1) * 2^(i-1) * G points, for various combinations of i positions.\n+     * We rewrite our equation in terms of these table entries.\n+     *\n+     * Let mask(b) = sum(2^(b*COMB_TEETH + t)*COMB_SPACING for t=0..COMB_TEETH-1),",
+      "path": "src/ecmult_gen_impl.h",
+      "position": 132,
+      "original_position": 113,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "original_commit_id": "da73fd9d51137e59f2a4f13807501ee23cc64956",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "da73fd9:\r\n```suggestion\r\n     * Let mask(b) = sum(2^((b*COMB_TEETH + t)*COMB_SPACING) for t=0..COMB_TEETH-1),\r\n```",
+      "created_at": "2024-01-11T02:10:58Z",
+      "updated_at": "2024-03-10T14:19:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1448201103",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1448201103"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 113,
+      "original_line": 106,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1518533789",
+      "pull_request_review_id": 1761684466,
+      "id": 1518533789,
+      "node_id": "PRRC_kwDOAP4Jqs5agvyd",
+      "diff_hunk": "@@ -1,83 +1,94 @@\n-/***********************************************************************\n- * Copyright (c) 2013, 2014, 2015 Pieter Wuille, Gregory Maxwell       *\n- * Distributed under the MIT software license, see the accompanying    *\n- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n- ***********************************************************************/\n+/*******************************************************************************\n+ * Copyright (c) 2013-2015, 2021 Pieter Wuille, Gregory Maxwell, Peter Dettman *\n+ * Distributed under the MIT software license, see the accompanying            *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.        *\n+ *******************************************************************************/\n \n #ifndef SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n #define SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n \n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    int spacing = (256 + blocks * teeth - 1) / (blocks * teeth);\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n-    {\n-        static const unsigned char nums_b32[33] = \"The scalar for this x is unknown\";\n-        secp256k1_fe nums_x;\n-        secp256k1_ge nums_ge;\n-        int r;\n-        r = secp256k1_fe_set_b32_limit(&nums_x, nums_b32);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        r = secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        secp256k1_gej_set_ge(&nums_gej, &nums_ge);\n-        /* Add G to make the bits in x uniformly distributed. */\n-        secp256k1_gej_add_ge_var(&nums_gej, &nums_gej, gen, NULL);\n+    /* u is the running power of two times gen we're working with, initially gen/2. */\n+    secp256k1_scalar_inverse_var(&half, &half);\n+    secp256k1_gej_set_infinity(&u);\n+    for (i = 255; i >= 0; --i) {\n+        /* Use a very simple multiplication ladder to avoid dependency on ecmult. */\n+        secp256k1_gej_double_var(&u, &u, NULL);\n+        if (secp256k1_scalar_get_bits(&half, i, 1)) {\n+            secp256k1_gej_add_ge_var(&u, &u, gen, NULL);\n+        }\n     }\n \n-    /* compute prec. */\n-    {\n-        secp256k1_gej gbase;\n-        secp256k1_gej numsbase;\n-        secp256k1_gej* precj = checked_malloc(&default_error_callback, n * g * sizeof(*precj));  /* Jacobian versions of prec. */\n-        gbase = gj; /* PREC_G^j * G */\n-        numsbase = nums_gej; /* 2^j * nums. */\n-        for (j = 0; j < n; j++) {\n-            /* Set precj[j*PREC_G .. j*PREC_G+(PREC_G-1)] to (numsbase, numsbase + gbase, ..., numsbase + (PREC_G-1)*gbase). */\n-            precj[j*g] = numsbase;\n-            for (i = 1; i < g; i++) {\n-                secp256k1_gej_add_var(&precj[j*g + i], &precj[j*g + i - 1], &gbase, NULL);\n-            }\n-            /* Multiply gbase by PREC_G. */\n-            for (i = 0; i < bits; i++) {\n-                secp256k1_gej_double_var(&gbase, &gbase, NULL);\n+    for (block = 0; block < blocks; ++block) {\n+        int tooth;\n+        /* Here u = 2^(block*teeth*spacing) * gen/2. */\n+        secp256k1_gej sum;\n+        secp256k1_gej_set_infinity(&sum);\n+        for (tooth = 0; tooth < teeth; ++tooth) {\n+            /* Here u = 2^((block*teeth + tooth)*spacing) * gen/2. */\n+            int bit_off;\n+            /* Make sum = sum(2^((block*teeth + t)*spacing), t=0..tooth). */\n+            secp256k1_gej_add_var(&sum, &sum, &u, NULL);\n+            /* Make u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            secp256k1_gej_double_var(&u, &u, NULL);\n+            /* Make ds[tooth] = u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            ds[tooth] = u;\n+            /* Make u = 2^((block*teeth + tooth + 1)*spacing). */",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": null,
+      "original_position": 104,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "original_commit_id": "da73fd9d51137e59f2a4f13807501ee23cc64956",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "da73fd9: micro-nit:\r\n```suggestion\r\n            /* Make u = 2^((block*teeth + tooth + 1)*spacing) * gen/2. */\r\n```",
+      "created_at": "2024-03-09T08:15:28Z",
+      "updated_at": "2024-03-10T14:19:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1518533789",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1518533789"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 54,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1518863439",
+      "pull_request_review_id": 1761684466,
+      "id": 1518863439,
+      "node_id": "PRRC_kwDOAP4Jqs5aiARP",
+      "diff_hunk": "@@ -1,83 +1,94 @@\n-/***********************************************************************\n- * Copyright (c) 2013, 2014, 2015 Pieter Wuille, Gregory Maxwell       *\n- * Distributed under the MIT software license, see the accompanying    *\n- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n- ***********************************************************************/\n+/*******************************************************************************\n+ * Copyright (c) 2013-2015, 2021 Pieter Wuille, Gregory Maxwell, Peter Dettman *\n+ * Distributed under the MIT software license, see the accompanying            *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.        *\n+ *******************************************************************************/\n \n #ifndef SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n #define SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n \n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    int spacing = (256 + blocks * teeth - 1) / (blocks * teeth);\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n-    {\n-        static const unsigned char nums_b32[33] = \"The scalar for this x is unknown\";\n-        secp256k1_fe nums_x;\n-        secp256k1_ge nums_ge;\n-        int r;\n-        r = secp256k1_fe_set_b32_limit(&nums_x, nums_b32);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        r = secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        secp256k1_gej_set_ge(&nums_gej, &nums_ge);\n-        /* Add G to make the bits in x uniformly distributed. */\n-        secp256k1_gej_add_ge_var(&nums_gej, &nums_gej, gen, NULL);\n+    /* u is the running power of two times gen we're working with, initially gen/2. */\n+    secp256k1_scalar_inverse_var(&half, &half);\n+    secp256k1_gej_set_infinity(&u);\n+    for (i = 255; i >= 0; --i) {\n+        /* Use a very simple multiplication ladder to avoid dependency on ecmult. */\n+        secp256k1_gej_double_var(&u, &u, NULL);\n+        if (secp256k1_scalar_get_bits(&half, i, 1)) {\n+            secp256k1_gej_add_ge_var(&u, &u, gen, NULL);\n+        }\n     }\n \n-    /* compute prec. */\n-    {\n-        secp256k1_gej gbase;\n-        secp256k1_gej numsbase;\n-        secp256k1_gej* precj = checked_malloc(&default_error_callback, n * g * sizeof(*precj));  /* Jacobian versions of prec. */\n-        gbase = gj; /* PREC_G^j * G */\n-        numsbase = nums_gej; /* 2^j * nums. */\n-        for (j = 0; j < n; j++) {\n-            /* Set precj[j*PREC_G .. j*PREC_G+(PREC_G-1)] to (numsbase, numsbase + gbase, ..., numsbase + (PREC_G-1)*gbase). */\n-            precj[j*g] = numsbase;\n-            for (i = 1; i < g; i++) {\n-                secp256k1_gej_add_var(&precj[j*g + i], &precj[j*g + i - 1], &gbase, NULL);\n-            }\n-            /* Multiply gbase by PREC_G. */\n-            for (i = 0; i < bits; i++) {\n-                secp256k1_gej_double_var(&gbase, &gbase, NULL);\n+    for (block = 0; block < blocks; ++block) {\n+        int tooth;\n+        /* Here u = 2^(block*teeth*spacing) * gen/2. */\n+        secp256k1_gej sum;\n+        secp256k1_gej_set_infinity(&sum);\n+        for (tooth = 0; tooth < teeth; ++tooth) {\n+            /* Here u = 2^((block*teeth + tooth)*spacing) * gen/2. */\n+            int bit_off;\n+            /* Make sum = sum(2^((block*teeth + t)*spacing), t=0..tooth). */\n+            secp256k1_gej_add_var(&sum, &sum, &u, NULL);\n+            /* Make u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            secp256k1_gej_double_var(&u, &u, NULL);\n+            /* Make ds[tooth] = u = 2^((block*teeth + tooth)*spacing + 1) * gen/2. */\n+            ds[tooth] = u;\n+            /* Make u = 2^((block*teeth + tooth + 1)*spacing). */\n+            for (bit_off = 1; bit_off < spacing; ++bit_off) {\n+                secp256k1_gej_double_var(&u, &u, NULL);\n             }\n-            /* Multiply numbase by 2. */\n-            secp256k1_gej_double_var(&numsbase, &numsbase, NULL);\n-            if (j == n - 2) {\n-                /* In the last iteration, numsbase is (1 - 2^j) * nums instead. */\n-                secp256k1_gej_neg(&numsbase, &numsbase);\n-                secp256k1_gej_add_var(&numsbase, &numsbase, &nums_gej, NULL);\n+        }\n+        /* Now u = 2^(block*(teeth + 1)*spacing) * gen/2. */\n+\n+        /* Next, compute the table entries for block block in Jacobian coordinates.\n+         * The entries will occupy vs[block*points + i] for i=0..points-1.\n+         * We start by computing the first (i=0) value corresponding to all summed\n+         * powers of two times G being negative. */\n+        secp256k1_gej_neg(&vs[vs_pos++], &sum);\n+        /* And then teeth-1 times \"double\" the range of i values for which the table\n+         * is computed: in each iteration, double the table by taking an existing\n+         * table entry and adding ds[tooth]. */\n+        for (tooth = 0; tooth < teeth - 1; ++tooth) {\n+            size_t stride = ((size_t)1) << tooth;\n+            size_t index;\n+            for (index = 0; index < stride; ++index, ++vs_pos) {\n+                secp256k1_gej_add_var(&vs[vs_pos], &vs[vs_pos - stride], &ds[tooth], NULL);",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 130,
+      "original_position": 129,
+      "commit_id": "3feae17e562f6b0043f6e67252e6952dbea6aaa2",
+      "original_commit_id": "da73fd9d51137e59f2a4f13807501ee23cc64956",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "da73fd9: so for vs_pos = [256, 263] - since those bits are always set to 0. their possible combinations are computed and kept but never end up being used? also wondering if those big powers of 2 (maybe something like - 2\\*\\*263 - 2\\*\\*259 - 2\\*\\*255 - 2\\*\\*251 - 2\\*\\*247 - 2\\*\\*243) are safe to add in `secp256k1_gej_add_var`.\r\n\r\n(talking about default configuration with blocks=11, teeth=6) ",
+      "created_at": "2024-03-10T14:08:30Z",
+      "updated_at": "2024-03-10T14:19:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1518863439",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1518863439"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 74,
+      "original_line": 73,
       "side": "RIGHT"
     }
   ]
