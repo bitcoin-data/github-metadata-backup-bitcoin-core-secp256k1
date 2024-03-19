@@ -13,7 +13,7 @@
     "state": "open",
     "state_reason": null,
     "title": "Clang sanitizer binaries segfault on CI",
-    "body": "This is not related to a specific PR, the only reason why master is green is that it doesn't have recent pushes.\r\n\r\nThe first failing build is https://github.com/bitcoin-core/secp256k1/actions/runs/8317860245?pr=1058, which includes a rebuild of the Docker image... But I'm not sure which difference caused the issue. There was no change on our side, so something must have changed in Debian. But what? Here are some things to look into:\r\n\r\n - updating to clang-snapshot doesn't help, see #1505 \r\n - There was a clang recent packing fix related to the clang runtime, this looks suspicious: https://metadata.ftp-master.debian.org/changelogs//main/l/llvm-toolchain-14/llvm-toolchain-14_14.0.6-12_changelog\r\n -  there's this related bug report, but it's two years old: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1008309 \r\n\r\n",
+    "body": "This is not related to a specific PR, the only reason why master is green is that it doesn't have recent pushes.\r\n\r\nThe first bad build is https://github.com/bitcoin-core/secp256k1/actions/runs/8317860245?pr=1058, which includes a rebuild of the Docker image... The last good build of the Docker image is https://github.com/bitcoin-core/secp256k1/actions/runs/8208332997/job/22451543872?pr=1479.  But I'm not sure which difference caused the issue. There was no change on our side, so something must have changed in Debian. But what? Here are some things to look into:\r\n\r\n - [x] updating to clang-snapshot doesn't help, see #1505 \r\n - [x] There was a recent clang packing fix related to the clang runtime, which looks suspicious: https://metadata.ftp-master.debian.org/changelogs//main/l/llvm-toolchain-14/llvm-toolchain-14_14.0.6-12_changelog, but the new version is apparently used already in the last good build \r\n -  [ ] there's this related bug report, but it's two years old: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1008309 \r\n\r\nWe should probably diff the package lists (including package versions) from the CI outputs of the Docker image builds. This tells us what Debian packages got updated between the last good and the first bad build...   ",
     "user": {
       "login": "real-or-random",
       "id": 1071625,
@@ -59,7 +59,7 @@
     "locked": false,
     "comments": 0,
     "created_at": "2024-03-19T12:54:19Z",
-    "updated_at": "2024-03-19T12:54:19Z"
+    "updated_at": "2024-03-19T13:01:32Z"
   },
   "events": [
     {
