@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-03-27T17:35:28Z",
+    "updated_at": "2024-03-28T02:11:34Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "2c36bddc33e5ee0bc6a4c5a8b09533e91a08552a",
@@ -333,7 +333,7 @@
     "changed_files": 16,
     "commits": 13,
     "review_comments": 60,
-    "comments": 28
+    "comments": 29
   },
   "events": [
     {
@@ -4392,6 +4392,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2023389025",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "commented",
+      "id": 2024274489,
+      "node_id": "IC_kwDOAP4Jqs54p_o5",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2024274489",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-03-28T02:11:33Z",
+      "updated_at": "2024-03-28T02:11:33Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > the user doesn't have a way to determine which of the created outputs belong to which recipient\r\n> \r\n> Good catch, I overlooked this! I took your suggestion of extending the recipient struct and updated the branch. This has the added benefit of simplifying the function signature (i.e. no longer need to pass arguments for `outputs` and `n_outputs`).\r\n\r\nAh indeed, smaller function signature is a nice benefit, especially since the number of parameters was quite high already. :+1: \r\n\r\nAs for the current version: I didn't think about this when I made the suggestion, but now having the generated outputs as pointers within the `_silentpayments_recipient` struct is a bit of tedious/weird interface for users, as they would have to allocate memory also for those (first, for the array of pointers, and then also for the _xonly_pubkey objects as well!), in addition to the struct itself. Do you think it's an acceptable choice if we just drop `n_outputs` from the struct and store the output directly as instance, i.e.\r\n```\r\ntypedef struct {\r\n    secp256k1_pubkey scan_pubkey;\r\n    secp256k1_pubkey spend_pubkey;\r\n    secp256k1_xonly_pubkey generated_output;\r\n} secp256k1_silentpayments_recipient;\r\n```\r\nThis should make things much easier imho, as the user only has to allocate memory for a single struct instance per recipient. It should also make the implementation slightly simpler (one loop less). I'm assuming here that creating multiple outputs to the same SP address is rather the exception than the rule. Even if it is used more often, I think repeatedly filling out the same scan/spend keypairs is not a problem for wallets.\r\n\r\n> \r\n> Thinking about the receiver API a bit more, I realized we can't assume the receiver has access to the `tx_outputs` when scanning. For example, if the client is using BIP158 block filters, they would generate the scriptPubKey and then check if it is in the filter before downloading the block, or in the case of an electrum style client, they might generate the taproot output and then call the electrum backend to see if the scriptPubKey exists in the UTXO set.\r\n\r\nOh, wasn't aware of that. The two examples you state here are _only_ applicable for the non-label case though, right (not even the change address label)? To my understanding, when scanning for labels, we always need all outputs of a tx.\r\nIs it thinkable to have two scanning interfaces, one for the simple non-label case where simply the output is returned, and one for labels, where all outputs are passed and the labels scanning is done?\r\n\r\n> \r\n> Given this, what do you think about using a callback function for checking if the generated output exists / checking if the label exists? It seems `libsecp256k1` does use this pattern already in the case of the ECDH module where the caller can provide their own hash function and using callbacks could allow for a much simpler, easy to use API but I'm not what the cost in performance would be or if this would work with language bindings (e.g. a javascript library using `libsecp256k1`). Curious to hear your thoughts.\r\n\r\nInteresting idea, I'd intuitively assume it's neither a huge for problem for performance nor for other language bindings, but would have to check deeper.",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2024274489",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
     }
   ],
