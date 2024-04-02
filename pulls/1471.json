@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-04-02T13:56:50Z",
+    "updated_at": "2024-04-02T20:21:17Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "2c36bddc33e5ee0bc6a4c5a8b09533e91a08552a",
@@ -332,7 +332,7 @@
     "deletions": 11,
     "changed_files": 16,
     "commits": 13,
-    "review_comments": 60,
+    "review_comments": 61,
     "comments": 30
   },
   "events": [
@@ -4501,6 +4501,42 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2032116020",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "reviewed",
+      "id": 1974903988,
+      "node_id": "PRR_kwDOAP4Jqs51tqS0",
+      "url": null,
+      "actor": null,
+      "commit_id": "e4ffa036d1d12b8581bac741caf90e58887ced7c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "@josibake I had a quick look at the API in your branch, a few minor comments:\r\n- The In/Out parameter `secp256k1_silentpayments_recipient` seems a bit strange. Why not just group by index? `secp256k1_silentpayments_recipient` could just contain the scan and spend pks, and the i-th generated output would correspond to the i-th provided `secp256k1_silentpayments_recipient`?\r\n- Instead of taking a `const unsigned char * const *taproot_seckeys` argument and multiplying each seckey with base point G to see if it needs to be negated, you could accept an array of `secp256k1_xonly_keypair`, which holds both the seckey and the pubkey. Often the caller will already have the pubkey and would, if the function wouldn't accept `xonly_keypair`, do a costly recomputation of the public key unnecessarily. If the caller doesn't have an `xonly_keypair`, they can just create one.\r\n- I can imagine that others disagree, but I wouldn't add another `sign32` function if the spend key can just be tweaked via some `keypair_tweak` function and then given to the regular `schnorrsig_sign32` function. Then this would be the same workflow for a silent payments derived key to sign via `schnorrsig_custom`. And a similar workflow for the musig module (where tweaking happens via `secp256k1_musig_pubkey_tweak_add`.",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#pullrequestreview-1974903988",
+      "submitted_at": "2024-04-02T20:21:17Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
     }
   ],
   "comments": [
@@ -7622,6 +7658,58 @@
       "start_side": "RIGHT",
       "line": 255,
       "original_line": 255,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1548531951",
+      "pull_request_review_id": 1974903988,
+      "id": 1548531951,
+      "node_id": "PRRC_kwDOAP4Jqs5cTLjv",
+      "diff_hunk": "@@ -0,0 +1,320 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/* This module provides an implementation for the ECC related parts of\n+ * Silent Payments, as specified in BIP352. This particularly involves\n+ * the creation of input tweak data by summing up private or public keys\n+ * and the derivation of a shared secret using Elliptic Curve Diffie-Hellman.\n+ * Combined are either:\n+ *   - spender's private keys and receiver's public key (a * B, sender side)\n+ *   - spender's public keys and receiver's private key (A * b, receiver side)\n+ * With this result, the necessary key material for ultimately creating/scanning\n+ * or spending Silent Payment outputs can be determined.\n+ *\n+ * Note that this module is _not_ a full implementation of BIP352, as it\n+ * inherently doesn't deal with higher-level concepts like addresses, output\n+ * script types or transactions. The intent is to provide cryptographical\n+ * helpers for low-level calculations that are most error-prone to custom\n+ * implementations (e.g. enforcing the right y-parity for key material, ECDH\n+ * calculation etc.). For any wallet software already using libsecp256k1, this\n+ * API should provide all the functions needed for a Silent Payments\n+ * implementation without the need for any further manual elliptic-curve\n+ * operations.\n+ */\n+\n+/** Create Silent Payment tweak data from input private keys.\n+ *\n+ * Given a list of n private keys a_1...a_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input private keys tweak data:\n+ *\n+ * a_sum = a_1 + a_2 + ... + a_n\n+ * input_hash = hash(outpoint_smallest || (a_sum * G))\n+ *\n+ * If necessary, the private keys are negated to enforce the right y-parity.\n+ * For that reason, the private keys have to be passed in via two different parameter\n+ * pairs, depending on whether they were used for creating taproot outputs or not.\n+ * The resulting data is needed to create a shared secret for the sender side.\n+ *\n+ *  Returns: 1 if shared secret creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:                 a_sum: pointer to the resulting 32-byte private key sum\n+ *                  input_hash: pointer to the resulting 32-byte input hash\n+ *  In:          plain_seckeys: pointer to an array of pointers to 32-byte private keys\n+ *                              of non-taproot inputs (can be NULL if no private keys of\n+ *                              non-taproot inputs are used)\n+ *             n_plain_seckeys: the number of sender's non-taproot input private keys\n+ *             taproot_seckeys: pointer to an array of pointers to 32-byte private keys\n+ *                              of taproot inputs (can be NULL if no private keys of\n+ *                              taproot inputs are used)\n+ *           n_taproot_seckeys: the number of sender's taproot input private keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_private_tweak_data(\n+    const secp256k1_context *ctx,\n+    unsigned char *a_sum,\n+    unsigned char *input_hash,\n+    const unsigned char * const *plain_seckeys,\n+    size_t n_plain_seckeys,\n+    const unsigned char * const *taproot_seckeys,\n+    size_t n_taproot_seckeys,\n+    const unsigned char *outpoint_smallest36\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(8);\n+\n+/** Create Silent Payment tweak data from input public keys.\n+ *\n+ * Given a list of n public keys A_1...A_n (one for each silent payment\n+ * eligible input to spend) and a serialized outpoint_smallest, compute\n+ * the corresponding input public keys tweak data:\n+ *\n+ * A_sum = A_1 + A_2 + ... + A_n\n+ * input_hash = hash(outpoint_lowest || A_sum)\n+ *\n+ * The public keys have to be passed in via two different parameter pairs,\n+ * one for regular and one for x-only public keys, in order to avoid the need\n+ * of users converting to a common pubkey format before calling this function.\n+ * The resulting data is needed to create a shared secret for the receiver's side.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:                 A_sum: pointer to the resulting public keys sum\n+ *                  input_hash: pointer to the resulting 32-byte input hash\n+ *  In:          plain_pubkeys: pointer to an array of pointers to non-taproot\n+ *                              public keys (can be NULL if no non-taproot inputs are used)\n+ *             n_plain_pubkeys: the number of non-taproot input public keys\n+ *               xonly_pubkeys: pointer to an array of pointers to taproot x-only\n+ *                              public keys (can be NULL if no taproot inputs are used)\n+ *             n_xonly_pubkeys: the number of taproot input public keys\n+ *         outpoint_smallest36: serialized smallest outpoint\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_public_tweak_data(\n+    const secp256k1_context *ctx,\n+    secp256k1_pubkey *A_sum,\n+    unsigned char *input_hash,\n+    const secp256k1_pubkey * const *plain_pubkeys,\n+    size_t n_plain_pubkeys,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const unsigned char *outpoint_smallest36\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(8);\n+\n+/** Create Silent Payment tweaked public key from public tweak data.\n+ *\n+ * Given public tweak data (public keys sum and input hash), calculate the\n+ * corresponding tweaked public key:\n+ *\n+ * A_tweaked = input_hash * A_sum\n+ *\n+ * The resulting data is useful for light clients and silent payment indexes.\n+ *\n+ *  Returns: 1 if tweaked public key creation was successful. 0 if an error occured.\n+ *  Args:              ctx: pointer to a context object\n+ *  Out:         A_tweaked: pointer to the resulting tweaked public key\n+ *  In:              A_sum: pointer to the public keys sum\n+ *              input_hash: pointer to the 32-byte input hash\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_tweaked_pubkey(\n+    const secp256k1_context *ctx,\n+    secp256k1_pubkey *A_tweaked,\n+    const secp256k1_pubkey *A_sum,\n+    const unsigned char *input_hash\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n+\n+/** Create Silent Payment shared secret.\n+ *\n+ * Given a public component Pub, a private component sec and an input_hash,\n+ * calculate the corresponding shared secret using ECDH:\n+ *\n+ * shared_secret = (sec * input_hash) * Pub\n+ *\n+ * What the components should be set to depends on the role of the caller.\n+ * For the sender side, the public component is set the recipient's scan public key\n+ * B_scan, and the private component is set to the input's private keys sum:\n+ *\n+ * shared_secret = (a_sum * input_hash) * B_scan   [Sender]\n+ *\n+ * For the receiver side, the public component is set to the input's public keys sum,\n+ * and the private component is set to the receiver's scan private key:\n+ *\n+ * shared_secret = (b_scan * input_hash) * A_sum   [Receiver, Full node scenario]\n+ *\n+ * In the \"light client\" scenario for receivers, the public component is already\n+ * tweaked with the input hash: A_tweaked = input_hash * A_sum\n+ * In this case, the input_hash parameter should be set to NULL, to signal that\n+ * no further tweaking should be done before the ECDH:\n+ *\n+ * shared_secret = b_scan * A_tweaked   [Receiver, Light client scenario]\n+ *\n+ * The resulting shared secret is needed as input for creating silent payments\n+ * outputs belonging to the same receiver scan public key.\n+ *\n+ *  Returns: 1 if shared secret creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:       shared_secret33: pointer to the resulting 33-byte shared secret\n+ *  In:       public_component: pointer to the public component\n+ *           private_component: pointer to 32-byte private component\n+ *                  input_hash: pointer to 32-byte input hash (can be NULL if the\n+ *                              public component is already tweaked with the input hash)\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_shared_secret(\n+    const secp256k1_context *ctx,\n+    unsigned char *shared_secret33,\n+    const secp256k1_pubkey *public_component,\n+    const unsigned char *secret_component,\n+    const unsigned char *input_hash\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n+\n+/** Create Silent Payment label tweak and label.\n+ *\n+ *  Given a recipient's scan private key b_scan and a label integer m, calculate\n+ *  the corresponding label tweak and label:\n+ *\n+ *  label_tweak = hash(b_scan || m)\n+ *  label = label_tweak * G\n+ *\n+ *  Returns: 1 if label tweak and label creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out:           label_tweak: pointer to the resulting label tweak\n+ *   In:  receiver_scan_seckey: pointer to the receiver's scan private key\n+ *                           m: label integer (0 is used for change outputs)\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_label_tweak(\n+    const secp256k1_context *ctx,\n+    secp256k1_pubkey *label,\n+    unsigned char *label_tweak32,\n+    const unsigned char *receiver_scan_seckey,\n+    unsigned int m\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n+\n+/** Create Silent Payment labelled spend public key.\n+ *\n+ *  Given a recipient's spend public key B_spend and a label, calculate\n+ *  the corresponding serialized labelled spend public key:\n+ *\n+ *  B_m = B_spend + label\n+ *\n+ *  The result is used by the receiver to create a Silent Payment address, consisting\n+ *  of the serialized and concatenated scan public key and (labelled) spend public key each.\n+ *\n+ *  Returns: 1 if labelled spend public key creation was successful. 0 if an error occured.\n+ *  Args:                  ctx: pointer to a context object\n+ *  Out: l_addr_spend_pubkey33: pointer to the resulting labelled spend public key\n+ *   In: receiver_spend_pubkey: pointer to the receiver's spend pubkey\n+ *                       label: pointer to the the receiver's label\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_create_address_spend_pubkey(\n+    const secp256k1_context *ctx,\n+    unsigned char *l_addr_spend_pubkey33,\n+    const secp256k1_pubkey *receiver_spend_pubkey,\n+    const secp256k1_pubkey *label\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n+\n+/** Create Silent Payment output public key (for sender).\n+ *\n+ *  Given a shared_secret, a recipient's spend public key B_spend, and\n+ *  an output counter k, calculate the corresponding output public key:\n+ *\n+ *  P_output_xonly = B_spend + hash(shared_secret || ser_32(k)) * G\n+ *\n+ *  Returns: 1 if output creation was successful. 0 if an error occured.\n+ *  Args:               ctx: pointer to a context object\n+ *  Out:     P_output_xonly: pointer to the resulting output x-only pubkey\n+ *  In:     shared_secret33: shared secret, derived from either sender's\n+ *                           or receiver's perspective with routines from above",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 230,
+      "original_position": 230,
+      "commit_id": "e4ffa036d1d12b8581bac741caf90e58887ced7c",
+      "original_commit_id": "e4ffa036d1d12b8581bac741caf90e58887ced7c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Only from the sender's perspective since only the sender calls this (as per the first sentence in the doc), right?",
+      "created_at": "2024-04-02T19:51:28Z",
+      "updated_at": "2024-04-02T20:21:17Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#discussion_r1548531951",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1548531951"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+        }
+      },
+      "start_line": 229,
+      "original_start_line": 229,
+      "start_side": "RIGHT",
+      "line": 230,
+      "original_line": 230,
       "side": "RIGHT"
     }
   ]
