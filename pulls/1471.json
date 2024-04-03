@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-04-02T20:21:17Z",
+    "updated_at": "2024-04-03T11:20:15Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "2c36bddc33e5ee0bc6a4c5a8b09533e91a08552a",
@@ -333,7 +333,7 @@
     "changed_files": 16,
     "commits": 13,
     "review_comments": 61,
-    "comments": 30
+    "comments": 31
   },
   "events": [
     {
@@ -3078,7 +3078,7 @@
             "patch_url": "https://github.com/bitcoin/bitcoin/pull/28122.patch"
           },
           "created_at": "2023-07-21T18:36:37Z",
-          "updated_at": "2024-04-02T04:57:09Z"
+          "updated_at": "2024-04-03T06:36:48Z"
         },
         "type": "issue"
       }
@@ -4537,6 +4537,118 @@
       "submitted_at": "2024-04-02T20:21:17Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+    },
+    {
+      "event": "commented",
+      "id": 2034302886,
+      "node_id": "IC_kwDOAP4Jqs55QP-m",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2034302886",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-03T11:20:14Z",
+      "updated_at": "2024-04-03T11:20:14Z",
+      "author_association": "MEMBER",
+      "body": "Thanks for the review, @jonasnick !\r\n\r\n>     * The In/Out parameter `secp256k1_silentpayments_recipient` seems a bit strange. Why not just group by index? `secp256k1_silentpayments_recipient` could just contain the scan and spend pks, and the i-th generated output would correspond to the i-th provided `secp256k1_silentpayments_recipient`?\r\n\r\nIIUC, this means bringing back the out param `taproot_outputs` and `n_taproot_outputs` (or just reuse `n_recipients`), correct? We could use the index in the `taproot_outputs` array to match to the recipient (this is because the heapsort does the sort in place, so the recipient order after sorting would match the order in the `taproot_outputs` array, right?). This seems more complex for the caller in that the need to initialize the taproot output array and match up the indices and I don't see any clear advantage, but perhaps I'm missing something? Also fine to go with the proposed change even if the reason is just that this is a more common pattern\r\n\r\n>     * Instead of taking a `const unsigned char * const *taproot_seckeys` argument and multiplying each seckey with base point G to see if it needs to be negated, you could accept an array of `secp256k1_xonly_keypair`, which holds both the seckey and the pubkey. Often the caller will already have the pubkey and would, if the function wouldn't accept `xonly_keypair`, do a costly recomputation of the public key unnecessarily. If the caller doesn't have an `xonly_keypair`, they can just create one.\r\n\r\nGreat point, this was on my list of things to change but I forgot to include it!\r\n\r\n>     * I can imagine that others disagree, but I wouldn't add another `sign32` function if the spend key can just be tweaked via some `keypair_tweak` function and then given to the regular `schnorrsig_sign32` function. Then this would be the same workflow for a silent payments derived key to sign via `schnorrsig_custom`. And a similar workflow for the musig module (where tweaking happens via `secp256k1_musig_pubkey_tweak_add`.\r\n\r\nI agree. The silent payments protocol doesn't really have anything to do with signing because once the spend key is tweaked, it is just a regular taproot output. My initial thinking was not wanting to expose any low level tweaking functions in the module, but based on the recent IRC discussion regarding a hazmat API, this seems less of a concern.\r\n\r\n",
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2034302886",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "mentioned",
+      "id": 12340253340,
+      "node_id": "MEE_lADOAP4Jqs56epE0zwAAAALfiVKc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12340253340",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-03T11:20:15Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 12340253357,
+      "node_id": "SE_lADOAP4Jqs56epE0zwAAAALfiVKt",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12340253357",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-03T11:20:15Z"
     }
   ],
   "comments": [
