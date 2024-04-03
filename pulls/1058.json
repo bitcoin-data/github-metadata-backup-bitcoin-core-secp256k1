@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-03T17:30:50Z",
+    "updated_at": "2024-04-03T18:36:52Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "cb2800cea025ed1b777336c4b1dab8d3205c59dd",
@@ -288,7 +288,7 @@
         "forks_count": 950,
         "stargazers_count": 1955,
         "watchers_count": 1955,
-        "size": 10690,
+        "size": 10694,
         "default_branch": "master",
         "open_issues_count": 137,
         "is_template": false,
@@ -332,7 +332,7 @@
     "deletions": 9942,
     "changed_files": 18,
     "commits": 15,
-    "review_comments": 47,
+    "review_comments": 48,
     "comments": 35
   },
   "events": [
@@ -7393,6 +7393,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1550180223"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 28,
+      "original_line": 28,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1550269300",
+      "pull_request_review_id": 1977668978,
+      "id": 1550269300,
+      "node_id": "PRRC_kwDOAP4Jqs5cZzt0",
+      "diff_hunk": "@@ -1,83 +1,95 @@\n-/***********************************************************************\n- * Copyright (c) 2013, 2014, 2015 Pieter Wuille, Gregory Maxwell       *\n- * Distributed under the MIT software license, see the accompanying    *\n- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n- ***********************************************************************/\n+/*******************************************************************************\n+ * Copyright (c) 2013-2015, 2021 Pieter Wuille, Gregory Maxwell, Peter Dettman *\n+ * Distributed under the MIT software license, see the accompanying            *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.        *\n+ *******************************************************************************/\n \n #ifndef SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n #define SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n \n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    int spacing = (256 + blocks * teeth - 1) / (blocks * teeth);\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n-    {\n-        static const unsigned char nums_b32[33] = \"The scalar for this x is unknown\";\n-        secp256k1_fe nums_x;\n-        secp256k1_ge nums_ge;\n-        int r;\n-        r = secp256k1_fe_set_b32_limit(&nums_x, nums_b32);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        r = secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        secp256k1_gej_set_ge(&nums_gej, &nums_ge);\n-        /* Add G to make the bits in x uniformly distributed. */\n-        secp256k1_gej_add_ge_var(&nums_gej, &nums_gej, gen, NULL);\n+    /* u is the running power of two times gen we're working with, initially gen/2. */",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 62,
+      "original_position": 63,
+      "commit_id": "843f9b06ab8a757af51f96d685ba501c175d9ee8",
+      "original_commit_id": "0a63916f36b92a0508aa7f1df7b8e659bc42bfa4",
+      "in_reply_to_id": 1549282824,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Yeah, okay, it had simply occurred to me that this piece is easy to check without adding a dependency on `ecmult`... But checking that particular condition is not too interesting. So never mind, ignore my comment.\r\n\r\nBut having said this, do you think it makes sense to add some code in tests.c that does some basic checks on the generated table values? The advantage is that `ecmult`/`ecmult_const` won't add a dependency there.",
+      "created_at": "2024-04-03T18:36:52Z",
+      "updated_at": "2024-04-03T18:39:43Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1550269300",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1550269300"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
