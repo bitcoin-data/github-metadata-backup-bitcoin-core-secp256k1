@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-02T16:38:46Z",
+    "updated_at": "2024-04-03T09:13:23Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "2999f018ab17e1a187ebc5dfe2f76dbce5173e26",
@@ -332,7 +332,7 @@
     "deletions": 9942,
     "changed_files": 18,
     "commits": 15,
-    "review_comments": 39,
+    "review_comments": 41,
     "comments": 35
   },
   "events": [
@@ -4893,6 +4893,42 @@
       "submitted_at": "2024-04-02T16:38:13Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+    },
+    {
+      "event": "reviewed",
+      "id": 1975763139,
+      "node_id": "PRR_kwDOAP4Jqs51w8DD",
+      "url": null,
+      "actor": null,
+      "commit_id": "3d8c92bd600b36202633194fdddcff4200c4e8c3",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "More to follow, I'm in the middle of the main commit...",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#pullrequestreview-1975763139",
+      "submitted_at": "2024-04-03T09:13:23Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
     }
   ],
   "comments": [
@@ -6922,6 +6958,110 @@
       "start_side": null,
       "line": 75,
       "original_line": 75,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1549065858",
+      "pull_request_review_id": 1975763139,
+      "id": 1549065858,
+      "node_id": "PRRC_kwDOAP4Jqs5cVN6C",
+      "diff_hunk": "@@ -10,19 +10,90 @@\n #include \"scalar.h\"\n #include \"group.h\"\n \n-#if ECMULT_GEN_PREC_BITS != 2 && ECMULT_GEN_PREC_BITS != 4 && ECMULT_GEN_PREC_BITS != 8\n-#  error \"Set ECMULT_GEN_PREC_BITS to 2, 4 or 8.\"\n+/* Configuration parameters for the signed-digit multi-comb algorithm:\n+ *\n+ * - COMB_BLOCKS is the number of lookup tables.\n+ * - COMB_TEETH is the number of bits covered by one table.\n+ *\n+ * The comb's spacing (COMB_SPACING), or the distance between the teeth,\n+ * is defined as ceil(256 / (COMB_BLOCKS * COMB_TEETH)).\n+ *\n+ * The size of the precomputed table is COMB_BLOCKS * (1 << (COMB_TEETH - 1))\n+ * secp256k1_ge_storages.\n+ *\n+ * The number of point additions equals COMB_BLOCKS * COMB_SPACING. Each point\n+ * addition involves a cmov from (1 << (COMB_TEETH - 1)) table entries and a\n+ * conditional negation.\n+ *\n+ * The number of point doublings is COMB_SPACING - 1. */\n+\n+#if defined(EXHAUSTIVE_TEST_ORDER)\n+/* We need to control these values for exhaustive tests because\n+ * the tables cannot have infinities in them (secp256k1_ge_storage\n+ * doesn't support infinities) */\n+#  undef COMB_BLOCKS\n+#  undef COMB_TEETH\n+#  if EXHAUSTIVE_TEST_ORDER > 32\n+#    define COMB_BLOCKS 52\n+#    define COMB_TEETH 5\n+#  elif EXHAUSTIVE_TEST_ORDER > 16\n+#    define COMB_BLOCKS 64\n+#    define COMB_TEETH 4\n+#  elif EXHAUSTIVE_TEST_ORDER > 8\n+#    define COMB_BLOCKS 86\n+#    define COMB_TEETH 3\n+#  elif EXHAUSTIVE_TEST_ORDER > 4\n+#    define COMB_BLOCKS 128\n+#    define COMB_TEETH 2\n+#  else\n+#    define COMB_BLOCKS 256\n+#    define COMB_TEETH 1\n+#  endif\n+#else /* !defined(EXHAUSTIVE_TEST_ORDER) */\n+/* Use (11, 6) as default configuration, which results in a 22 kB table. */\n+#  ifndef COMB_BLOCKS\n+#    define COMB_BLOCKS 11\n+#  endif\n+#  ifndef COMB_TEETH\n+#    define COMB_TEETH 6\n+#  endif\n+#endif /* defined(EXHAUSTIVE_TEST_ORDER) */\n+\n+/* Range checks on the parameters. */\n+#if !(1 <= COMB_BLOCKS && COMB_BLOCKS <= 256)\n+#  error \"COMB_BLOCKS must be in the range [1, 256]\"\n+#endif\n+#if !(1 <= COMB_TEETH && COMB_TEETH <= 8)\n+#  error \"COMB_TEETH must be in the range [1, 8]\"\n+#endif\n+\n+/* The remaining COMB_* parameters are derived values, don't modify these. */\n+/* - The distance between the teeth of the comb. */\n+#define COMB_SPACING ((255 + COMB_BLOCKS * COMB_TEETH) / (COMB_BLOCKS * COMB_TEETH))\n+/* - The number of bits covered by all the combs; must be at least 256. */\n+#define COMB_BITS (COMB_BLOCKS * COMB_TEETH * COMB_SPACING)\n+/* - The number of points per table. */\n+#define COMB_POINTS (1 << (COMB_TEETH - 1))\n+\n+/* Additional sanity checks. */\n+#if (COMB_BLOCKS - 1) * COMB_TEETH * COMB_SPACING >= 256\n+#  error \"COMB_BLOCKS can be reduced\"\n+#endif\n+#if COMB_BLOCKS * (COMB_TEETH - 1) * COMB_SPACING >= 256\n+#  error \"COMB_TEETH can be reduced\"\n #endif\n-#define ECMULT_GEN_PREC_G(bits) (1 << bits)\n-#define ECMULT_GEN_PREC_N(bits) (256 / bits)\n \n typedef struct {\n     /* Whether the context has been built. */\n     int built;\n \n-    /* Blinding values used when computing (n-b)G + bG. */\n-    secp256k1_scalar blind; /* -b */\n-    secp256k1_gej initial;  /* bG */\n+    /* Blinding values used when computing nG as (n-b)G + bG. */\n+    secp256k1_scalar scalar_offset; /* -b */\n+    secp256k1_ge final_point_add;  /* bG */",
+      "path": "src/ecmult_gen.h",
+      "position": null,
+      "original_position": 97,
+      "commit_id": "3d8c92bd600b36202633194fdddcff4200c4e8c3",
+      "original_commit_id": "a7f0d0e5dec0b88676b9b6c79f21e12405f7befb",
+      "in_reply_to_id": 776926428,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "16beb95db60757bbf559e97c3d0cef519355f410  Initial gej blinding -> final ge blinding \r\n\r\nnit: I suggest renaming to `ge_offset`.\r\n - `s/_add/_offset` to make this consistent with `scalar_offset`.\r\n -  drop `final` to uncouple the naming from whether the blinding is applied at the beginning or at the end\r\n - `s/point/ge` because that's more common in our code\r\n\r\n(feel free to pick just any of these transforms if you don't like all of them) \r\n\r\nIf you accept this, you'll probably also want to rename `f`, `final1`, `final2` in the `tests.c` then.\r\n\r\nedit: After looking at all the commits, I see that this could be a rebase mess... I think, it's okay to add a rename commit if you like the suggestion.",
+      "created_at": "2024-04-03T07:19:29Z",
+      "updated_at": "2024-04-03T09:13:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1549065858",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1549065858"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 90,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 92,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1549282824",
+      "pull_request_review_id": 1975763139,
+      "id": 1549282824,
+      "node_id": "PRRC_kwDOAP4Jqs5cWC4I",
+      "diff_hunk": "@@ -1,83 +1,95 @@\n-/***********************************************************************\n- * Copyright (c) 2013, 2014, 2015 Pieter Wuille, Gregory Maxwell       *\n- * Distributed under the MIT software license, see the accompanying    *\n- * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n- ***********************************************************************/\n+/*******************************************************************************\n+ * Copyright (c) 2013-2015, 2021 Pieter Wuille, Gregory Maxwell, Peter Dettman *\n+ * Distributed under the MIT software license, see the accompanying            *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.        *\n+ *******************************************************************************/\n \n #ifndef SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n #define SECP256K1_ECMULT_GEN_COMPUTE_TABLE_IMPL_H\n \n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    int spacing = (256 + blocks * teeth - 1) / (blocks * teeth);\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n-    {\n-        static const unsigned char nums_b32[33] = \"The scalar for this x is unknown\";\n-        secp256k1_fe nums_x;\n-        secp256k1_ge nums_ge;\n-        int r;\n-        r = secp256k1_fe_set_b32_limit(&nums_x, nums_b32);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        r = secp256k1_ge_set_xo_var(&nums_ge, &nums_x, 0);\n-        (void)r;\n-        VERIFY_CHECK(r);\n-        secp256k1_gej_set_ge(&nums_gej, &nums_ge);\n-        /* Add G to make the bits in x uniformly distributed. */\n-        secp256k1_gej_add_ge_var(&nums_gej, &nums_gej, gen, NULL);\n+    /* u is the running power of two times gen we're working with, initially gen/2. */",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 62,
+      "original_position": 63,
+      "commit_id": "3d8c92bd600b36202633194fdddcff4200c4e8c3",
+      "original_commit_id": "0a63916f36b92a0508aa7f1df7b8e659bc42bfa4",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "https://github.com/bitcoin-core/secp256k1/commit/0a63916f36b92a0508aa7f1df7b8e659bc42bfa4 Signed-digit multi-comb ecmult_gen algorithm\r\n\r\nWant to assert that 2*u == gen?",
+      "created_at": "2024-04-03T08:55:15Z",
+      "updated_at": "2024-04-03T09:13:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1549282824",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1549282824"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 28,
+      "original_line": 29,
       "side": "RIGHT"
     }
   ]
