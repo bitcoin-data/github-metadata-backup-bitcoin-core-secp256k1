@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-04T16:52:27Z",
+    "updated_at": "2024-04-04T17:34:44Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "e30edfb3886faa1b70c7b67d4248baee00102183",
@@ -332,7 +332,7 @@
     "deletions": 9942,
     "changed_files": 18,
     "commits": 15,
-    "review_comments": 59,
+    "review_comments": 60,
     "comments": 36
   },
   "events": [
@@ -8117,6 +8117,58 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 170,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1552136347",
+      "pull_request_review_id": 1980698833,
+      "id": 1552136347,
+      "node_id": "PRRC_kwDOAP4Jqs5cg7ib",
+      "diff_hunk": "@@ -29,38 +29,154 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx\n     secp256k1_ge_clear(&ctx->ge_offset);\n }\n \n-/* For accelerating the computation of a*G:\n- * To harden against timing attacks, use the following mechanism:\n- * * Break up the multiplicand into groups of PREC_BITS bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).\n- * * Compute sum(n_i * (PREC_G)^i * G + U_i, i=0 ... PREC_N-1), where:\n- *   * U_i = U * 2^i, for i=0 ... PREC_N-2\n- *   * U_i = U * (1-2^(PREC_N-1)), for i=PREC_N-1\n- *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0 ... PREC_N-1) = 0.\n- * For each i, and each of the PREC_G possible values of n_i, (n_i * (PREC_G)^i * G + U_i) is\n- * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0 ... PREC_N-1).\n- * None of the resulting prec group elements have a known scalar, and neither do any of\n- * the intermediate sums while computing a*G.\n- * The prec values are stored in secp256k1_ecmult_gen_prec_table[i][n_i] = n_i * (PREC_G)^i * G + U_i.\n- */\n-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n-    int bits = ECMULT_GEN_PREC_BITS;\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+/* Compute the scalar (2^COMB_BITS - 1) / 2. */\n+static void secp256k1_ecmult_gen_scalar_diff(secp256k1_scalar* diff) {",
+      "path": "src/ecmult_gen_impl.h",
+      "position": 43,
+      "original_position": 36,
+      "commit_id": "843f9b06ab8a757af51f96d685ba501c175d9ee8",
+      "original_commit_id": "62601920bee3b57456a130d1c10a4e7fc08f3866",
+      "in_reply_to_id": 1551959311,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "It's the difference between the multiplicand scalar and the scalar whose encoding the table lookup bits are drawn from (before adding the blinding offset).",
+      "created_at": "2024-04-04T17:34:44Z",
+      "updated_at": "2024-04-04T17:34:44Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1552136347",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1552136347"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 34,
+      "original_line": 33,
       "side": "RIGHT"
     }
   ]
