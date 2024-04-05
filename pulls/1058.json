@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-05T19:09:18Z",
+    "updated_at": "2024-04-05T20:46:01Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "a3b6f525f4ac283fa9827248e3cd4efe4e8c527a",
@@ -332,7 +332,7 @@
     "deletions": 9963,
     "changed_files": 22,
     "commits": 15,
-    "review_comments": 107,
+    "review_comments": 108,
     "comments": 36
   },
   "events": [
@@ -10932,6 +10932,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554179899"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": 39,
+      "original_start_line": 39,
+      "start_side": "RIGHT",
+      "line": 42,
+      "original_line": 42,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554280739",
+      "pull_request_review_id": 1984154101,
+      "id": 1554280739,
+      "node_id": "PRRC_kwDOAP4Jqs5cpHEj",
+      "diff_hunk": "@@ -25,41 +25,216 @@ static int secp256k1_ecmult_gen_context_is_built(const secp256k1_ecmult_gen_cont\n \n static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx) {\n     ctx->built = 0;\n-    secp256k1_scalar_clear(&ctx->blind);\n-    secp256k1_gej_clear(&ctx->initial);\n+    secp256k1_scalar_clear(&ctx->scalar_offset);\n+    secp256k1_ge_clear(&ctx->ge_offset);\n+    secp256k1_fe_clear(&ctx->proj_blind);\n }\n \n-/* For accelerating the computation of a*G:\n- * To harden against timing attacks, use the following mechanism:\n- * * Break up the multiplicand into groups of PREC_BITS bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).\n- * * Compute sum(n_i * (PREC_G)^i * G + U_i, i=0 ... PREC_N-1), where:\n- *   * U_i = U * 2^i, for i=0 ... PREC_N-2\n- *   * U_i = U * (1-2^(PREC_N-1)), for i=PREC_N-1\n- *   where U is a point with no known corresponding scalar. Note that sum(U_i, i=0 ... PREC_N-1) = 0.\n- * For each i, and each of the PREC_G possible values of n_i, (n_i * (PREC_G)^i * G + U_i) is\n- * precomputed (call it prec(i, n_i)). The formula now becomes sum(prec(i, n_i), i=0 ... PREC_N-1).\n- * None of the resulting prec group elements have a known scalar, and neither do any of\n- * the intermediate sums while computing a*G.\n- * The prec values are stored in secp256k1_ecmult_gen_prec_table[i][n_i] = n_i * (PREC_G)^i * G + U_i.\n- */\n-static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {\n-    int bits = ECMULT_GEN_PREC_BITS;\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+/* Compute the scalar (2^COMB_BITS - 1) / 2, the difference between the gn argument to\n+ * secp256k1_ecmult_gen, and the scalar whose encoding the table lookup bits are drawn\n+ * from (before applying blinding). */\n+static void secp256k1_ecmult_gen_scalar_diff(secp256k1_scalar* diff) {\n+    int i;\n+\n+    /* Compute scalar -1/2. */\n+    secp256k1_scalar neghalf = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 2);\n+    secp256k1_scalar_inverse_var(&neghalf, &neghalf);\n+    secp256k1_scalar_negate(&neghalf, &neghalf);",
+      "path": "src/ecmult_gen_impl.h",
+      "position": 44,
+      "original_position": 44,
+      "commit_id": "dafb392b406cc9fdb1d0061cdc15006a8dc719fb",
+      "original_commit_id": "dafb392b406cc9fdb1d0061cdc15006a8dc719fb",
+      "in_reply_to_id": 1554165746,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "New attempt: https://github.com/real-or-random/secp256k1/commit/9054994691d9f037146988a6cb41ec7a0d90fe03",
+      "created_at": "2024-04-05T20:46:01Z",
+      "updated_at": "2024-04-05T20:46:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1554280739",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554280739"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
