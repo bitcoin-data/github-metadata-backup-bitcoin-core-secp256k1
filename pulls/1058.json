@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-05T14:20:32Z",
+    "updated_at": "2024-04-05T16:57:44Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "7e42c1a1e72b7560cc7d3e07b44bb896204bd813",
@@ -332,7 +332,7 @@
     "deletions": 9955,
     "changed_files": 19,
     "commits": 15,
-    "review_comments": 89,
+    "review_comments": 90,
     "comments": 36
   },
   "events": [
@@ -5178,6 +5178,42 @@
       "submitted_at": "2024-04-05T14:01:48Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+    },
+    {
+      "event": "reviewed",
+      "id": 1983329506,
+      "node_id": "PRR_kwDOAP4Jqs52NzTi",
+      "url": null,
+      "actor": null,
+      "commit_id": "7dec5ab865e48bef5c1e1332f66b10825be890d0",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#pullrequestreview-1983329506",
+      "submitted_at": "2024-04-05T16:57:44Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
     }
   ],
   "comments": [
@@ -9703,6 +9739,162 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 211,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1553739485",
+      "pull_request_review_id": 1983329506,
+      "id": 1553739485,
+      "node_id": "PRRC_kwDOAP4Jqs5cnC7d",
+      "diff_hunk": "@@ -5602,9 +5602,29 @@ static void test_ecmult_gen_blind_reset(void) {\n     CHECK(secp256k1_ge_eq_var(&p1, &p2));\n }\n \n+/* Verify that ecmult_gen for scalars gn for which gn + scalar_offset = {-1,0,1}. */\n+static void test_ecmult_gen_edge_cases(void) {\n+    int i;\n+    secp256k1_gej res1, res2;\n+    secp256k1_scalar gn = secp256k1_scalar_one; /* gn = 1 */\n+    secp256k1_scalar_add(&gn, &gn, &CTX->ecmult_gen_ctx.scalar_offset); /* gn = 1 + scalar_offset */\n+    secp256k1_scalar_negate(&gn, &gn); /* gn = -1 - scalar_offset */\n+\n+    for (i = -1; i < 2; ++i) {\n+        /* Run test with gn = i - scalar_offset (so that the ecmult_gen recoded value represents i). */\n+        secp256k1_ecmult_gen(&CTX->ecmult_gen_ctx, &res1, &gn);\n+        secp256k1_ecmult(&res2, NULL, &secp256k1_scalar_zero, &gn);\n+        secp256k1_gej_neg(&res2, &res2);\n+        secp256k1_gej_add_var(&res1, &res1, &res2, NULL);\n+        CHECK(secp256k1_gej_is_infinity(&res1));",
+      "path": "src/tests.c",
+      "position": 71,
+      "original_position": 18,
+      "commit_id": "7dec5ab865e48bef5c1e1332f66b10825be890d0",
+      "original_commit_id": "8ec3b9f0eb78945b561e5f839d2b35d65c74bd9d",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: use `secp256k1_gej_eq_var` instead",
+      "created_at": "2024-04-05T14:16:41Z",
+      "updated_at": "2024-04-05T16:57:44Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1553739485",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1553739485"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": 5617,
+      "original_start_line": 5617,
+      "start_side": "RIGHT",
+      "line": 5619,
+      "original_line": 5619,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1553745075",
+      "pull_request_review_id": 1983329506,
+      "id": 1553745075,
+      "node_id": "PRRC_kwDOAP4Jqs5cnESz",
+      "diff_hunk": "@@ -5602,9 +5602,29 @@ static void test_ecmult_gen_blind_reset(void) {\n     CHECK(secp256k1_ge_eq_var(&p1, &p2));\n }\n \n+/* Verify that ecmult_gen for scalars gn for which gn + scalar_offset = {-1,0,1}. */\n+static void test_ecmult_gen_edge_cases(void) {\n+    int i;\n+    secp256k1_gej res1, res2;\n+    secp256k1_scalar gn = secp256k1_scalar_one; /* gn = 1 */\n+    secp256k1_scalar_add(&gn, &gn, &CTX->ecmult_gen_ctx.scalar_offset); /* gn = 1 + scalar_offset */\n+    secp256k1_scalar_negate(&gn, &gn); /* gn = -1 - scalar_offset */\n+\n+    for (i = -1; i < 2; ++i) {\n+        /* Run test with gn = i - scalar_offset (so that the ecmult_gen recoded value represents i). */\n+        secp256k1_ecmult_gen(&CTX->ecmult_gen_ctx, &res1, &gn);\n+        secp256k1_ecmult(&res2, NULL, &secp256k1_scalar_zero, &gn);",
+      "path": "src/tests.c",
+      "position": 68,
+      "original_position": 15,
+      "commit_id": "7dec5ab865e48bef5c1e1332f66b10825be890d0",
+      "original_commit_id": "8ec3b9f0eb78945b561e5f839d2b35d65c74bd9d",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: Add `secp256k1_ecmult_const(&res3, &secp256k1_ge_const_g, &gn);` ?\r\n",
+      "created_at": "2024-04-05T14:20:32Z",
+      "updated_at": "2024-04-05T16:57:44Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1553745075",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1553745075"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": 5614,
+      "original_start_line": 5614,
+      "start_side": "RIGHT",
+      "line": 5616,
+      "original_line": 5616,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554003316",
+      "pull_request_review_id": 1983329506,
+      "id": 1554003316,
+      "node_id": "PRRC_kwDOAP4Jqs5coDV0",
+      "diff_hunk": "@@ -85,6 +84,7 @@ static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, cons\n     for (block = 0; block < blocks; ++block) {\n         size_t index;\n         for (index = 0; index < points; ++index) {\n+            CHECK(!secp256k1_ge_is_infinity(&prec[block * points + index]));",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 141,
+      "original_position": 16,
+      "commit_id": "7dec5ab865e48bef5c1e1332f66b10825be890d0",
+      "original_commit_id": "0b8deaac023d5fc963457a3e812902143fbf77d4",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "note: the precompute binaries are built with `-DVERIFY` (but it can't be wrong to keep this here, I guess) ",
+      "created_at": "2024-04-05T16:56:43Z",
+      "updated_at": "2024-04-05T16:59:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1554003316",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554003316"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 87,
+      "original_line": 87,
       "side": "RIGHT"
     }
   ]
