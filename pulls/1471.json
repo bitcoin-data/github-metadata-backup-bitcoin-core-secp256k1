@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-04-05T13:36:53Z",
+    "updated_at": "2024-04-07T08:52:59Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "0fd208c4608a20220da8352ce0004e9190c62326",
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-04-05T13:45:14Z",
+        "pushed_at": "2024-04-06T11:46:57Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-04-05T04:12:20Z",
         "license": {
@@ -333,7 +333,7 @@
     "changed_files": 16,
     "commits": 13,
     "review_comments": 62,
-    "comments": 40
+    "comments": 41
   },
   "events": [
     {
@@ -3065,12 +3065,21 @@
               "name": "Privacy",
               "color": "5319e7",
               "default": false
+            },
+            {
+              "id": 955867938,
+              "node_id": "MDU6TGFiZWw5NTU4Njc5Mzg=",
+              "url": "https://api.github.com/repos/bitcoin/bitcoin/labels/Needs%20rebase",
+              "name": "Needs rebase",
+              "description": "",
+              "color": "cccccc",
+              "default": false
             }
           ],
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
-          "comments": 32,
+          "comments": 33,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin/bitcoin/pulls/28122",
             "html_url": "https://github.com/bitcoin/bitcoin/pull/28122",
@@ -3078,7 +3087,7 @@
             "patch_url": "https://github.com/bitcoin/bitcoin/pull/28122.patch"
           },
           "created_at": "2023-07-21T18:36:37Z",
-          "updated_at": "2024-04-04T20:17:14Z"
+          "updated_at": "2024-04-06T11:05:27Z"
         },
         "type": "issue"
       }
@@ -5541,6 +5550,154 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-04-05T13:36:53Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 1984883643,
+      "node_id": "PRR_kwDOAP4Jqs52Tuu7",
+      "url": null,
+      "actor": null,
+      "commit_id": "e4ffa036d1d12b8581bac741caf90e58887ced7c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "@josibake\r\n\r\n> You mean to match up the original sp1qxxx: amount address to the correct generated output?\r\n\r\nYes.\r\n\r\n> This wouldn't change ordering of the list, but the downside is that the check is O(n^2) in the worst case.\r\n\r\nI would try to avoid adding a function with O(n^2) complexity.\r\n\r\nHere's yet another alternative, which adds an index field to the recipient list, sorts the recipients inside the `sender_create_outputs` but returns the `generated_output` at the \"right\" position:\r\n\r\n```\r\n/* In param */\r\ntypedef struct {\r\n    secp256k1_pubkey scan_pubkey;\r\n    secp256k1_pubkey spend_pubkey;\r\n    size_t idx;\r\n} secp256k1_silentpayments_recipient;\r\n\r\nint secp256k1_silentpayments_sender_create_outputs(secp256k1_xonly_pubkey *generated_output, secp256k1_silentpayments_recipient **recipients) {\r\n  /* sort based on (scan_pubkey, spend_pubkey) */\r\n  recipients = sort(recipients)\r\n  for rec in recipient {\r\n    generated_output[rec->idx] = create_output(...)\r\n  }\r\n}\r\n```\r\n\r\nThis modifies the recipient array which may still be annoying for the caller. Of course, the caller can just copy the array to avoid that. Or we could sort it back based on the `idx` field, but that seems to be overkill. Would the Bitcoin Core implementation require the order of the recipient array unmodified?\r\n\r\nThe caller would be responsible for setting idx to the right value, but this could be easily checked in `sender_create_outputs`.\r\n\r\n@josibake @theStack\r\n\r\n> From an organizational point of view, do you think it makes sense to open a new PR for the refactored branch soon?\r\n> I’ll defer to the libsecp maintainers on what they prefer.\r\n\r\nI have a slight preference for opening a new PR since josi's branch is more a  rewrite than a refactor and a lot of the discussion in this PR doesn't apply.\r\n\r\n",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#pullrequestreview-1984883643",
+      "submitted_at": "2024-04-07T08:52:22Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1471"
+    },
+    {
+      "event": "commented",
+      "id": 2041374061,
+      "node_id": "IC_kwDOAP4Jqs55rOVt",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2041374061",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-07T08:52:58Z",
+      "updated_at": "2024-04-07T08:52:58Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "@josibake\r\n\r\n> For the receiver, there are three clients:\r\n\r\n> This would allow a node to first do the ECDH step (creating multiple shared secrets) and then scan the transaction with each generated shared secret.\r\n\r\nI don't see advantage of this. Wouldn't it be an equal amount of work to scan the transaction with each scan secret key and generate the shared secret internally?\r\n\r\n> You could also have the scan seckeys not on the scanning application and instead in an HSM or some separate application\r\n\r\nIf you can run create_shared_secret on the HSM, why couldn't you run receiver_scan_outputs?\r\n\r\n> In this model, it makes sense to separate create_shared_secret and create_output_pubkey\r\n\r\nI see. Or have `create_output_pubkeys` function that derives the shared_secret and creates one or more pubkeys.\r\n",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2041374061",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
+    },
+    {
+      "event": "mentioned",
+      "id": 12383541107,
+      "node_id": "MEE_lADOAP4Jqs56epE0zwAAAALiHddz",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12383541107",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-07T08:52:59Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 12383541108,
+      "node_id": "SE_lADOAP4Jqs56epE0zwAAAALiHdd0",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12383541108",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-07T08:52:59Z"
     }
   ],
   "comments": [
