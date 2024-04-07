@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2023-12-23T17:39:21Z",
-    "updated_at": "2024-04-07T08:52:59Z",
+    "updated_at": "2024-04-07T10:20:30Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "0fd208c4608a20220da8352ce0004e9190c62326",
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-04-06T11:46:57Z",
+        "pushed_at": "2024-04-07T10:23:15Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-04-05T04:12:20Z",
         "license": {
@@ -333,7 +333,7 @@
     "changed_files": 16,
     "commits": 13,
     "review_comments": 62,
-    "comments": 41
+    "comments": 42
   },
   "events": [
     {
@@ -5698,6 +5698,60 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-04-07T08:52:59Z"
+    },
+    {
+      "event": "commented",
+      "id": 2041408011,
+      "node_id": "IC_kwDOAP4Jqs55rWoL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2041408011",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-07T10:20:29Z",
+      "updated_at": "2024-04-07T10:20:29Z",
+      "author_association": "MEMBER",
+      "body": "> Wouldn't it be an equal amount of work to scan the transaction with each scan secret key and generate the shared secret internally?\r\n\r\nI misspoke, it’s not the shared secret part, but the summing of the input public keys that would duplicated work when scanning with multiple scan keys. So it seems we could have a `receiver_scan_outputs` function that takes the summed input pubkeys as an input, a scan secret key, and an optional `smallest_outpoint` (null if the input hash is already included with the summed input pubkeys) and have the share secret be created internally.\r\n\r\nRegarding an HSM, I suppose there’s nothing stopping it from taking everything it needs to scan the transaction since the data needed will always be less than the maximum transaction size.\r\n\r\n> Or have create_output_pubkeys function that derives the shared_secret and creates one or more pubkeys.\r\n\r\nI think for this to work the client would need to know the total number of outputs in the transaction to avoid needing to redo ECDH in the event they don’t generate enough pubkeys the first time. However, if we assume the client knows the total number of outputs, we could make this function more closely match the `receiver_scan_outputs` function by using a `output_lookup` callback (instead of a label lookup). This way we could completely remove `create_shared_secret` from the API\r\n\r\n(apologies for any typos, doing this on a phone)",
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1471#issuecomment-2041408011",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1471"
     }
   ],
   "comments": [
