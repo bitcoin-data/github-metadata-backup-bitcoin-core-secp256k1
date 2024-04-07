@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-06T11:46:56Z",
+    "updated_at": "2024-04-07T09:26:22Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "4b33b0a0f881d2c43528c91e4c5d942f09c45499",
@@ -157,7 +157,7 @@
         "forks_count": 20,
         "stargazers_count": 43,
         "watchers_count": 43,
-        "size": 11938,
+        "size": 11846,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -332,7 +332,7 @@
     "deletions": 9963,
     "changed_files": 22,
     "commits": 16,
-    "review_comments": 111,
+    "review_comments": 112,
     "comments": 36
   },
   "events": [
@@ -5504,6 +5504,41 @@
         "date": "2024-04-06T11:46:49Z"
       },
       "sha": "a61f0e59218469a0153453a749fd2f539561da12"
+    },
+    {
+      "event": "reviewed",
+      "id": 1984890227,
+      "node_id": "PRR_kwDOAP4Jqs52TwVz",
+      "url": null,
+      "actor": null,
+      "commit_id": "a61f0e59218469a0153453a749fd2f539561da12",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#pullrequestreview-1984890227",
+      "submitted_at": "2024-04-07T09:26:22Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
     }
   ],
   "comments": [
@@ -11277,6 +11312,58 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 42,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554856207",
+      "pull_request_review_id": 1984890227,
+      "id": 1554856207,
+      "node_id": "PRRC_kwDOAP4Jqs5crTkP",
+      "diff_hunk": "@@ -10,74 +10,96 @@\n #include \"ecmult_gen_compute_table.h\"\n #include \"group_impl.h\"\n #include \"field_impl.h\"\n+#include \"scalar_impl.h\"\n #include \"ecmult_gen.h\"\n #include \"util.h\"\n \n-static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int bits) {\n-    int g = ECMULT_GEN_PREC_G(bits);\n-    int n = ECMULT_GEN_PREC_N(bits);\n+static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, const secp256k1_ge* gen, int blocks, int teeth, int spacing) {\n+    size_t points = ((size_t)1) << (teeth - 1);\n+    size_t points_total = points * blocks;\n+    secp256k1_ge* prec = checked_malloc(&default_error_callback, points_total * sizeof(*prec));\n+    secp256k1_gej* ds = checked_malloc(&default_error_callback, teeth * sizeof(*ds));\n+    secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));\n+    secp256k1_gej u;\n+    size_t vs_pos = 0;\n+    secp256k1_scalar half = secp256k1_scalar_zero;\n+    int block, i;\n \n-    secp256k1_ge* prec = checked_malloc(&default_error_callback, n * g * sizeof(*prec));\n-    secp256k1_gej gj;\n-    secp256k1_gej nums_gej;\n-    int i, j;\n-\n-    VERIFY_CHECK(g > 0);\n-    VERIFY_CHECK(n > 0);\n-\n-    /* get the generator */\n-    secp256k1_gej_set_ge(&gj, gen);\n-\n-    /* Construct a group element with no known corresponding scalar (nothing up my sleeve). */\n+    /* u is the running power of two times gen we're working with, initially gen/2. */",
+      "path": "src/ecmult_gen_compute_table_impl.h",
+      "position": 41,
+      "original_position": 41,
+      "commit_id": "a61f0e59218469a0153453a749fd2f539561da12",
+      "original_commit_id": "a61f0e59218469a0153453a749fd2f539561da12",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Add `VERIFY_CHECK(points_total > 0)` here to tell GCC that the loop is at least executed once.\r\n\r\nSee https://github.com/real-or-random/secp256k1/commit/854723f1e30d0e7e71967d0c225645275d169883#diff-2d5b5da541c539e4be4fc1506b554895bd68ef20bf8ae17879c8af6c948dbe54 for working CI runs on MacOS GCC.",
+      "created_at": "2024-04-07T09:26:22Z",
+      "updated_at": "2024-04-07T09:26:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1554856207",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1554856207"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 28,
+      "original_line": 28,
       "side": "RIGHT"
     }
   ]
