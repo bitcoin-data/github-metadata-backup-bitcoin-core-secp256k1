@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2021-12-29T20:56:42Z",
-    "updated_at": "2024-04-15T15:33:59Z",
+    "updated_at": "2024-04-15T16:46:25Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "b2cf033aa675e5a007178c1aa4ddd38cda680af7",
@@ -157,7 +157,7 @@
         "forks_count": 20,
         "stargazers_count": 43,
         "watchers_count": 43,
-        "size": 11852,
+        "size": 11992,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -332,7 +332,7 @@
     "deletions": 9970,
     "changed_files": 22,
     "commits": 18,
-    "review_comments": 116,
+    "review_comments": 117,
     "comments": 38
   },
   "events": [
@@ -5907,6 +5907,42 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-04-15T15:33:59Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2001667941,
+      "node_id": "PRR_kwDOAP4Jqs53Twdl",
+      "url": null,
+      "actor": null,
+      "commit_id": "c8e106a01b11f0b711502cead65dfb6f84b072e6",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK mod nit",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#pullrequestreview-2001667941",
+      "submitted_at": "2024-04-15T16:46:25Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
     }
   ],
   "comments": [
@@ -11940,6 +11976,58 @@
       "start_side": null,
       "line": 1,
       "original_line": 1,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1566136757",
+      "pull_request_review_id": 2001667941,
+      "id": 1566136757,
+      "node_id": "PRRC_kwDOAP4Jqs5dWVm1",
+      "diff_hunk": "@@ -170,7 +170,10 @@ static SECP256K1_INLINE void *checked_malloc(const secp256k1_callback* cb, size_\n #define ALIGNMENT 16\n #endif\n \n-#define ROUND_TO_ALIGN(size) ((((size) + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT)\n+/* ceil(x/y) for integers x >= 0 and y > 0. Here, / denotes rational division. */\n+#define CEIL_DIV(x, y) (1 + ((x) - 1) / (y))",
+      "path": "src/util.h",
+      "position": 6,
+      "original_position": 6,
+      "commit_id": "c8e106a01b11f0b711502cead65dfb6f84b072e6",
+      "original_commit_id": "51196df97601dc8c8c74618125bef32c4f3d8757",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "This is clearly better than my suggestion, but this can now underflow for unsigned x == 0, so the docs need to be changed:\r\n```suggestion\r\n/* ceil(x/y) for integers x > 0 and y > 0. Here, / denotes rational division. */\r\n#define CEIL_DIV(x, y) (1 + ((x) - 1) / (y))\r\n```\r\n\r\nIt's a bit sad that there's no real way to add a VERIFY_CHECK in a macro (or at least not one which is compatible with the way we use this macro in `WNAF_SIZE_BITS(bits, w)` as a compile time integer constant...). If you think that's better, we could drop that use, and make it a real function `size_t ceil_div(size_t, size_t)` with a VERIFY_CHECK instead, but no strong opinions here.",
+      "created_at": "2024-04-15T16:45:35Z",
+      "updated_at": "2024-04-15T16:46:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1058#discussion_r1566136757",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1566136757"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1058"
+        }
+      },
+      "start_line": 173,
+      "original_start_line": 173,
+      "start_side": "RIGHT",
+      "line": 174,
+      "original_line": 174,
       "side": "RIGHT"
     }
   ]
