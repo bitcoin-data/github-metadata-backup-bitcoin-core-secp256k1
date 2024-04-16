@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1479/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
     "number": 1479,
     "state": "open",
     "locked": false,
@@ -38,7 +38,7 @@
       "type": "User",
       "site_admin": false
     },
-    "body": "Closes #1452. Most of the code is a copy from [libsecp256k1-zkp](https://github.com/BlockstreamResearch/secp256k1-zkp). The API added in this PR is identical with the exception of two modifications:\r\n\r\n1. I removed the unused `scratch_space` argument from `secp256k1_musig_pubkey_agg`. This argument was intended to allow using `ecmult_multi` algorithms for key aggregation in the future. But at this point it's unclear whether the `scratch_space` object will remain in its current form (see #1302).\r\n2. Support for adaptor signatures was removed and therefore the `adaptor` argument of `musig_nonce_process` was also removed.\r\n\r\nIn contrast to the module in libsecp256k1-zkp, the module is non-experimental. I slightly cleaned up parts of the module, adjusted the code to the new definition of the VERIFY_CHECK macro and applied some simplifications that were possible because the module is now in the upstream repo (`ge_from_bytes`, `ge_to_bytes`). You can follow the changes I made to the libsecp256k1-zkp module at https://github.com/jonasnick/secp256k1-zkp/commits/musig2-upstream/.\r\n",
+    "body": "EDIT: based on #1518. Closes #1452. Most of the code is a copy from [libsecp256k1-zkp](https://github.com/BlockstreamResearch/secp256k1-zkp). The API added in this PR is identical with the exception of two modifications:\r\n\r\n1. I removed the unused `scratch_space` argument from `secp256k1_musig_pubkey_agg`. This argument was intended to allow using `ecmult_multi` algorithms for key aggregation in the future. But at this point it's unclear whether the `scratch_space` object will remain in its current form (see #1302).\r\n2. Support for adaptor signatures was removed and therefore the `adaptor` argument of `musig_nonce_process` was also removed.\r\n\r\nIn contrast to the module in libsecp256k1-zkp, the module is non-experimental. I slightly cleaned up parts of the module, adjusted the code to the new definition of the VERIFY_CHECK macro and applied some simplifications that were possible because the module is now in the upstream repo (`ge_from_bytes`, `ge_to_bytes`). You can follow the changes I made to the libsecp256k1-zkp module at https://github.com/jonasnick/secp256k1-zkp/commits/musig2-upstream/.\r\n",
     "labels": [
       {
         "id": 4975353639,
@@ -51,10 +51,10 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-04-16T18:56:24Z",
+    "updated_at": "2024-04-16T19:32:40Z",
     "mergeable": true,
     "mergeable_state": "blocked",
-    "merge_commit_sha": "0fd42a66aa5c190fea54822663cd2ec03d02ca72",
+    "merge_commit_sha": "a662510f7a050d6f554a99a3139f64d51f70b994",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -62,7 +62,7 @@
     "head": {
       "label": "jonasnick:musig2-module",
       "ref": "musig2-module",
-      "sha": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "sha": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "user": {
         "login": "jonasnick",
         "id": 2582071,
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-03-19T10:04:28Z",
+        "pushed_at": "2024-04-16T19:29:24Z",
         "created_at": "2016-05-03T03:14:21Z",
         "updated_at": "2023-03-16T11:44:51Z",
         "license": {
@@ -193,7 +193,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "427e86b9edcaa5cb19e71233ad93c2ec60dff10f",
+      "sha": "d8311688bd383d3a923a1b11789cded3cc8e5e03",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -290,7 +290,7 @@
         "watchers_count": 1957,
         "size": 10695,
         "default_branch": "master",
-        "open_issues_count": 136,
+        "open_issues_count": 137,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-04-16T07:04:12Z",
+        "pushed_at": "2024-04-16T19:29:26Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-04-15T10:22:25Z",
         "license": {
@@ -331,9 +331,9 @@
     "additions": 4744,
     "deletions": 29,
     "changed_files": 31,
-    "commits": 12,
+    "commits": 10,
     "review_comments": 33,
-    "comments": 4
+    "comments": 5
   },
   "events": [
     {
@@ -1271,166 +1271,6 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1479"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI2ZGRlMjk1ZDBhZDEyYTAxMWZjNDA2MmFkNjQyODUyZjdmZjY4ZmE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26dde295d0ad12a011fc4062ad642852f7ff68fa",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26dde295d0ad12a011fc4062ad642852f7ff68fa",
-      "tree": {
-        "sha": "a37dd5bdca9564018b9331bd374cf23f588399f3",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a37dd5bdca9564018b9331bd374cf23f588399f3"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree a37dd5bdca9564018b9331bd374cf23f588399f3\nparent e4af41c61b0bb55fc9614cb39df8e455715b4dd4\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704555450 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1706037183 +0000\n\nextrakeys: add secp256k1_pubkey_sort\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmWwD78ACgkQSGHb8mIS\nNgV2qw//Vt68mVdYmdz9RyomvDn3n4xdjC0tW3q7mjfCtRJxsrcRUqzQDF6ykYCs\n5o5rFP8DxC3HPoNELLtyQTeOw0THnRZ7rAT8aLBfMs6Atr9DGwrDvmU2fnSYkILo\n/1QK/TAa0mQieqHfhJpfbbPFLCFsPAoP83O0yok/I5LBtcZ9pqD+r02eXfJGtsVT\nLJt70XcltH9OYx15Pg/KgX5JkjgvchMRMo4HKeh3y4wVPzQN95mB9ZNVgmLEzTBY\noOWxl2j5eoId9Or+xHuCdeVHWeS8QbOfjHkoVm4f1sfAnvGCJ1f4sqTc+KZ/ibcC\nx8NEtrU5b2neL0uR8HliRzAq1kF31cdMVW594aV1g8WdN362lIsE7ASmvXUioXwL\n/TXDKFD51Z2OtMU8jx6/fSVAv+CTYIvPXZWZbMDxaPYzhOFJ+xZ88dNp2hu2Yxzm\ngAJumDsyFSpgiGLhAxGHSUPvOnsvCa/aGz8Oc0660lCb2htQ8O6eMXjlsRNOEXLe\nJbr7vGjHW6NleMITqkVEmtjlOwVbqBfJlxhgJKDqmhYruJJVTEAkddcnzGflwXAy\nBSoLeJ54HnMkp3UMkonblvBObPAyXLRHw0VDkSJnoJ8MWYNCNP7ynEfUJG4YKD+A\nkSzEBr5WWQ3PhUjjLexmiBMcugjF0Mnok42Jnu7Qi/pI90Dy4O4=\n=OVaz\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e4af41c61b0bb55fc9614cb39df8e455715b4dd4",
-          "sha": "e4af41c61b0bb55fc9614cb39df8e455715b4dd4",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e4af41c61b0bb55fc9614cb39df8e455715b4dd4"
-        }
-      ],
-      "message": "extrakeys: add secp256k1_pubkey_sort",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-23T19:13:03Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-06T15:37:30Z"
-      },
-      "sha": "26dde295d0ad12a011fc4062ad642852f7ff68fa"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBjN2NhMjczMmQ4ZmZiZDczNzYyYWY5MGM2MWM0YTQ4NTllNGFiYjE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c7ca2732d8ffbd73762af90c61c4a4859e4abb1",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c7ca2732d8ffbd73762af90c61c4a4859e4abb1",
-      "tree": {
-        "sha": "f04fa7c3a521b544e7a3fb021d54437262961d8c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f04fa7c3a521b544e7a3fb021d54437262961d8c"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree f04fa7c3a521b544e7a3fb021d54437262961d8c\nparent 26dde295d0ad12a011fc4062ad642852f7ff68fa\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704556410 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1706037187 +0000\n\ngroup: add ge_to_bytes and ge_from_bytes\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmWwD8MACgkQSGHb8mIS\nNgWfqxAAnhBlpuSUh0jdivbK2E1u3UjlAFeqQ6YNxp6nfiJ3mznwcZiwewnbWNgt\nfeqRBx8iF8G/IqXONe/WUqfsa5d895IW79fpgezurm+T7e/oJCv+sj1BfMKCZt4S\n2GQLy4Q3uvv00YD0NDUMnR9acqgzqA81UKjKq/nn/z9YqmqXGRVAlA/cjlwA31u1\nJgSISYRm66iSVP5y/vBCN+lcSwMo1rwQ/1bh4meoxRYuE0s6V2HRl2DBeofl6bMG\npksv5xLjPhrmwjoI7sAHxPCupqjgOjmS5Ro22XJSHowOvxlGIBoEqZEK1o3f6wqW\n/ajYKY4J27vf8NU6uQ581FJzcyWitzB7kbBhVcqt+xHpEL9Js0oPB7FoKepNg4x8\nyg3VtCznB132HBlGD2P5I120JLd++bu4uD20NFiTZ/+xtuiBpxEZbKzXMk2ySdns\nIiW9eDiEd9zXTqwPZjL7fa501+MhGEEq90KsUuWlXfaXR2cZkJ7ggcZ56SiYOXtY\nxeHJJgdCVB69ZhoS/6M3qt1BOggwwBzeq2hy0M83TVJdfJoOvuJuXkgv+0l5tstL\n2uuseQf8OSXPc0OQpM3Pe7r71to+sMmH/+G8wLscqOmMdpRZ1G8gjIK31kwFUQj+\ng4tS36DfiSjBfg3N4NZrsuNLSpCdD2WRgw2uDps77uQrOLwKKEc=\n=s6Er\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26dde295d0ad12a011fc4062ad642852f7ff68fa",
-          "sha": "26dde295d0ad12a011fc4062ad642852f7ff68fa",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26dde295d0ad12a011fc4062ad642852f7ff68fa"
-        }
-      ],
-      "message": "group: add ge_to_bytes and ge_from_bytes",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-23T19:13:07Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-06T15:53:30Z"
-      },
-      "sha": "0c7ca2732d8ffbd73762af90c61c4a4859e4abb1"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDZlMTA0ZmJkYmIwZDg4OGQzNmQwOGY4MzZmZWE2ZTBlYTQ5NDFlYTI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6e104fbdbb0d888d36d08f836fea6e0ea4941ea2",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6e104fbdbb0d888d36d08f836fea6e0ea4941ea2",
-      "tree": {
-        "sha": "6c47667f68eef51bda2b22f97b6352546f87883e",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6c47667f68eef51bda2b22f97b6352546f87883e"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 6c47667f68eef51bda2b22f97b6352546f87883e\nparent 0c7ca2732d8ffbd73762af90c61c4a4859e4abb1\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704569478 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1706037360 +0000\n\nAdd module \"musig\" that implements MuSig2 multi-signatures (BIP 327)\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmWwEHIACgkQSGHb8mIS\nNgWrgw/6A8dveE0vXSxWqeVwTtjTnno8kgXo/H45AlFBimAq2NNnxjYGxigA2IaC\ngn+jCSfzPxe7zR+Cr9dqdr1XrHZgB+ddYPKUwXeK8IfeEHCuJBiSC3RjzktgjgUN\nqzh8Qm/Nv/UlzxLng07kF0hnCe3E0EYvi8uE7kuHS62TVLYSjdcyX8f1OTiQdrzd\n7V93ozC6OKkAOgtbXslPFfW9O5fD6wtKkNX1IBDb26H57fM7xVYabu9M+cdM0Yy7\nDrkUqYejyvCEmbOYopyd0/6HfR0a/Kzm9OiiVwxJS1ZnQr9EtwVAjlts+Bo452wy\na9z8BWhfth/IL48GcKtrKtvp/r7MOsVjSQ5KahUiBQZ7YQ6s0OHzVyPYJyhplAPu\nrL+nv2T8AYkxWtgngdcBRgj71jGJlOkPuMPY6xmaHj9IsLlosWOZCC0SbIIMTJUH\nEmCgZ3SN9j6RvHqaT4WwUvsx8h44eVnc6LAXHv9D0Wc9+i3thpDqAsbUmgT48GA6\nvnCvWB5SDSlMUl7VNZrW4H0D6kP2T/biAlODitfJPZOQjWtL6DHQw4AufITsfkjX\nban7KtJESWnN25/DxEb/Bvp/+lfmXUKUV2Vu+lUhQNf6fUZd8tG+NP4xWd/yY6js\nSGS4OL3crsQSFOJkZ10J3uazJpKkOZjS19zS5WkmE9k6INyYkPA=\n=so99\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c7ca2732d8ffbd73762af90c61c4a4859e4abb1",
-          "sha": "0c7ca2732d8ffbd73762af90c61c4a4859e4abb1",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c7ca2732d8ffbd73762af90c61c4a4859e4abb1"
-        }
-      ],
-      "message": "Add module \"musig\" that implements MuSig2 multi-signatures (BIP 327)",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-23T19:16:00Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-06T19:31:18Z"
-      },
-      "sha": "6e104fbdbb0d888d36d08f836fea6e0ea4941ea2"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGRkNDkzMmI2N2I1NzNiMjM2NmU3MjllODY5OTE4YjE3OTY0ZjVmODM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dd4932b67b573b2366e729e869918b17964f5f83",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dd4932b67b573b2366e729e869918b17964f5f83",
-      "tree": {
-        "sha": "b19c7674e736b68ac4d631094295fb6a74962d77",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b19c7674e736b68ac4d631094295fb6a74962d77"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree b19c7674e736b68ac4d631094295fb6a74962d77\nparent 6e104fbdbb0d888d36d08f836fea6e0ea4941ea2\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704572247 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1706037668 +0000\n\nbuild: allow enabling the musig module in cmake\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmWwEaYACgkQSGHb8mIS\nNgUSiBAAkwSidTZYk7/uqMx0XxQ83rygIDOQNMU42kqyX6mwUxpkHAd1PrwXQrGV\nHQRzS5ZEUvtKeyOBo2GsjoLqzcEsOAyXLjrs0s+ZwFx7d4KUWHj3aZ12r0G6pnP6\nTn71RNZatGw024KJbiXrIXFdWp3l68TiqmsxUvtOPHGt3zOnD1jSRl1OtB+RpHZ0\n978E+yKt1BD8aMRafA6p+mtFFQFKiIGfxCmcFch+pBMQUz6ZvDR3sYBrK3EvoB+t\nLHjUGxzwgGGleb1YccJRbsOWel3ILqwc0SpFCf75ouOh3AAx5Kjq1hqzJEc7tULA\ne/memVDFkxZydcRGuBMJ0xb7GdQ7BT/TA1zmlHJ6oHvPb7Fa1FUEPGDrYxnLWI/a\nG2KOKL8Zz8cYaOagHosE9KuGsXqLNb061opLKZLMnaxGwXHHoL5oTy05BCoqZOXo\ne/FGrzNiCB4qjJGL69aQsueaH9O1Tb+wWB+FpkjtLh0zJtmxFZnCkwCy5qWbnK+e\nkR+6yJg1Ce55dmEiml9716oIceYIGW5ISJa7CVjrF4FCu9dJHuOPZS1B8oHJqbb0\nMQIG/7WMZ+RA+YaR8r9ZqOwrT5a96Tj/tPfjSPKXyHQ6IpFK207J2f3ExYwNps9J\noPhg9PfxXVIQCIVLKb9lrNL/sVUZsFvakerVytEg/HPu6alnoJ4=\n=QaPd\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6e104fbdbb0d888d36d08f836fea6e0ea4941ea2",
-          "sha": "6e104fbdbb0d888d36d08f836fea6e0ea4941ea2",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6e104fbdbb0d888d36d08f836fea6e0ea4941ea2"
-        }
-      ],
-      "message": "build: allow enabling the musig module in cmake",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-23T19:21:08Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-01-06T20:17:27Z"
-      },
-      "sha": "dd4932b67b573b2366e729e869918b17964f5f83"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 11575114955,
       "node_id": "HRFPE_lADOAP4Jqs57T9BRzwAAAAKx7jzL",
@@ -1900,206 +1740,6 @@
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDJhMGQ5MzQ1NDBlNWFjNzY5ZmEyZTEzYTRlZGQyMjg0MDYzNWM3ZTg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2a0d934540e5ac769fa2e13a4edd22840635c7e8",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2a0d934540e5ac769fa2e13a4edd22840635c7e8",
-      "tree": {
-        "sha": "f60f864edbc2cdd7ba3cfa8a7347e88291c9b397",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f60f864edbc2cdd7ba3cfa8a7347e88291c9b397"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree f60f864edbc2cdd7ba3cfa8a7347e88291c9b397\nparent dd4932b67b573b2366e729e869918b17964f5f83\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709927446 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1709927653 +0000\n\nfixup! use optimized tagged hashes\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXrbOUACgkQSGHb8mIS\nNgVYmhAApJvhUilcddmHtwFq2P620Pi5g/yVK596hwImAmM6Tp3Ccpu3Tg8Bxvkk\njUU0c684J746t/NIMoX20p7NZbdDZDJS8dzJFYnSWOf9mwsGVtvDF4AYOTAGpHVS\nVxhQE8ru/XxF3RfW30X6YUBVDj5oRbt7A0yRlBFiJqsqckKB3B3f5rAKbflyI2X3\nIKgFD+bc+1nl4E5nkMDtw/eoBqWY7P4Bt7I9gudI6qmc0K/o1jOhGbnj9+kdQDu3\ni04avCbNabRQ4akE151Z0uU8a+45PbmDqm0eLZsF6axYzTFRypCJ73xqBfwOn+Pm\nT0NrTL14I5vJRWuwxw2AjW76D53tMnMyskMMV3sQK2ulKTtrEZ3ZNlp+dONaibBW\njrUaoWsaXrGx/Hj4tsfvJ/aEZMp31xNg5RR/mDRnedw4zYqMJJXckE+CwvyiI8rL\nu6yxNKTJpuc9qFPvQGlhz1LU+gjwNgpHk0G0hjYf1Me+1WNSFzFf5erqOOBCi4d5\nEw1rv2QjVlciI8gBDaYLzzxtgPuHjqXE9MeqXQUQpEkhmM9P8V4fzWO+2EmmYIbT\n4fOowTVIscvxQITt3rh25xCelfXVf9VLtlnquc0jIRYTbicjqUYEsOHfc5pq3tTb\nFsRwRQugSYFHmtIyBMWWNM3pXQxLmgRQs2WZv1B9KbFOv7qdOCc=\n=Worg\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dd4932b67b573b2366e729e869918b17964f5f83",
-          "sha": "dd4932b67b573b2366e729e869918b17964f5f83",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dd4932b67b573b2366e729e869918b17964f5f83"
-        }
-      ],
-      "message": "fixup! use optimized tagged hashes",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T19:54:13Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T19:50:46Z"
-      },
-      "sha": "2a0d934540e5ac769fa2e13a4edd22840635c7e8"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDQ2OGM1YzQxZTRhY2QzMzhlOTg0YWJmN2FmZDU2MDYyMWYwM2ZhYzY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/468c5c41e4acd338e984abf7afd560621f03fac6",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/468c5c41e4acd338e984abf7afd560621f03fac6",
-      "tree": {
-        "sha": "8caffe4769f70b13de0714d241f74839eaabf6e4",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8caffe4769f70b13de0714d241f74839eaabf6e4"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 8caffe4769f70b13de0714d241f74839eaabf6e4\nparent 2a0d934540e5ac769fa2e13a4edd22840635c7e8\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709923921 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1709927657 +0000\n\nfixup! move musig_ge_{to,from} to group.h\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXrbOkACgkQSGHb8mIS\nNgWm7A/5ASJSHtMzzmdQ0BhDMFYHxbIjF/elHI+9iDROgZIfS4UPWsMQx+RQULEU\nvErVEyWC2Z+QdvlX7eM6ZR31mRQAFUu83VkoGYchgZwCwk5XHWugcaClg0uIAYVr\nHdAYAyusr4KMSDRXqwJPPWHq3T09OdlzhWN/pMmUWEG8A+k5v+dTMJdwSniLa0Kk\nbYd3V0ZCJERZAksB2zI/T9Y9c2nVr9MkVojCzuTKGVl6bXQW118qrz4U31e1dCeD\nSZ2K0jy9iMDxpmh91G/ZCjIV7+F8bRUCnmFUqGYPf3cT3+TJ9UNEhfqNaT/u/Lfd\nfPhn12rm4tG9zINWaB08pb9Vj/krIJB7xhHfpQmEE5NV+mhsUq0D5OV8c55nqlgF\nXVCvNF3bxr03FKJhree2b0k4hM574lTs9/DeO030GfYWXMGQxMh8KF3jJculcPhh\nzMAMTDI+3sy7WB9oArjKQQOOknh7wzKVk0dxxx51knG0OCQ7bel4lCSdyWvRB70Z\ntWHXaqfF4sjWUAxTpio/8/gZltz5Soi3f/i25ZJZiGLlDULKSQpaPxzfXuXKeayP\nwuNFaNJtfgnVlEUuMBx6twm2xxE3FPf/yWI71trjMWIWgRRm08/pYWYC4w76RJ3s\nvAb9+8IQuOZBGIrdJ7T52mjSzrxV33zIOs9aLCMe3vCzNotw4TI=\n=VcaZ\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2a0d934540e5ac769fa2e13a4edd22840635c7e8",
-          "sha": "2a0d934540e5ac769fa2e13a4edd22840635c7e8",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2a0d934540e5ac769fa2e13a4edd22840635c7e8"
-        }
-      ],
-      "message": "fixup! move musig_ge_{to,from} to group.h",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T19:54:17Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T18:52:01Z"
-      },
-      "sha": "468c5c41e4acd338e984abf7afd560621f03fac6"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGQzYTg5NTJkNWUzODY0YTNjMTkwM2U1NzYxMGI4NzJiYjM0YjRkMDA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d3a8952d5e3864a3c1903e57610b872bb34b4d00",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d3a8952d5e3864a3c1903e57610b872bb34b4d00",
-      "tree": {
-        "sha": "c33a460f93a75ebff818163484c873368444b44f",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c33a460f93a75ebff818163484c873368444b44f"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree c33a460f93a75ebff818163484c873368444b44f\nparent 468c5c41e4acd338e984abf7afd560621f03fac6\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709916440 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1709927658 +0000\n\nfixup! move extrakeys to main\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXrbOoACgkQSGHb8mIS\nNgUdnQ/+KzKoaep3Ge56pNPVCP/FQrqjBgGW4zrTdTZatG13BRcX2kZLzxweFF+f\nHvkvWrx0esHUFudPxuxZ4M/+Zv6vDPAgRpJt7+6rrFUdbakynjQYY3Qbj6A/onMu\nmqOKFOFJKxuVWMXBxt3E+KwgEXSg5ikSm+y2AECd/HqYM9jumPLQ8KX1/xUutSUR\nMLZywKUPkygDF3oTiMx/wDy3Oz17S4qBUsilstp7tMgvBW+CWoKT4RjATAKLkfXw\nR9g703NCntE8c382cIe0xgEeEF5okRIHNmfdXbCCzsbEJA1uUEZWpXk9IarqDdD6\nUd7Be8wkZW7XYlSOiXSKVpkLYgnEvRbv5DPdQadLRGp7KUQyhVBNfypaFXxjxKsi\nqsesUVM10Q4lb/fq7gs28fPnZOEc5zc3AYvZo0lDTWvT2kxgqC0FK1zEUHb5PRmm\nJv67o2SLY6JrMNSFG1ue3+6iefPjILvd/PCmZzeNt7/KQfaMk+u6dxVwiP6c9Jeu\n2pkZ9DPCxFDZQsShqjsnWBSYtVWqNR84Tz8aPN2+vbF3R6rFtcuj7ojo4qO3P97y\nRC1ce6Jv2qSFiY0uGkH6nBkvl0JckvQ3QL/8gdl/BuB4s1GHfHqDWbxTX39rHqq5\nufwp0qEdFuOmpQshh04ylmCDlPj6yTzE+Hl4iJXC8I6kPIOcEJ4=\n=BUfz\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/468c5c41e4acd338e984abf7afd560621f03fac6",
-          "sha": "468c5c41e4acd338e984abf7afd560621f03fac6",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/468c5c41e4acd338e984abf7afd560621f03fac6"
-        }
-      ],
-      "message": "fixup! move extrakeys to main",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T19:54:18Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-08T16:47:20Z"
-      },
-      "sha": "d3a8952d5e3864a3c1903e57610b872bb34b4d00"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGRmZDk4NDlhMTkzYzEyYzJjMjBkZjA3ZmY3ZDQ2ODVhZGMyYTg3ODM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dfd9849a193c12c2c20df07ff7d4685adc2a8783",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dfd9849a193c12c2c20df07ff7d4685adc2a8783",
-      "tree": {
-        "sha": "16b80a85c22a62b486572b212ae3771f5275e06a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/16b80a85c22a62b486572b212ae3771f5275e06a"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 16b80a85c22a62b486572b212ae3771f5275e06a\nparent d3a8952d5e3864a3c1903e57610b872bb34b4d00\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709972975 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1709972975 +0000\n\nfixup! rename pubkey_sort -> ec_pubkey_sort\n\nfor consistency with other \"ec_pubkey\" functions\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXsHhAACgkQSGHb8mIS\nNgVBfQ//bzR75uoYZQ4QjLLTnN/5+8jOU2Y+sSUM87I/8SRUXueAVlnIPqbqq+vk\nZdb3kZ+4JlV56oG5zOWKBbFYkiuT3rKYngpCUNrP5eq7W+QdQAdZs2hOKbiHzeyJ\nTafOOpudGe+DBdx4WH24hR4SwE22QmDFU9uEzWtP47JPFIaDMT8JqaX+vdbA8dCJ\niaq9KrxZWLdWLVemW/NGmI/0j75wyv9svEfqqKvRB5w/zbtXgpr+zGEpXYFr1Qmx\nPRvOGGumIbXMN4fqCDhNhHi9LWGMWo3A9IJrYYdwLA+90sFGQJgK7nsYe7TXdS4k\nO/g68UfcbMCGDcAFBCwDORdNPYi72YBzJAcvbZHsyxGz4whlqJ4gBwSUwdFbPANI\nho5XtR72xWvPbKHU2LYfF+++uiXzVOK3hC0y3BLhw5vchWqMd+r0jFATNwtw51xo\nLsl1yOl53knNHejwmZPzreq3CJZh5T8jjylf4u5N9M8WnI+Tv+ynovUVyx2Dk3iA\nvtzXK0tBgAaIcFri9270DmdkPcW8T2jr9+rldyC+IfZsoN1fxHvH4MvvBxSAKvkg\nXSK9we6eXqXu+BHZrDJK1wlbSCJloW7eZXW0PYKMHKZuWjyqaOXR4yr88KOwCiMl\nEUpBvrXFpl+0ihqPnY8rrPKC3IfZ0wB7/RSg4BlHUg9gbBmm3zA=\n=bnPW\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d3a8952d5e3864a3c1903e57610b872bb34b4d00",
-          "sha": "d3a8952d5e3864a3c1903e57610b872bb34b4d00",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d3a8952d5e3864a3c1903e57610b872bb34b4d00"
-        }
-      ],
-      "message": "fixup! rename pubkey_sort -> ec_pubkey_sort\n\nfor consistency with other \"ec_pubkey\" functions",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-09T08:29:35Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-09T08:29:35Z"
-      },
-      "sha": "dfd9849a193c12c2c20df07ff7d4685adc2a8783"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDQ2MTk3MDY4MmY1NmE4ZTE1ZmM3MWVjYWIxOGQ0NTM3ZTUwNDQxZmM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/461970682f56a8e15fc71ecab18d4537e50441fc",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/461970682f56a8e15fc71ecab18d4537e50441fc",
-      "tree": {
-        "sha": "63d8567e5159e955925619d9743fa806d1806f1b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/63d8567e5159e955925619d9743fa806d1806f1b"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 63d8567e5159e955925619d9743fa806d1806f1b\nparent dfd9849a193c12c2c20df07ff7d4685adc2a8783\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710080543 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1710082651 +0000\n\nfixup! split counter mode from musig_nonce_gen\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXtylsACgkQSGHb8mIS\nNgWMzA/+LD/GT8M8eYmkohdY/WtETAln/FAw/LDjvOxyc/8CzzrtsPX9bviijHTe\nFR8jRqw3LubV5SDQF1Ol7B7Qfe0WU7/yKziHZWEGkieqiCZEHptSpx52Sz0EopsO\nJ5r3l8+L23KJJOqYBysvvXRYv38S4U+gWaijEfFPQiTMWg/S2RTDY2033FYKD99q\neA193598XGLXJ/xsOoL8hdFvD9MNfDNZiOlKnRwemcw7zRljP4B/obYmfNdL4oZ4\nNZhD9967UwkG4FwkKlISUi/URzvenBmB4IXJt35J+9OwnIQTrcx2p00kCpydeNHF\n3KZZiq4KxJ01vhXMnhI3eDkFHlKvzpgZDLAD2XcIMvqRgA7LgxgCHcvyzl8CQN8V\nsPuaBB5BMTaIyRU6gV3EQRHXGZk3LJDWnfFaIihXCgY5cjginVJiD6xwou3YnbY/\nYFdLBZ6KsVOR8kZuerAVDoCb2+UpegZeFgzQanhq4DLDDsl5NCxpbbK1Kg0N3hwx\noPEsa3FndjqrlOD6JIJgudbeweA/wYD2XxSz3A/wSwLHqoQWMXDJaL+V+o/YYriI\n2B2B9R7juZoL5mRJNb6AXTvb0L8h5s+afA9UGW48ojiUIhaeNqxOuIFK6EU6t5Ep\ny0FiGBXQDphZMXMEB8O+4RCm6HSSPRFse+kqpRp3Sw0eQRXHzUI=\n=rWF9\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/dfd9849a193c12c2c20df07ff7d4685adc2a8783",
-          "sha": "dfd9849a193c12c2c20df07ff7d4685adc2a8783",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/dfd9849a193c12c2c20df07ff7d4685adc2a8783"
-        }
-      ],
-      "message": "fixup! split counter mode from musig_nonce_gen",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-10T14:57:31Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-10T14:22:23Z"
-      },
-      "sha": "461970682f56a8e15fc71ecab18d4537e50441fc"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 12065677534,
       "node_id": "HRFPE_lADOAP4Jqs57T9BRzwAAAALPK6De",
@@ -2127,86 +1767,6 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-03-10T14:57:47Z"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDM1ZGQ0MzA0YzIwOGI3ZmY1NWUyOWIxMDMzOTEzOTQ0Y2EzOWExZjQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/35dd4304c208b7ff55e29b1033913944ca39a1f4",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/35dd4304c208b7ff55e29b1033913944ca39a1f4",
-      "tree": {
-        "sha": "ef60603922dd447a411e9e30376ec1c4a0a81ba3",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ef60603922dd447a411e9e30376ec1c4a0a81ba3"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree ef60603922dd447a411e9e30376ec1c4a0a81ba3\nparent 461970682f56a8e15fc71ecab18d4537e50441fc\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710152977 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1710152977 +0000\n\nfixup! Add pubkey_sort to changelog\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXu3RoACgkQSGHb8mIS\nNgW6JxAAsdiUXBgF/lqg/sTJlm2qgHXS7uMAj4JU3UDIW0LRH9CednF2lKRq5zNd\n2vK4u6N3Lxw04AKKQ6KgUDPU/+q0k9Xb9vg+L7mgc3h/04Z/cqsgj4CHOQYzqS/s\nK8SztXHZDep1M7WYfr7RWpnRQGTNW/ZClEJNE1CYPQ4P/ET383H9TtQ55O/MAm/y\nuDBExL8Ze2B/4VupVEpvEvlujohBBD6qkMvmyT767Yz8EPTGnqIPqhJ6zr9YZGGn\nVn/cBizM7xKyWI+vn+0T69FwqK56DZF5HtLbnazKpWW4vSssoLTzTDFPsz91z5+B\nLi04LRtdHtzlq0zRURyX3mylscMv/YxvHNWJOzCeH0vUBl4uflKSoOMYpzV2zaVH\nW+AKLhTtAm6UBVf0PcBdl8Y018C/LvFHQidCqaDbjxrPaVX2Ig69i8CibxRYg0zL\nWPuN24i/qlqRP1NadkZiDh8t705L4SiGUt4cLI3+49EZlJ31uKHRwaFHN7ouD8Gp\nVzoM2DCuZVdJtuOVQ7Rct2hJ4LA5CRVFWqMHWGEdiO/xxbzGQkGs6RbdliJzdaNH\nwf65HXZ80uqhYKUoFlD8g+ju1CoZY9TXIdkkfrPvpm+3Ctnwhen/V2OU0NQRU0gQ\nhnk/3Qj1QEEzCJ6griwpVZhsvXLFS+N3yFaIfYxvkingEa+GaCM=\n=xa1j\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/461970682f56a8e15fc71ecab18d4537e50441fc",
-          "sha": "461970682f56a8e15fc71ecab18d4537e50441fc",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/461970682f56a8e15fc71ecab18d4537e50441fc"
-        }
-      ],
-      "message": "fixup! Add pubkey_sort to changelog",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-11T10:29:37Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-11T10:29:37Z"
-      },
-      "sha": "35dd4304c208b7ff55e29b1033913944ca39a1f4"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI1MTJlNGI5NDMxMzYzY2JkMjk5OGNlMmFjNDNhYjkwYzgxMzRkMzc",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2512e4b9431363cbd2998ce2ac43ab90c8134d37",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2512e4b9431363cbd2998ce2ac43ab90c8134d37",
-      "tree": {
-        "sha": "ebad0456618239fc203f82f720053cbeed1e46ab",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ebad0456618239fc203f82f720053cbeed1e46ab"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree ebad0456618239fc203f82f720053cbeed1e46ab\nparent 35dd4304c208b7ff55e29b1033913944ca39a1f4\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710153007 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1710153007 +0000\n\nfixup! add musig module to change log\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmXu3TsACgkQSGHb8mIS\nNgUpUBAAht+1FkJgUwfmOGU9S+GXOaz1Tk7BAfJZJVrpacTz5IwLrD201fW+e+qN\nji4hZwn1iHKNRYzc/ESVzmpVDW7ksNDhncvwumi+qRjGOtc/9KEKlAv5S6gv2V+S\nCi2oQqZ90JzMeVT44zaKZFehsAXS0wOe0NoD/z4HADiPuf6W60I/BoG2btffjzDB\n5fcO7mcei/zhiv7sM7bJMPRH6TWRG7hor151yon2BKuwfneVSWO4rHqyzdtH75hl\nFC3bVI0r/JuZPSNFvI9cDfzkBSv7NkUJ9/2+DSRaX4TVawCu+Rl1aSUSXOFwO9m9\nNLSHwMQAZ/07P/YoR9kHgtcvdF2glXiU5cohL+JkRAhmPfAWYNO1UVtS6LrCClln\n0oAnxL65di6gHOrsskXCkWONH72Ffl/ETy87iCg9uu5q25hzaNwJaHF+cKBlfEAG\ncrlu7rDlLt2Si+sd8BTs8Sn/G4Zxrn9lsiwnrX2UF25Fw9tQlnAtGsx88WDfyOZH\npKbFdlt8Z1yKupruZPds68JruivUKtql/11wtXgvKje+W4JKjXq3F8G9IMmcEipz\nKPGSV+7vlD5Yvqo8mmCV+81e4dzxE5sBONy+TTNqpk8T/E/Q+fjMxVmbj7P68dDy\ns3Ti6vGXn7MqelZgXcHkGxLPdOj0G1wnzZjuQtpOvd2P7wEnBAs=\n=psRY\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/35dd4304c208b7ff55e29b1033913944ca39a1f4",
-          "sha": "35dd4304c208b7ff55e29b1033913944ca39a1f4",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/35dd4304c208b7ff55e29b1033913944ca39a1f4"
-        }
-      ],
-      "message": "fixup! add musig module to change log",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-11T10:30:07Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-11T10:30:07Z"
-      },
-      "sha": "2512e4b9431363cbd2998ce2ac43ab90c8134d37"
     },
     {
       "event": "reviewed",
@@ -2353,46 +1913,6 @@
       }
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDNiNmM5MGE5M2ZiNTViMmVhNWZjNjI5NzYyYmY0YzNjNTY5MjExY2Y",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
-      "tree": {
-        "sha": "2b4470e702e373df1abc68affffa5ac7576791ee",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2b4470e702e373df1abc68affffa5ac7576791ee"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 2b4470e702e373df1abc68affffa5ac7576791ee\nparent 2512e4b9431363cbd2998ce2ac43ab90c8134d37\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710842639 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1710842639 +0000\n\nfixup! improve nonce_gen doc\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmX5YyIACgkQSGHb8mIS\nNgWLdQ//X1xZhVynHxvEmBgi325BJ5X7SdOSc38Lvkt9xNu1vwn1ZXEkGXLT7jTm\nO2wvpQ5PFrw54kFQoZiD/QyQirk3wRM7imA2FqaXIGCwjrbmc9kSUmWfbVN1jbQ5\n1b2sbQHKGaKXt93whvoRV2zPyzXZPOc/pRdxf5n+rJK7b86QaiCtAvsbdotvPZ26\npoDujvBnDe4oAtZlPKOqp8I61CAUlpyjKbBNaSB3w7OLDG5gtiZNrhAwHfp+5f3Q\nbF/bGCTUqIkuV0ulZe77WmolBIV//X06WrIgs+E4/8KPqklfKp7/7aH+cbl1ND6Z\nUYVKpl8IjuoPUBuMWD0rQzCp9r+B5FkDA0emrf/jcDUHq7tJLDDBUW0GD8+qOnus\n3Rl9Gm6h65L1NHanHUg0adh/NuznM4ArQ7Cwxbx3+cYLScMuh1KGpKLzupvo0AQ3\nS1M2N+ar10qKG6I+LlwCVDOTh42T1Lkiqhzb3R76V8NxRHeapOInliMML+V/mlrV\nIDiUwRBwWKkA6vO5V3VCARKO4JiQBk0mY048khy+QkhMHlEfS5BCGGBiTdX5jbKY\nqnPkdLnXszvwOrfIanAb7y/L0ghAkq9dBZd16Qqi/BTcoRM3WP5onfci14eG4fD+\nAQF6CdLZF4qfnUw6Z96llxxRXSRkzKxjPbIGL7AYdebNeqPYc3M=\n=6v2f\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2512e4b9431363cbd2998ce2ac43ab90c8134d37",
-          "sha": "2512e4b9431363cbd2998ce2ac43ab90c8134d37",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2512e4b9431363cbd2998ce2ac43ab90c8134d37"
-        }
-      ],
-      "message": "fixup! improve nonce_gen doc",
-      "committer": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-19T10:03:59Z"
-      },
-      "author": {
-        "name": "Jonas Nick",
-        "email": "jonasd.nick@gmail.com",
-        "date": "2024-03-19T10:03:59Z"
-      },
-      "sha": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf"
-    },
-    {
       "event": "reviewed",
       "id": 1986650201,
       "node_id": "PRR_kwDOAP4Jqs52aeBZ",
@@ -2427,6 +1947,628 @@
       "submitted_at": "2024-04-08T14:43:11Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGNjN2QxOGE4YTg1YzhkMWUzNzdhY2Y3MjcwMWRkOGZjMjg2YzJkMDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cc7d18a8a85c8d1e377acf72701dd8fc286c2d03",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cc7d18a8a85c8d1e377acf72701dd8fc286c2d03",
+      "tree": {
+        "sha": "b1b3f89fe6222caf799fd70da963a6ca670727a7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b1b3f89fe6222caf799fd70da963a6ca670727a7"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree b1b3f89fe6222caf799fd70da963a6ca670727a7\nparent d8311688bd383d3a923a1b11789cded3cc8e5e03\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704555450 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295082 +0000\n\nextrakeys: add secp256k1_pubkey_sort\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezuoACgkQSGHb8mIS\nNgVcKA//YIV6RvlbN8lRba/kFUbWTG/kZzqnxgT6/OVfvdswVkq7fvd48UrEc3eY\nTxdEJcL4rZJZnjYqbx/Gt963AUeBoa1BiqrEs0XbvzybvT7MuHr/eEeKSwI8lBYa\nW5mlW4Inrep3R+05ibR0P8p2md9gcYek3i57dV3Po1f9boSu8D3K/AsFNGgMB5xj\noIfRrn2BTWp3QQQNBd+u1r4kMH1aA5+xdeKHFU6QEoLeQPa+DQqn46e0WmYeJ2Sx\nhSwngOmDH/5ygAk3ApC6q+Xe+0ssFQo2KWcUsYfRSwbe30PWu5EFwbyzVhaAHObP\nXO3U+Ltab/otcjofcmw+7dEDotFq7YfowMcklA+ewINpZ/1aF3lfQ4b9O36IhTFV\n/uR+AyFVITuH6V4r/eoRs2a2VWJdrO/cyHl6/cNesdebzuix/PykjhcXvDvibC6W\n+mCPnIICrjdrufD9qPU/ZJ2y8tih/Qh7+gcus16hrjMdhDyAhVA8u0jhba1x1P2i\nu6T+UitU/UuBRRZIlvb7xgpAj+b7TxQMKjB9qWZpBubnA87JTCfzGiE0lFTKNkR0\nY2V/Y10DxpfVzBzxBDIXKVk6aKAmAGhyr2qYwceZmQsxSUoqtmfUs+t/tFuhq3Dc\n1A/F2ThbpOST4dqIAj6bQ7RB021E6Zto4ij6yXZElBgJcGZED6k=\n=+CrL\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d8311688bd383d3a923a1b11789cded3cc8e5e03",
+          "sha": "d8311688bd383d3a923a1b11789cded3cc8e5e03",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d8311688bd383d3a923a1b11789cded3cc8e5e03"
+        }
+      ],
+      "message": "extrakeys: add secp256k1_pubkey_sort",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:02Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-01-06T15:37:30Z"
+      },
+      "sha": "cc7d18a8a85c8d1e377acf72701dd8fc286c2d03"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGU2MGM3YmZjMDc0OGZlMzFiN2I3MjNiYzY5MGU3ZjcxNWE3ZGExMzk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e60c7bfc0748fe31b7b723bc690e7f715a7da139",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e60c7bfc0748fe31b7b723bc690e7f715a7da139",
+      "tree": {
+        "sha": "323d5a5ffb31d1482fed2f79a3dd3a8485038194",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/323d5a5ffb31d1482fed2f79a3dd3a8485038194"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 323d5a5ffb31d1482fed2f79a3dd3a8485038194\nparent cc7d18a8a85c8d1e377acf72701dd8fc286c2d03\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704556410 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\ngroup: add ge_to_bytes and ge_from_bytes\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgVRgg//ZlhDgsnB+UkhZvNpZOxBsfIp2WXKiMQnQ+zocZPy+EDoiXDn2pRByZ1N\njJqzFRAiAPK781S72Y7YhhCQL5w/JUp0tU61K1a957JqOx0V6lDjiM+5/67+R6Qw\nEXYpPIn7mgUXElOkeduh8QEzCRPcFk1ZYTsE9lZcw3CMqom3FKWO6HRA0N3VubQe\nzNSswvMiNUAd75Yo6qDVWVXD+iKEXoMYNFSFHplIgHshSaBKmwv4yxFBPFV6sg9Z\nzCgTra95JbvG3tQi7L8dVhpXGVLvgh0Kmxux7rZ1XiiPqxTf3U38SwKr3M+8OZ+5\n9M6awJEqRWR+datXAjkQ2c0LbbIXJo3SGq7fFunEhv32eVkFH/Ez+wv0HrRotqRa\nv5j+iz93HATVQ8dqhKZlorM1LtLpERczoLK87def5lK2iOVm2YnxES1H6fMmyobu\nQiwjzupwgPQdgbHWLahyt6ulAeJ89ap/97bibX/f+zsiZo3BicAgIZCRILoxQLCf\nl6aUb2EA2MU67S0SOpW9idc4lE+/Vtk8hh8NlY3hf1aBSBBtk22y88HHeF7LExAZ\nGMhhyudn3aHfIqZs65s/nslY8cDmhUkIMOQsXkY7mvPJc3jydgYOABCGR84X1jKx\nQqE+6aah4NOmkAcCjehjLQSU2VlrzJMOy+0SAE9TZ5nr4Spy9e8=\n=5/c6\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cc7d18a8a85c8d1e377acf72701dd8fc286c2d03",
+          "sha": "cc7d18a8a85c8d1e377acf72701dd8fc286c2d03",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cc7d18a8a85c8d1e377acf72701dd8fc286c2d03"
+        }
+      ],
+      "message": "group: add ge_to_bytes and ge_from_bytes",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-01-06T15:53:30Z"
+      },
+      "sha": "e60c7bfc0748fe31b7b723bc690e7f715a7da139"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGE4Yjk3NjFjZDIwZjQ3MjQ4NDA5ZjkwZjM0ZjhlZjdlOTFhMTUxNjM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a8b9761cd20f47248409f90f34f8ef7e91a15163",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a8b9761cd20f47248409f90f34f8ef7e91a15163",
+      "tree": {
+        "sha": "e176c19fc3ba8c52b8e13f880ba35cf988a4dabf",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e176c19fc3ba8c52b8e13f880ba35cf988a4dabf"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree e176c19fc3ba8c52b8e13f880ba35cf988a4dabf\nparent e60c7bfc0748fe31b7b723bc690e7f715a7da139\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704569478 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nAdd module \"musig\" that implements MuSig2 multi-signatures (BIP 327)\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgWiahAAq30nRI7cuaDBi265LofkeJGrSWhsup9O6FUHzwh4WBT1bj80wrxeKbum\nCsucbmUAfko10noHff20OL/O24+3nUrROSTXcYrT/2gIxZDtXmNWdy7uh2Er8UX5\nJdGE28xHkRi71OFFpO2QOkepXZuAwHdzD0UfvuC9G9FhEx/9dyB/OIVH1Dh3n85m\n7kbyyu2/Em65Q+Sqzgi565U3fDEa9/ZPciO9PmWYZ9E2/e0J5oZmgeaLvyzYHs4E\nwKwXFGntqaBe8/MNbEKD6CMQuKdd0ESkKZEIA4l+tHbvV8luc0VzRneNAPCwldV4\nPjtyAG1l1QcVUAHS49bJUVceH7LaRWjFL2fUcLNPvCTcbviP7v4WjluHNG5WxxQb\nFKSyOggASFCorPxQ9JRDu2fsdJfNGKXzbZFfmhhj8ctdOgLJrHe2oSzn8b9OnD1x\n1Q9y63xKdF0M8wq6NinvrDQwbJeq9Wa8XZy/hU9nDlI67d7KQsqRmlRaImPqcy0X\nm6LHfKgy7eyY0SrWhNwb3rOF2q/pqGLtXxGShhVbkrrvBW9bXEZra71A+Wqjg092\ncPr5MDG0RH9N4V1sWN5IXefMhO0YnMPDpawHGpZQY4PWdNaEMBOyT44Jx6CtPOQ0\nyAiR7JReAxojrpvM/VdfXuFBl9ibT21sXfBkRCsy1sRcUG0Ikq4=\n=tslB\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e60c7bfc0748fe31b7b723bc690e7f715a7da139",
+          "sha": "e60c7bfc0748fe31b7b723bc690e7f715a7da139",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e60c7bfc0748fe31b7b723bc690e7f715a7da139"
+        }
+      ],
+      "message": "Add module \"musig\" that implements MuSig2 multi-signatures (BIP 327)",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-01-06T19:31:18Z"
+      },
+      "sha": "a8b9761cd20f47248409f90f34f8ef7e91a15163"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDUwM2ZlN2VjMjY3MmIyZjljNGE5ZmI3OTZhZTZjMWNkYjk4MzExNjQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164",
+      "tree": {
+        "sha": "14fb716352c0df114f684888bccf93ed6ab40d03",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/14fb716352c0df114f684888bccf93ed6ab40d03"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 14fb716352c0df114f684888bccf93ed6ab40d03\nparent a8b9761cd20f47248409f90f34f8ef7e91a15163\nauthor Jonas Nick <jonasd.nick@gmail.com> 1704572247 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nbuild: allow enabling the musig module in cmake\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgU00Q/9HFrJSZBGMqsYYw90p69gsrm8JBv2DteiqAfCIFS3aqFu0ImW5W+PV5m7\ndZgSKQPJcU2QAk6BrVfcyGk4g/HQ97m42ZRJK3MgufTixEhee69XpdWIm/5kabtz\nUmYt9S7DKF13ijtFNFtMkNTJWcVMthn8Oe1T03AIHbYSV4xFWmFpa3iLht1M6rb+\nL0cEq4erkUd14C1eNlnMJxEVMlOKPRI6SCAA98y+YGv2BynQJmREq4+MmI1sF3f4\n6oCTCsDlS6DcvyhxMmElK1ZmJeJYbzWnHPCbiLU9Q6hF73Moiy5lM98oS7kYwJYY\nFpTto8iZJ5A4SQ1/SkbGcZAsK8KYD4KoMkR1jbKmN2W7/tFQFbSMwAfpHT6l68FQ\nRI8w8ydr2Xge/6fgvmy73Bu471CiGDQwoSPq7qqbsDA/lPov372ksm2ucOqJ6f+R\n13tj0AWuSfBJlD+cn8Iwy3xicvaOm4w97r4vCKIl5Fm7YHu4NxOEMZkZCpHaUncY\nCF2B4HPBA9wZYw4Dy1A0R9BS+OaDQZRpP1f9Th3UsIM2IUh/RMLr5XZtLrYOLpZz\n3vWMY7EPriDYq7FFfMDHOegz4quVWcYdA35poKmEiheuLttHfHPsl+5xLoLRXBUU\n6fP+WxGC+JrOY/7PjBKOUtuJLSoCp44Bd+8iDgwb9PMqpvm8fT8=\n=1NDS\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a8b9761cd20f47248409f90f34f8ef7e91a15163",
+          "sha": "a8b9761cd20f47248409f90f34f8ef7e91a15163",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a8b9761cd20f47248409f90f34f8ef7e91a15163"
+        }
+      ],
+      "message": "build: allow enabling the musig module in cmake",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-01-06T20:17:27Z"
+      },
+      "sha": "503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGJmYzBkMzMyYzQ0NjM2NjI2YTU2YzBmNDhlMTE1NGY5MDVjMWQ1MjA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfc0d332c44636626a56c0f48e1154f905c1d520",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfc0d332c44636626a56c0f48e1154f905c1d520",
+      "tree": {
+        "sha": "1a6244eab6a9dca9e711cb2560f4448fac553bb4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/1a6244eab6a9dca9e711cb2560f4448fac553bb4"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 1a6244eab6a9dca9e711cb2560f4448fac553bb4\nparent 503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709927446 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! use optimized tagged hashes\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgVN0Q/8DBJs2265woT4nDSvTjOMfmhbx5lCFt8m0yBTaWo99u/wtPlbZOc35MAh\nSQ2yk7cBboNoeiXSJaevBSwkhwvmSx6dQBNRZgYMG+BcNrQ7y9q84+4LRUj4dYxP\nZuisa9JaxOsCBLDw+fEcBIMAEwcFy8Yqhl+G2dD2QiL7CwmdqMQzx+8h5Wub8xOQ\nxZk2k0CzahNK+x+sqRsqkETZOGThJWkoFoh2r4qElJPVughEi6s6gLPc/A7K/SuV\nu+cG35KnabDKQ3TULMCamLgywrdiIYczV+xL7dlxh/k0Mkipos6BaFGv18F0Ox4f\nU46JbxnlAkaR6aHzhIzew1/KFq9nP85ELphptxp5AhWJYBk2q9Q7YvKEAcofBYl7\nGqStw1RTK3mu7c2oEDzjGRfQ+3wtIbrLORaVnE1TjIVDozDtK+IYcXvKEmSjTysj\nFYWJEG8W9b8/kmjpRqErSkV2QOzCWP2M0dPS9+7ontbKncf6FM4snEiyjudFzVWT\nA189w3dNbYl7spGmZqzRnjIynjk/09psukwPG+xosjiin9/axS1j79UewUR42dVK\niesXlkkvk+qRzWGJYqxAhki7HQxsrv7eDVWUFPuJ1rYbXEzw6RSHBfnmVTonJj7Z\nOJI71uPblWRbVxJCsB4wvu6Xhc6wlgCyIp88BahQmdpO3bbhM9U=\n=XegG\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164",
+          "sha": "503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/503fe7ec2672b2f9c4a9fb796ae6c1cdb9831164"
+        }
+      ],
+      "message": "fixup! use optimized tagged hashes",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-08T19:50:46Z"
+      },
+      "sha": "bfc0d332c44636626a56c0f48e1154f905c1d520"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQyNmFhMmZiYTkxNDZkMDQ5ZGM1ZWQ3NjQ0Yjc1NGJiMzkwY2YxM2Y",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/426aa2fba9146d049dc5ed7644b754bb390cf13f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/426aa2fba9146d049dc5ed7644b754bb390cf13f",
+      "tree": {
+        "sha": "289a7c258b2f38c46d3c7471c3abe826394912ce",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/289a7c258b2f38c46d3c7471c3abe826394912ce"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 289a7c258b2f38c46d3c7471c3abe826394912ce\nparent bfc0d332c44636626a56c0f48e1154f905c1d520\nauthor Jonas Nick <jonasd.nick@gmail.com> 1709923921 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! move musig_ge_{to,from} to group.h\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgUl6RAArI3U33DZV0VFum80QDAMzSCQHf9jqevBeegJWqiaidApX0BK2wLzANAp\n+SnHs99q+CqCNi8RByDl1snTaekQVyTILbnb3PNjnuRBtgTdVr1gJzT+ceAvXnU9\nUVPcTNtB7gCnaocA8/rHCEb6fvka5q7enyXoGB6Qu7oQaT9vlFr+og62pU/+9p35\nSMiorC5JD5GhCWyIhOFn0lA54V6zCRSsq6dJLiKm8hMgG6gZGc973olhyM6HysFz\nrWkIRNZU1KFU6OZdSV6mpNvCsJIDA5qOduXK6zSc+eD6sCg/R+lmfOFYT+B6gljn\n6nE4megO4vp8KRcT4PU7vlPt0mwKjFA456DjdeyYMN0MUlSpN3JThfwOhYX7YB8U\npksTloBvHZI+u3/v0k3+II43EXsXWRu6j0aCPPoSdJgqt6kez9YV3ZdRhc9UM3we\nWPtVtfumyP5pursdPt2DUeKElfZYfLhlxrfVs6LWMQxPtATDzxzdlZAx7KsOefWn\nc6NrdqlWB7FYjlko92NYncsiOwRdAOugC42aUhZVi2ksjHGOU6HPwE1uR2QjBxkx\nZn295Ei8hzyjKaOTxzqReQznxoGewM9NcgOJZ4O/DpzQiIlauL+BEOC2JpmukCPk\nez6jGs15/jZPUydacnGhAjsUzQiqRQcpYeW0eVY003HvvJ24OOs=\n=sZXP\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfc0d332c44636626a56c0f48e1154f905c1d520",
+          "sha": "bfc0d332c44636626a56c0f48e1154f905c1d520",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfc0d332c44636626a56c0f48e1154f905c1d520"
+        }
+      ],
+      "message": "fixup! move musig_ge_{to,from} to group.h",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-08T18:52:01Z"
+      },
+      "sha": "426aa2fba9146d049dc5ed7644b754bb390cf13f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDU5MGNiNWUzOWViNWMyZWU4MWY4NjgwZDYyMzU1OWJlNWMwNjc4YzE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/590cb5e39eb5c2ee81f8680d623559be5c0678c1",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/590cb5e39eb5c2ee81f8680d623559be5c0678c1",
+      "tree": {
+        "sha": "3da0df3168d6974f6a7af8139c4808c1f9b515fc",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3da0df3168d6974f6a7af8139c4808c1f9b515fc"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 3da0df3168d6974f6a7af8139c4808c1f9b515fc\nparent 426aa2fba9146d049dc5ed7644b754bb390cf13f\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710080543 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! split counter mode from musig_nonce_gen\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgXRoxAAsJvExkNG8XwUZ9UtIP8VkCaCahi7WI0vN9bh6BJWHx5veeXwTGNUGevG\nnzOx+1p2QGWTkG5B5SGZujQS9rqW7QfkfeJoFdr3ydHX4yX3v7Yq0fRhGx960yAH\nXfF16uAw83j7DUufiwq55JPnMhH3etQai3zyFwBOlp4p+ksW2jSJEhS/1D7Fwn4l\nV1ScRRGyFX2dPGTdwsJdDq037UjhUX6HaQh81/+E0n9bUvyG3XXFw//LroT8cPEY\n6hXfbuX6xZIV0hzVyilwhdiqS+kn1eu92rtvLB7Ygnl03sAS1x3TYKZmUAW/pwm/\nRIgGrkMiRhS/pZ88AYYhqblTBGoOoJdizMEjpMT2/iC53CCgjLTUoIO64D8Cj66H\n7pMD3h+dU+pmh+3JdNSHzpRXTbzV0tr+EJ1glc9Agn/5rHLC677anL3GhHgyKkrc\nrLUnf4jsqcryWA2ppF7p0feIae6ZSQ7B0tCk+aa9gv3njoRmu2RmGlY4gOcjsDsG\nwsgsU9PI26Hv5RvoWzzNbiBOw3pFIOCeynXN7AoUyJ9UkAwtG7OcFxGZZVbpfREr\nZB13OvSU2OnTfcqX2TTCvvJGt/U/PcYYr2dJgWwPA9z6O08BYgs8QWBrWOEY8UBn\nLImh/scuNMt0XUYkwmUlnpycUmEAN8/mQhd3Q73MKOxJ5Mf8Kuc=\n=WfiD\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/426aa2fba9146d049dc5ed7644b754bb390cf13f",
+          "sha": "426aa2fba9146d049dc5ed7644b754bb390cf13f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/426aa2fba9146d049dc5ed7644b754bb390cf13f"
+        }
+      ],
+      "message": "fixup! split counter mode from musig_nonce_gen",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-10T14:22:23Z"
+      },
+      "sha": "590cb5e39eb5c2ee81f8680d623559be5c0678c1"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQ1OGUwMzk0N2MyYjgzNzNjNTYyNGRjODgxMDhhN2I1YmMzNmQ5YzQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/458e03947c2b8373c5624dc88108a7b5bc36d9c4",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/458e03947c2b8373c5624dc88108a7b5bc36d9c4",
+      "tree": {
+        "sha": "9f002da81d9720a9ae48e581ac595a2f0ca70d38",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9f002da81d9720a9ae48e581ac595a2f0ca70d38"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 9f002da81d9720a9ae48e581ac595a2f0ca70d38\nparent 590cb5e39eb5c2ee81f8680d623559be5c0678c1\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710152977 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! Add pubkey_sort to changelog\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgVhkw//WtV1kkdh/SQThoX3rifPGdDVWagX8Z9BQkBx5vkD9c36FI0Fetx783nY\nlWMoD3Pi22c81zmstbyNYYw3686doEyoPugWUanIVpW71nf7gTcKQ4iAx2GAvOyE\nN70MGmaJ1dT5/WuiCPqlAyqpx2g4RGEs2bQg1ht6gPPhL4bVlXKVPjyxZYuME3f8\n8f5cqQ0Rbgd5P2kaTRxk528jsAu+0EMP/h/AfrJEXHFt56Zwx83Ip0K1H4pXF/D8\n7Y3V/AgpWABR3pyiNU4lJfOp88IHOT4UTKSO1zH4OVg4O7mIZoGXnJ0RdMkZLCz7\n7g3pCQDsASoeaCoFb/tXwb/MNkclUFjb3SiE+2eD2NMrsE9ONsoO1MM+OIRebOl0\nCUqnLXF+RU7z4g7b41qCvg6RjLctJBcdjViOeDTPiM5dX7bRwc//SGBtOjmxXkS7\nKFASUYIJylemwHAj7vURqOz/xFa4J6zvA4rk3fAi5lvcnavxrwui+T24dQ/5/oj3\nJ+xlA1tKMXJh2dvJLf0kYu7ZQefhr6oEL3zL1psImJKajDcXrljobPzuQ3OeFURk\n0DI1jpp7z+QrGCiyh3LiGeXCXMLE2Ve3Fb51+UDwE+c0uc9xWBa61Ca0/Im+mdex\nqDPLSaA6qK+dpwxMbN1pj4WNaP0wZPzjD5gSOlQW95+8qSso5ts=\n=8iD5\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/590cb5e39eb5c2ee81f8680d623559be5c0678c1",
+          "sha": "590cb5e39eb5c2ee81f8680d623559be5c0678c1",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/590cb5e39eb5c2ee81f8680d623559be5c0678c1"
+        }
+      ],
+      "message": "fixup! Add pubkey_sort to changelog",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-11T10:29:37Z"
+      },
+      "sha": "458e03947c2b8373c5624dc88108a7b5bc36d9c4"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDhiMDMwOWIwYzc5MzE2YmRmMWM3YzQ2NTUwMjkxYzYxYjRmYWMwNWQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8b0309b0c79316bdf1c7c46550291c61b4fac05d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8b0309b0c79316bdf1c7c46550291c61b4fac05d",
+      "tree": {
+        "sha": "6bf32ffde00fa726e83617f00ae94807818178c4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6bf32ffde00fa726e83617f00ae94807818178c4"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 6bf32ffde00fa726e83617f00ae94807818178c4\nparent 458e03947c2b8373c5624dc88108a7b5bc36d9c4\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710153007 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! add musig module to change log\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgW7TQ/+O0JhuEo+5dTEdtVyowmqeATuQrjkDLoo9dXoReNT3mABV3/RQMT0w7db\nAVSSxSqpTbsnK7jqnlgQnnskrbc42tpbzT7/Me48+DsoIfglSzYiX6rmxJsjM9Wc\nK63c91CgRTNBDI4A9aAMcdHZ0WXocCR529gMBSStsbHIpNS1rrPQUuwsTp1pfFdf\nVkXxIYvqcqcWFYMO08EFT3uEvjUvpG9mGvGfuTAgNIX3je9BqYYlrhE06I7s4KT/\nLs/c8ueFKE4BE7ZfTgi8nZ35lQNE5zpIBuxx2ZcJBY5gEiPPV/QXJ/NhzsaIBBCH\nj3GRMA4dVb6rO/e5D52pLSCX37rtS2zhPkXJUI6YvDf/TSlmuPDlPaF2IxWr17uC\ns+jbYgiXTfLg7rHj4rZlFh8CwsllYTK90tmveIsjlhPDEQ3upxemFyY/8nQ43HGm\nc13nuPGvicIdinStJdqipy2dRoJxBq8YhsvdYnF+ljE2uTbFDb4b1sgz9aXzYsyl\n/djc3XPKCfTEIdob/4kwqu1IOt8pDFtlvP9lMJdv8e+1zkkOKn4KLxHeko+ukUKV\ney6LVkMzWe0SS9ehPz+h+Wdb52FRm/fEa2ttWmvPfKUIx23UIEfeWbFmSnA6IWdl\nP6P/rh46IGq+P+Hbhq9LJQcMK/7ktyaCHBjbTZnQE39kM1D0pac=\n=f3Ya\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/458e03947c2b8373c5624dc88108a7b5bc36d9c4",
+          "sha": "458e03947c2b8373c5624dc88108a7b5bc36d9c4",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/458e03947c2b8373c5624dc88108a7b5bc36d9c4"
+        }
+      ],
+      "message": "fixup! add musig module to change log",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-11T10:30:07Z"
+      },
+      "sha": "8b0309b0c79316bdf1c7c46550291c61b4fac05d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGFlN2NhM2QxYmFhYzE0MTg4Y2UzNDVkNTI5OThiYjk4OTFjNGJkNGU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
+      "tree": {
+        "sha": "cdfab710f8461ec633418deef4fe770c0265af6c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/cdfab710f8461ec633418deef4fe770c0265af6c"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree cdfab710f8461ec633418deef4fe770c0265af6c\nparent 8b0309b0c79316bdf1c7c46550291c61b4fac05d\nauthor Jonas Nick <jonasd.nick@gmail.com> 1710842639 +0000\ncommitter Jonas Nick <jonasd.nick@gmail.com> 1713295112 +0000\n\nfixup! improve nonce_gen doc\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEES7uEWm9aZaad+uwjSGHb8mISNgUFAmYezwgACgkQSGHb8mIS\nNgV9XxAArXsmdAF33gzyQCpmaxgPRD3IiBq1qhQo2G0gbgID0CTjnaDvlifCEaML\nRn0hrN9sf50gnAd35pZyCaGJ6Xh2ma9j0xlOOmiHJEc9371duiuEXVUsn7GlSbtI\n1I4YhBnaIF/wq1PBHW8u4QaKKydmWM5VZDu+pBgytSoUD1pNhq+Auk5XPX8PaYhS\nOm/UjAK2ESyQ8z+GitSlDXkRIWHXfUzmBTZ9gWoXOOiYfJzOfzX8SBzn5eZc4qMD\nO332/loXEhExe7MzN5I+ZgY7Wt+HRboPdPyg4CM7btloNctCye9BmcczzcMxqW44\nQL8rOqxXB0anPKcls/opY+1hADpOeEZRo6dk1mw48h69905WRxj5z9fQo6UYXYGf\n2jiRaJWMLI3Dxx+H6ppbeVXxjEnUZ6i17faFVKyxwbmnH2P6jbatzg8bvHVhTLst\ngDlHfN+tkhaOapnJ/a3lSdkGgb5bUC619yWTZZ5thJu0FyJBIK7dH/kBHGl3ju6+\nntPCea4af5tD8l0vxb9Fb4ek+fr9eRgTA4eE9zHLY/D5WMX1C0OLdlPahDXf2PL1\nGqG5gjIkrvupGEWwauTV+w22E2nSlt0V5ML8Joylw4lTxoNETycw7RwO0EmYZ7Fo\n3Z/U091e5o41V8b45CbLd++HY15fpoeYSKADlUmUcwuA3pjAe2c=\n=idHk\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8b0309b0c79316bdf1c7c46550291c61b4fac05d",
+          "sha": "8b0309b0c79316bdf1c7c46550291c61b4fac05d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8b0309b0c79316bdf1c7c46550291c61b4fac05d"
+        }
+      ],
+      "message": "fixup! improve nonce_gen doc",
+      "committer": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-04-16T19:18:32Z"
+      },
+      "author": {
+        "name": "Jonas Nick",
+        "email": "jonasd.nick@gmail.com",
+        "date": "2024-03-19T10:03:59Z"
+      },
+      "sha": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e"
+    },
+    {
+      "event": "cross-referenced",
+      "id": null,
+      "node_id": null,
+      "url": null,
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-16T19:29:05Z",
+      "updated_at": "2024-04-16T19:29:05Z",
+      "source": {
+        "issue": {
+          "id": 2246748111,
+          "node_id": "PR_kwDOAP4Jqs5s11_E",
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1518",
+          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1518/labels%7B/name%7D",
+          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1518/comments",
+          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1518/events",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518",
+          "number": 1518,
+          "state": "open",
+          "state_reason": null,
+          "title": "extrakeys: add secp256k1_pubkey_sort",
+          "body": "This PR adds a  `secp256k1_pubkey_sort` function the the public API which was originally part of the musig PR (#1479). However, I opened a separate PR because it adds internal functions that are also used by the WIP silent payments module. ",
+          "user": {
+            "login": "jonasnick",
+            "id": 2582071,
+            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/jonasnick",
+            "html_url": "https://github.com/jonasnick",
+            "followers_url": "https://api.github.com/users/jonasnick/followers",
+            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+            "repos_url": "https://api.github.com/users/jonasnick/repos",
+            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+            "type": "User",
+            "site_admin": false
+          },
+          "labels": [],
+          "assignees": [],
+          "author_association": "CONTRIBUTOR",
+          "locked": false,
+          "comments": 0,
+          "pull_request": {
+            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518",
+            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518",
+            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1518.diff",
+            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1518.patch"
+          },
+          "created_at": "2024-04-16T19:29:04Z",
+          "updated_at": "2024-04-16T19:29:04Z"
+        },
+        "type": "issue"
+      }
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 12495477081,
+      "node_id": "HRFPE_lADOAP4Jqs57T9BRzwAAAALoydlZ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12495477081",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-16T19:29:26Z"
+    },
+    {
+      "event": "commented",
+      "id": 2059792383,
+      "node_id": "IC_kwDOAP4Jqs56xe__",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2059792383",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-16T19:32:39Z",
+      "updated_at": "2024-04-16T19:32:39Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "@josibake \r\n\r\n>  What do you think about splitting out the sort commits into their own PR?\r\n\r\nThat's a good idea. In particular, if more fixups are needed for the sort commits. See #1518.",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#issuecomment-2059792383",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1479"
+    },
+    {
+      "event": "mentioned",
+      "id": 12495520191,
+      "node_id": "MEE_lADOAP4Jqs57T9BRzwAAAALoyoG_",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12495520191",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-16T19:32:40Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 12495520202,
+      "node_id": "SE_lADOAP4Jqs57T9BRzwAAAALoyoHK",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/12495520202",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-04-16T19:32:41Z"
     }
   ],
   "comments": [
@@ -2439,7 +2581,7 @@
       "path": "include/secp256k1_extrakeys.h",
       "position": null,
       "original_position": 18,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "bf1ebb890f69a2e60b51a397959146739bc284ed",
       "in_reply_to_id": null,
       "user": {
@@ -2491,7 +2633,7 @@
       "path": "src/secp256k1.c",
       "position": null,
       "original_position": 1,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "04aa4e76996ad24282df58e1486508f9a51692b5",
       "in_reply_to_id": null,
       "user": {
@@ -2543,7 +2685,7 @@
       "path": "include/secp256k1_extrakeys.h",
       "position": null,
       "original_position": 18,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "bf1ebb890f69a2e60b51a397959146739bc284ed",
       "in_reply_to_id": 1443989873,
       "user": {
@@ -2595,7 +2737,7 @@
       "path": "src/secp256k1.c",
       "position": null,
       "original_position": 1,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "04aa4e76996ad24282df58e1486508f9a51692b5",
       "in_reply_to_id": 1443990557,
       "user": {
@@ -2647,7 +2789,7 @@
       "path": "src/secp256k1.c",
       "position": null,
       "original_position": 1,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "04aa4e76996ad24282df58e1486508f9a51692b5",
       "in_reply_to_id": 1443990557,
       "user": {
@@ -2699,7 +2841,7 @@
       "path": "src/secp256k1.c",
       "position": null,
       "original_position": 1,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "04aa4e76996ad24282df58e1486508f9a51692b5",
       "in_reply_to_id": 1443990557,
       "user": {
@@ -2751,7 +2893,7 @@
       "path": "include/secp256k1_extrakeys.h",
       "position": null,
       "original_position": 18,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "e1ba262f16fd821ec48e8570d4d2990111ec0ef3",
       "in_reply_to_id": null,
       "user": {
@@ -2803,7 +2945,7 @@
       "path": "src/modules/musig/keyagg.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "fce0857aa09a1af71bb3f8a45379fbc3c7768db1",
       "in_reply_to_id": null,
       "user": {
@@ -2855,7 +2997,7 @@
       "path": "examples/musig.c",
       "position": 186,
       "original_position": 186,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "dd4932b67b573b2366e729e869918b17964f5f83",
       "in_reply_to_id": null,
       "user": {
@@ -2907,7 +3049,7 @@
       "path": "examples/musig.c",
       "position": 186,
       "original_position": 186,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "dd4932b67b573b2366e729e869918b17964f5f83",
       "in_reply_to_id": 1477961061,
       "user": {
@@ -3011,7 +3153,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 325,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "dd4932b67b573b2366e729e869918b17964f5f83",
       "in_reply_to_id": null,
       "user": {
@@ -3115,7 +3257,7 @@
       "path": "include/secp256k1_extrakeys.h",
       "position": null,
       "original_position": 18,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "e1ba262f16fd821ec48e8570d4d2990111ec0ef3",
       "in_reply_to_id": 1457727273,
       "user": {
@@ -3167,7 +3309,7 @@
       "path": "src/modules/musig/keyagg.h",
       "position": null,
       "original_position": 34,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "fce0857aa09a1af71bb3f8a45379fbc3c7768db1",
       "in_reply_to_id": 1457733653,
       "user": {
@@ -3219,7 +3361,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 325,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "dd4932b67b573b2366e729e869918b17964f5f83",
       "in_reply_to_id": 1516062204,
       "user": {
@@ -3271,7 +3413,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 20,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": null,
       "user": {
@@ -3323,7 +3465,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 68,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": null,
       "user": {
@@ -3363,7 +3505,7 @@
       "original_start_line": 384,
       "start_side": "RIGHT",
       "line": null,
-      "original_line": 386,
+      "original_line": 392,
       "side": "RIGHT"
     },
     {
@@ -3375,7 +3517,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 20,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": 1524409269,
       "user": {
@@ -3427,7 +3569,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 65,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": null,
       "user": {
@@ -3479,7 +3621,7 @@
       "path": "src/modules/extrakeys/main_impl.h",
       "position": null,
       "original_position": 35,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "26dde295d0ad12a011fc4062ad642852f7ff68fa",
       "in_reply_to_id": null,
       "user": {
@@ -3531,7 +3673,7 @@
       "path": "src/modules/extrakeys/main_impl.h",
       "position": null,
       "original_position": 35,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "26dde295d0ad12a011fc4062ad642852f7ff68fa",
       "in_reply_to_id": 1555961371,
       "user": {
@@ -3583,7 +3725,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 20,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": 1524409269,
       "user": {
@@ -3635,7 +3777,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 68,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": 1524421899,
       "user": {
@@ -3675,7 +3817,7 @@
       "original_start_line": 384,
       "start_side": "RIGHT",
       "line": null,
-      "original_line": 386,
+      "original_line": 392,
       "side": "RIGHT"
     },
     {
@@ -3687,7 +3829,7 @@
       "path": "include/secp256k1_musig.h",
       "position": null,
       "original_position": 65,
-      "commit_id": "3b6c90a93fb55b2ea5fc629762bf4c3c569211cf",
+      "commit_id": "ae7ca3d1baac14188ce345d52998bb9891c4bd4e",
       "original_commit_id": "461970682f56a8e15fc71ecab18d4537e50441fc",
       "in_reply_to_id": 1524437469,
       "user": {
