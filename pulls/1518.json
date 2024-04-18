@@ -51,9 +51,9 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-04-17T22:45:57Z",
+    "updated_at": "2024-04-18T12:14:37Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "30946bdf4736f034b3f5f3806884677d59364f16",
     "assignees": [],
     "requested_reviewers": [],
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 6,
     "commits": 1,
-    "review_comments": 9,
+    "review_comments": 10,
     "comments": 1
   },
   "events": [
@@ -909,6 +909,41 @@
       "submitted_at": "2024-04-17T22:45:57Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+    },
+    {
+      "event": "reviewed",
+      "id": 2008720121,
+      "node_id": "PRR_kwDOAP4Jqs53uqL5",
+      "url": null,
+      "actor": null,
+      "commit_id": "4520d7527c8831e657ef0e5e8711aefe0a0f82bb",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#pullrequestreview-2008720121",
+      "submitted_at": "2024-04-18T12:14:37Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
     }
   ],
   "comments": [
@@ -1378,6 +1413,58 @@
       "start_side": null,
       "line": 477,
       "original_line": 477,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1570608863",
+      "pull_request_review_id": 2008720121,
+      "id": 1570608863,
+      "node_id": "PRRC_kwDOAP4Jqs5dnZbf",
+      "diff_hunk": "@@ -0,0 +1,116 @@\n+/***********************************************************************\n+ * Copyright (c) 2021 Russell O'Connor, Jonas Nick                     *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_HSORT_IMPL_H\n+#define SECP256K1_HSORT_IMPL_H\n+\n+#include \"hsort.h\"\n+\n+/* An array is a heap when, for all non-zero indexes i, the element at index i\n+ * compares as less than or equal to the element at index parent(i) = (i-1)/2.\n+ */\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child1(size_t i) {\n+    VERIFY_CHECK(i <= (SIZE_MAX - 1)/2);\n+    return 2*i + 1;\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child2(size_t i) {\n+    VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+    return secp256k1_heap_child1(i)+1;\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap64(unsigned char *a, size_t i, size_t j, size_t stride) {\n+    unsigned char tmp[64];\n+    VERIFY_CHECK(stride <= 64);\n+    memcpy(tmp, a + i*stride, stride);\n+    memmove(a + i*stride, a + j*stride, stride);\n+    memcpy(a + j*stride, tmp, stride);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap(unsigned char *a, size_t i, size_t j, size_t stride) {\n+    while (64 < stride) {\n+        secp256k1_heap_swap64(a + (stride - 64), i, j, 64);\n+        stride -= 64;\n+    }\n+    secp256k1_heap_swap64(a, i, j, stride);\n+}",
+      "path": "src/hsort_impl.h",
+      "position": 40,
+      "original_position": 40,
+      "commit_id": "4520d7527c8831e657ef0e5e8711aefe0a0f82bb",
+      "original_commit_id": "4520d7527c8831e657ef0e5e8711aefe0a0f82bb",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "`secp256k1_heap_swap` is incorrect for `stride > 64`. See https://github.com/real-or-random/secp256k1/commit/95138ca6c1336bcd20ef332dd742f8a5f0f7cf75 for a fix and a test. This was overlooked because we never use such a stride, not even in the tests.\r\n\r\nAlternatively, we could drop `secp256k1_heap_swap` entirely. `secp256k1_heap_swap64` appears to be correct. But I'd say let's just keep it if my fix looks good.\r\n\r\n",
+      "created_at": "2024-04-18T12:14:37Z",
+      "updated_at": "2024-04-18T12:14:37Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1570608863",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1570608863"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 34,
+      "original_start_line": 34,
+      "start_side": "RIGHT",
+      "line": 40,
+      "original_line": 40,
       "side": "RIGHT"
     }
   ]
