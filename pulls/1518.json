@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-04-18T15:58:24Z",
+    "updated_at": "2024-04-18T16:51:55Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "30946bdf4736f034b3f5f3806884677d59364f16",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 6,
     "commits": 1,
-    "review_comments": 10,
+    "review_comments": 11,
     "comments": 2
   },
   "events": [
@@ -973,9 +973,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-04-18T15:55:38Z",
-      "updated_at": "2024-04-18T15:58:24Z",
+      "updated_at": "2024-04-18T16:02:27Z",
       "author_association": "CONTRIBUTOR",
-      "body": "A wild idea:\nWhat if we used something simple(like shellsort) that is very easy to verify, and has good performance in the best case (when it's already sorted) and then we recommend users that use huge list of pub keys to sort them before passing them in with the stdlib sort function of the platform their using.\n\nNeeding to reimplement and maintaining highly efficient in place sorting every time is very sad\n\nAbout it being useful, I'll say that embedded rust still gives you sorting via libcore, and I think every embedded C toolkit has some sort of sorting utility, but I might be wrong on this",
+      "body": "A wild idea:\nWhat if we used something simple(like shellsort or even bubblesort) that is very easy to verify, and has good performance in the best case (when it's already sorted) and then we recommend users that use huge list of pub keys to sort them before passing them in with the stdlib sort function of the platform their using.\n\nNeeding to reimplement and maintaining highly efficient in place sorting every time is very sad\n\nAbout it being useful, I'll say that embedded rust still gives you sorting via libcore, and I think every embedded C toolkit has some sort of sorting utility, but I might be wrong on this",
       "user": {
         "login": "elichai",
         "id": 2167860,
@@ -1509,6 +1509,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1570608863"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 34,
+      "original_start_line": 34,
+      "start_side": "RIGHT",
+      "line": 40,
+      "original_line": 40,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1571088701",
+      "pull_request_review_id": 2009420545,
+      "id": 1571088701,
+      "node_id": "PRRC_kwDOAP4Jqs5dpOk9",
+      "diff_hunk": "@@ -0,0 +1,116 @@\n+/***********************************************************************\n+ * Copyright (c) 2021 Russell O'Connor, Jonas Nick                     *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_HSORT_IMPL_H\n+#define SECP256K1_HSORT_IMPL_H\n+\n+#include \"hsort.h\"\n+\n+/* An array is a heap when, for all non-zero indexes i, the element at index i\n+ * compares as less than or equal to the element at index parent(i) = (i-1)/2.\n+ */\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child1(size_t i) {\n+    VERIFY_CHECK(i <= (SIZE_MAX - 1)/2);\n+    return 2*i + 1;\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child2(size_t i) {\n+    VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+    return secp256k1_heap_child1(i)+1;\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap64(unsigned char *a, size_t i, size_t j, size_t stride) {\n+    unsigned char tmp[64];\n+    VERIFY_CHECK(stride <= 64);\n+    memcpy(tmp, a + i*stride, stride);\n+    memmove(a + i*stride, a + j*stride, stride);\n+    memcpy(a + j*stride, tmp, stride);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap(unsigned char *a, size_t i, size_t j, size_t stride) {\n+    while (64 < stride) {\n+        secp256k1_heap_swap64(a + (stride - 64), i, j, 64);\n+        stride -= 64;\n+    }\n+    secp256k1_heap_swap64(a, i, j, stride);\n+}",
+      "path": "src/hsort_impl.h",
+      "position": 40,
+      "original_position": 40,
+      "commit_id": "4520d7527c8831e657ef0e5e8711aefe0a0f82bb",
+      "original_commit_id": "4520d7527c8831e657ef0e5e8711aefe0a0f82bb",
+      "in_reply_to_id": 1570608863,
+      "user": {
+        "login": "roconnor-blockstream",
+        "id": 21371712,
+        "node_id": "MDQ6VXNlcjIxMzcxNzEy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/21371712?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/roconnor-blockstream",
+        "html_url": "https://github.com/roconnor-blockstream",
+        "followers_url": "https://api.github.com/users/roconnor-blockstream/followers",
+        "following_url": "https://api.github.com/users/roconnor-blockstream/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/roconnor-blockstream/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/roconnor-blockstream/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/roconnor-blockstream/subscriptions",
+        "organizations_url": "https://api.github.com/users/roconnor-blockstream/orgs",
+        "repos_url": "https://api.github.com/users/roconnor-blockstream/repos",
+        "events_url": "https://api.github.com/users/roconnor-blockstream/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/roconnor-blockstream/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "FWIW, below is more like what I intended to write:\r\n\r\n```c\r\nstatic SECP256K1_INLINE void swap64(unsigned char *a, unsigned char *b, size_t len) {\r\n    unsigned char tmp[64];\r\n    VERIFY_CHECK(len <= 64);\r\n    memcpy(tmp, a, len);\r\n    memmove(a, b, len);\r\n    memcpy(b, tmp, len);\r\n}\r\n\r\nstatic SECP256K1_INLINE void swap(unsigned char *arr, unsigned char *a, size_t stride) {\r\n    unsigned char *a = arr + i*stride;\r\n    unsigned char *b = arr + j*stride;\r\n    size_t len = stride;\r\n    while (64 < len) {\r\n        swap64(a + (len - 64), b + (len - 64), 64);\r\n        len -= 64;\r\n    }\r\n    swap64(a, b, len);\r\n}\r\n```\r\n\r\nObviously I've gotten this wrong before, so take it with a grain of salt.",
+      "created_at": "2024-04-18T16:51:54Z",
+      "updated_at": "2024-04-18T16:51:55Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1571088701",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1571088701"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
