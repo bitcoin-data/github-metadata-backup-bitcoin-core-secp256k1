@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-04-19T14:23:34Z",
+    "updated_at": "2024-04-19T16:08:57Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "a845a8ce6c9490b20aca2d3df7ead0da993dd453",
@@ -157,7 +157,7 @@
         "forks_count": 4,
         "stargazers_count": 3,
         "watchers_count": 3,
-        "size": 12258,
+        "size": 12359,
         "default_branch": "master",
         "open_issues_count": 16,
         "is_template": false,
@@ -290,7 +290,7 @@
         "watchers_count": 1960,
         "size": 10695,
         "default_branch": "master",
-        "open_issues_count": 138,
+        "open_issues_count": 137,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,7 +301,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-04-19T14:38:10Z",
+        "pushed_at": "2024-04-19T15:43:54Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-04-19T09:18:27Z",
         "license": {
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 6,
     "commits": 4,
-    "review_comments": 13,
+    "review_comments": 18,
     "comments": 4
   },
   "events": [
@@ -1349,7 +1349,17 @@
             "type": "User",
             "site_admin": false
           },
-          "labels": [],
+          "labels": [
+            {
+              "id": 4975353639,
+              "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+              "name": "feature",
+              "description": "",
+              "color": "731E95",
+              "default": false
+            }
+          ],
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
@@ -1361,10 +1371,46 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1519.patch"
           },
           "created_at": "2024-04-19T14:21:15Z",
-          "updated_at": "2024-04-19T14:21:15Z"
+          "updated_at": "2024-04-19T16:18:02Z"
         },
         "type": "issue"
       }
+    },
+    {
+      "event": "reviewed",
+      "id": 2011814857,
+      "node_id": "PRR_kwDOAP4Jqs536dvJ",
+      "url": null,
+      "actor": null,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK mod nits, I've inspected the code and the proofs again.\r\n\r\nNew improved tests are nice. ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#pullrequestreview-2011814857",
+      "submitted_at": "2024-04-19T16:08:57Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
     }
   ],
   "comments": [
@@ -2042,6 +2088,266 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 40,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572592643",
+      "pull_request_review_id": 2011814857,
+      "id": 1572592643,
+      "node_id": "PRRC_kwDOAP4Jqs5du9wD",
+      "diff_hunk": "@@ -3675,6 +3675,77 @@ static void run_inverse_tests(void)\n     }\n }\n \n+/***** HSORT TESTS *****/\n+\n+static void test_heap_swap(void) {\n+    unsigned char a[600];\n+    unsigned char e[sizeof(a)];\n+    memset(a,       21, 200);\n+    memset(a + 200, 99, 200);\n+    memset(a + 400, 42, 200);\n+    memset(e,       42, 200);\n+    memset(e + 200, 99, 200);\n+    memset(e + 400, 21, 200);\n+    secp256k1_heap_swap(a, 0, 2, 200);\n+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);\n+}\n+\n+static void test_hsort_is_sorted(unsigned char *elements, size_t n, size_t len) {\n+    size_t i;\n+    for (i = 1; i < n; i++) {\n+        CHECK(memcmp(&elements[(i-1) * len], &elements[i * len], len) <= 0);",
+      "path": "src/tests.c",
+      "position": 22,
+      "original_position": 22,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: `secp256k1_memcmp_var` according to CONTRIBUTING.md (or add a rule that says we can skip in tests, I'll ACK)",
+      "created_at": "2024-04-19T15:58:29Z",
+      "updated_at": "2024-04-19T16:08:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1572592643",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572592643"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 3696,
+      "original_line": 3696,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572593725",
+      "pull_request_review_id": 2011814857,
+      "id": 1572593725,
+      "node_id": "PRRC_kwDOAP4Jqs5du-A9",
+      "diff_hunk": "@@ -3675,6 +3675,77 @@ static void run_inverse_tests(void)\n     }\n }\n \n+/***** HSORT TESTS *****/\n+\n+static void test_heap_swap(void) {\n+    unsigned char a[600];\n+    unsigned char e[sizeof(a)];\n+    memset(a,       21, 200);\n+    memset(a + 200, 99, 200);\n+    memset(a + 400, 42, 200);\n+    memset(e,       42, 200);\n+    memset(e + 200, 99, 200);\n+    memset(e + 400, 21, 200);\n+    secp256k1_heap_swap(a, 0, 2, 200);\n+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);\n+}\n+\n+static void test_hsort_is_sorted(unsigned char *elements, size_t n, size_t len) {\n+    size_t i;\n+    for (i = 1; i < n; i++) {\n+        CHECK(memcmp(&elements[(i-1) * len], &elements[i * len], len) <= 0);\n+    }\n+}\n+\n+struct test_hsort_cmp_data {\n+    size_t counter;\n+    size_t element_len;\n+};\n+\n+static int test_hsort_cmp(const void *ele1, const void *ele2, void *data) {\n+  struct test_hsort_cmp_data *d = (struct test_hsort_cmp_data *) data;\n+  d->counter += 1;\n+  return memcmp((unsigned char *)ele1, (unsigned char *)ele2, d->element_len);\n+}",
+      "path": "src/tests.c",
+      "position": 35,
+      "original_position": 35,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": " - indentation\r\n - `secp256k1_memcmp_var`",
+      "created_at": "2024-04-19T15:58:46Z",
+      "updated_at": "2024-04-19T16:08:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1572593725",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572593725"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 3705,
+      "original_start_line": 3705,
+      "start_side": "RIGHT",
+      "line": 3709,
+      "original_line": 3709,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572595731",
+      "pull_request_review_id": 2011814857,
+      "id": 1572595731,
+      "node_id": "PRRC_kwDOAP4Jqs5du-gT",
+      "diff_hunk": "@@ -0,0 +1,119 @@\n+/***********************************************************************\n+ * Copyright (c) 2021 Russell O'Connor, Jonas Nick                     *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_HSORT_IMPL_H\n+#define SECP256K1_HSORT_IMPL_H\n+\n+#include \"hsort.h\"\n+\n+/* An array is a heap when, for all non-zero indexes i, the element at index i\n+ * compares as less than or equal to the element at index parent(i) = (i-1)/2.\n+ */\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child1(size_t i) {\n+    VERIFY_CHECK(i <= (SIZE_MAX - 1)/2);\n+    return 2*i + 1;\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child2(size_t i) {\n+    VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+    return secp256k1_heap_child1(i)+1;\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap64(unsigned char *a, unsigned char *b, size_t len) {\n+    unsigned char tmp[64];\n+    VERIFY_CHECK(len <= 64);\n+    memcpy(tmp, a, len);\n+    memmove(a, b, len);\n+    memcpy(b, tmp, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap(unsigned char *arr, size_t i, size_t j, size_t stride) {\n+    unsigned char *a = arr + i*stride;\n+    unsigned char *b = arr + j*stride;\n+    size_t len = stride;\n+    while (64 < len) {\n+        secp256k1_heap_swap64(a + (len - 64), b + (len - 64), 64);\n+        len -= 64;\n+    }\n+    secp256k1_heap_swap64(a, b, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_down(unsigned char *arr, size_t i, size_t heap_size, size_t stride,\n+                            int (*cmp)(const void *, const void *, void *), void *cmp_data) {\n+    while (i < heap_size/2) {\n+        VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+        /* Proof:\n+         * i < heap_size/2\n+         * i + 1 <= heap_size/2\n+         * 2*i + 2 <= heap_size <= SIZE_MAX\n+         * 2*i <= SIZE_MAX - 2\n+         */\n+\n+        VERIFY_CHECK(secp256k1_heap_child1(i) < heap_size);\n+        /* Proof:\n+         * i < heap_size/2\n+         * i + 1 <= heap_size/2\n+         * 2*i + 2 <= heap_size\n+         * 2*i + 1 < heap_size\n+         * child1(i) < heap_size\n+         */\n+\n+        /* Let [x] be notation for the contents at a[x*stride].\n+         *\n+         * If [child1(i)] > [i] and [child2(i)] > [i],\n+         *   swap [i] with the larger child to ensure the new parent is larger\n+         *   than both children. When [child1(i)] == [child2(i)], swap [i] with\n+         *   [child2(i)].\n+         * Else if [child1(i)] > [i], swap [i] with [child1(i)].\n+         * Else if [child2(i)] > [i], swap [i] with [child2(i)].\n+         */\n+        if (secp256k1_heap_child2(i) < heap_size\n+                && 0 <= cmp(arr + secp256k1_heap_child2(i)*stride, arr + secp256k1_heap_child1(i)*stride, cmp_data)) {\n+            if (0 < cmp(arr + secp256k1_heap_child2(i)*stride, arr +         i*stride, cmp_data)) {\n+                secp256k1_heap_swap(arr, i, secp256k1_heap_child2(i), stride);\n+                i = secp256k1_heap_child2(i);\n+            } else {\n+                /* At this point we have [child2(i)] >= [child1(i)] and we have\n+                 * [child2(i)] <= [i], and thus [child1(i)] <= [i] which means\n+                 * that the next comparison can be skipped. */\n+                return;\n+            }\n+        } else if (0 < cmp(arr + secp256k1_heap_child1(i)*stride, arr +         i*stride, cmp_data)) {\n+            secp256k1_heap_swap(arr, i, secp256k1_heap_child1(i), stride);\n+            i = secp256k1_heap_child1(i);\n+        } else {\n+            return;\n+        }\n+    }\n+    /* heap_size/2 <= i\n+     * heap_size/2 < i + 1\n+     * heap_size < 2*i + 2\n+     * heap_size <= 2*i + 1\n+     * heap_size <= child1(i)\n+     * Thus child1(i) and child2(i) are now out of bounds and we are at a leaf.\n+     */\n+}\n+\n+/* In-place heap sort. */\n+static void secp256k1_hsort(void *ptr, size_t count, size_t size,\n+                            int (*cmp)(const void *, const void *, void *),\n+                            void *cmp_data ) {\n+    size_t i;\n+\n+    for(i = count/2; 0 < i; --i) {\n+        secp256k1_heap_down(ptr, i-1, count, size, cmp, cmp_data);\n+    }\n+    for(i = count; 1 < i; --i) {",
+      "path": "src/hsort_impl.h",
+      "position": 110,
+      "original_position": 110,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "spacing micronits\r\n```suggestion\r\n                            void *cmp_data) {\r\n    size_t i;\r\n\r\n    for (i = count/2; 0 < i; --i) {\r\n        secp256k1_heap_down(ptr, i-1, count, size, cmp, cmp_data);\r\n    }\r\n    for (i = count; 1 < i; --i) {\r\n```\r\n",
+      "created_at": "2024-04-19T15:59:54Z",
+      "updated_at": "2024-04-19T16:08:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1572595731",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572595731"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 104,
+      "original_start_line": 104,
+      "start_side": "RIGHT",
+      "line": 110,
+      "original_line": 110,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572598518",
+      "pull_request_review_id": 2011814857,
+      "id": 1572598518,
+      "node_id": "PRRC_kwDOAP4Jqs5du_L2",
+      "diff_hunk": "@@ -3675,6 +3675,77 @@ static void run_inverse_tests(void)\n     }\n }\n \n+/***** HSORT TESTS *****/\n+\n+static void test_heap_swap(void) {\n+    unsigned char a[600];\n+    unsigned char e[sizeof(a)];\n+    memset(a,       21, 200);\n+    memset(a + 200, 99, 200);\n+    memset(a + 400, 42, 200);\n+    memset(e,       42, 200);\n+    memset(e + 200, 99, 200);\n+    memset(e + 400, 21, 200);\n+    secp256k1_heap_swap(a, 0, 2, 200);\n+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);\n+}\n+\n+static void test_hsort_is_sorted(unsigned char *elements, size_t n, size_t len) {\n+    size_t i;\n+    for (i = 1; i < n; i++) {\n+        CHECK(memcmp(&elements[(i-1) * len], &elements[i * len], len) <= 0);\n+    }\n+}\n+\n+struct test_hsort_cmp_data {\n+    size_t counter;\n+    size_t element_len;\n+};\n+\n+static int test_hsort_cmp(const void *ele1, const void *ele2, void *data) {\n+  struct test_hsort_cmp_data *d = (struct test_hsort_cmp_data *) data;\n+  d->counter += 1;\n+  return memcmp((unsigned char *)ele1, (unsigned char *)ele2, d->element_len);\n+}\n+\n+#define NUM 65\n+#define MAX_ELEMENT_LEN 65\n+static void test_hsort(size_t element_len) {\n+    unsigned char elements[NUM * MAX_ELEMENT_LEN] = { 0 };\n+    struct test_hsort_cmp_data data;\n+    int i;\n+\n+    VERIFY_CHECK(element_len <= MAX_ELEMENT_LEN);\n+    data.counter = 0;\n+    data.element_len = element_len;\n+\n+    secp256k1_hsort(elements, 0, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, 1, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, NUM, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter >= NUM);\n+    test_hsort_is_sorted(elements, NUM, element_len);\n+\n+    /* Test hsort with array of random length n */\n+    for (i = 0; i < COUNT; i++) {\n+        int n = secp256k1_testrand_int(NUM);\n+        secp256k1_testrand_bytes_test(elements, n*element_len);\n+        secp256k1_hsort(elements, n, element_len, test_hsort_cmp, &data);\n+        test_hsort_is_sorted(elements, n, element_len);\n+    }",
+      "path": "src/tests.c",
+      "position": 62,
+      "original_position": 62,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "suggestion: Also call the C library `qsort_r` and compare the results. This is a very effective test at the cost of just a handful of code lines. ",
+      "created_at": "2024-04-19T16:01:35Z",
+      "updated_at": "2024-04-19T16:08:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1572598518",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572598518"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 3730,
+      "original_start_line": 3730,
+      "start_side": "RIGHT",
+      "line": 3736,
+      "original_line": 3736,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572608994",
+      "pull_request_review_id": 2011814857,
+      "id": 1572608994,
+      "node_id": "PRRC_kwDOAP4Jqs5dvBvi",
+      "diff_hunk": "@@ -6607,6 +6678,161 @@ static void run_pubkey_comparison(void) {\n     CHECK(secp256k1_ec_pubkey_cmp(CTX, &pk2, &pk1) > 0);\n }\n \n+static void test_sort_helper(secp256k1_pubkey *pk, size_t *pk_order, size_t n_pk) {\n+    size_t i;\n+    const secp256k1_pubkey *pk_test[5];\n+\n+    for (i = 0; i < n_pk; i++) {\n+        pk_test[i] = &pk[pk_order[i]];\n+    }\n+    secp256k1_ec_pubkey_sort(CTX, pk_test, n_pk);\n+    for (i = 0; i < n_pk; i++) {\n+        CHECK(secp256k1_memcmp_var(pk_test[i], &pk[i], sizeof(*pk_test[i])) == 0);\n+    }\n+}\n+\n+static void permute(size_t *arr, size_t n) {\n+    size_t i;\n+    for (i = n - 1; i >= 1; i--) {\n+        size_t tmp, j;\n+        j = secp256k1_testrand_int(i + 1);\n+        tmp = arr[i];\n+        arr[i] = arr[j];\n+        arr[j] = tmp;\n+    }\n+}\n+\n+static void rand_pk(secp256k1_pubkey *pk) {\n+    unsigned char seckey[32];\n+    secp256k1_keypair keypair;\n+    secp256k1_testrand256(seckey);\n+    CHECK(secp256k1_keypair_create(CTX, &keypair, seckey) == 1);\n+    CHECK(secp256k1_keypair_pub(CTX, pk, &keypair) == 1);\n+}\n+\n+static void test_sort_api(void) {\n+    secp256k1_pubkey pks[2];\n+    const secp256k1_pubkey *pks_ptr[2];\n+\n+    pks_ptr[0] = &pks[0];\n+    pks_ptr[1] = &pks[1];\n+\n+    rand_pk(&pks[0]);\n+    rand_pk(&pks[1]);\n+\n+    CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1);\n+    CHECK_ILLEGAL(CTX, secp256k1_ec_pubkey_sort(CTX, NULL, 2));\n+    CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 0) == 1);\n+    /* Test illegal public keys */\n+    memset(&pks[0], 0, sizeof(pks[0]));\n+    CHECK_ILLEGAL_VOID(CTX, CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1));\n+    memset(&pks[1], 0, sizeof(pks[1]));\n+    {\n+        int32_t ecount = 0;\n+        secp256k1_context_set_illegal_callback(CTX, counting_callback_fn, &ecount);\n+        CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1);\n+        CHECK(ecount == 2);\n+        secp256k1_context_set_illegal_callback(CTX, NULL, NULL);\n+    }",
+      "path": "src/tests.c",
+      "position": 137,
+      "original_position": 137,
+      "commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Not exactly this PR, but do you think it's worth noting in the API docs that callbacks may be triggered more than once  per API call? This may be interesting in the case of the illegal callback because you wouldn't need to crash necessarily for this type of callback (e.g., thinking of python bindings that could choose to raise). If yes, we could track this separately.",
+      "created_at": "2024-04-19T16:07:41Z",
+      "updated_at": "2024-04-19T16:08:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1572608994",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1572608994"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 6730,
+      "original_start_line": 6730,
+      "start_side": "RIGHT",
+      "line": 6736,
+      "original_line": 6736,
       "side": "RIGHT"
     }
   ]
