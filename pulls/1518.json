@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-04-19T20:14:15Z",
+    "updated_at": "2024-04-21T18:52:49Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "82ceda7b3fa6e0c648eb03d175cdf174e849bcf4",
@@ -286,8 +286,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 957,
-        "stargazers_count": 1960,
-        "watchers_count": 1960,
+        "stargazers_count": 1961,
+        "watchers_count": 1961,
         "size": 10695,
         "default_branch": "master",
         "open_issues_count": 137,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-04-19T19:34:41Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-04-19T09:18:27Z",
+        "updated_at": "2024-04-20T15:36:49Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 6,
     "commits": 7,
-    "review_comments": 21,
+    "review_comments": 23,
     "comments": 6
   },
   "events": [
@@ -2767,6 +2767,110 @@
       "start_side": null,
       "line": null,
       "original_line": 3727,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1573884229",
+      "pull_request_review_id": 2013499265,
+      "id": 1573884229,
+      "node_id": "PRRC_kwDOAP4Jqs5dz5FF",
+      "diff_hunk": "@@ -3675,6 +3675,77 @@ static void run_inverse_tests(void)\n     }\n }\n \n+/***** HSORT TESTS *****/\n+\n+static void test_heap_swap(void) {\n+    unsigned char a[600];\n+    unsigned char e[sizeof(a)];\n+    memset(a,       21, 200);\n+    memset(a + 200, 99, 200);\n+    memset(a + 400, 42, 200);\n+    memset(e,       42, 200);\n+    memset(e + 200, 99, 200);\n+    memset(e + 400, 21, 200);\n+    secp256k1_heap_swap(a, 0, 2, 200);\n+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);\n+}\n+\n+static void test_hsort_is_sorted(unsigned char *elements, size_t n, size_t len) {\n+    size_t i;\n+    for (i = 1; i < n; i++) {\n+        CHECK(memcmp(&elements[(i-1) * len], &elements[i * len], len) <= 0);\n+    }\n+}\n+\n+struct test_hsort_cmp_data {\n+    size_t counter;\n+    size_t element_len;\n+};\n+\n+static int test_hsort_cmp(const void *ele1, const void *ele2, void *data) {\n+  struct test_hsort_cmp_data *d = (struct test_hsort_cmp_data *) data;\n+  d->counter += 1;\n+  return memcmp((unsigned char *)ele1, (unsigned char *)ele2, d->element_len);\n+}\n+\n+#define NUM 65\n+#define MAX_ELEMENT_LEN 65\n+static void test_hsort(size_t element_len) {\n+    unsigned char elements[NUM * MAX_ELEMENT_LEN] = { 0 };\n+    struct test_hsort_cmp_data data;\n+    int i;\n+\n+    VERIFY_CHECK(element_len <= MAX_ELEMENT_LEN);\n+    data.counter = 0;\n+    data.element_len = element_len;\n+\n+    secp256k1_hsort(elements, 0, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, 1, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, NUM, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter >= NUM);\n+    test_hsort_is_sorted(elements, NUM, element_len);\n+\n+    /* Test hsort with array of random length n */\n+    for (i = 0; i < COUNT; i++) {\n+        int n = secp256k1_testrand_int(NUM);\n+        secp256k1_testrand_bytes_test(elements, n*element_len);\n+        secp256k1_hsort(elements, n, element_len, test_hsort_cmp, &data);\n+        test_hsort_is_sorted(elements, n, element_len);\n+    }",
+      "path": "src/tests.c",
+      "position": 63,
+      "original_position": 62,
+      "commit_id": "890031268ec8dd25160c3148e054a1339e4a69da",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": 1572598518,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> Unfortunately, `qsort_r` is not part of the standard lib.\r\n\r\nYes, okay, I see. I think we could implement a test also with `qsort` if we add an adapter comparison function. But then it's a few lines of code more. It certainly won't hurt, but then it's not entirely clear if it's worth the hassle and gives us much more than the simple check that the output array is sorted. ",
+      "created_at": "2024-04-21T18:51:37Z",
+      "updated_at": "2024-04-21T18:51:37Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1573884229",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1573884229"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 3731,
+      "original_start_line": 3730,
+      "start_side": "RIGHT",
+      "line": 3737,
+      "original_line": 3736,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1573884510",
+      "pull_request_review_id": 2013499406,
+      "id": 1573884510,
+      "node_id": "PRRC_kwDOAP4Jqs5dz5Je",
+      "diff_hunk": "@@ -6607,6 +6678,161 @@ static void run_pubkey_comparison(void) {\n     CHECK(secp256k1_ec_pubkey_cmp(CTX, &pk2, &pk1) > 0);\n }\n \n+static void test_sort_helper(secp256k1_pubkey *pk, size_t *pk_order, size_t n_pk) {\n+    size_t i;\n+    const secp256k1_pubkey *pk_test[5];\n+\n+    for (i = 0; i < n_pk; i++) {\n+        pk_test[i] = &pk[pk_order[i]];\n+    }\n+    secp256k1_ec_pubkey_sort(CTX, pk_test, n_pk);\n+    for (i = 0; i < n_pk; i++) {\n+        CHECK(secp256k1_memcmp_var(pk_test[i], &pk[i], sizeof(*pk_test[i])) == 0);\n+    }\n+}\n+\n+static void permute(size_t *arr, size_t n) {\n+    size_t i;\n+    for (i = n - 1; i >= 1; i--) {\n+        size_t tmp, j;\n+        j = secp256k1_testrand_int(i + 1);\n+        tmp = arr[i];\n+        arr[i] = arr[j];\n+        arr[j] = tmp;\n+    }\n+}\n+\n+static void rand_pk(secp256k1_pubkey *pk) {\n+    unsigned char seckey[32];\n+    secp256k1_keypair keypair;\n+    secp256k1_testrand256(seckey);\n+    CHECK(secp256k1_keypair_create(CTX, &keypair, seckey) == 1);\n+    CHECK(secp256k1_keypair_pub(CTX, pk, &keypair) == 1);\n+}\n+\n+static void test_sort_api(void) {\n+    secp256k1_pubkey pks[2];\n+    const secp256k1_pubkey *pks_ptr[2];\n+\n+    pks_ptr[0] = &pks[0];\n+    pks_ptr[1] = &pks[1];\n+\n+    rand_pk(&pks[0]);\n+    rand_pk(&pks[1]);\n+\n+    CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1);\n+    CHECK_ILLEGAL(CTX, secp256k1_ec_pubkey_sort(CTX, NULL, 2));\n+    CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 0) == 1);\n+    /* Test illegal public keys */\n+    memset(&pks[0], 0, sizeof(pks[0]));\n+    CHECK_ILLEGAL_VOID(CTX, CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1));\n+    memset(&pks[1], 0, sizeof(pks[1]));\n+    {\n+        int32_t ecount = 0;\n+        secp256k1_context_set_illegal_callback(CTX, counting_callback_fn, &ecount);\n+        CHECK(secp256k1_ec_pubkey_sort(CTX, pks_ptr, 2) == 1);\n+        CHECK(ecount == 2);\n+        secp256k1_context_set_illegal_callback(CTX, NULL, NULL);\n+    }",
+      "path": "src/tests.c",
+      "position": 138,
+      "original_position": 137,
+      "commit_id": "890031268ec8dd25160c3148e054a1339e4a69da",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": 1572608994,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "> But if we think that calling the callback multiple times causes problems, it may makes more sense to fix/change that because it's unlikely someone will read this and take it into account.\r\n\r\nLet's maybe track this in a separate issue. It's certainly not great to call the callback twice, but last time when I tried to \"fix\" it, I wasn't happy with the added code complexity.",
+      "created_at": "2024-04-21T18:52:49Z",
+      "updated_at": "2024-04-21T18:52:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1573884510",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1573884510"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": 6731,
+      "original_start_line": 6730,
+      "start_side": "RIGHT",
+      "line": 6737,
+      "original_line": 6736,
       "side": "RIGHT"
     }
   ]
