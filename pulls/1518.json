@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-04-22T17:06:55Z",
+    "updated_at": "2024-04-24T15:47:05Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "07ae2718a7690fd5e556d856ab9a53d2643cadd0",
@@ -286,11 +286,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 958,
-        "stargazers_count": 1961,
-        "watchers_count": 1961,
+        "stargazers_count": 1962,
+        "watchers_count": 1962,
         "size": 10880,
         "default_branch": "master",
-        "open_issues_count": 136,
+        "open_issues_count": 137,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -301,9 +301,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-04-22T15:22:53Z",
+        "pushed_at": "2024-04-24T09:38:44Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-04-22T15:17:49Z",
+        "updated_at": "2024-04-24T14:16:26Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 7,
     "commits": 1,
-    "review_comments": 25,
+    "review_comments": 28,
     "comments": 7
   },
   "events": [
@@ -1203,7 +1203,7 @@
           "assignees": [],
           "author_association": "MEMBER",
           "locked": false,
-          "comments": 0,
+          "comments": 2,
           "pull_request": {
             "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519",
             "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519",
@@ -1211,7 +1211,7 @@
             "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1519.patch"
           },
           "created_at": "2024-04-19T14:21:15Z",
-          "updated_at": "2024-04-22T16:26:35Z"
+          "updated_at": "2024-04-24T09:56:38Z"
         },
         "type": "issue"
       }
@@ -1517,6 +1517,42 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#issuecomment-2069872148",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1518"
+    },
+    {
+      "event": "reviewed",
+      "id": 2020260426,
+      "node_id": "PRR_kwDOAP4Jqs54arpK",
+      "url": null,
+      "actor": null,
+      "commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#pullrequestreview-2020260426",
+      "submitted_at": "2024-04-24T15:47:05Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
     }
   ],
   "comments": [
@@ -2818,6 +2854,162 @@
       "start_side": "RIGHT",
       "line": 3738,
       "original_line": 3738,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578121243",
+      "pull_request_review_id": 2020260426,
+      "id": 1578121243,
+      "node_id": "PRRC_kwDOAP4Jqs5eEDgb",
+      "diff_hunk": "@@ -0,0 +1,119 @@\n+/***********************************************************************\n+ * Copyright (c) 2021 Russell O'Connor, Jonas Nick                     *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_HSORT_IMPL_H\n+#define SECP256K1_HSORT_IMPL_H\n+\n+#include \"hsort.h\"\n+\n+/* An array is a heap when, for all non-zero indexes i, the element at index i\n+ * compares as less than or equal to the element at index parent(i) = (i-1)/2.\n+ */\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child1(size_t i) {\n+    VERIFY_CHECK(i <= (SIZE_MAX - 1)/2);\n+    return 2*i + 1;\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child2(size_t i) {\n+    VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+    return secp256k1_heap_child1(i)+1;\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap64(unsigned char *a, unsigned char *b, size_t len) {\n+    unsigned char tmp[64];\n+    VERIFY_CHECK(len <= 64);\n+    memcpy(tmp, a, len);\n+    memmove(a, b, len);\n+    memcpy(b, tmp, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap(unsigned char *arr, size_t i, size_t j, size_t stride) {\n+    unsigned char *a = arr + i*stride;\n+    unsigned char *b = arr + j*stride;\n+    size_t len = stride;\n+    while (64 < len) {\n+        secp256k1_heap_swap64(a + (len - 64), b + (len - 64), 64);\n+        len -= 64;\n+    }\n+    secp256k1_heap_swap64(a, b, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_down(unsigned char *arr, size_t i, size_t heap_size, size_t stride,\n+                            int (*cmp)(const void *, const void *, void *), void *cmp_data) {\n+    while (i < heap_size/2) {\n+        VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+        /* Proof:\n+         * i < heap_size/2\n+         * i + 1 <= heap_size/2\n+         * 2*i + 2 <= heap_size <= SIZE_MAX\n+         * 2*i <= SIZE_MAX - 2\n+         */\n+\n+        VERIFY_CHECK(secp256k1_heap_child1(i) < heap_size);\n+        /* Proof:\n+         * i < heap_size/2\n+         * i + 1 <= heap_size/2\n+         * 2*i + 2 <= heap_size\n+         * 2*i + 1 < heap_size\n+         * child1(i) < heap_size\n+         */\n+\n+        /* Let [x] be notation for the contents at a[x*stride].\n+         *\n+         * If [child1(i)] > [i] and [child2(i)] > [i],\n+         *   swap [i] with the larger child to ensure the new parent is larger\n+         *   than both children. When [child1(i)] == [child2(i)], swap [i] with\n+         *   [child2(i)].\n+         * Else if [child1(i)] > [i], swap [i] with [child1(i)].\n+         * Else if [child2(i)] > [i], swap [i] with [child2(i)].\n+         */\n+        if (secp256k1_heap_child2(i) < heap_size\n+                && 0 <= cmp(arr + secp256k1_heap_child2(i)*stride, arr + secp256k1_heap_child1(i)*stride, cmp_data)) {\n+            if (0 < cmp(arr + secp256k1_heap_child2(i)*stride, arr +         i*stride, cmp_data)) {",
+      "path": "src/hsort_impl.h",
+      "position": 76,
+      "original_position": 76,
+      "commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "original_commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Strange indentation.",
+      "created_at": "2024-04-24T15:44:40Z",
+      "updated_at": "2024-04-24T15:47:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1578121243",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578121243"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 76,
+      "original_line": 76,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578123557",
+      "pull_request_review_id": 2020260426,
+      "id": 1578123557,
+      "node_id": "PRRC_kwDOAP4Jqs5eEEEl",
+      "diff_hunk": "@@ -0,0 +1,119 @@\n+/***********************************************************************\n+ * Copyright (c) 2021 Russell O'Connor, Jonas Nick                     *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_HSORT_IMPL_H\n+#define SECP256K1_HSORT_IMPL_H\n+\n+#include \"hsort.h\"\n+\n+/* An array is a heap when, for all non-zero indexes i, the element at index i\n+ * compares as less than or equal to the element at index parent(i) = (i-1)/2.\n+ */\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child1(size_t i) {\n+    VERIFY_CHECK(i <= (SIZE_MAX - 1)/2);\n+    return 2*i + 1;\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_heap_child2(size_t i) {\n+    VERIFY_CHECK(i <= SIZE_MAX/2 - 1);\n+    return secp256k1_heap_child1(i)+1;\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap64(unsigned char *a, unsigned char *b, size_t len) {\n+    unsigned char tmp[64];\n+    VERIFY_CHECK(len <= 64);\n+    memcpy(tmp, a, len);\n+    memmove(a, b, len);\n+    memcpy(b, tmp, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_swap(unsigned char *arr, size_t i, size_t j, size_t stride) {\n+    unsigned char *a = arr + i*stride;\n+    unsigned char *b = arr + j*stride;\n+    size_t len = stride;\n+    while (64 < len) {\n+        secp256k1_heap_swap64(a + (len - 64), b + (len - 64), 64);\n+        len -= 64;\n+    }\n+    secp256k1_heap_swap64(a, b, len);\n+}\n+\n+static SECP256K1_INLINE void secp256k1_heap_down(unsigned char *arr, size_t i, size_t heap_size, size_t stride,",
+      "path": "src/hsort_impl.h",
+      "position": 45,
+      "original_position": 45,
+      "commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "original_commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Maybe add a one-line description, like \"Given an array arr of length heap_size strides, of which all elements >i satisfy the max-heap property, update it so all elements >=i satisfy the max-heap property\"?",
+      "created_at": "2024-04-24T15:46:25Z",
+      "updated_at": "2024-04-24T15:47:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1578123557",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578123557"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 45,
+      "original_line": 45,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578124289",
+      "pull_request_review_id": 2020260426,
+      "id": 1578124289,
+      "node_id": "PRRC_kwDOAP4Jqs5eEEQB",
+      "diff_hunk": "@@ -325,6 +326,40 @@ int secp256k1_ec_pubkey_cmp(const secp256k1_context* ctx, const secp256k1_pubkey\n     return secp256k1_memcmp_var(out[0], out[1], sizeof(out[0]));\n }\n \n+/* This struct wraps a const context pointer to satisfy the secp256k1_hsort api",
+      "path": "src/secp256k1.c",
+      "position": 12,
+      "original_position": 12,
+      "commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "original_commit_id": "b764ca84f98cee6314b0f5891051c87c1e33c82c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "That sounds like an unnecessary indirection to me, just to avoid casting away a `const`?",
+      "created_at": "2024-04-24T15:46:58Z",
+      "updated_at": "2024-04-24T15:47:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1578124289",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1578124289"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 329,
+      "original_line": 329,
       "side": "RIGHT"
     }
   ]
