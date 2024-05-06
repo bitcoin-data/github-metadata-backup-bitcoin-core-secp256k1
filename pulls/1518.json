@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-16T19:29:04Z",
-    "updated_at": "2024-05-03T15:36:00Z",
+    "updated_at": "2024-05-06T07:02:05Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "1338daa2f5d1a8838db9b233ccf2fabc609820fb",
@@ -332,7 +332,7 @@
     "deletions": 0,
     "changed_files": 7,
     "commits": 1,
-    "review_comments": 33,
+    "review_comments": 34,
     "comments": 8
   },
   "events": [
@@ -3337,6 +3337,58 @@
       "start_side": "RIGHT",
       "line": 332,
       "original_line": 332,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1590613482",
+      "pull_request_review_id": 2040119099,
+      "id": 1590613482,
+      "node_id": "PRRC_kwDOAP4Jqs5eztXq",
+      "diff_hunk": "@@ -3675,6 +3675,77 @@ static void run_inverse_tests(void)\n     }\n }\n \n+/***** HSORT TESTS *****/\n+\n+static void test_heap_swap(void) {\n+    unsigned char a[600];\n+    unsigned char e[sizeof(a)];\n+    memset(a,       21, 200);\n+    memset(a + 200, 99, 200);\n+    memset(a + 400, 42, 200);\n+    memset(e,       42, 200);\n+    memset(e + 200, 99, 200);\n+    memset(e + 400, 21, 200);\n+    secp256k1_heap_swap(a, 0, 2, 200);\n+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);\n+}\n+\n+static void test_hsort_is_sorted(unsigned char *elements, size_t n, size_t len) {\n+    size_t i;\n+    for (i = 1; i < n; i++) {\n+        CHECK(memcmp(&elements[(i-1) * len], &elements[i * len], len) <= 0);\n+    }\n+}\n+\n+struct test_hsort_cmp_data {\n+    size_t counter;\n+    size_t element_len;\n+};\n+\n+static int test_hsort_cmp(const void *ele1, const void *ele2, void *data) {\n+  struct test_hsort_cmp_data *d = (struct test_hsort_cmp_data *) data;\n+  d->counter += 1;\n+  return memcmp((unsigned char *)ele1, (unsigned char *)ele2, d->element_len);\n+}\n+\n+#define NUM 65\n+#define MAX_ELEMENT_LEN 65\n+static void test_hsort(size_t element_len) {\n+    unsigned char elements[NUM * MAX_ELEMENT_LEN] = { 0 };\n+    struct test_hsort_cmp_data data;\n+    int i;\n+\n+    VERIFY_CHECK(element_len <= MAX_ELEMENT_LEN);\n+    data.counter = 0;\n+    data.element_len = element_len;\n+\n+    secp256k1_hsort(elements, 0, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, 1, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter == 0);\n+    secp256k1_hsort(elements, NUM, element_len, test_hsort_cmp, &data);\n+    CHECK(data.counter >= NUM);",
+      "path": "src/tests.c",
+      "position": null,
+      "original_position": 53,
+      "commit_id": "7d2591ce12d8a9b85f210cf9d678e91cee125ee9",
+      "original_commit_id": "2bb0baf63d1173929068e040345bb240af420601",
+      "in_reply_to_id": 1572830550,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Changed to `NUM-1`.",
+      "created_at": "2024-05-06T07:02:05Z",
+      "updated_at": "2024-05-06T07:02:05Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1518#discussion_r1590613482",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1590613482"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1518"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 3727,
       "side": "RIGHT"
     }
   ]
