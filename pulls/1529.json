@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2024-05-11T10:23:20Z",
-    "updated_at": "2024-05-22T18:01:06Z",
+    "updated_at": "2024-05-23T10:59:25Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "280a4e26bdbc6155fdf46bcc62e529210647b63d",
@@ -342,7 +342,7 @@
     "changed_files": 1,
     "commits": 2,
     "review_comments": 0,
-    "comments": 8
+    "comments": 9
   },
   "events": [
     {
@@ -1198,6 +1198,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1529#issuecomment-2125436698",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1529"
+    },
+    {
+      "event": "commented",
+      "id": 2126822212,
+      "node_id": "IC_kwDOAP4Jqs5-xLtE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2126822212",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-05-23T10:59:24Z",
+      "updated_at": "2024-05-23T10:59:24Z",
+      "author_association": "MEMBER",
+      "body": "The public header includes were changed in https://github.com/bitcoin-core/secp256k1/pull/925. When building the library itself, in the `BUILD_INTERFACE` context, providing an `-I` compiler flag the `include` subdirectory is not needed anymore.\r\n\r\nHowever, when the library is integrated by a downstream project in its own build tree, for example, with using `add_subdirectory()` command, the `secp256k1` target  must provide the [`INTERFACE_INCLUDE_DIRECTORIES`](https://cmake.org/cmake/help/latest/prop_tgt/INTERFACE_INCLUDE_DIRECTORIES.html) property with a path to the `include` subdirectory as a part of its usage requirements. Otherwise, the downstream project will likely fail to find the public headers.\r\n\r\nLet's break down the following code https://github.com/bitcoin-core/secp256k1/blob/06bff6dec8d038f7b4112664a9b882293ebc5178/src/CMakeLists.txt#L34-L38\r\n\r\nThis command sets the `INTERFACE_INCLUDE_DIRECTORIES` property of the `secp256k1` target, which means it is a part of the usage requirement and is dedicated to the library consumers.\r\n\r\nThere are two kinds of such consumers: internal and external ones.\r\n\r\n1. Internal consumers are tests and benchmarks that refer to public headers using a relative path like https://github.com/bitcoin-core/secp256k1/blob/06bff6dec8d038f7b4112664a9b882293ebc5178/src/bench.c#L10\r\n\r\nSuch consumers do not need any include directories to be specified, and it is the case because `PROJECT_IS_TOP_LEVEL` holds `TRUE`.\r\n\r\n2. External consumers are downstream projects that included this project in their build tree using an `add_subdirectory(secp256k1)` command. In that case, `INTERFACE_INCLUDE_DIRECTORIES` will include a path to `.../secp256k1/include` directory.\r\n\r\n---\r\n\r\nIn short, not using `PROJECT_IS_TOP_LEVEL` leads to unnecessary `-I/path/to/include` flag when compiling tests and benchmarks.",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1529#issuecomment-2126822212",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1529"
     }
   ],
