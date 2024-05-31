@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-05-31T14:22:24Z",
+    "updated_at": "2024-05-31T16:24:22Z",
     "mergeable": true,
     "mergeable_state": "blocked",
     "merge_commit_sha": "8eda16f64d221c3f3d71eb355638e0f129e9d58a",
@@ -333,7 +333,7 @@
     "changed_files": 20,
     "commits": 14,
     "review_comments": 63,
-    "comments": 9
+    "comments": 10
   },
   "events": [
     {
@@ -2577,6 +2577,60 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-05-31T14:22:25Z"
+    },
+    {
+      "event": "commented",
+      "id": 2142599641,
+      "node_id": "IC_kwDOAP4Jqs5_tXnZ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2142599641",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-05-31T16:23:47Z",
+      "updated_at": "2024-05-31T16:24:22Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "\r\n## Some general notes\r\n### On error handling in general\r\nError handling is hard, and the caller usually can't really recover from an error anyway. This is in particular true on malicious inputs:  there's no reason to try to continue dealing with the attacker, and you simply want to abort. That's why, as a general rule, we try to avoid error paths as much as possible. This usually boils down to merging all errors into a single one, i.e., *a)* have just a single error \"code\" for all possible errors, *b)* and in the case of a multi-stage thing involving multiple function calls, have just a single place where errors are returned. \r\n\r\nSignature verification is a good example. A (signature, message, pubkey) triple is either valid or not. The caller *should not* care why exactly a signature fails to verify, so we don't even want to expose this to the caller.\r\n\r\n However, signature verification this is also a nice example of a case in which we stretch the rules a bit. Signature verification is implemented as two-stage process: 1. Parse the public key (which can fail). 2. Check the signature (which can fail). Purely from a \"safe\" API point of view, this is not great because we give the user two functions and two error paths instead of one. Ideally, there could just be one verification function which also takes care of parsing (this is how it's defined BIP340). The primary reason why we want to have a separate parsing function in this case is performance: if you check several signatures under the same key, you don't want to parse, which involves computing the y-coordinate, every time.\r\n\r\n### ARG_CHECK\r\n`ARG_CHECK` will call the \"illegal (argument) callback\", which, by default, crashes. See the docs here: https://github.com/bitcoin-core/secp256k1/blob/1791f6fce4d4856a4ce2b1982768a4ffa23fcc0a/include/secp256k1.h#L324 The callback/crash indicates to the caller that there's a bug in the caller's code.\r\n\r\n## What does this mean for this discussion?\r\n> * Added `ARG_CHECK`s to check for the sum of the private keys / public keys being zero\r\n> \r\n> \r\n> Per [#1519 (comment)](https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1617720108), I agree returning 0 is not the right thing to do, but having multiple error codes also seemed gross. I think an `ARG_CHECK` makes sense here because if the caller passed all valid seckeys / pubkeys and then they sum to zero, in principle its the caller passing incorrect arguments. The only thing the caller can do at this point is try again with different arguments. For the sender, this would mean repeating coin selection to get a different input set, and for the recipient this would mean skipping the transaction and moving on to the next one. Also happy to change if there is a better suggestion!\r\n\r\nSo let's take a look at the two sides:\r\n\r\n### On the sender side: The secret keys sum up to zero (`sum_i a_i = 0`)\r\nThis will happen only with negligible probability for honestly generated (=random) secret keys. That is, this will in practice only happen if the caller has a bug, or the caller has been tricked into using these secret keys, e.g., if someone else has crafted malicious secret keys for the caller. Since the latter is not a crazy scenario, we should not use `ARG_CHECK` here. \r\n\r\nWe can just return 0 here to indicate to the caller that we can't continue with these function inputs. And even if there are other error cases, I don't see a reason why the caller code should care much about why the function fails. As long as you call the function with honestly generated inputs, everything will work out. (Devs will be interested in the exact failure case when debugging the caller's code, but I think they can figure out during debugging then. \"Normal\" caller code should get just a single error code.)\r\n\r\n### On the recipient side: The public keys sum up to infinity (`sum_i A_i = 0`) [1]\r\nAgain, this can only happen if the sender is malicious. But since we're not the sender, it's entirely possible that the sender is malicious. And then these inputs are certainly legal, they're just not valid. (In the same sense as it's perfectly legal to use the signature verification algorithm on an invalid signature.) So an `ARG_CHECK` will not be appropriate at all: a malicious sender could trigger it and crash the scanning process. \r\n\r\nWe should also simply return 0 to indicate that this transaction is not well-formed/not eligible for SP. And again, even if there are other error cases, I don't see a reason why the caller should care why this transaction is not eligible.\r\n\r\nAlternatively, we could even return 1, store infinity in the `public_data`, and simply make sure that scanning won't find any payments in that case.  This would avoid the error path for this function entirely. But if the caller then calls `secp256k1_silentpayments_recipient_create_shared_secret`, I think we'd just postpone the error to this function, and for this function, I don't see another way than returning an error. So I'm not convinced that this is better. \r\n\r\n\r\n[1] We should perhaps rename \"infinity\" to \"zero\"... ;)\r\n",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#issuecomment-2142599641",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1519"
     }
   ],
   "comments": [
