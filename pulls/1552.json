@@ -41,7 +41,7 @@
     "body": "This PR proposes reducing code repetition by reusing CMake utilities (functions and macros) shared between this project and Bitcoin Core. Both projects use similar functionality, including:\r\n1. Defining a default build configuration.\r\n2. Modifying configuration-specific flags.\r\n3. Checking compiler and linker flags.\r\n4. Reporting a summary.\r\n\r\nTo achieve this, I suggest creating a dedicated repository under https://github.com/bitcoin-core to house these utilities. Such a repository could also benefit other projects like https://github.com/sipa/minisketch and https://github.com/chaincodelabs/libmultiprocess. Additionally, the CMake utilities repository could include CI tests for the provided utilities.\r\n\r\nSeeking Concept (N)ACKs for this proposal. Please note that only one function is replaced in this PR.",
     "labels": [],
     "created_at": "2024-06-25T17:16:00Z",
-    "updated_at": "2024-06-25T17:16:00Z",
+    "updated_at": "2024-06-26T10:21:18Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "1285e42dd87c724fc2b3c12d74a5c4e7d5405539",
@@ -147,7 +147,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 12566,
+        "size": 12569,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -160,7 +160,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-06-25T17:16:35Z",
+        "pushed_at": "2024-06-26T00:07:35Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2024-06-25T14:01:53Z",
         "license": {
@@ -280,7 +280,7 @@
         "watchers_count": 2004,
         "size": 11918,
         "default_branch": "master",
-        "open_issues_count": 133,
+        "open_issues_count": 134,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -291,7 +291,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-06-25T17:16:01Z",
+        "pushed_at": "2024-06-26T09:35:36Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2024-06-25T13:59:57Z",
         "license": {
@@ -323,7 +323,7 @@
     "changed_files": 1,
     "commits": 2,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -405,6 +405,60 @@
         "date": "2024-06-25T16:39:54Z"
       },
       "sha": "bdcdba84d879b34de9d4b3c29bf040e3b8b421ca"
+    },
+    {
+      "event": "commented",
+      "id": 2191331946,
+      "node_id": "IC_kwDOAP4Jqs6CnRJq",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2191331946",
+      "actor": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-06-26T10:15:42Z",
+      "updated_at": "2024-06-26T10:21:18Z",
+      "author_association": "MEMBER",
+      "body": "Concept NACK - It's hard to evaluate how much benefit this would actually bring (without a full example), and there's a number of downsides / other things that'd need to be considered before doing anything like this:\r\n\r\n* Given that the Core CMake build system hasn't even landed, and should be considered in flux for some time after that, I'd say it's far too early to be trying to extract \"reused\" code into a separate repo, as it's not even clear if that code will exist / will be duplicated in the future.\r\n* I'm not a huge fan of having the build system do networking, and we'd have to consider how this works in isolated build envs \r\n  * I guess we'd have to preload the CMake content pre-Guix build, similar to depends, but can that be done without a full configure?\r\n  * If you get our tarball can you compile it without internet?\r\n  * Can nobody compile Core if Github happens to be down?\r\n  * How does it work with subprojects etc? Do they share a single copy of the utils, if they happen to be using the same version? Or would we end up with multiple copies of different versions of the utils. i.e Core has a copy of the repo at version X, while secp256k1 has it's own copy of the utils at version Y etc.\r\n* I'm not sure if we actually want to couple all these projects together, and doing so may just lead to more hassle when trying to change the shared utils, as project requirements change.\r\n* I'm guessing (for us) this'd lead to more backporting / maintenance complications. i.e would the utils repo be versioned the same way we maintain our various branches? Otherwise what happens when you need to fix an issue in a util that effects all maintained versions, but you can't bump the subtree in an older branch because of newer changes? \r\n* This would also introduce a new bottleneck / annoyance for code review / changing anything in our repo, because to fix /change something in the build system, you might have to go to a different repo with even less reviewers and change something (which hopefully doesn't break something for all other projects) and then bump (essentially) a subtree before fixing something.",
+      "user": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1552#issuecomment-2191331946",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1552"
     }
   ],
   "comments": []
