@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-07-03T09:58:22Z",
+    "updated_at": "2024-07-03T10:04:14Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "13e94d4a7aae3830965bd810119909a644e2d47a",
@@ -170,7 +170,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-07-03T09:22:34Z",
+        "pushed_at": "2024-07-03T10:03:15Z",
         "created_at": "2024-02-01T15:52:50Z",
         "updated_at": "2024-07-01T19:55:09Z",
         "license": {
@@ -2491,9 +2491,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-07-03T09:57:36Z",
-      "updated_at": "2024-07-03T09:57:36Z",
+      "updated_at": "2024-07-03T10:04:14Z",
       "author_association": "MEMBER",
-      "body": "Update https://github.com/bitcoin-core/secp256k1/commit/ac591050262d9d00b629943d598f62b47e1ca7ae -> https://github.com/bitcoin-core/secp256k1/commit/5dd552ccbb5243047e0ad967561796f15a42bfbb ([bip352-silentpayments-module-07](https://github.com/josibake/secp256k1/tree/bip352-silentpayments-module-07) -> [bip352-silentpayments-module-08](https://github.com/josibake/secp256k1/tree/bip352-silentpayments-module-08), [compare](https://github.com/josibake/secp256k1/compare/bip352-silentpayments-module-07..josibake:secp256k1:bip352-silentpayments-module-08))\r\n\r\n(note: I also included a rebase inadvertently, so I rebased the `-07` branch as well to make comparing the diff easier with this [compare](https://github.com/josibake/secp256k1/compare/bip352-silentpayments-module-07..josibake:secp256k1:bip352-silentpayments-module-08) link)\r\n\r\nThe main change in this push is adding full test coverage for the module API. To make this easier, I ended up re-organizing the commits so that everything for sending is one commit, everything for labelled address is one commit, and everything for receiving is one commit. While this does make each commit larger, I think overall this makes things easier to review. I find it especially helpful to have the API tests in the same commit as it makes it easier to reason on how the functions will be used and makes it easy to modify the tests during testing to exercise the API.\r\n\r\nWhile adding the tests, I made the following implementation changes:\r\n\r\n* Only have `ARG_CHECKS` in functions exposed in the API. This meant removing `ARG_CHECKS` from some functions and adding them to others\r\n* Accumulate errors in a return value (i.e., use `ret &= func` instead of `if (!func) { return 0 }`\r\n  * In many cases where we were returning early, I couldn't think of a way to trigger an error in the function since the error would have already been caught with an `ARG_CHECK` or when initializing a struct. In these cases, it seemed better to remove the if branch and instead accumulate the error so that the function will still fail if an error is ever encountered\r\n* Some stylistic changes, e.g., comments and rewriting `ARG_CHECK` parsing for clarity\r\n\r\nRunning `gcov` after these changes shows that the test coverage for the module is ~100% :smile: \r\n![image](https://github.com/bitcoin-core/secp256k1/assets/7444140/fc3d8b26-5110-49ae-97db-447ea439092e)\r\n",
+      "body": "Update https://github.com/bitcoin-core/secp256k1/commit/ac591050262d9d00b629943d598f62b47e1ca7ae -> https://github.com/bitcoin-core/secp256k1/commit/5dd552ccbb5243047e0ad967561796f15a42bfbb ([bip352-silentpayments-module-07](https://github.com/josibake/secp256k1/tree/bip352-silentpayments-module-07) -> [bip352-silentpayments-module-08](https://github.com/josibake/secp256k1/tree/bip352-silentpayments-module-08), [compare](https://github.com/josibake/secp256k1/compare/bip352-silentpayments-module-07..josibake:secp256k1:bip352-silentpayments-module-08))\r\n\r\n(note: I also included a rebase inadvertently, so I rebased the `-07-rebase` branch as well to make comparing the diff easier with this [compare](https://github.com/josibake/secp256k1/compare/bip352-silentpayments-module-07-rebase..josibake:secp256k1:bip352-silentpayments-module-08) link)\r\n\r\nThe main change in this push is adding full test coverage for the module API. To make this easier, I ended up re-organizing the commits so that everything for sending is one commit, everything for labelled address is one commit, and everything for receiving is one commit. While this does make each commit larger, I think overall this makes things easier to review. I find it especially helpful to have the API tests in the same commit as it makes it easier to reason on how the functions will be used and makes it easy to modify the tests during testing to exercise the API.\r\n\r\nWhile adding the tests, I made the following implementation changes:\r\n\r\n* Only have `ARG_CHECKS` in functions exposed in the API. This meant removing `ARG_CHECKS` from some functions and adding them to others\r\n* Accumulate errors in a return value (i.e., use `ret &= func` instead of `if (!func) { return 0 }`\r\n  * In many cases where we were returning early, I couldn't think of a way to trigger an error in the function since the error would have already been caught with an `ARG_CHECK` or when initializing a struct. In these cases, it seemed better to remove the if branch and instead accumulate the error so that the function will still fail if an error is ever encountered\r\n* Some stylistic changes, e.g., comments and rewriting `ARG_CHECK` parsing for clarity\r\n\r\nRunning `gcov` after these changes shows that the test coverage for the module is ~100% :smile: \r\n![image](https://github.com/bitcoin-core/secp256k1/assets/7444140/fc3d8b26-5110-49ae-97db-447ea439092e)\r\n",
       "user": {
         "login": "josibake",
         "id": 7444140,
