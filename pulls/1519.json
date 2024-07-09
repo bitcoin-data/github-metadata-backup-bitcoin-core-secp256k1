@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-07-09T12:56:19Z",
+    "updated_at": "2024-07-09T13:52:14Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "16d3feedea209c204b8bf11cfd4287940bd3673d",
@@ -332,7 +332,7 @@
     "deletions": 12,
     "changed_files": 20,
     "commits": 9,
-    "review_comments": 65,
+    "review_comments": 73,
     "comments": 22
   },
   "events": [
@@ -6604,6 +6604,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1670483699"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 440,
+      "original_line": 440,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1670493260",
+      "pull_request_review_id": 2166261003,
+      "id": 1670493260,
+      "node_id": "PRRC_kwDOAP4Jqs5jkbRM",
+      "diff_hunk": "@@ -347,11 +348,244 @@ static void test_recipient_api(void) {\n     CHECK_ILLEGAL(CTX, secp256k1_silentpayments_recipient_scan_outputs(CTX, fp, &n_f, tp, 1, ALICE_SECKEY, &pd, &p, &label_lookup, NULL));\n }\n \n+void run_silentpayments_test_vector_send(const struct bip352_test_vector *test) {\n+    secp256k1_silentpayments_recipient recipients[MAX_OUTPUTS_PER_TEST_CASE];\n+    const secp256k1_silentpayments_recipient *recipient_ptrs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey generated_outputs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey *generated_output_ptrs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_keypair taproot_keypairs[MAX_INPUTS_PER_TEST_CASE];\n+    secp256k1_keypair const *taproot_keypair_ptrs[MAX_INPUTS_PER_TEST_CASE];\n+    unsigned char const *plain_seckeys[MAX_INPUTS_PER_TEST_CASE];\n+    unsigned char created_output[32];\n+    size_t i, j, k;\n+    int match, ret;\n+\n+    /* Check that sender creates expected outputs */\n+    for (i = 0; i < test->num_outputs; i++) {\n+        CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].scan_pubkey, test->recipient_pubkeys[i].scan_pubkey, 33));\n+        CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].spend_pubkey, test->recipient_pubkeys[i].spend_pubkey, 33));\n+        recipients[i].index = i;\n+        recipient_ptrs[i] = &recipients[i];\n+        generated_output_ptrs[i] = &generated_outputs[i];\n+    }\n+    for (i = 0; i < test->num_plain_inputs; i++) {\n+        plain_seckeys[i] = test->plain_seckeys[i];\n+    }\n+    for (i = 0; i < test->num_taproot_inputs; i++) {\n+        CHECK(secp256k1_keypair_create(CTX, &taproot_keypairs[i], test->taproot_seckeys[i]));\n+        taproot_keypair_ptrs[i] = &taproot_keypairs[i];\n+    }\n+    ret = secp256k1_silentpayments_sender_create_outputs(CTX,\n+                generated_output_ptrs,\n+                recipient_ptrs,\n+                test->num_outputs,\n+                test->outpoint_smallest,\n+                test->num_taproot_inputs > 0 ? taproot_keypair_ptrs : NULL, test->num_taproot_inputs,\n+                test->num_plain_inputs > 0 ? plain_seckeys : NULL, test->num_plain_inputs\n+    );\n+    /* If we are unable to create outputs, e.g., the input keys sum to zero, check that the\n+     * expected number of recipient outputs for this test case is zero\n+     */\n+    if (!ret) {\n+        CHECK(test->num_recipient_outputs == 0);\n+        return;\n+    }\n+\n+    match = 0;\n+    for (i = 0; i < test->num_output_sets; i++) {\n+        size_t n_matches = 0;\n+        for (j = 0; j < test->num_outputs; j++) {\n+            CHECK(secp256k1_xonly_pubkey_serialize(CTX, created_output, &generated_outputs[j]));\n+            /* Loop over both lists to ensure tests don't fail due to different orderings of outputs */\n+            for (k = 0; k < test->num_recipient_outputs; k++) {\n+                if (secp256k1_memcmp_var(created_output, test->recipient_outputs[i][k], 32) == 0) {\n+                    n_matches++;\n+                    break;\n+                }\n+            }\n+        }\n+        if (n_matches == test->num_recipient_outputs) {\n+            match = 1;\n+            break;\n+        }\n+    }\n+    CHECK(match);\n+}\n+\n+void run_silentpayments_test_vector_receive(const struct bip352_test_vector *test) {\n+    secp256k1_pubkey plain_pubkeys_objs[MAX_INPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey xonly_pubkeys_objs[MAX_INPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey tx_output_objs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_silentpayments_found_output found_output_objs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_pubkey const *plain_pubkeys[MAX_INPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey const *xonly_pubkeys[MAX_INPUTS_PER_TEST_CASE];\n+    secp256k1_xonly_pubkey const *tx_outputs[MAX_OUTPUTS_PER_TEST_CASE];\n+    secp256k1_silentpayments_found_output *found_outputs[MAX_OUTPUTS_PER_TEST_CASE];\n+    unsigned char found_outputs_light_client[MAX_OUTPUTS_PER_TEST_CASE][32];\n+    secp256k1_pubkey recipient_scan_pubkey;\n+    secp256k1_pubkey recipient_spend_pubkey;\n+    size_t i,j;\n+    int match, ret;\n+    size_t n_found = 0;\n+    unsigned char found_output[32];\n+    unsigned char found_signatures[10][64];\n+    secp256k1_silentpayments_public_data public_data, public_data_index;\n+    unsigned char shared_secret_lightclient[33];\n+    unsigned char light_client_data[33];\n+\n+\n+    /* prepare the inputs */\n+    {\n+        for (i = 0; i < test->num_plain_inputs; i++) {\n+            CHECK(secp256k1_ec_pubkey_parse(CTX, &plain_pubkeys_objs[i], test->plain_pubkeys[i], 33));",
+      "path": "src/modules/silentpayments/tests_impl.h",
+      "position": 440,
+      "original_position": 101,
+      "commit_id": "a31a105e6dd9446be7694226fac0e8e7bfafe300",
+      "original_commit_id": "ef597945b2632862158a9477a74c1a525e92ffe9",
+      "in_reply_to_id": 1670455581,
+      "user": {
+        "login": "Sjors",
+        "id": 10217,
+        "node_id": "MDQ6VXNlcjEwMjE3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/10217?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Sjors",
+        "html_url": "https://github.com/Sjors",
+        "followers_url": "https://api.github.com/users/Sjors/followers",
+        "following_url": "https://api.github.com/users/Sjors/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Sjors/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Sjors/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Sjors/subscriptions",
+        "organizations_url": "https://api.github.com/users/Sjors/orgs",
+        "repos_url": "https://api.github.com/users/Sjors/repos",
+        "events_url": "https://api.github.com/users/Sjors/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Sjors/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "So when I modify the first sec key in the first test vector the test does fail, and test-suite.log shows it happens at line 412 - which makes sense. The suggested sanity check would help debugging though.",
+      "created_at": "2024-07-09T13:02:42Z",
+      "updated_at": "2024-07-09T13:02:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1670493260",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1670493260"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
