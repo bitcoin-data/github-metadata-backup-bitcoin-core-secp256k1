@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-07-24T10:04:41Z",
+    "updated_at": "2024-07-25T06:58:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "5543701cf6fc6f8c07d5ba0f76981abe29c717d6",
@@ -285,7 +285,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 979,
+        "forks_count": 978,
         "stargazers_count": 2020,
         "watchers_count": 2020,
         "size": 11944,
@@ -332,7 +332,7 @@
     "deletions": 28,
     "changed_files": 27,
     "commits": 4,
-    "review_comments": 136,
+    "review_comments": 137,
     "comments": 13
   },
   "events": [
@@ -9820,6 +9820,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1689502047"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+        }
+      },
+      "start_line": 257,
+      "original_start_line": 258,
+      "start_side": "RIGHT",
+      "line": 258,
+      "original_line": 258,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1690914267",
+      "pull_request_review_id": 2198463271,
+      "id": 1690914267,
+      "node_id": "PRRC_kwDOAP4Jqs5kyU3b",
+      "diff_hunk": "@@ -0,0 +1,293 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_MUSIG_KEYAGG_IMPL_H\n+#define SECP256K1_MODULE_MUSIG_KEYAGG_IMPL_H\n+\n+#include <string.h>\n+\n+#include \"keyagg.h\"\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../field.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../util.h\"\n+\n+static const unsigned char secp256k1_musig_keyagg_cache_magic[4] = { 0xf4, 0xad, 0xbb, 0xdf };\n+\n+/* A keyagg cache consists of\n+ * - 4 byte magic set during initialization to allow detecting an uninitialized\n+ *   object.\n+ * - 64 byte aggregate (and potentially tweaked) public key\n+ * - 64 byte \"second\" public key (set to the point at infinity if not present)\n+ * - 32 byte hash of all public keys\n+ * - 1 byte the parity of the internal key (if tweaked, otherwise 0)\n+ * - 32 byte tweak\n+ */\n+/* Requires that cache_i->pk is not infinity. */\n+static void secp256k1_keyagg_cache_save(secp256k1_musig_keyagg_cache *cache, secp256k1_keyagg_cache_internal *cache_i) {\n+    unsigned char *ptr = cache->data;\n+    memcpy(ptr, secp256k1_musig_keyagg_cache_magic, 4);\n+    ptr += 4;\n+    secp256k1_ge_to_bytes(ptr, &cache_i->pk);\n+    ptr += 64;\n+    secp256k1_ge_to_bytes_ext(ptr, &cache_i->second_pk);\n+    ptr += 64;\n+    memcpy(ptr, cache_i->pk_hash, 32);\n+    ptr += 32;\n+    *ptr = cache_i->parity_acc;\n+    ptr += 1;\n+    secp256k1_scalar_get_b32(ptr, &cache_i->tweak);\n+}\n+\n+static int secp256k1_keyagg_cache_load(const secp256k1_context* ctx, secp256k1_keyagg_cache_internal *cache_i, const secp256k1_musig_keyagg_cache *cache) {\n+    const unsigned char *ptr = cache->data;\n+    ARG_CHECK(secp256k1_memcmp_var(ptr, secp256k1_musig_keyagg_cache_magic, 4) == 0);\n+    ptr += 4;\n+    secp256k1_ge_from_bytes(&cache_i->pk, ptr);\n+    ptr += 64;\n+    secp256k1_ge_from_bytes_ext(&cache_i->second_pk, ptr);\n+    ptr += 64;\n+    memcpy(cache_i->pk_hash, ptr, 32);\n+    ptr += 32;\n+    cache_i->parity_acc = *ptr & 1;\n+    ptr += 1;\n+    secp256k1_scalar_set_b32(&cache_i->tweak, ptr, NULL);\n+    return 1;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"KeyAgg list\")||SHA256(\"KeyAgg list\"). */\n+static void secp256k1_musig_keyagglist_sha256(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+\n+    sha->s[0] = 0xb399d5e0ul;\n+    sha->s[1] = 0xc8fff302ul;\n+    sha->s[2] = 0x6badac71ul;\n+    sha->s[3] = 0x07c5b7f1ul;\n+    sha->s[4] = 0x9701e2eful;\n+    sha->s[5] = 0x2a72ecf8ul;\n+    sha->s[6] = 0x201a4c7bul;\n+    sha->s[7] = 0xab148a38ul;\n+    sha->bytes = 64;\n+}\n+\n+/* Computes pk_hash = tagged_hash(pk[0], ..., pk[np-1]) */\n+static int secp256k1_musig_compute_pk_hash(const secp256k1_context *ctx, unsigned char *pk_hash, const secp256k1_pubkey * const* pk, size_t np) {\n+    secp256k1_sha256 sha;\n+    size_t i;\n+\n+    secp256k1_musig_keyagglist_sha256(&sha);\n+    for (i = 0; i < np; i++) {\n+        unsigned char ser[33];\n+        size_t ser_len = sizeof(ser);\n+        if (!secp256k1_ec_pubkey_serialize(ctx, ser, &ser_len, pk[i], SECP256K1_EC_COMPRESSED)) {\n+            return 0;\n+        }\n+        VERIFY_CHECK(ser_len == sizeof(ser));\n+        secp256k1_sha256_write(&sha, ser, sizeof(ser));\n+    }\n+    secp256k1_sha256_finalize(&sha, pk_hash);\n+    return 1;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"KeyAgg coefficient\")||SHA256(\"KeyAgg coefficient\"). */\n+static void secp256k1_musig_keyaggcoef_sha256(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+\n+    sha->s[0] = 0x6ef02c5aul;\n+    sha->s[1] = 0x06a480deul;\n+    sha->s[2] = 0x1f298665ul;\n+    sha->s[3] = 0x1d1134f2ul;\n+    sha->s[4] = 0x56a0b063ul;\n+    sha->s[5] = 0x52da4147ul;\n+    sha->s[6] = 0xf280d9d4ul;\n+    sha->s[7] = 0x4484be15ul;\n+    sha->bytes = 64;\n+}\n+\n+/* Compute KeyAgg coefficient which is constant 1 for the second pubkey and\n+ * otherwise tagged_hash(pk_hash, x) where pk_hash is the hash of public keys.\n+ * second_pk is the point at infinity in case there is no second_pk. Assumes\n+ * that pk is not the point at infinity and that the Y-coordinates of pk and\n+ * second_pk are normalized. */\n+static void secp256k1_musig_keyaggcoef_internal(secp256k1_scalar *r, const unsigned char *pk_hash, secp256k1_ge *pk, const secp256k1_ge *second_pk) {\n+    secp256k1_sha256 sha;\n+\n+    VERIFY_CHECK(!secp256k1_ge_is_infinity(pk));\n+\n+    if (!secp256k1_ge_is_infinity(second_pk)\n+          && secp256k1_fe_equal(&pk->x, &second_pk->x)\n+          && secp256k1_fe_is_odd(&pk->y) == secp256k1_fe_is_odd(&second_pk->y)) {\n+        secp256k1_scalar_set_int(r, 1);\n+    } else {\n+        unsigned char buf[33];\n+        size_t buflen = sizeof(buf);\n+        int ret;\n+        secp256k1_musig_keyaggcoef_sha256(&sha);\n+        secp256k1_sha256_write(&sha, pk_hash, 32);\n+        ret = secp256k1_eckey_pubkey_serialize(pk, buf, &buflen, 1);\n+#ifdef VERIFY\n+        /* Serialization does not fail since the pk is not the point at infinity\n+         * (according to this function's precondition). */\n+        VERIFY_CHECK(ret && buflen == sizeof(buf));\n+#else\n+        (void) ret;\n+#endif\n+        secp256k1_sha256_write(&sha, buf, sizeof(buf));\n+        secp256k1_sha256_finalize(&sha, buf);\n+        secp256k1_scalar_set_b32(r, buf, NULL);\n+    }\n+}\n+\n+/* Assumes that pk is not the point at infinity and that the Y-coordinates of pk\n+ * and cache_i->second_pk are normalized. */\n+static void secp256k1_musig_keyaggcoef(secp256k1_scalar *r, const secp256k1_keyagg_cache_internal *cache_i, secp256k1_ge *pk) {\n+    secp256k1_musig_keyaggcoef_internal(r, cache_i->pk_hash, pk, &cache_i->second_pk);\n+}\n+\n+typedef struct {\n+    const secp256k1_context *ctx;\n+    /* pk_hash is the hash of the public keys */\n+    unsigned char pk_hash[32];\n+    const secp256k1_pubkey * const* pks;\n+    secp256k1_ge second_pk;\n+} secp256k1_musig_pubkey_agg_ecmult_data;\n+\n+/* Callback for batch EC multiplication to compute keyaggcoef_0*P0 + keyaggcoef_1*P1 + ...  */\n+static int secp256k1_musig_pubkey_agg_callback(secp256k1_scalar *sc, secp256k1_ge *pt, size_t idx, void *data) {\n+    secp256k1_musig_pubkey_agg_ecmult_data *ctx = (secp256k1_musig_pubkey_agg_ecmult_data *) data;\n+    int ret;\n+    ret = secp256k1_pubkey_load(ctx->ctx, pt, ctx->pks[idx]);\n+#ifdef VERIFY\n+    /* pubkey_load can't fail because the same pks have already been loaded in\n+     * `musig_compute_pk_hash` (and we test this). */\n+    VERIFY_CHECK(ret);\n+#else\n+    (void) ret;\n+#endif\n+    secp256k1_musig_keyaggcoef_internal(sc, ctx->pk_hash, pt, &ctx->second_pk);\n+    return 1;\n+}\n+\n+int secp256k1_musig_pubkey_agg(const secp256k1_context* ctx, secp256k1_xonly_pubkey *agg_pk, secp256k1_musig_keyagg_cache *keyagg_cache, const secp256k1_pubkey * const* pubkeys, size_t n_pubkeys) {\n+    secp256k1_musig_pubkey_agg_ecmult_data ecmult_data;\n+    secp256k1_gej pkj;\n+    secp256k1_ge pkp;\n+    size_t i;\n+\n+    VERIFY_CHECK(ctx != NULL);\n+    if (agg_pk != NULL) {\n+        memset(agg_pk, 0, sizeof(*agg_pk));\n+    }\n+    ARG_CHECK(pubkeys != NULL);\n+    ARG_CHECK(n_pubkeys > 0);\n+\n+    ecmult_data.ctx = ctx;\n+    ecmult_data.pks = pubkeys;\n+\n+    secp256k1_ge_set_infinity(&ecmult_data.second_pk);\n+    for (i = 1; i < n_pubkeys; i++) {\n+        if (secp256k1_memcmp_var(pubkeys[0], pubkeys[i], sizeof(*pubkeys[0])) != 0) {\n+            secp256k1_ge pk;\n+            if (!secp256k1_pubkey_load(ctx, &pk, pubkeys[i])) {\n+                return 0;\n+            }\n+            ecmult_data.second_pk = pk;\n+            break;\n+        }\n+    }\n+\n+    if (!secp256k1_musig_compute_pk_hash(ctx, ecmult_data.pk_hash, pubkeys, n_pubkeys)) {\n+        return 0;\n+    }\n+    /* TODO: actually use optimized ecmult_multi algorithms by providing a\n+     * scratch space */\n+    if (!secp256k1_ecmult_multi_var(&ctx->error_callback, NULL, &pkj, NULL, secp256k1_musig_pubkey_agg_callback, (void *) &ecmult_data, n_pubkeys)) {\n+        /* In order to reach this line with the current implementation of\n+         * ecmult_multi_var one would need to provide a callback that can\n+         * fail. */\n+        return 0;\n+    }\n+    secp256k1_ge_set_gej(&pkp, &pkj);\n+    secp256k1_fe_normalize_var(&pkp.y);\n+    /* The resulting public key is infinity with negligible probability */\n+    VERIFY_CHECK(!secp256k1_ge_is_infinity(&pkp));\n+    if (keyagg_cache != NULL) {\n+        secp256k1_keyagg_cache_internal cache_i = { 0 };\n+        cache_i.pk = pkp;\n+        cache_i.second_pk = ecmult_data.second_pk;\n+        memcpy(cache_i.pk_hash, ecmult_data.pk_hash, sizeof(cache_i.pk_hash));\n+        secp256k1_keyagg_cache_save(keyagg_cache, &cache_i);\n+    }\n+\n+    secp256k1_extrakeys_ge_even_y(&pkp);\n+    if (agg_pk != NULL) {\n+        secp256k1_xonly_pubkey_save(agg_pk, &pkp);\n+    }\n+    return 1;\n+}\n+\n+int secp256k1_musig_pubkey_get(const secp256k1_context* ctx, secp256k1_pubkey *agg_pk, const secp256k1_musig_keyagg_cache *keyagg_cache) {\n+    secp256k1_keyagg_cache_internal cache_i;\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(agg_pk != NULL);\n+    memset(agg_pk, 0, sizeof(*agg_pk));\n+    ARG_CHECK(keyagg_cache != NULL);\n+\n+    if(!secp256k1_keyagg_cache_load(ctx, &cache_i, keyagg_cache)) {\n+        return 0;\n+    }\n+    secp256k1_pubkey_save(agg_pk, &cache_i.pk);\n+    return 1;\n+}\n+\n+static int secp256k1_musig_pubkey_tweak_add_internal(const secp256k1_context* ctx, secp256k1_pubkey *output_pubkey, secp256k1_musig_keyagg_cache *keyagg_cache, const unsigned char *tweak32, int xonly) {\n+    secp256k1_keyagg_cache_internal cache_i;\n+    int overflow = 0;\n+    secp256k1_scalar tweak;\n+\n+    VERIFY_CHECK(ctx != NULL);\n+    if (output_pubkey != NULL) {\n+        memset(output_pubkey, 0, sizeof(*output_pubkey));\n+    }\n+    ARG_CHECK(keyagg_cache != NULL);\n+    ARG_CHECK(tweak32 != NULL);",
+      "path": "src/modules/musig/keyagg_impl.h",
+      "position": 258,
+      "original_position": 259,
+      "commit_id": "75ff36d5db6976270a1a20e72d44d1e90fd7e751",
+      "original_commit_id": "8703fe48070eb01cf7123b733ecf628da81b3fbb",
+      "in_reply_to_id": 1687825340,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "In this case, I think it helps with the clarity to have the arg checking happen in the public function _before_ calling the internal function (even at the cost of code duplication). \r\n\r\nThat being said, this is really just a style nit so feel free to resolve this discussion if you prefer the (current) more concise version.",
+      "created_at": "2024-07-25T06:58:10Z",
+      "updated_at": "2024-07-25T06:58:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1690914267",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1690914267"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
