@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-08-06T09:53:32Z",
+    "updated_at": "2024-08-06T10:58:13Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merge_commit_sha": "ad6735619b55f5c5c1eb79564da97af2226b941a",
@@ -332,7 +332,7 @@
     "deletions": 12,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 174,
+    "review_comments": 175,
     "comments": 27
   },
   "events": [
@@ -13627,6 +13627,58 @@
       "start_side": null,
       "line": 128,
       "original_line": 128,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1705335097",
+      "pull_request_review_id": 2220969842,
+      "id": 1705335097,
+      "node_id": "PRRC_kwDOAP4Jqs5lpVk5",
+      "diff_hunk": "@@ -0,0 +1,405 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/* This module provides an implementation for Silent Payments, as specified in\n+ * BIP352. This particularly involves the creation of input tweak data by\n+ * summing up private or public keys and the derivation of a shared secret\n+ * using Elliptic Curve Diffie-Hellman. Combined are either: - spender's\n+ * private keys and recipient's public key (a * B, sender side) - spender's\n+ * public keys and recipient's private key (A * b, recipient side) With this\n+ * result, the necessary key material for ultimately creating/scanning or\n+ * spending Silent Payment outputs can be determined.\n+ *\n+ * Note that this module is _not_ a full implementation of BIP352, as it\n+ * inherently doesn't deal with higher-level concepts like addresses, output\n+ * script types or transactions. The intent is to provide a module for\n+ * abstracting away the elliptic-curve operations required for the protocol.\n+ * For any wallet software already using libsecp256k1, this API should provide\n+ * all the functions needed for a Silent Payments implementation without\n+ * requiring any further elliptic-curve operations from the wallet.\n+ */\n+\n+/* This struct serves as an In param for passing the silent payment address\n+ * data. The index field is for when more than one address is being sent to in\n+ * a transaction. Index is set based on the original ordering of the addresses\n+ * and used to return the generated outputs matching the original ordering.\n+ * When more than one recipient is used the recipient array will be sorted in\n+ * place as part of generating the outputs, but the generated outputs will be\n+ * returned in the original ordering specified by the index to ensure the\n+ * caller is able to match up the generated outputs to the correct silent\n+ * payment address (e.g. to be able to assign the correct amounts to the\n+ * correct generated outputs in the final transaction).\n+ */\n+typedef struct {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payment outputs for recipient(s).\n+ *\n+ *  Given a list of n private keys a_1...a_n (one for each silent payment\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the the\n+ *  payment.\n+ *\n+ *  If necessary, the private keys are negated to enforce the right y-parity.\n+ *  For that reason, the private keys have to be passed in via two different\n+ *  parameter pairs, depending on whether the seckeys correspond to x-only\n+ *  outputs or not.\n+ *\n+ *  Returns: 1 if creation of outputs was successful. 0 if an error occured.\n+ *  Args:                ctx: pointer to a context object\n+ *  Out:   generated_outputs: pointer to an array of pointers to xonly pubkeys,\n+ *                            one per recipient.\n+ *                            The order of outputs here matches the original\n+ *                            ordering of the recipients array.\n+ *  In:           recipients: pointer to an array of pointers to silent payment\n+ *                            recipients, where each recipient is a scan public\n+ *                            key, a spend public key, and an index indicating\n+ *                            its position in the original ordering. The\n+ *                            recipient array will be sorted in place, but\n+ *                            generated outputs are saved in the\n+ *                            `generated_outputs` array to match the ordering\n+ *                            from the index field. This ensures the caller is\n+ *                            able to match the generated outputs to the\n+ *                            correct silent payment addresses. The same\n+ *                            recipient can be passed multiple times to create\n+ *                            multiple outputs for the same recipient.\n+ *              n_recipients: the number of recipients. This is equal to the\n+ *                            total number of outputs to be generated as each\n+ *                            recipient may passed multiple times to generate\n+ *                            multiple outputs for the same recipient\n+ *       outpoint_smallest36: serialized smallest outpoint (lexicographically)\n+ *                            from the transaction inputs\n+ *           taproot_seckeys: pointer to an array of pointers to 32-byte\n+ *                            private keys of taproot inputs (can be NULL if no\n+ *                            private keys of taproot inputs are used)\n+ *         n_taproot_seckeys: the number of sender's taproot input private keys\n+ *             plain_seckeys: pointer to an array of pointers to 32-byte\n+ *                            private keys of non-taproot inputs (can be NULL\n+ *                            if no private keys of non-taproot inputs are\n+ *                            used)\n+ *           n_plain_seckeys: the number of sender's non-taproot input private\n+ *                            keys\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_sender_create_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_xonly_pubkey **generated_outputs,\n+    const secp256k1_silentpayments_recipient **recipients,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 101,
+      "original_position": 101,
+      "commit_id": "00b0cb19a97718dfaab70aa7505ff157f22a31bd",
+      "original_commit_id": "00b0cb19a97718dfaab70aa7505ff157f22a31bd",
+      "in_reply_to_id": 1702281913,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "The recipients array is passed to `secp256k1_hsort`, where the array is sorted in place.",
+      "created_at": "2024-08-06T10:58:13Z",
+      "updated_at": "2024-08-06T10:58:13Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1705335097",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1705335097"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 101,
+      "original_line": 101,
       "side": "RIGHT"
     }
   ]
