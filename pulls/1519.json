@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-08-08T15:53:35Z",
+    "updated_at": "2024-08-08T17:23:22Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "95f0c57ba0277dda62b535601a2ea52302d38e5d",
@@ -332,7 +332,7 @@
     "deletions": 12,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 183,
+    "review_comments": 187,
     "comments": 33
   },
   "events": [
@@ -5273,6 +5273,42 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-08-08T15:17:43Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2227982140,
+      "node_id": "PRR_kwDOAP4Jqs6EzE88",
+      "url": null,
+      "actor": null,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "Did another review round, left a few nitty-nits below. Overall I think the module is in a pretty good state. Would be nice if the \"friendly neighborhood cryptographers\" could give an opinion on the remaining few TODOs regarding _cmov calls following _set_b32-seckey :-)  I _think_ the answer to most of them is just \"no\":\r\n\r\nhttps://github.com/josibake/secp256k1/blob/3165b6b091a30a4ace948d67d55142c61a12929d/src/modules/silentpayments/main_impl.h#L193\r\nhttps://github.com/josibake/secp256k1/blob/3165b6b091a30a4ace948d67d55142c61a12929d/src/modules/silentpayments/main_impl.h#L202\r\nhttps://github.com/josibake/secp256k1/blob/3165b6b091a30a4ace948d67d55142c61a12929d/src/modules/silentpayments/main_impl.h#L455\r\nhttps://github.com/josibake/secp256k1/blob/3165b6b091a30a4ace948d67d55142c61a12929d/src/modules/silentpayments/main_impl.h#L585",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#pullrequestreview-2227982140",
+      "submitted_at": "2024-08-08T17:23:22Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
     }
   ],
   "comments": [
@@ -14582,6 +14618,370 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 56,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709578025",
+      "pull_request_review_id": 2227982140,
+      "id": 1709578025,
+      "node_id": "PRRC_kwDOAP4Jqs5l5hcp",
+      "diff_hunk": "@@ -7,10 +7,241 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient. */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n \n-/* TODO: implement functions for receiver side. */\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_hash, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    size_t len;\n+    int ret;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    (void)ret;\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_scalar *secret_component, const secp256k1_pubkey *public_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss, pk;\n+    size_t len;\n+    int ret;\n+    memset(shared_secret33, 0, 33);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 72,
+      "original_position": 68,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "31a6da2cf73675ac1daa32895177fcefa8e37133",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "nit: I think this memset can be removed, as there is no early return in this function and it's guaranteed that `shared_secret33` will be filled with the _pubkey_serialize call below",
+      "created_at": "2024-08-08T14:00:55Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709578025",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709578025"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 72,
+      "original_line": 72,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709585421",
+      "pull_request_review_id": 2227982140,
+      "id": 1709585421,
+      "node_id": "PRRC_kwDOAP4Jqs5l5jQN",
+      "diff_hunk": "@@ -7,10 +7,241 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient. */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n \n-/* TODO: implement functions for receiver side. */\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_hash, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    size_t len;\n+    int ret;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    (void)ret;\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_scalar *secret_component, const secp256k1_pubkey *public_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss, pk;\n+    size_t len;\n+    int ret;\n+    memset(shared_secret33, 0, 33);\n+    /* By the time we call _create_shared_secret, the public_component has been created by us and validated\n+     * or loaded from a public_data object and validated, so this call will never fail\n+     */\n+    secp256k1_pubkey_load(ctx, &pk, public_component);\n+\n+    /* Compute shared_secret = tweaked_secret_component * Public_component */\n+    secp256k1_ecmult_const(&ss_j, &pk, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point, considering we have already validated the public key and\n+     * the secret key being used\n+     */\n+    ret = secp256k1_eckey_pubkey_serialize(&ss, shared_secret33, &len, 1);\n+    VERIFY_CHECK(ret && len == 33);\n+    (void)ret;\n+}",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 88,
+      "original_position": 84,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "31a6da2cf73675ac1daa32895177fcefa8e37133",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "could clear out the ge/gej shared secret representations at the end (with the same \"while not technically 'secret' data...\" argumentation that's already used in other functions)\r\n```suggestion\r\n    (void)ret;\r\n    secp256k1_ge_clear(&ss);\r\n    secp256k1_gej_clear(&ss_j);\r\n}\r\n```",
+      "created_at": "2024-08-08T14:04:24Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709585421",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709585421"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": 87,
+      "original_start_line": 87,
+      "start_side": "RIGHT",
+      "line": 88,
+      "original_line": 88,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709817501",
+      "pull_request_review_id": 2227982140,
+      "id": 1709817501,
+      "node_id": "PRRC_kwDOAP4Jqs5l6b6d",
+      "diff_hunk": "@@ -244,4 +244,71 @@ int secp256k1_silentpayments_sender_create_outputs(\n     return ret;\n }\n \n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Label\". */\n+static void secp256k1_silentpayments_sha256_init_label(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0x26b95d63ul;\n+    hash->s[1] = 0x8bf1b740ul;\n+    hash->s[2] = 0x10a5986ful;\n+    hash->s[3] = 0x06a387a5ul;\n+    hash->s[4] = 0x2d1c1c30ul;\n+    hash->s[5] = 0xd035951aul;\n+    hash->s[6] = 0x2d7f0f96ul;\n+    hash->s[7] = 0x29e3e0dbul;\n+\n+    hash->bytes = 64;\n+}\n+\n+int secp256k1_silentpayments_recipient_create_label_tweak(const secp256k1_context *ctx, secp256k1_pubkey *label, unsigned char *label_tweak32, const unsigned char *recipient_scan_key, unsigned int m) {\n+    secp256k1_sha256 hash;\n+    unsigned char m_serialized[4];\n+\n+    /* Sanity check inputs. */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(label != NULL);\n+    ARG_CHECK(label_tweak32 != NULL);\n+    ARG_CHECK(recipient_scan_key != NULL);\n+\n+    /* Compute label_tweak = hash(ser_256(b_scan) || ser_32(m))  [sha256 with tag \"BIP0352/Label\"] */\n+    secp256k1_silentpayments_sha256_init_label(&hash);\n+    secp256k1_sha256_write(&hash, recipient_scan_key, 32);\n+    secp256k1_write_be32(m_serialized, m);\n+    secp256k1_sha256_write(&hash, m_serialized, sizeof(m_serialized));\n+    secp256k1_sha256_finalize(&hash, label_tweak32);\n+\n+    /* Compute label = label_tweak * G */\n+    return secp256k1_ec_pubkey_create(ctx, label, label_tweak32);\n+}\n+\n+int secp256k1_silentpayments_recipient_create_labelled_spend_pubkey(const secp256k1_context *ctx, secp256k1_pubkey *labelled_spend_pubkey, const secp256k1_pubkey *recipient_spend_pubkey, const secp256k1_pubkey *label) {\n+    secp256k1_ge B_m, label_addend;\n+    secp256k1_gej result_gej;\n+    secp256k1_ge result_ge;\n+    int ret;\n+\n+    /* Sanity check inputs. */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(labelled_spend_pubkey != NULL);\n+    ARG_CHECK(recipient_spend_pubkey != NULL);\n+    ARG_CHECK(label != NULL);\n+\n+    /* Calculate B_m = B_spend + label\n+     * If either the label or spend public key is an invalid public key,\n+     * return early\n+     */\n+    ret = secp256k1_pubkey_load(ctx, &B_m, recipient_spend_pubkey);\n+    ret &= secp256k1_pubkey_load(ctx, &label_addend, label);\n+    if (!ret) {\n+        return ret;\n+    }\n+    secp256k1_gej_set_ge(&result_gej, &B_m);\n+    secp256k1_gej_add_ge_var(&result_gej, &result_gej, &label_addend, NULL);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 305,
+      "original_position": 62,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "bc9ac6237fbf3f61451d2f80d9655c08b0343ccc",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "should we add a check here if the result is the point at infinity and return 0?",
+      "created_at": "2024-08-08T15:53:34Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709817501",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709817501"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 305,
+      "original_line": 305,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709903047",
+      "pull_request_review_id": 2227982140,
+      "id": 1709903047,
+      "node_id": "PRRC_kwDOAP4Jqs5l6wzH",
+      "diff_hunk": "@@ -158,6 +158,247 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipien\n     const secp256k1_pubkey *label\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Opaque data structure that holds silent payments public input data.\n+ *\n+ *  This structure does not contain secret data. Guaranteed to be 98 bytes in\n+ *  size. It can be safely copied/moved. Created with\n+ *  `secp256k1_silentpayments_public_data_create`. Can be serialized as a\n+ *  compressed public key using\n+ *  `secp256k1_silentpayments_public_data_serialize`. The serialization is\n+ *  intended for sending the public input data to light clients. Light clients\n+ *  can use this serialization with\n+ *  `secp256k1_silentpayments_public_data_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[98];\n+} secp256k1_silentpayments_public_data;\n+\n+/** Compute Silent Payment public data from input public keys and transaction\n+ * inputs.\n+ *\n+ *  Given a list of n public keys A_1...A_n (one for each silent payment\n+ *  eligible input to spend) and a serialized outpoint_smallest, create a\n+ *  `public_data` object. This object summarizes the public data from the\n+ *  transaction inputs needed for scanning.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the the\n+ *  payment.\n+ *\n+ *  The public keys have to be passed in via two different parameter pairs, one\n+ *  for regular and one for x-only public keys, in order to avoid the need of\n+ *  users converting to a common pubkey format before calling this function.\n+ *  The resulting data can be used for scanning on the recipient side, or\n+ *  stored in an index for later use (e.g. wallet rescanning, vending data to\n+ *  light clients).\n+ *\n+ *  If calling this function for simply aggregating the public transaction data\n+ *  for later use, the caller can save the result with\n+ *  `silentpayments_public_data_serialize`.\n+ *\n+ *  Returns: 1 if tweak data creation was successful. 0 if an error occured.\n+ *  Args:                 ctx: pointer to a context object\n+ *  Out:          public_data: pointer to public_data object containing the\n+ *                             summed public key and input_hash.\n+ *  In:   outpoint_smallest36: serialized smallest outpoint (lexicographically)\n+ *                             from the transaction inputs\n+ *              xonly_pubkeys: pointer to an array of pointers to taproot\n+ *                             x-only public keys (can be NULL if no taproot\n+ *                             inputs are used)\n+ *            n_xonly_pubkeys: the number of taproot input public keys\n+ *              plain_pubkeys: pointer to an array of pointers to non-taproot\n+ *                             public keys (can be NULL if no non-taproot\n+ *                             inputs are used)\n+ *            n_plain_pubkeys: the number of non-taproot input public keys\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_public_data_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_public_data *public_data,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *plain_pubkeys,\n+    size_t n_plain_pubkeys\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Serialize a silentpayments_public_data object into a 33-byte sequence.\n+ *\n+ *  Returns: 1 always.\n+ *\n+ *  Args:         ctx: pointer to a context object\n+ *  Out:     output33: pointer to a 33-byte array to place the serialized\n+ *                     `silentpayments_public_data` in\n+ *  In:   public_data: pointer to an initialized silentpayments_public_data\n+ *                     object\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_public_data_serialize(\n+    const secp256k1_context *ctx,\n+    unsigned char *output33,\n+    const secp256k1_silentpayments_public_data *public_data\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Parse a 33-byte sequence into a silent_payments_public_data object.\n+ *\n+ *  Returns: 1 if the data was able to be parsed. \n+ *           0 if the sequence is invalid (e.g. does not represent a valid\n+ *           public key).\n+ *\n+ *  Args:         ctx: pointer to a context object.\n+ *  Out:  public_data: pointer to a silentpayments_public_data object. If 1 is\n+ *                     returned, it is set to a parsed version of input33.\n+ *  In:       input33: pointer to a serialized silentpayments_public_data.\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_public_data_parse(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_public_data *public_data,\n+    const unsigned char *input33\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Callback function for label lookups\n+ *\n+ *  This function is implemented by the recipient to check if a value exists in\n+ *  the recipients label cache during scanning.\n+ *\n+ *  Returns: pointer to the 32-byte label tweak if there is a match.\n+ *           NULL pointer if there is no match.\n+ *\n+ *  In:         label: pointer to the label value to check (computed during\n+ *                     scanning)\n+ *      label_context: pointer to the recipients label cache.\n+ */\n+typedef const unsigned char* (*secp256k1_silentpayments_label_lookup)(const unsigned char* label33, const void* label_context);\n+\n+/** Found outputs struct\n+ *\n+ *  Struct for holding a found output along with data needed to spend it later.\n+ *\n+ *            output: the x-only public key for the taproot output\n+ *             tweak: the 32-byte tweak needed to spend the output\n+ *  found_with_label: boolean value to indicate if the output was sent to a\n+ *                    labelled address. If true, label will be set with a valid\n+ *                    public key.\n+ *             label: public key representing the label used.\n+ *                    If found_with_label = false, this is set to an invalid\n+ *                    public key.\n+ */\n+typedef struct {\n+    secp256k1_xonly_pubkey output;\n+    unsigned char tweak[32];\n+    int found_with_label;\n+    secp256k1_pubkey label;\n+} secp256k1_silentpayments_found_output;\n+\n+/** Scan for Silent Payment transaction outputs.\n+ *\n+ *  Given a input public sum, an input_hash, a recipient's spend public key\n+ *  B_spend, and the relevant transaction outputs, scan for outputs belonging to\n+ *  the recipient and return the tweak(s) needed for spending the output(s). An\n+ *  optional label_lookup callback function and label_context can be passed if\n+ *  the recipient uses labels. This allows for checking if a label exists in\n+ *  the recipients label cache and retrieving the label tweak during scanning.\n+ *\n+ *  Returns: 1 if output scanning was successful.\n+ *           0 if an error occured.\n+ *\n+ *  Args:                   ctx: pointer to a context object\n+ *  Out:          found_outputs: pointer to an array of pointers to found\n+ *                               output objects. The found outputs array MUST\n+ *                               be initialized to be the same length as the\n+ *                               tx_outputs array\n+ *              n_found_outputs: pointer to an integer indicating the final\n+ *                               size of the found outputs array. This number\n+ *                               represents the number of outputs found while\n+ *                               scanning (0 if none are found)\n+ *  In:              tx_outputs: pointer to the tx's x-only public key outputs\n+ *                 n_tx_outputs: the number of tx_outputs being scanned\n+ *           recipient_scan_key: pointer to the recipient's scan key\n+ *                  public_data: pointer to the input public key sum\n+ *                               (optionally, with the `input_hash` multiplied\n+ *                               in, see `_recipient_public_data_create`).\n+ *       recipient_spend_pubkey: pointer to the recipient's spend pubkey\n+  *                label_lookup: pointer to a callback function for looking up",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 321,
+      "original_position": 164,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "6b1f86b3e5cc2e64121271ad6969097748ef67ae",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "whitespace nit\r\n```suggestion\r\n *       recipient_spend_pubkey: pointer to the recipient's spend pubkey\r\n *                 label_lookup: pointer to a callback function for looking up\r\n```",
+      "created_at": "2024-08-08T16:43:29Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709903047",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709903047"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": 320,
+      "original_start_line": 320,
+      "start_side": "RIGHT",
+      "line": 321,
+      "original_line": 321,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709908361",
+      "pull_request_review_id": 2227982140,
+      "id": 1709908361,
+      "node_id": "PRRC_kwDOAP4Jqs5l6yGJ",
+      "diff_hunk": "@@ -311,4 +311,301 @@ int secp256k1_silentpayments_recipient_create_labelled_spend_pubkey(const secp25\n     return 1;\n }\n \n+int secp256k1_silentpayments_recipient_public_data_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_public_data *public_data,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *plain_pubkeys,\n+    size_t n_plain_pubkeys\n+) {\n+    size_t i;\n+    size_t pubkeylen = 65;\n+    secp256k1_ge A_sum_ge, addend;\n+    secp256k1_gej A_sum_gej;\n+    unsigned char input_hash_local[32];\n+    int ret = 1;\n+\n+    /* Sanity check inputs */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(public_data != NULL);\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    ARG_CHECK((plain_pubkeys != NULL) || (xonly_pubkeys != NULL));\n+    if (xonly_pubkeys != NULL) {\n+        ARG_CHECK(n_xonly_pubkeys > 0);\n+    } else {\n+        ARG_CHECK(n_xonly_pubkeys == 0);\n+    }\n+    if (plain_pubkeys != NULL) {\n+        ARG_CHECK(n_plain_pubkeys > 0);\n+    } else {\n+        ARG_CHECK(n_plain_pubkeys == 0);\n+    }\n+    memset(input_hash_local, 0, 32);\n+\n+    /* Compute input public keys sum: A_sum = A_1 + A_2 + ... + A_n */\n+    secp256k1_gej_set_infinity(&A_sum_gej);\n+    for (i = 0; i < n_plain_pubkeys; i++) {\n+        ret &= secp256k1_pubkey_load(ctx, &addend, plain_pubkeys[i]);\n+        secp256k1_gej_add_ge_var(&A_sum_gej, &A_sum_gej, &addend, NULL);\n+    }\n+    for (i = 0; i < n_xonly_pubkeys; i++) {\n+        ret &= secp256k1_xonly_pubkey_load(ctx, &addend, xonly_pubkeys[i]);\n+        secp256k1_gej_add_ge_var(&A_sum_gej, &A_sum_gej, &addend, NULL);\n+    }\n+    /* Since an attacker can maliciously craft transactions where the public keys sum to zero, fail early here\n+     * to avoid making the caller do extra work, e.g., when building an index or scanning many malicious transactions\n+     */\n+    if (secp256k1_gej_is_infinity(&A_sum_gej)) {\n+        return 0;\n+    }\n+    /* Compute input_hash = hash(outpoint_L || A_sum) */\n+    secp256k1_ge_set_gej(&A_sum_ge, &A_sum_gej);\n+    secp256k1_silentpayments_calculate_input_hash(input_hash_local, outpoint_smallest36, &A_sum_ge);\n+    /* serialize the public_data struct */\n+    public_data->data[0] = 0;\n+    secp256k1_eckey_pubkey_serialize(&A_sum_ge, &public_data->data[1], &pubkeylen, 0);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 368,
+      "original_position": 58,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "6b1f86b3e5cc2e64121271ad6969097748ef67ae",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "could check the return value and `pubkeylen` here if VERIFY is set (like also done in e.g. `_silentpayments_calculate_input_hash`), e.g.\r\n```suggestion\r\n    ser_ret = secp256k1_eckey_pubkey_serialize(&A_sum_ge, &public_data->data[1], &pubkeylen, 0);\r\n    VERIFY_CHECK(ser_ret && pubkeylen == 65);\r\n    (void)ser_ret;\r\n```",
+      "created_at": "2024-08-08T16:47:07Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709908361",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709908361"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 368,
+      "original_line": 368,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709936221",
+      "pull_request_review_id": 2227982140,
+      "id": 1709936221,
+      "node_id": "PRRC_kwDOAP4Jqs5l645d",
+      "diff_hunk": "@@ -0,0 +1,503 @@\n+/*************************************************************************\n+ * To the extent possible under law, the author(s) have dedicated all    *\n+ * copyright and related and neighboring rights to the software in this  *\n+ * file to the public domain worldwide. This software is distributed     *\n+ * without any warranty. For the CC0 Public Domain Dedication, see       *\n+ * EXAMPLES_COPYING or https://creativecommons.org/publicdomain/zero/1.0 *\n+ *************************************************************************/\n+\n+#include <stdio.h>\n+#include <assert.h>\n+#include <string.h>\n+\n+#include <secp256k1.h>\n+#include <secp256k1_extrakeys.h>\n+#include <secp256k1_silentpayments.h>\n+\n+#include \"examples_util.h\"\n+#include \"src/util.h\"\n+\n+/* Static data for Bob and Carol's silent payment addresses */\n+static unsigned char smallest_outpoint[36] = {\n+    0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+    0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+    0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+    0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00\n+};\n+static unsigned char bob_scan_key[32] = {\n+    0xa8, 0x90, 0x54, 0xc9, 0x5b, 0xe3, 0xc3, 0x01,\n+    0x56, 0x65, 0x74, 0xf2, 0xaa, 0x93, 0xad, 0xe0,\n+    0x51, 0x85, 0x09, 0x03, 0xa6, 0x9c, 0xbd, 0xd1,\n+    0xd4, 0x7e, 0xae, 0x26, 0x3d, 0x7b, 0xc0, 0x31\n+};\n+static unsigned char bob_spend_pubkey[33] = {\n+    0x02, 0xee, 0x97, 0xdf, 0x83, 0xb2, 0x54, 0x6a,\n+    0xf5, 0xa7, 0xd0, 0x62, 0x15, 0xd9, 0x8b, 0xcb,\n+    0x63, 0x7f, 0xe0, 0x5d, 0xd0, 0xfa, 0x37, 0x3b,\n+    0xd8, 0x20, 0xe6, 0x64, 0xd3, 0x72, 0xde, 0x9a, 0x01\n+};\n+static unsigned char bob_address[2][33] = {\n+    {\n+        0x02, 0x15, 0x40, 0xae, 0xa8, 0x97, 0x54, 0x7a,\n+        0xd4, 0x39, 0xb4, 0xe0, 0xf6, 0x09, 0xe5, 0xf0,\n+        0xfa, 0x63, 0xde, 0x89, 0xab, 0x11, 0xed, 0xe3,\n+        0x1e, 0x8c, 0xde, 0x4b, 0xe2, 0x19, 0x42, 0x5f, 0x23\n+    },\n+    {\n+        0x02, 0x3e, 0xff, 0xf8, 0x18, 0x51, 0x65, 0xea,\n+        0x63, 0xa9, 0x92, 0xb3, 0x9f, 0x31, 0xd8, 0xfd,\n+        0x8e, 0x0e, 0x64, 0xae, 0xf9, 0xd3, 0x88, 0x07,\n+        0x34, 0x97, 0x37, 0x14, 0xa5, 0x3d, 0x83, 0x11, 0x8d\n+    }\n+};\n+static unsigned char carol_scan_key[32] = {\n+    0x04, 0xb2, 0xa4, 0x11, 0x63, 0x5c, 0x09, 0x77,\n+    0x59, 0xaa, 0xcd, 0x0f, 0x00, 0x5a, 0x4c, 0x82,\n+    0xc8, 0xc9, 0x28, 0x62, 0xc6, 0xfc, 0x28, 0x4b,\n+    0x80, 0xb8, 0xef, 0xeb, 0xc2, 0x0c, 0x3d, 0x17\n+};\n+static unsigned char carol_address[2][33] = {\n+    {\n+        0x03, 0xbb, 0xc6, 0x3f, 0x12, 0x74, 0x5d, 0x3b,\n+        0x9e, 0x9d, 0x24, 0xc6, 0xcd, 0x7a, 0x1e, 0xfe,\n+        0xba, 0xd0, 0xa7, 0xf4, 0x69, 0x23, 0x2f, 0xbe,\n+        0xcf, 0x31, 0xfb, 0xa7, 0xb4, 0xf7, 0xdd, 0xed, 0xa8\n+    },\n+    {\n+        0x03, 0x81, 0xeb, 0x9a, 0x9a, 0x9e, 0xc7, 0x39,\n+        0xd5, 0x27, 0xc1, 0x63, 0x1b, 0x31, 0xb4, 0x21,\n+        0x56, 0x6f, 0x5c, 0x2a, 0x47, 0xb4, 0xab, 0x5b,\n+        0x1f, 0x6a, 0x68, 0x6d, 0xfb, 0x68, 0xea, 0xb7, 0x16\n+    }\n+};\n+\n+/** Labels\n+ *\n+ *  The structs and call back function are implemented here as a demonstration\n+ *  of how the label lookup callback is meant to query a label cache and return\n+ *  the label tweak when a match is found. This is for demonstration purposes\n+ *  only and not optimized. In a production usecase, it is expected that the\n+ *  caller will be using a much more performant method for storing and querying\n+ *  labels.\n+ *\n+ *  Recipients not using labels can ignore these steps and simply pass `NULL`\n+ *  for the label_lookup and label_context arguments:\n+ *\n+ *      secp256k1_silentpayments_recipient_scan_outputs(..., NULL, NULL);\n+ */\n+\n+struct label_cache_entry {\n+    unsigned char label[33];\n+    unsigned char label_tweak[32];\n+};\n+\n+struct labels_cache {\n+    size_t entries_used;\n+    struct label_cache_entry entries[5];\n+};\n+\n+const unsigned char* label_lookup(\n+    const unsigned char* label33,\n+    const void* cache_ptr\n+) {\n+    const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;\n+    size_t i;\n+    for (i = 0; i < cache->entries_used; i++) {\n+        if (secp256k1_memcmp_var(cache->entries[i].label, label33, 33) == 0) {\n+            return cache->entries[i].label_tweak;\n+        }\n+    }\n+    return NULL;\n+}\n+\n+int main(void) {\n+    enum { N_INPUTS = 2, N_OUTPUTS = 3 };\n+    unsigned char randomize[32];\n+    unsigned char xonly_print[32];\n+    secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\n+    secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\n+    int ret;\n+    size_t i;\n+\n+    /* Before we can call actual API functions, we need to create a \"context\" */\n+    secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    if (!fill_random(randomize, sizeof(randomize))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return 1;\n+    }\n+    /* Randomizing the context is recommended to protect against side-channel\n+     * leakage See `secp256k1_context_randomize` in secp256k1.h for more",
+      "path": "examples/silentpayments.c",
+      "position": 129,
+      "original_position": 129,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "2f39991873c5d9c1e07b215e4951c0784a959794",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "missing dot nit\r\n```suggestion \r\n    /* Randomizing the context is recommended to protect against side-channel\r\n     * leakage. See `secp256k1_context_randomize` in secp256k1.h for more\r\n```",
+      "created_at": "2024-08-08T17:05:16Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709936221",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709936221"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": 128,
+      "original_start_line": 128,
+      "start_side": "RIGHT",
+      "line": 129,
+      "original_line": 129,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709946444",
+      "pull_request_review_id": 2227982140,
+      "id": 1709946444,
+      "node_id": "PRRC_kwDOAP4Jqs5l67ZM",
+      "diff_hunk": "@@ -2,28 +2,111 @@\n #define SECP256K1_SILENTPAYMENTS_H\n \n #include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n \n #ifdef __cplusplus\n extern \"C\" {\n #endif\n \n-/* This module provides an implementation for Silent Payments, as specified in BIP352.\n- * This particularly involves the creation of input tweak data by summing up private\n- * or public keys and the derivation of a shared secret using Elliptic Curve Diffie-Hellman.\n- * Combined are either:\n- *   - spender's private keys and recipient's public key (a * B, sender side)\n- *   - spender's public keys and recipient's private key (A * b, recipient side)\n- * With this result, the necessary key material for ultimately creating/scanning\n- * or spending Silent Payment outputs can be determined.\n+/* This module provides an implementation for Silent Payments, as specified in\n+ * BIP352. This particularly involves the creation of input tweak data by\n+ * summing up private or public keys and the derivation of a shared secret\n+ * using Elliptic Curve Diffie-Hellman. Combined are either: - spender's\n+ * private keys and recipient's public key (a * B, sender side) - spender's\n+ * public keys and recipient's private key (A * b, recipient side) With this\n+ * result, the necessary key material for ultimately creating/scanning or\n+ * spending Silent Payment outputs can be determined.",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": null,
+      "original_position": 25,
+      "commit_id": "3165b6b091a30a4ace948d67d55142c61a12929d",
+      "original_commit_id": "31a6da2cf73675ac1daa32895177fcefa8e37133",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "here and below: seems like these format changes should be already part of the first commit",
+      "created_at": "2024-08-08T17:11:30Z",
+      "updated_at": "2024-08-08T17:23:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1709946444",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1709946444"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 10,
+      "start_side": "LEFT",
+      "line": null,
+      "original_line": 18,
       "side": "RIGHT"
     }
   ]
