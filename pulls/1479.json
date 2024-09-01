@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-09-01T00:52:32Z",
+    "updated_at": "2024-09-01T07:12:20Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "d692f7a187201412e52b99b787977e145e667c79",
@@ -332,7 +332,7 @@
     "deletions": 28,
     "changed_files": 27,
     "commits": 4,
-    "review_comments": 183,
+    "review_comments": 184,
     "comments": 17
   },
   "events": [
@@ -13074,6 +13074,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1739942807"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 97,
+      "original_line": 97,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1739991601",
+      "pull_request_review_id": 2274225550,
+      "id": 1739991601,
+      "node_id": "PRRC_kwDOAP4Jqs5ntiox",
+      "diff_hunk": "@@ -0,0 +1,580 @@\n+#ifndef SECP256K1_MUSIG_H\n+#define SECP256K1_MUSIG_H\n+\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+#include <stddef.h>\n+#include <stdint.h>\n+\n+/** This module implements BIP 327 \"MuSig2 for BIP340-compatible\n+ *  Multi-Signatures\"\n+ *  (https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki)\n+ *  v1.0.0. You can find an example demonstrating the musig module in\n+ *  examples/musig.c.\n+ *\n+ *  The module also supports BIP 341 (\"Taproot\") public key tweaking.\n+ *\n+ *  It is recommended to read the documentation in this include file carefully.\n+ *  Further notes on API usage can be found in doc/musig.md\n+ *\n+ *  Since the first version of MuSig is essentially replaced by MuSig2, we use\n+ *  MuSig, musig and MuSig2 synonymously unless noted otherwise.\n+ */\n+\n+/** Opaque data structures\n+ *\n+ *  The exact representation of data inside is implementation defined and not\n+ *  guaranteed to be portable between different platforms or versions. If you\n+ *  need to convert to a format suitable for storage, transmission, or\n+ *  comparison, use the corresponding serialization and parsing functions.\n+ */\n+\n+/** Opaque data structure that caches information about public key aggregation.\n+ *\n+ *  Guaranteed to be 197 bytes in size. It can be safely copied/moved. No\n+ *  serialization and parsing functions (yet).\n+ */\n+typedef struct {\n+    unsigned char data[197];\n+} secp256k1_musig_keyagg_cache;\n+\n+/** Opaque data structure that holds a signer's _secret_ nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size.\n+ *\n+ *  WARNING: This structure MUST NOT be copied or read or written to directly. A\n+ *  signer who is online throughout the whole process and can keep this\n+ *  structure in memory can use the provided API functions for a safe standard\n+ *  workflow.\n+ *\n+ *  Copying this data structure can result in nonce reuse which will leak the\n+ *  secret signing key.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_secnonce;\n+\n+/** Opaque data structure that holds a signer's public nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size. It can be safely copied/moved. Serialized\n+ *  and parsed with `musig_pubnonce_serialize` and `musig_pubnonce_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_pubnonce;\n+\n+/** Opaque data structure that holds an aggregate public nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size. It can be safely copied/moved.\n+ *  Serialized and parsed with `musig_aggnonce_serialize` and\n+ *  `musig_aggnonce_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_aggnonce;\n+\n+/** Opaque data structure that holds a MuSig session.\n+ *\n+ *  This structure is not required to be kept secret for the signing protocol to\n+ *  be secure. Guaranteed to be 133 bytes in size. It can be safely\n+ *  copied/moved. No serialization and parsing functions (yet).\n+ */\n+typedef struct {\n+    unsigned char data[133];\n+} secp256k1_musig_session;\n+\n+/** Opaque data structure that holds a partial MuSig signature.\n+ *\n+ *  Guaranteed to be 36 bytes in size. Serialized and parsed with\n+ *  `musig_partial_sig_serialize` and `musig_partial_sig_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[36];\n+} secp256k1_musig_partial_sig;",
+      "path": "include/secp256k1_musig.h",
+      "position": 97,
+      "original_position": 97,
+      "commit_id": "5dccc7b4578fb583df60290fc363220cbacb7a03",
+      "original_commit_id": "5dccc7b4578fb583df60290fc363220cbacb7a03",
+      "in_reply_to_id": 1739901289,
+      "user": {
+        "login": "Kixunil",
+        "id": 1178779,
+        "node_id": "MDQ6VXNlcjExNzg3Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1178779?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Kixunil",
+        "html_url": "https://github.com/Kixunil",
+        "followers_url": "https://api.github.com/users/Kixunil/followers",
+        "following_url": "https://api.github.com/users/Kixunil/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Kixunil/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Kixunil/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Kixunil/subscriptions",
+        "organizations_url": "https://api.github.com/users/Kixunil/orgs",
+        "repos_url": "https://api.github.com/users/Kixunil/repos",
+        "events_url": "https://api.github.com/users/Kixunil/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Kixunil/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Someone coming from Rust and being paranoid about everything. :D Thanks for clarifying, though I think a documentation comment would still be nice.",
+      "created_at": "2024-09-01T07:12:19Z",
+      "updated_at": "2024-09-01T07:12:20Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1739991601",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1739991601"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
