@@ -41,7 +41,7 @@
     "body": "Hi! As discussed in #1570 I propose this as a change to the examples.c\r\n\r\nIf the key is either zero or out of range we just return 1 and end the example instead of looping until a good key is found. This is all very unlikely but could indicate a faulty/manipulated RNG.\r\nAnybody knows where I can find the docs for this? First commit to this library, hope I don't break anything!",
     "labels": [],
     "created_at": "2024-08-29T20:39:48Z",
-    "updated_at": "2024-08-29T20:39:48Z",
+    "updated_at": "2024-09-02T20:01:40Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "9dbee14ba7ce320a5a55bb3a68bf6b9e5a852c1f",
@@ -146,7 +146,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12008,
+        "size": 12004,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -274,12 +274,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 988,
-        "stargazers_count": 2038,
-        "watchers_count": 2038,
+        "forks_count": 990,
+        "stargazers_count": 2044,
+        "watchers_count": 2044,
         "size": 12008,
         "default_branch": "master",
-        "open_issues_count": 147,
+        "open_issues_count": 148,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,7 +292,7 @@
         "visibility": "public",
         "pushed_at": "2024-08-21T06:32:32Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-08-29T12:57:34Z",
+        "updated_at": "2024-09-02T17:33:56Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -321,7 +321,7 @@
     "deletions": 30,
     "changed_files": 3,
     "commits": 3,
-    "review_comments": 0,
+    "review_comments": 2,
     "comments": 0
   },
   "events": [
@@ -444,7 +444,148 @@
         "date": "2024-08-29T20:38:11Z"
       },
       "sha": "edb863dffba81f5d272c7238913ac4f0200df24c"
+    },
+    {
+      "event": "reviewed",
+      "id": 2276120668,
+      "node_id": "PRR_kwDOAP4Jqs6Hqthc",
+      "url": null,
+      "actor": null,
+      "commit_id": "edb863dffba81f5d272c7238913ac4f0200df24c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "Hey @Cheapshot003, thanks for the contribution. What sort of docs are you looking for exactly?",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1599#pullrequestreview-2276120668",
+      "submitted_at": "2024-09-02T20:01:40Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1599"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1741225883",
+      "pull_request_review_id": 2276120668,
+      "id": 1741225883,
+      "node_id": "PRRC_kwDOAP4Jqs5nyP-b",
+      "diff_hunk": "@@ -49,16 +49,15 @@ int main(void) {\n     /*** Generate secret keys ***/\n \n     /* If the secret key is zero or out of range (bigger than secp256k1's\n-     * order), we try to sample a new key. Note that the probability of this\n-     * happening is negligible. */\n-    while (1) {\n-        if (!fill_random(seckey1, sizeof(seckey1)) || !fill_random(seckey2, sizeof(seckey2))) {\n-            printf(\"Failed to generate randomness\\n\");\n-            return 1;\n-        }\n-        if (secp256k1_ec_seckey_verify(ctx, seckey1) && secp256k1_ec_seckey_verify(ctx, seckey2)) {\n-            break;\n-        }\n+     * order), we return 1. Note that the probability of this\n+     * happening is negligible, though it could indicate a faulty RNG */\n+    if (!fill_random(seckey1, sizeof(seckey1)) || !fill_random(seckey2, sizeof(seckey2))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return 1;\n+    }\n+    if (!secp256k1_ec_seckey_verify(ctx, seckey1) || !secp256k1_ec_seckey_verify(ctx, seckey2)) {\n+        printf(\"Generated secret key is invalid. This could indicate an issue with the random number generator.\\n\")",
+      "path": "examples/ellswift.c",
+      "position": 21,
+      "original_position": 21,
+      "commit_id": "edb863dffba81f5d272c7238913ac4f0200df24c",
+      "original_commit_id": "edb863dffba81f5d272c7238913ac4f0200df24c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "This misses a semicolon. I think we should print this message in any example where `seckey_verify` fails. Also, \"could indicate\" -> \"indicates\".",
+      "created_at": "2024-09-02T19:58:58Z",
+      "updated_at": "2024-09-02T20:01:40Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1599#discussion_r1741225883",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1741225883"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1599"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 59,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1741226691",
+      "pull_request_review_id": 2276120668,
+      "id": 1741226691,
+      "node_id": "PRRC_kwDOAP4Jqs5nyQLD",
+      "diff_hunk": "@@ -49,16 +49,15 @@ int main(void) {\n     /*** Generate secret keys ***/\n \n     /* If the secret key is zero or out of range (bigger than secp256k1's\n-     * order), we try to sample a new key. Note that the probability of this\n-     * happening is negligible. */\n-    while (1) {\n-        if (!fill_random(seckey1, sizeof(seckey1)) || !fill_random(seckey2, sizeof(seckey2))) {\n-            printf(\"Failed to generate randomness\\n\");\n-            return 1;\n-        }\n-        if (secp256k1_ec_seckey_verify(ctx, seckey1) && secp256k1_ec_seckey_verify(ctx, seckey2)) {\n-            break;\n-        }\n+     * order), we return 1. Note that the probability of this\n+     * happening is negligible, though it could indicate a faulty RNG */",
+      "path": "examples/ellswift.c",
+      "position": 15,
+      "original_position": 15,
+      "commit_id": "edb863dffba81f5d272c7238913ac4f0200df24c",
+      "original_commit_id": "edb863dffba81f5d272c7238913ac4f0200df24c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "```\r\n/* If the secret key is zero or out of range (greater than secp256k1's\r\n * order), we return 1. Note that the probability of this occurring\r\n * is negligible with a properly functioning random number generator. */\r\n ```",
+      "created_at": "2024-09-02T20:01:28Z",
+      "updated_at": "2024-09-02T20:01:40Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1599#discussion_r1741226691",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1741226691"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1599"
+        }
+      },
+      "start_line": 52,
+      "original_start_line": 52,
+      "start_side": "RIGHT",
+      "line": 53,
+      "original_line": 53,
+      "side": "RIGHT"
+    }
+  ]
 }
