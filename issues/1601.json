@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1601/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1601",
     "number": 1601,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Help Bitcoin Public Key Why can't I convert the taproot public key through the private key?",
     "body": "#include <stdio.h>\r\n#include <stdlib.h>\r\n#include <secp256k1.h>\r\n#include <secp256k1_extrakeys.h>  \r\n\r\nint main() {\r\n    \r\n    secp256k1_context *ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);\r\n\r\n    \r\n    unsigned char privkey[32] = {\r\n        0x7d, 0x48, 0x1e, 0x43, 0x55, 0xd5, 0x1c, 0x82,\r\n        0x4e, 0x8d, 0x02, 0xe6, 0x17, 0xd0, 0xe1, 0x88,\r\n        0xba, 0x97, 0x68, 0x5e, 0x55, 0xf8, 0x65, 0x57,\r\n        0xd1, 0xd8, 0x3d, 0x64, 0xd1, 0xc8, 0x95, 0x4b\r\n    };\r\n\t\r\n    \r\n    if (!secp256k1_ec_seckey_verify(ctx, privkey)) {\r\n        printf(\"Invalid private key\\n\");\r\n        secp256k1_context_destroy(ctx);\r\n        return 1;\r\n    }\r\n\r\n    \r\n    secp256k1_pubkey pubkey;\r\n\r\n    \r\n    if (!secp256k1_ec_pubkey_create(ctx, &pubkey, privkey)) {\r\n        printf(\"Failed to create public key\\n\");\r\n        secp256k1_context_destroy(ctx);\r\n        return 1;\r\n    }\r\n\r\n    \r\n    secp256k1_xonly_pubkey xonly_pubkey;\r\n    if (!secp256k1_xonly_pubkey_from_pubkey(ctx, &xonly_pubkey, NULL, &pubkey)) {\r\n        printf(\"Failed to convert to x-only public key\\n\");\r\n        secp256k1_context_destroy(ctx);\r\n        return 1;\r\n    }\r\n\r\n    unsigned char output[32];\r\n    if (!secp256k1_xonly_pubkey_serialize(ctx, output, &xonly_pubkey)) {\r\n        printf(\"Failed to serialize x-only public key\\n\");\r\n        secp256k1_context_destroy(ctx);\r\n        return 1;\r\n    }\r\n\r\n    \r\n    printf(\"Taproot public key (x-only): \");\r\n    for (size_t i = 0; i < 32; i++) {\r\n        printf(\"%02x\", output[i]);\r\n    }\r\n    printf(\"\\n\");\r\n\r\n    \r\n    secp256k1_context_destroy(ctx);\r\n\r\n    return 0;\r\n}\r\n\r\nI need t2pr public key\r\n\r\nI need an example, can anyone help me?",
     "user": {
@@ -37,10 +37,11 @@
     "labels": [],
     "assignees": [],
     "author_association": "NONE",
-    "locked": false,
+    "locked": true,
     "comments": 1,
+    "closed_at": "2024-09-03T13:25:09Z",
     "created_at": "2024-09-03T12:52:44Z",
-    "updated_at": "2024-09-03T12:53:21Z"
+    "updated_at": "2024-09-03T13:25:09Z"
   },
   "events": [
     {
@@ -96,6 +97,64 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1601#issuecomment-2326450450",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1601"
+    },
+    {
+      "event": "locked",
+      "id": 14115295027,
+      "node_id": "LOE_lADOAP4Jqs6VLcpdzwAAAANJVk8z",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14115295027",
+      "actor": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-09-03T13:25:09Z"
+    },
+    {
+      "event": "converted_to_discussion",
+      "id": 14115295067,
+      "node_id": "CITDE_lADOAP4Jqs6VLcpdzwAAAANJVk9b",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14115295067",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-09-03T13:25:09Z"
     }
   ]
 }
