@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-09-04T20:04:28Z",
+    "updated_at": "2024-09-05T17:34:56Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "4d16d493346c617b68f7b7fc84081412ee760233",
@@ -286,8 +286,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 991,
-        "stargazers_count": 2045,
-        "watchers_count": 2045,
+        "stargazers_count": 2046,
+        "watchers_count": 2046,
         "size": 12008,
         "default_branch": "master",
         "open_issues_count": 148,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-08-21T06:32:32Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-09-03T21:46:21Z",
+        "updated_at": "2024-09-05T03:58:57Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 30,
     "changed_files": 27,
     "commits": 4,
-    "review_comments": 194,
+    "review_comments": 195,
     "comments": 20
   },
   "events": [
@@ -14046,6 +14046,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1744349109"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 109,
+      "original_line": 109,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1745926896",
+      "pull_request_review_id": 2283697585,
+      "id": 1745926896,
+      "node_id": "PRRC_kwDOAP4Jqs5oELrw",
+      "diff_hunk": "@@ -0,0 +1,579 @@\n+#ifndef SECP256K1_MUSIG_H\n+#define SECP256K1_MUSIG_H\n+\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+#include <stddef.h>\n+#include <stdint.h>\n+\n+/** This module implements BIP 327 \"MuSig2 for BIP340-compatible\n+ *  Multi-Signatures\"\n+ *  (https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki)\n+ *  v1.0.0. You can find an example demonstrating the musig module in\n+ *  examples/musig.c.\n+ *\n+ *  The module also supports BIP 341 (\"Taproot\") public key tweaking.\n+ *\n+ *  It is recommended to read the documentation in this include file carefully.\n+ *  Further notes on API usage can be found in doc/musig.md\n+ *\n+ *  Since the first version of MuSig is essentially replaced by MuSig2, we use\n+ *  MuSig, musig and MuSig2 synonymously unless noted otherwise.\n+ */\n+\n+/** Opaque data structures\n+ *\n+ *  The exact representation of data inside is implementation defined and not\n+ *  guaranteed to be portable between different platforms or versions. If you\n+ *  need to convert to a format suitable for storage, transmission, or\n+ *  comparison, use the corresponding serialization and parsing functions.\n+ */\n+\n+/** Opaque data structure that caches information about public key aggregation.\n+ *\n+ *  Guaranteed to be 197 bytes in size. It can be safely copied/moved. No\n+ *  serialization and parsing functions (yet).\n+ */\n+typedef struct {\n+    unsigned char data[197];\n+} secp256k1_musig_keyagg_cache;\n+\n+/** Opaque data structure that holds a signer's _secret_ nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size.\n+ *\n+ *  WARNING: This structure MUST NOT be copied or read or written to directly. A\n+ *  signer who is online throughout the whole process and can keep this\n+ *  structure in memory can use the provided API functions for a safe standard\n+ *  workflow.\n+ *\n+ *  Copying this data structure can result in nonce reuse which will leak the\n+ *  secret signing key.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_secnonce;\n+\n+/** Opaque data structure that holds a signer's public nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size. It can be safely copied/moved. Serialized\n+ *  and parsed with `musig_pubnonce_serialize` and `musig_pubnonce_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_pubnonce;\n+\n+/** Opaque data structure that holds an aggregate public nonce.\n+ *\n+ *  Guaranteed to be 132 bytes in size. It can be safely copied/moved.\n+ *  Serialized and parsed with `musig_aggnonce_serialize` and\n+ *  `musig_aggnonce_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[132];\n+} secp256k1_musig_aggnonce;\n+\n+/** Opaque data structure that holds a MuSig session.\n+ *\n+ *  This structure is not required to be kept secret for the signing protocol to\n+ *  be secure. Guaranteed to be 133 bytes in size. It can be safely\n+ *  copied/moved. No serialization and parsing functions (yet).\n+ */\n+typedef struct {\n+    unsigned char data[133];\n+} secp256k1_musig_session;\n+\n+/** Opaque data structure that holds a partial MuSig signature.\n+ *\n+ *  Guaranteed to be 36 bytes in size. Serialized and parsed with\n+ *  `musig_partial_sig_serialize` and `musig_partial_sig_parse`.\n+ */\n+typedef struct {\n+    unsigned char data[36];\n+} secp256k1_musig_partial_sig;\n+\n+/** Parse a signer's public nonce.\n+ *\n+ *  Returns: 1 when the nonce could be parsed, 0 otherwise.\n+ *  Args:    ctx: pointer to a context object\n+ *  Out:   nonce: pointer to a nonce object\n+ *  In:     in66: pointer to the 66-byte nonce to be parsed\n+ */\n+SECP256K1_API int secp256k1_musig_pubnonce_parse(\n+    const secp256k1_context *ctx,\n+    secp256k1_musig_pubnonce *nonce,\n+    const unsigned char *in66",
+      "path": "include/secp256k1_musig.h",
+      "position": 109,
+      "original_position": 109,
+      "commit_id": "5bd08918a81d8df7e522cd643fa4bd8930b165a7",
+      "original_commit_id": "52cd8e0a7a41210e94ac5e4dd484b255e326a2df",
+      "in_reply_to_id": 1741694956,
+      "user": {
+        "login": "Kixunil",
+        "id": 1178779,
+        "node_id": "MDQ6VXNlcjExNzg3Nzk=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1178779?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Kixunil",
+        "html_url": "https://github.com/Kixunil",
+        "followers_url": "https://api.github.com/users/Kixunil/followers",
+        "following_url": "https://api.github.com/users/Kixunil/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Kixunil/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Kixunil/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Kixunil/subscriptions",
+        "organizations_url": "https://api.github.com/users/Kixunil/orgs",
+        "repos_url": "https://api.github.com/users/Kixunil/repos",
+        "events_url": "https://api.github.com/users/Kixunil/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Kixunil/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "For instance in Rust we have [`bindgen`](https://crates.io/crates/bindgen), a tool that generates bindings automatically. I've tried to pass it this header file:\r\n\r\n```c\r\nvoid foo(const unsigned char *arg);\r\nvoid bar(const unsigned char arg[32]);\r\nvoid baz(const unsigned char (*arg)[32]);\r\n```\r\n\r\nAnd it generated this code:\r\n\r\n```rust\r\nextern \"C\" {\r\n    pub fn foo(arg: *const ::std::os::raw::c_uchar);\r\n}\r\nextern \"C\" {\r\n    pub fn bar(arg: *const ::std::os::raw::c_uchar);\r\n}\r\nextern \"C\" {\r\n    pub fn baz(arg: *const [::std::os::raw::c_uchar; 32usize]);\r\n}\r\n```\r\n\r\nAs you can see, the last one has a different type. And while it's the same from ABI perspective, there's a real difference between them in Rust since you can directly pass in `&array` without any casts because the types match making the code more obviously correct.\r\n\r\nCurrently, we aren't using `bidgen` in rust-secp256k1 but we might in the future and I'd be surprised if similar tools don't exist in other languages.\r\n\r\nAlso I'm not familiar with the current state of static analysis in C but I think a reasonable static analyzer should be able to see that statements like `out[33] = 42` or `baz(&twentyone_item_array)` are obviously wrong. `gcc` already complains about the these when compiling with `-O2 -W -Wall -Warray-bounds`. ",
+      "created_at": "2024-09-05T17:34:56Z",
+      "updated_at": "2024-09-05T17:34:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1745926896",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1745926896"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
