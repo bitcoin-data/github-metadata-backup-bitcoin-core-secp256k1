@@ -51,7 +51,7 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-09-25T23:39:42Z",
+    "updated_at": "2024-09-26T10:47:53Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "1e48e13e1574c1db70a0c2d83ffd41343c149d25",
@@ -332,7 +332,7 @@
     "deletions": 28,
     "changed_files": 28,
     "commits": 5,
-    "review_comments": 262,
+    "review_comments": 263,
     "comments": 20
   },
   "events": [
@@ -4353,6 +4353,41 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-09-25T19:23:41Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2330825345,
+      "node_id": "PRR_kwDOAP4Jqs6K7ZKB",
+      "url": null,
+      "actor": null,
+      "commit_id": "55d3dc0a70367e5980759db49c4c06101db601b2",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#pullrequestreview-2330825345",
+      "submitted_at": "2024-09-26T10:47:53Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
     }
   ],
   "comments": [
@@ -17908,9 +17943,9 @@
         "type": "User",
         "site_admin": false
       },
-      "body": "There is no `seckey` argument anymore.",
+      "body": "There is no `seckey` argument anymore.\r\n\r\nEDIT: Ok, it does day \"which is part of the keypair argument in `secp256k1_musig_nonce_gen_counter`\", but that sounds a bit confusing given that this is the documentation for that function.\r\n\r\nWhat about \"This requires that a private key is provided to `secp256k1_musig_nonce_gen_counter` (through the keypair argument), as opposed to `secp256k1_musig_nonce_gen` where the seckey argument is optional.\"?",
       "created_at": "2024-09-25T23:39:41Z",
-      "updated_at": "2024-09-25T23:39:42Z",
+      "updated_at": "2024-09-26T00:45:56Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1776103134",
       "author_association": "CONTRIBUTOR",
       "_links": {
@@ -17926,6 +17961,58 @@
       "start_side": null,
       "line": 384,
       "original_line": 384,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1776816636",
+      "pull_request_review_id": 2330825345,
+      "id": 1776816636,
+      "node_id": "PRRC_kwDOAP4Jqs5p6BH8",
+      "diff_hunk": "@@ -0,0 +1,258 @@\n+/*************************************************************************\n+ * To the extent possible under law, the author(s) have dedicated all    *\n+ * copyright and related and neighboring rights to the software in this  *\n+ * file to the public domain worldwide. This software is distributed     *\n+ * without any warranty. For the CC0 Public Domain Dedication, see       *\n+ * EXAMPLES_COPYING or https://creativecommons.org/publicdomain/zero/1.0 *\n+ *************************************************************************/\n+\n+/** This file demonstrates how to use the MuSig module to create a\n+ *  3-of-3 multisignature. Additionally, see the documentation in\n+ *  include/secp256k1_musig.h and doc/musig.md.\n+ */\n+\n+#include <stdio.h>\n+#include <assert.h>\n+#include <string.h>\n+\n+#include <secp256k1.h>\n+#include <secp256k1_extrakeys.h>\n+#include <secp256k1_musig.h>\n+#include <secp256k1_schnorrsig.h>\n+\n+#include \"examples_util.h\"\n+\n+struct signer_secrets {\n+    secp256k1_keypair keypair;\n+    secp256k1_musig_secnonce secnonce;\n+};\n+\n+struct signer {\n+    secp256k1_pubkey pubkey;\n+    secp256k1_musig_pubnonce pubnonce;\n+    secp256k1_musig_partial_sig partial_sig;\n+};\n+\n+ /* Number of public keys involved in creating the aggregate signature */\n+#define N_SIGNERS 3\n+/* Create a key pair, store it in signer_secrets->keypair and signer->pubkey */\n+static int create_keypair(const secp256k1_context* ctx, struct signer_secrets *signer_secrets, struct signer *signer) {\n+    unsigned char seckey[32];\n+    while (1) {\n+        if (!fill_random(seckey, sizeof(seckey))) {\n+            printf(\"Failed to generate randomness\\n\");\n+            return 0;\n+        }\n+        if (secp256k1_keypair_create(ctx, &signer_secrets->keypair, seckey)) {\n+            break;\n+        }\n+    }\n+    if (!secp256k1_keypair_pub(ctx, &signer->pubkey, &signer_secrets->keypair)) {\n+        return 0;\n+    }\n+\n+    secure_erase(seckey, sizeof(seckey));\n+    return 1;\n+}\n+\n+/* Tweak the pubkey corresponding to the provided keyagg cache, update the cache\n+ * and return the tweaked aggregate pk. */\n+static int tweak(const secp256k1_context* ctx, secp256k1_xonly_pubkey *agg_pk, secp256k1_musig_keyagg_cache *cache) {\n+    secp256k1_pubkey output_pk;\n+    /* For BIP 32 tweaking the plain_tweak is set to a hash as defined in BIP\n+     * 32. */\n+    unsigned char plain_tweak[32] = \"this could be a BIP32 tweak....\";\n+    /* For Taproot tweaking the xonly_tweak is set to the TapTweak hash as\n+     * defined in BIP 341 */\n+    unsigned char xonly_tweak[32] = \"this could be a Taproot tweak..\";\n+\n+\n+    /* Plain tweaking which, for example, allows deriving multiple child\n+     * public keys from a single aggregate key using BIP32 */\n+    if (!secp256k1_musig_pubkey_ec_tweak_add(ctx, NULL, cache, plain_tweak)) {\n+        return 0;\n+    }\n+    /* Note that we did not provide an output_pk argument, because the\n+     * resulting pk is also saved in the cache and so if one is just interested\n+     * in signing, the output_pk argument is unnecessary. On the other hand, if\n+     * one is not interested in signing, the same output_pk can be obtained by\n+     * calling `secp256k1_musig_pubkey_get` right after key aggregation to get\n+     * the full pubkey and then call `secp256k1_ec_pubkey_tweak_add`. */\n+\n+    /* Xonly tweaking which, for example, allows creating Taproot commitments */\n+    if (!secp256k1_musig_pubkey_xonly_tweak_add(ctx, &output_pk, cache, xonly_tweak)) {\n+        return 0;\n+    }\n+    /* Note that if we wouldn't care about signing, we can arrive at the same\n+     * output_pk by providing the untweaked public key to\n+     * `secp256k1_xonly_pubkey_tweak_add` (after converting it to an xonly pubkey\n+     * if necessary with `secp256k1_xonly_pubkey_from_pubkey`). */\n+\n+    /* Now we convert the output_pk to an xonly pubkey to allow to later verify\n+     * the Schnorr signature against it. For this purpose we can ignore the\n+     * `pk_parity` output argument; we would need it if we would have to open\n+     * the Taproot commitment. */\n+    if (!secp256k1_xonly_pubkey_from_pubkey(ctx, agg_pk, NULL, &output_pk)) {\n+        return 0;\n+    }\n+    return 1;\n+}\n+\n+/* Sign a message hash with the given key pairs and store the result in sig */\n+static int sign(const secp256k1_context* ctx, struct signer_secrets *signer_secrets, struct signer *signer, const secp256k1_musig_keyagg_cache *cache, const unsigned char *msg32, unsigned char *sig64) {\n+    int i;\n+    const secp256k1_musig_pubnonce *pubnonces[N_SIGNERS];\n+    const secp256k1_musig_partial_sig *partial_sigs[N_SIGNERS];\n+    /* The same for all signers */\n+    secp256k1_musig_session session;\n+    secp256k1_musig_aggnonce agg_pubnonce;\n+\n+    for (i = 0; i < N_SIGNERS; i++) {\n+        unsigned char seckey[32];\n+        unsigned char session_secrand[32];\n+        /* Create random session ID. It is absolutely necessary that the session ID\n+         * is unique for every call of secp256k1_musig_nonce_gen. Otherwise\n+         * it's trivial for an attacker to extract the secret key! */\n+        if (!fill_random(session_secrand, sizeof(session_secrand))) {\n+            return 0;\n+        }\n+        if (!secp256k1_keypair_sec(ctx, seckey, &signer_secrets[i].keypair)) {\n+            return 0;\n+        }\n+        /* Initialize session and create secret nonce for signing and public\n+         * nonce to send to the other signers. */\n+        if (!secp256k1_musig_nonce_gen(ctx, &signer_secrets[i].secnonce, &signer[i].pubnonce, session_secrand, seckey, &signer[i].pubkey, msg32, NULL, NULL)) {\n+            return 0;\n+        }\n+        pubnonces[i] = &signer[i].pubnonce;\n+\n+        secure_erase(seckey, sizeof(seckey));\n+        secure_erase(session_secrand, sizeof(session_secrand));",
+      "path": "examples/musig.c",
+      "position": 130,
+      "original_position": 130,
+      "commit_id": "55d3dc0a70367e5980759db49c4c06101db601b2",
+      "original_commit_id": "96c95bfd3a006451aa686947131c5cef69f4e746",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "with the latest change to `secp256k1_musig_nonce_gen`, this line wouldn't be needed anymore (doesn't hurt to keep it though for demonstrating good practices, I presume)",
+      "created_at": "2024-09-26T10:43:13Z",
+      "updated_at": "2024-09-26T10:47:53Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1776816636",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1776816636"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 130,
+      "original_line": 130,
       "side": "RIGHT"
     }
   ]
