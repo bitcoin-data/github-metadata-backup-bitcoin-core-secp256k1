@@ -51,9 +51,9 @@
       }
     ],
     "created_at": "2024-01-06T20:40:28Z",
-    "updated_at": "2024-09-26T15:13:25Z",
+    "updated_at": "2024-09-29T17:14:59Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "d0cf8d57fd78177be2b34da9807ff298f9598203",
     "assignees": [],
     "requested_reviewers": [],
@@ -157,7 +157,7 @@
         "forks_count": 4,
         "stargazers_count": 3,
         "watchers_count": 3,
-        "size": 13509,
+        "size": 13611,
         "default_branch": "master",
         "open_issues_count": 16,
         "is_template": false,
@@ -286,11 +286,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1002,
-        "stargazers_count": 2059,
-        "watchers_count": 2059,
+        "stargazers_count": 2060,
+        "watchers_count": 2060,
         "size": 11996,
         "default_branch": "master",
-        "open_issues_count": 146,
+        "open_issues_count": 147,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -303,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-09-18T13:42:10Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-09-25T16:14:21Z",
+        "updated_at": "2024-09-29T01:40:13Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +332,7 @@
     "deletions": 28,
     "changed_files": 28,
     "commits": 5,
-    "review_comments": 269,
+    "review_comments": 270,
     "comments": 20
   },
   "events": [
@@ -4452,6 +4452,42 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-09-26T15:09:00Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2335893606,
+      "node_id": "PRR_kwDOAP4Jqs6LOuhm",
+      "url": null,
+      "actor": null,
+      "commit_id": "5e55f093118c2517f068841f5414f767fb35c7fe",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "body": "\r\nMinor API question: are there any musig API functions where the `SECP256K1_WARN_UNUSED_RESULT` attribute should be added? (Probably for the `_{pubnonce,aggnonce,partial_sig}_parse` functions, given that external data is passed in, and the nonce generation functions?)",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#pullrequestreview-2335893606",
+      "submitted_at": "2024-09-29T17:14:59Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
     }
   ],
   "comments": [
@@ -18389,6 +18425,58 @@
       "start_side": null,
       "line": null,
       "original_line": 130,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1780085082",
+      "pull_request_review_id": 2335893606,
+      "id": 1780085082,
+      "node_id": "PRRC_kwDOAP4Jqs5qGfFa",
+      "diff_hunk": "@@ -0,0 +1,817 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_MUSIG_SESSION_IMPL_H\n+#define SECP256K1_MODULE_MUSIG_SESSION_IMPL_H\n+\n+#include <string.h>\n+\n+#include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n+#include \"../../../include/secp256k1_musig.h\"\n+\n+#include \"keyagg.h\"\n+#include \"session.h\"\n+#include \"../../eckey.h\"\n+#include \"../../hash.h\"\n+#include \"../../scalar.h\"\n+#include \"../../util.h\"\n+\n+/* Outputs 33 zero bytes if the given group element is the point at infinity and\n+ * otherwise outputs the compressed serialization */\n+static void secp256k1_musig_ge_serialize_ext(unsigned char *out33, secp256k1_ge* ge) {\n+    if (secp256k1_ge_is_infinity(ge)) {\n+        memset(out33, 0, 33);\n+    } else {\n+        int ret;\n+        size_t size = 33;\n+        ret = secp256k1_eckey_pubkey_serialize(ge, out33, &size, 1);\n+#ifdef VERIFY\n+        /* Serialize must succeed because the point is not at infinity */\n+        VERIFY_CHECK(ret && size == 33);\n+#else\n+        (void) ret;\n+#endif\n+    }\n+}\n+\n+/* Outputs the point at infinity if the given byte array is all zero, otherwise\n+ * attempts to parse compressed point serialization. */\n+static int secp256k1_musig_ge_parse_ext(secp256k1_ge* ge, const unsigned char *in33) {\n+    unsigned char zeros[33] = { 0 };\n+\n+    if (secp256k1_memcmp_var(in33, zeros, sizeof(zeros)) == 0) {\n+        secp256k1_ge_set_infinity(ge);\n+        return 1;\n+    }\n+    return secp256k1_eckey_pubkey_parse(ge, in33, 33);\n+}\n+\n+static const unsigned char secp256k1_musig_secnonce_magic[4] = { 0x22, 0x0e, 0xdc, 0xf1 };\n+\n+static void secp256k1_musig_secnonce_save(secp256k1_musig_secnonce *secnonce, const secp256k1_scalar *k, const secp256k1_ge *pk) {\n+    memcpy(&secnonce->data[0], secp256k1_musig_secnonce_magic, 4);\n+    secp256k1_scalar_get_b32(&secnonce->data[4], &k[0]);\n+    secp256k1_scalar_get_b32(&secnonce->data[36], &k[1]);\n+    secp256k1_ge_to_bytes(&secnonce->data[68], pk);\n+}\n+\n+static int secp256k1_musig_secnonce_load(const secp256k1_context* ctx, secp256k1_scalar *k, secp256k1_ge *pk, const secp256k1_musig_secnonce *secnonce) {\n+    int is_zero;\n+    ARG_CHECK(secp256k1_memcmp_var(&secnonce->data[0], secp256k1_musig_secnonce_magic, 4) == 0);\n+    /* We make very sure that the nonce isn't invalidated by checking the values\n+     * in addition to the magic. */\n+    is_zero = secp256k1_is_zero_array(&secnonce->data[4], 2 * 32);\n+    secp256k1_declassify(ctx, &is_zero, sizeof(is_zero));\n+    ARG_CHECK(!is_zero);\n+\n+    secp256k1_scalar_set_b32(&k[0], &secnonce->data[4], NULL);\n+    secp256k1_scalar_set_b32(&k[1], &secnonce->data[36], NULL);\n+    secp256k1_ge_from_bytes(pk, &secnonce->data[68]);\n+    return 1;\n+}\n+\n+/* If flag is true, invalidate the secnonce; otherwise leave it. Constant-time. */\n+static void secp256k1_musig_secnonce_invalidate(const secp256k1_context* ctx, secp256k1_musig_secnonce *secnonce, int flag) {\n+    secp256k1_memczero(secnonce->data, sizeof(secnonce->data), flag);\n+    /* The flag argument is usually classified. So, the line above makes the\n+     * magic and public key classified. However, we need both to be\n+     * declassified. Note that we don't declassify the entire object, because if\n+     * flag is 0, then k[0] and k[1] have not been zeroed. */\n+    secp256k1_declassify(ctx, secnonce->data, sizeof(secp256k1_musig_secnonce_magic));\n+    secp256k1_declassify(ctx, &secnonce->data[68], 64);\n+}\n+\n+static const unsigned char secp256k1_musig_pubnonce_magic[4] = { 0xf5, 0x7a, 0x3d, 0xa0 };\n+\n+/* Saves two group elements into a pubnonce. Requires that none of the provided\n+ * group elements is infinity. */\n+static void secp256k1_musig_pubnonce_save(secp256k1_musig_pubnonce* nonce, const secp256k1_ge* ges) {\n+    int i;\n+    memcpy(&nonce->data[0], secp256k1_musig_pubnonce_magic, 4);\n+    for (i = 0; i < 2; i++) {\n+        secp256k1_ge_to_bytes(nonce->data + 4+64*i, &ges[i]);\n+    }\n+}\n+\n+/* Loads two group elements from a pubnonce. Returns 1 unless the nonce wasn't\n+ * properly initialized */\n+static int secp256k1_musig_pubnonce_load(const secp256k1_context* ctx, secp256k1_ge* ges, const secp256k1_musig_pubnonce* nonce) {\n+    int i;\n+\n+    ARG_CHECK(secp256k1_memcmp_var(&nonce->data[0], secp256k1_musig_pubnonce_magic, 4) == 0);\n+    for (i = 0; i < 2; i++) {\n+        secp256k1_ge_from_bytes(&ges[i], nonce->data + 4 + 64*i);\n+    }\n+    return 1;\n+}\n+\n+static const unsigned char secp256k1_musig_aggnonce_magic[4] = { 0xa8, 0xb7, 0xe4, 0x67 };\n+\n+static void secp256k1_musig_aggnonce_save(secp256k1_musig_aggnonce* nonce, const secp256k1_ge* ges) {\n+    int i;\n+    memcpy(&nonce->data[0], secp256k1_musig_aggnonce_magic, 4);\n+    for (i = 0; i < 2; i++) {\n+        secp256k1_ge_to_bytes_ext(&nonce->data[4 + 64*i], &ges[i]);\n+    }\n+}\n+\n+static int secp256k1_musig_aggnonce_load(const secp256k1_context* ctx, secp256k1_ge* ges, const secp256k1_musig_aggnonce* nonce) {\n+    int i;\n+\n+    ARG_CHECK(secp256k1_memcmp_var(&nonce->data[0], secp256k1_musig_aggnonce_magic, 4) == 0);\n+    for (i = 0; i < 2; i++) {\n+        secp256k1_ge_from_bytes_ext(&ges[i], &nonce->data[4 + 64*i]);\n+    }\n+    return 1;\n+}\n+\n+static const unsigned char secp256k1_musig_session_cache_magic[4] = { 0x9d, 0xed, 0xe9, 0x17 };\n+\n+/* A session consists of\n+ * - 4 byte session cache magic\n+ * - 1 byte the parity of the final nonce\n+ * - 32 byte serialized x-only final nonce\n+ * - 32 byte nonce coefficient b\n+ * - 32 byte signature challenge hash e\n+ * - 32 byte scalar s that is added to the partial signatures of the signers\n+ */\n+static void secp256k1_musig_session_save(secp256k1_musig_session *session, const secp256k1_musig_session_internal *session_i) {\n+    unsigned char *ptr = session->data;\n+\n+    memcpy(ptr, secp256k1_musig_session_cache_magic, 4);\n+    ptr += 4;\n+    *ptr = session_i->fin_nonce_parity;\n+    ptr += 1;\n+    memcpy(ptr, session_i->fin_nonce, 32);\n+    ptr += 32;\n+    secp256k1_scalar_get_b32(ptr, &session_i->noncecoef);\n+    ptr += 32;\n+    secp256k1_scalar_get_b32(ptr, &session_i->challenge);\n+    ptr += 32;\n+    secp256k1_scalar_get_b32(ptr, &session_i->s_part);\n+}\n+\n+static int secp256k1_musig_session_load(const secp256k1_context* ctx, secp256k1_musig_session_internal *session_i, const secp256k1_musig_session *session) {\n+    const unsigned char *ptr = session->data;\n+\n+    ARG_CHECK(secp256k1_memcmp_var(ptr, secp256k1_musig_session_cache_magic, 4) == 0);\n+    ptr += 4;\n+    session_i->fin_nonce_parity = *ptr;\n+    ptr += 1;\n+    memcpy(session_i->fin_nonce, ptr, 32);\n+    ptr += 32;\n+    secp256k1_scalar_set_b32(&session_i->noncecoef, ptr, NULL);\n+    ptr += 32;\n+    secp256k1_scalar_set_b32(&session_i->challenge, ptr, NULL);\n+    ptr += 32;\n+    secp256k1_scalar_set_b32(&session_i->s_part, ptr, NULL);\n+    return 1;\n+}\n+\n+static const unsigned char secp256k1_musig_partial_sig_magic[4] = { 0xeb, 0xfb, 0x1a, 0x32 };\n+\n+static void secp256k1_musig_partial_sig_save(secp256k1_musig_partial_sig* sig, secp256k1_scalar *s) {\n+    memcpy(&sig->data[0], secp256k1_musig_partial_sig_magic, 4);\n+    secp256k1_scalar_get_b32(&sig->data[4], s);\n+}\n+\n+static int secp256k1_musig_partial_sig_load(const secp256k1_context* ctx, secp256k1_scalar *s, const secp256k1_musig_partial_sig* sig) {\n+    int overflow;\n+\n+    ARG_CHECK(secp256k1_memcmp_var(&sig->data[0], secp256k1_musig_partial_sig_magic, 4) == 0);\n+    secp256k1_scalar_set_b32(s, &sig->data[4], &overflow);\n+    /* Parsed signatures can not overflow */\n+    VERIFY_CHECK(!overflow);\n+    return 1;\n+}\n+\n+int secp256k1_musig_pubnonce_parse(const secp256k1_context* ctx, secp256k1_musig_pubnonce* nonce, const unsigned char *in66) {\n+    secp256k1_ge ges[2];\n+    int i;\n+\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(nonce != NULL);\n+    ARG_CHECK(in66 != NULL);\n+\n+    for (i = 0; i < 2; i++) {\n+        if (!secp256k1_eckey_pubkey_parse(&ges[i], &in66[33*i], 33)) {\n+            return 0;\n+        }\n+        if (!secp256k1_ge_is_in_correct_subgroup(&ges[i])) {\n+            return 0;\n+        }",
+      "path": "src/modules/musig/session_impl.h",
+      "position": 205,
+      "original_position": 205,
+      "commit_id": "5e55f093118c2517f068841f5414f767fb35c7fe",
+      "original_commit_id": "6f496a0d5fb2be2fa872acc62d88957d0d7dbd50",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "curiosity nit: is this check needed, and if yes, does it make sense to also add it in the aggregate nonce parsing function `_musig_aggnonce_parse`? IIUC, this is only becomes relevant once exhaustive tests are added, and returns always 1 in production (so no big deal if it stays as-is now).",
+      "created_at": "2024-09-29T16:45:44Z",
+      "updated_at": "2024-09-29T17:14:59Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1479#discussion_r1780085082",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1780085082"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1479"
+        }
+      },
+      "start_line": 203,
+      "original_start_line": 203,
+      "start_side": "RIGHT",
+      "line": 205,
+      "original_line": 205,
       "side": "RIGHT"
     }
   ]
