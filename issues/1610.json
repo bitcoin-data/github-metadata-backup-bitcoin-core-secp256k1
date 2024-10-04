@@ -57,9 +57,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 3,
+    "comments": 4,
     "created_at": "2024-09-30T15:15:06Z",
-    "updated_at": "2024-10-04T11:48:44Z"
+    "updated_at": "2024-10-04T13:12:23Z"
   },
   "events": [
     {
@@ -317,6 +317,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2393523572",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
+    },
+    {
+      "event": "commented",
+      "id": 2393679053,
+      "node_id": "IC_kwDOAP4Jqs6OrKTN",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2393679053",
+      "actor": {
+        "login": "RandomLattice",
+        "id": 128569685,
+        "node_id": "U_kgDOB6nRVQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/128569685?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RandomLattice",
+        "html_url": "https://github.com/RandomLattice",
+        "followers_url": "https://api.github.com/users/RandomLattice/followers",
+        "following_url": "https://api.github.com/users/RandomLattice/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RandomLattice/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RandomLattice/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RandomLattice/subscriptions",
+        "organizations_url": "https://api.github.com/users/RandomLattice/orgs",
+        "repos_url": "https://api.github.com/users/RandomLattice/repos",
+        "events_url": "https://api.github.com/users/RandomLattice/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RandomLattice/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-04T13:12:22Z",
+      "updated_at": "2024-10-04T13:12:22Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Thanks for the great discussion.\r\n\r\n> I don't think it's contrived. What if you run inside a VM and the VM is reset? What if the caller decides to memcpy the nonce, or write it to disk? (We can document that one must not do this, but this doesn't necessarily mean that people will adhere to the rules.)\r\n\r\nI agree rollback is bad. I think in the VM case, one would not use the new proposed API. One would just use the existing API. The new proposed API is suitable for a specific use case we're hitting \"in real life\": an embedded device (=constrained computing device) that a) needs to sign \"very fast\" and b) has plenty of time for precomputation before the signing request comes in.\r\n\r\n> The second large concern is that one cannot use deterministic nonce generation when the message is not known.\r\n\r\nWe cannot use RFC6979 to generate the secret nonce when the message is not known. But that doesn't mean we can use other approaches for deterministic nonce generation (see next paragraph).\r\n\r\n> So you'll need a good source of randomness during signing.\r\n\r\nYes, that is one way, but not the only one. Alternatively, one can use a monotonic counter / unique (public) value as input to a keyed hash to construct the secret nonce. I'm not necessarily advocating for this; it all depends on the specific use case and definitely we're in the territory of \"you need to know what you're doing\". I think the new API should be generic enough to allow the user to do this kind of choices.\r\n\r\n> But yeah, we're apparently willing to accept that risk in the MuSig2 API, so it's not entirely crazy to add a similar API also for ordinary signatures.\r\n\r\nSounds reasonable, thanks.\r\n\r\n> In the MuSig2 PR, we simply overwrite the nonce with zeros after using it. That's a tiny bit safer and doesn't need a flag.\r\n\r\nSure, that would also work. Happy to take this approach too.\r\n\r\n> have you tried with a recent version (>=0.5.0), and have you tried all precomputation table sizes on your platform?\r\n\r\nI'll let others chime in, I don't have the numbers right now with me. Thanks for all the suggestions!",
+      "user": {
+        "login": "RandomLattice",
+        "id": 128569685,
+        "node_id": "U_kgDOB6nRVQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/128569685?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RandomLattice",
+        "html_url": "https://github.com/RandomLattice",
+        "followers_url": "https://api.github.com/users/RandomLattice/followers",
+        "following_url": "https://api.github.com/users/RandomLattice/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RandomLattice/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RandomLattice/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RandomLattice/subscriptions",
+        "organizations_url": "https://api.github.com/users/RandomLattice/orgs",
+        "repos_url": "https://api.github.com/users/RandomLattice/repos",
+        "events_url": "https://api.github.com/users/RandomLattice/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RandomLattice/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2393679053",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
     }
   ]
