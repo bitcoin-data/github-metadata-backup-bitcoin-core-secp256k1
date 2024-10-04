@@ -57,9 +57,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 1,
+    "comments": 2,
     "created_at": "2024-09-30T15:15:06Z",
-    "updated_at": "2024-10-03T15:48:26Z"
+    "updated_at": "2024-10-04T08:34:03Z"
   },
   "events": [
     {
@@ -209,6 +209,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2391758208",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
+    },
+    {
+      "event": "commented",
+      "id": 2393147995,
+      "node_id": "IC_kwDOAP4Jqs6OpIpb",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2393147995",
+      "actor": {
+        "login": "RandomLattice",
+        "id": 128569685,
+        "node_id": "U_kgDOB6nRVQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/128569685?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RandomLattice",
+        "html_url": "https://github.com/RandomLattice",
+        "followers_url": "https://api.github.com/users/RandomLattice/followers",
+        "following_url": "https://api.github.com/users/RandomLattice/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RandomLattice/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RandomLattice/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RandomLattice/subscriptions",
+        "organizations_url": "https://api.github.com/users/RandomLattice/orgs",
+        "repos_url": "https://api.github.com/users/RandomLattice/repos",
+        "events_url": "https://api.github.com/users/RandomLattice/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RandomLattice/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-04T08:34:01Z",
+      "updated_at": "2024-10-04T08:34:01Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> this is the drawback of this. It's a major footgun\r\n\r\nI think we have ways to make this less of a footgun. For example, here goes a simple mitigation. We can add to the precomputed material data struct a flag `has_been_used` meant to detect reuse. The consumer function of the struct uses this flag as follows:\r\n - checks on function enter that `has_been_used == NOT_USED_YET`. Refuses to continue if this doesn't check.\r\n - sets `has_been_used` to `ALREADY_USED`\r\n - proceeds to perform the actual computation (possibly following sad paths)\r\n\r\nLike this, a user has to go out of their way to use this unsafely (by modifying fields in an opaque struct). This doesn't cover the contrived case where the user is reusing precomputed material that got persisted _before_ the flag change; but I think that's a narrow corner case that can be dealt with a clear warning: do not reuse nonce material if you're using this API.\r\n\r\nI imagine you've considered similar things for MuSig2, curious what you think.\r\n\r\n> I don't think I'm against giving users advanced and dangerous features, but they should be clearly marked as such\r\n\r\nI think this is the right tradeoff. We can clearly mark the precomputed material as secret and that it cannot be re-used.\r\n\r\n> I'd love to hear your use case and scenario here. [...] Do you personally need/want this, or is this is just a suggestion for improvement?\r\n\r\nI'm asking others to chime in and give better context. Long story short is that we're hitting a performance bottleneck in Bitkey hardware wallet (https://github.com/proto-at-block/bitkey). We need to speed up (by a lot) the signing operation for large transactions if we want to use libsecp256k1.\r\n",
+      "user": {
+        "login": "RandomLattice",
+        "id": 128569685,
+        "node_id": "U_kgDOB6nRVQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/128569685?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RandomLattice",
+        "html_url": "https://github.com/RandomLattice",
+        "followers_url": "https://api.github.com/users/RandomLattice/followers",
+        "following_url": "https://api.github.com/users/RandomLattice/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RandomLattice/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RandomLattice/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RandomLattice/subscriptions",
+        "organizations_url": "https://api.github.com/users/RandomLattice/orgs",
+        "repos_url": "https://api.github.com/users/RandomLattice/repos",
+        "events_url": "https://api.github.com/users/RandomLattice/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RandomLattice/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2393147995",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
     }
   ]
