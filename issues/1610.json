@@ -57,9 +57,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 2,
+    "comments": 3,
     "created_at": "2024-09-30T15:15:06Z",
-    "updated_at": "2024-10-04T08:34:03Z"
+    "updated_at": "2024-10-04T11:48:44Z"
   },
   "events": [
     {
@@ -263,6 +263,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2393147995",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
+    },
+    {
+      "event": "commented",
+      "id": 2393523572,
+      "node_id": "IC_kwDOAP4Jqs6OqkV0",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2393523572",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-04T11:48:43Z",
+      "updated_at": "2024-10-04T11:48:43Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > this is the drawback of this. It's a major footgun\r\n> \r\n> I think we have ways to make this less of a footgun. For example, here goes a simple mitigation. We can add to the precomputed material data struct a flag `has_been_used` meant to detect reuse. [...]\r\n> \r\n> Like this, a user has to go out of their way to use this unsafely (by modifying fields in an opaque struct). \r\n\r\n> This doesn't cover the contrived case where the user is reusing precomputed material that got persisted _before_ the flag change; but I think that's a narrow corner case that can be dealt with a clear warning: do not reuse nonce material if you're using this API.\r\n\r\nI don't think it's contrived. What if you run inside a VM and the VM is reset? What if the caller decides to memcpy the nonce, or write it to disk? (We can document that one must not do this, but this doesn't necessarily mean that people will adhere to the rules.)  \r\n\r\nThe second large concern is that one cannot use deterministic nonce generation when the message is not known. So you'll need a good source of randomness during signing.\r\n\r\nBut yeah, we're apparently willing to accept that risk in the MuSig2 API, so it's not entirely crazy to add a similar API also for ordinary signatures.\r\n\r\n> I imagine you've considered similar things for MuSig2, curious what you think.\r\n\r\nIn the MuSig2 PR, we simply overwrite the nonce with zeros after using it. That's a tiny bit safer and doesn't need a flag. \r\n\r\n> Long story short is that we're hitting a performance bottleneck in Bitkey hardware wallet ([proto-at-block/bitkey](https://github.com/proto-at-block/bitkey)). We need to speed up (by a lot) the signing operation for large transactions if we want to use libsecp256k1.\r\n\r\nI'm curious why you use ECDSA at all in a modern wallet. Schnorr signing is 27% faster on my machine, I'd be curious about the difference on the hardware wallet. The difference is probably mostly due to the RFC6979 hashing in ECDSA, which is overkill. So [switching to a faster nonce derivation function](https://github.com/bitcoin-core/secp256k1/issues/757#issuecomment-697225995) should already speed up things a lot without introducing risks. \r\n\r\nAlso, have you tried with a recent version (>=0.5.0), and have you tried all precomputation table sizes on your platform? (See https://github.com/bitcoin-core/secp256k1/blob/master/CHANGELOG.md#changed-1, note that we changed the default in 0.5.1) ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1610#issuecomment-2393523572",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1610"
     }
   ]
