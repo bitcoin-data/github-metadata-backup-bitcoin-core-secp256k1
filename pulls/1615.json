@@ -39,11 +39,21 @@
       "site_admin": false
     },
     "body": "This PR attempts to add an exhaustive test for 2-of-2 signature aggregation via MuSig2. Currently, only the combinations of each participant's possible signing keys are fully iterated, and other involved cryptographic elements (generated nonces, signing challenge etc.) are either derived from a counter or statically set. Some invalid conditions that are practically unreachable on the full group order for secp256k1 (due to negligible probablity) can obviously hit for the exhaustive group test orders, so some special treatment is needed here to avoid a crash in the test. Those three conditions are:\r\n\r\n* aggregated public key results in the point at infinity (in `secp256k1_musig_pubkey_agg`): https://github.com/bitcoin-core/secp256k1/blob/a88aa9350633c2d2472bace5c290aa291c7f12c9/src/modules/musig/keyagg_impl.h#L216-L217\r\n&rarr; the PR copes with that by letting the function return 0 instead if the condition hits and we compile for exhaustive tests, and skip the current iteration at the call-site in that case\r\n* one of the generated nonce scalars is zero (in `secp256k1_musig_nonce_gen{,_counter}`): https://github.com/bitcoin-core/secp256k1/blob/a88aa9350633c2d2472bace5c290aa291c7f12c9/src/modules/musig/session_impl.h#L442-L443\r\n&rarr; the PR copes with that by letting the function return 0 instead if the condition hits and we compile for exhaustive tests, and try to generate a nonce another time with different input (increased counter), until it succeeds\r\n* the generated final nonce is the point at infinity (in `secp256k1_musig_nonce_process`): https://github.com/bitcoin-core/secp256k1/blob/a88aa9350633c2d2472bace5c290aa291c7f12c9/src/modules/musig/session_impl.h#L601-L603\r\n This one was a bit tricky. On the full group order, this condition can only be true if both of the aggregated nonce group elements (which are supplied externally) are the point at infinity (encoded as 66 zero-bytes), caused by either a dishonest nonce aggregator or dishonest signer, see https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki#user-content-Dealing_with_Infinity_in_Nonce_Aggregation. On the reduced group orders, this can hit frequently, making the aggregated signature verification fail in the end.\r\n&rarr; the PR copes with that by checking if the final nonce is G (when possibly a reduction has happened) and skip signing/verification then. that's a bit hacky and skips also legit cases (i.e. we arrive at G for the final nonce without the reduction being involved), but works for now :-)\r\n\r\nI'm asking for general comments at this point what would make the most sense in an exhaustive musig test, or if it is even worth it to have one at all. If yes, is it a good idea to change function behaviour depending on exhaustive tests being compiled? Are there other solutions that I haven't thought of? It's also a bit strange that some iterations are skipped, so there should probably an extra check at the end (right now if all iterations are skipped, we wouldn't even notice it, apart from the WIP-printf output). I guess the basic idea of the PR is still slightly better than having nothing, but still far away from what we would want ideally.\r\n\r\nNumber of full iterations (i.e. nothing is skipped due to any condition described above) depending on the exhaustive test order:\r\n* EXHAUSTIVE_TEST_ORDER=7 &rarr; 18/36 full iterations (50%)\r\n* EXHAUSTIVE_TEST_ORDER=13 &rarr; 99/144 full iterations (68.75%)\r\n* EXHAUSTIVE_TEST_ORDER=199 &rarr; 38453/39204 full iterations (98.08%)",
-    "labels": [],
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      }
+    ],
     "created_at": "2024-10-09T15:51:44Z",
-    "updated_at": "2024-10-09T15:59:40Z",
+    "updated_at": "2024-10-10T12:39:05Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "da98ffe0177cc113638bc4bc537827821f1f1e90",
     "assignees": [],
     "requested_reviewers": [],
@@ -276,8 +286,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1003,
-        "stargazers_count": 2065,
-        "watchers_count": 2065,
+        "stargazers_count": 2066,
+        "watchers_count": 2066,
         "size": 12060,
         "default_branch": "master",
         "open_issues_count": 147,
@@ -293,7 +303,7 @@
         "visibility": "public",
         "pushed_at": "2024-10-08T00:09:28Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-10-08T00:09:32Z",
+        "updated_at": "2024-10-10T06:25:55Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -365,6 +375,39 @@
         "date": "2024-10-08T23:39:23Z"
       },
       "sha": "f1df2b74cfbb4546443bf3051fdccba388eafdcc"
+    },
+    {
+      "event": "labeled",
+      "id": 14590629239,
+      "node_id": "LE_lADOAP4Jqs6Zj5w4zwAAAANlq1V3",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14590629239",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-10T12:39:05Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
     }
   ],
   "comments": []
