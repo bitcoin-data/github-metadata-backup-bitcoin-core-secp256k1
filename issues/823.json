@@ -40,7 +40,7 @@
     "locked": false,
     "comments": 28,
     "created_at": "2020-09-23T08:51:57Z",
-    "updated_at": "2024-10-11T09:46:43Z"
+    "updated_at": "2024-10-11T10:03:56Z"
   },
   "events": [
     {
@@ -2142,9 +2142,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-10-11T09:45:46Z",
-      "updated_at": "2024-10-11T09:46:43Z",
+      "updated_at": "2024-10-11T10:03:56Z",
       "author_association": "CONTRIBUTOR",
-      "body": "I just lost an afternoon trying to debug a valgrind false positive.\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/pull/1140/files#diff-3fe8f8fa0b765ad49f70d6c32f6a865be48faeb3c8d6dd5f8c274ca546ef5b61R1111 (click 'Load diff' on tests_impl.h).\r\n\r\nThe line\r\n\r\n```\r\n           CHECK(memcmp(output, input, sizeof(output)) == 0);\r\n```\r\n\r\nresulted in this CI failure:\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/actions/runs/11285462388/job/31388294841\r\n\r\n```\r\n==9263== Memcheck, a memory error detector\r\n==9263== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.\r\n==9263== Using Valgrind-3.24.0.GIT-lbmacos and LibVEX; rerun with -h for copyright info\r\n==9263== Command: ./tests\r\n==9263== \r\ntest count = 2\r\nrandom seed = ae250b1a3ee1ceb09ad0acfab0d10ecd\r\nSkipping run_sha256_known_output_tests 1000000 (iteration count too low)\r\nSkipping test_ecmult_constants_sha 2048 (iteration count too low)\r\nSkipping test_ecmult_constants_2bit (iteration count too low)\r\n==9263== Conditional jump or move depends on uninitialised value(s)\r\n==9263==    at 0x7FF81B8D5D07: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Use of uninitialised value of size 8\r\n==9263==    at 0x7FF81B8D5D23: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Use of uninitialised value of size 8\r\n==9263==    at 0x7FF81B8D5D28: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Conditional jump or move depends on uninitialised value(s)\r\n==9263==    at 0x10001A8C7: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\nrandom run = ae7d7478f2fc4fde34e2625d2948ce83\r\nno problems found\r\n==9263== \r\n==9263== HEAP SUMMARY:\r\n==9263==     in use at exit: 8,586 bytes in 169 blocks\r\n==9263==   total heap usage: 28,425 allocs, 28,256 frees, 98,898,807,326 bytes allocated\r\n==9263== \r\n==9263== LEAK SUMMARY:\r\n==9263==    definitely lost: 4,160 bytes in 130 blocks\r\n==9263==    indirectly lost: 0 bytes in 0 blocks\r\n==9263==      possibly lost: 600 bytes in 3 blocks\r\n==9263==    still reachable: 3,826 bytes in 36 blocks\r\n==9263==         suppressed: 0 bytes in 0 blocks\r\n==9263== Rerun with --leak-check=full to see details of leaked memory\r\n==9263== \r\n==9263== Use --track-origins=yes to see where uninitialised values come from\r\n==9263== For lists of detected and suppressed errors, rerun with: -s\r\n==9263== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 123 from 19)\r\nFAIL tests (exit status: 42)\r\n```\r\n\r\nI could not get valgrind to point me to the right line, so bisecting the line took a very long time. I don't think anything is actually wrong with the code there.\r\n\r\nIn the end changing `memcmp` to `secp256k1_memcmp_var` fixed it.\r\n\r\nThis happened on macOS x86 for both gcc and clang. The valgrind check on linux worked fine.\r\n\r\n**Consider adding a CI check that forbids the use uf `memcmp()`**, so no one else has to go through the pain of debugging something like this again :see_no_evil: ",
+      "body": "I just lost an afternoon trying to debug a valgrind false positive.\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/pull/1140/files#diff-3fe8f8fa0b765ad49f70d6c32f6a865be48faeb3c8d6dd5f8c274ca546ef5b61R1111 (click 'Load diff' on tests_impl.h).\r\n\r\nThe line\r\n\r\n```\r\n           CHECK(memcmp(output, input, sizeof(output)) == 0);\r\n```\r\n\r\nresulted in this CI failure:\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/actions/runs/11285462388/job/31388294841\r\n\r\n```\r\n==9263== Memcheck, a memory error detector\r\n==9263== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.\r\n==9263== Using Valgrind-3.24.0.GIT-lbmacos and LibVEX; rerun with -h for copyright info\r\n==9263== Command: ./tests\r\n==9263== \r\ntest count = 2\r\nrandom seed = ae250b1a3ee1ceb09ad0acfab0d10ecd\r\nSkipping run_sha256_known_output_tests 1000000 (iteration count too low)\r\nSkipping test_ecmult_constants_sha 2048 (iteration count too low)\r\nSkipping test_ecmult_constants_2bit (iteration count too low)\r\n==9263== Conditional jump or move depends on uninitialised value(s)\r\n==9263==    at 0x7FF81B8D5D07: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Use of uninitialised value of size 8\r\n==9263==    at 0x7FF81B8D5D23: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Use of uninitialised value of size 8\r\n==9263==    at 0x7FF81B8D5D28: ???\r\n==9263==    by 0x10001A8C4: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\n==9263== Conditional jump or move depends on uninitialised value(s)\r\n==9263==    at 0x10001A8C7: ??? (in ./tests)\r\n==9263==    by 0x10001CA1D: ??? (in ./tests)\r\n==9263==    by 0x10003DA27: ??? (in ./tests)\r\n==9263==    by 0x10026952D: (below main) (in /usr/lib/dyld)\r\n==9263== \r\nrandom run = ae7d7478f2fc4fde34e2625d2948ce83\r\nno problems found\r\n==9263== \r\n==9263== HEAP SUMMARY:\r\n==9263==     in use at exit: 8,586 bytes in 169 blocks\r\n==9263==   total heap usage: 28,425 allocs, 28,256 frees, 98,898,807,326 bytes allocated\r\n==9263== \r\n==9263== LEAK SUMMARY:\r\n==9263==    definitely lost: 4,160 bytes in 130 blocks\r\n==9263==    indirectly lost: 0 bytes in 0 blocks\r\n==9263==      possibly lost: 600 bytes in 3 blocks\r\n==9263==    still reachable: 3,826 bytes in 36 blocks\r\n==9263==         suppressed: 0 bytes in 0 blocks\r\n==9263== Rerun with --leak-check=full to see details of leaked memory\r\n==9263== \r\n==9263== Use --track-origins=yes to see where uninitialised values come from\r\n==9263== For lists of detected and suppressed errors, rerun with: -s\r\n==9263== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 123 from 19)\r\nFAIL tests (exit status: 42)\r\n```\r\n\r\nI could not get valgrind to point me to the right line, so bisecting the line took a very long time. I don't think anything is actually wrong with the code there.\r\n\r\nIn the end changing `memcmp` to `secp256k1_memcmp_var` fixed it.\r\n\r\nThis happened on macOS x86 for both gcc and clang. The valgrind check on linux worked fine.\r\n\r\n**Consider adding a CI check that forbids the use uf `memcmp()`**, so no one else has to go through the pain of debugging something like this again :see_no_evil: \r\n\r\nedit: \r\n\r\n@real-or-random \r\n\r\nabove you mention\r\n\r\n> Moreover, new calls are easily spotted in code review. I think memcmp is simply different because one needs to remember that memcmp is special.\r\n\r\nThis turned out to be a wrong assumption - in my case, no one pointed it out to me in review, and it was very hard for me to figure this one out. If the CI check had been added as discussed above, I would not have lost so much time on this.",
       "user": {
         "login": "benma",
         "id": 1225267,
@@ -2167,6 +2167,122 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/823#issuecomment-2407043416",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/823"
+    },
+    {
+      "event": "mentioned",
+      "id": 14606265181,
+      "node_id": "MEE_lADOAP4Jqs4qJqJOzwAAAANmmetd",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14606265181",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-11T10:02:32Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 14606265188,
+      "node_id": "SE_lADOAP4Jqs4qJqJOzwAAAANmmetk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14606265188",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-11T10:02:32Z"
+    },
+    {
+      "event": "mentioned",
+      "id": 14606286445,
+      "node_id": "MEE_lADOAP4Jqs4qJqJOzwAAAANmmj5t",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14606286445",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-11T10:04:16Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 14606286456,
+      "node_id": "SE_lADOAP4Jqs4qJqJOzwAAAANmmj54",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/14606286456",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-11T10:04:16Z"
     }
   ]
 }
