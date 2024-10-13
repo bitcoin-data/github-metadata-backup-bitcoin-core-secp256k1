@@ -51,10 +51,9 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-10-11T14:58:35Z",
+    "updated_at": "2024-10-13T07:04:38Z",
     "mergeable": false,
     "mergeable_state": "dirty",
-    "merge_commit_sha": "16b6ec42fb541dc4f15eee51a83db3b3f85b869d",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -286,8 +285,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1003,
-        "stargazers_count": 2066,
-        "watchers_count": 2066,
+        "stargazers_count": 2067,
+        "watchers_count": 2067,
         "size": 12060,
         "default_branch": "master",
         "open_issues_count": 147,
@@ -301,9 +300,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-10-08T00:09:28Z",
+        "pushed_at": "2024-10-13T07:25:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-10-10T06:25:55Z",
+        "updated_at": "2024-10-13T07:25:21Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -332,7 +331,7 @@
     "deletions": 12,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 243,
+    "review_comments": 245,
     "comments": 37
   },
   "events": [
@@ -5916,6 +5915,41 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#pullrequestreview-2362819079",
       "submitted_at": "2024-10-11T14:58:35Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+    },
+    {
+      "event": "reviewed",
+      "id": 2364836373,
+      "node_id": "PRR_kwDOAP4Jqs6M9IoV",
+      "url": null,
+      "actor": null,
+      "commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#pullrequestreview-2364836373",
+      "submitted_at": "2024-10-13T07:04:38Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
     }
@@ -18503,6 +18537,110 @@
       "start_side": null,
       "line": 325,
       "original_line": 325,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1798109567",
+      "pull_request_review_id": 2364836373,
+      "id": 1798109567,
+      "node_id": "PRRC_kwDOAP4Jqs5rLPl_",
+      "diff_hunk": "@@ -0,0 +1,406 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/* This module provides an implementation for Silent Payments, as specified in\n+ * BIP352. This particularly involves the creation of input tweak data by\n+ * summing up private or public keys and the derivation of a shared secret using\n+ * Elliptic Curve Diffie-Hellman. Combined are either:\n+ *   - spender's private keys and recipient's public key (a * B, sender side)\n+ *   - spender's public keys and recipient's private key (A * b, recipient side)\n+ * With this result, the necessary key material for ultimately creating/scanning\n+ * or spending Silent Payment outputs can be determined.\n+ *\n+ * Note that this module is _not_ a full implementation of BIP352, as it\n+ * inherently doesn't deal with higher-level concepts like addresses, output\n+ * script types or transactions. The intent is to provide a module for\n+ * abstracting away the elliptic-curve operations required for the protocol. For\n+ * any wallet software already using libsecp256k1, this API should provide all\n+ * the functions needed for a Silent Payments implementation without requiring\n+ * any further elliptic-curve operations from the wallet.\n+ */\n+\n+/* This struct serves as an In param for passing the silent payment address",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 29,
+      "original_position": 29,
+      "commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "original_commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "```suggestion\r\n/* This struct serves as an input argument for passing the silent payment address\r\n```\r\n\r\nwould be more consistent with secp256k1.h",
+      "created_at": "2024-10-13T07:03:58Z",
+      "updated_at": "2024-10-13T07:04:38Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1798109567",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1798109567"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 29,
+      "original_line": 29,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1798109851",
+      "pull_request_review_id": 2364836373,
+      "id": 1798109851,
+      "node_id": "PRRC_kwDOAP4Jqs5rLPqb",
+      "diff_hunk": "@@ -0,0 +1,406 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/* This module provides an implementation for Silent Payments, as specified in\n+ * BIP352. This particularly involves the creation of input tweak data by\n+ * summing up private or public keys and the derivation of a shared secret using\n+ * Elliptic Curve Diffie-Hellman. Combined are either:\n+ *   - spender's private keys and recipient's public key (a * B, sender side)\n+ *   - spender's public keys and recipient's private key (A * b, recipient side)\n+ * With this result, the necessary key material for ultimately creating/scanning\n+ * or spending Silent Payment outputs can be determined.\n+ *\n+ * Note that this module is _not_ a full implementation of BIP352, as it\n+ * inherently doesn't deal with higher-level concepts like addresses, output\n+ * script types or transactions. The intent is to provide a module for\n+ * abstracting away the elliptic-curve operations required for the protocol. For\n+ * any wallet software already using libsecp256k1, this API should provide all\n+ * the functions needed for a Silent Payments implementation without requiring\n+ * any further elliptic-curve operations from the wallet.\n+ */\n+\n+/* This struct serves as an In param for passing the silent payment address\n+ * data. The index field is for when more than one address is being sent to in\n+ * a transaction. Index is set based on the original ordering of the addresses\n+ * and used to return the generated outputs matching the original ordering.\n+ * When more than one recipient is used the recipient array will be sorted in\n+ * place as part of generating the outputs, but the generated outputs will be\n+ * returned in the original ordering specified by the index to ensure the\n+ * caller is able to match up the generated outputs to the correct silent\n+ * payment address (e.g. to be able to assign the correct amounts to the",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 37,
+      "original_position": 37,
+      "commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "original_commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "```suggestion\r\n * When more than one recipient is used, the recipient array will be sorted in\r\n * place as part of generating the outputs, but the generated outputs will be\r\n * returned in the original ordering specified by the index to ensure the\r\n * caller is able to match up the generated outputs to the correct silent\r\n * payment address (e.g., to be able to assign the correct amounts to the\r\n```",
+      "created_at": "2024-10-13T07:04:28Z",
+      "updated_at": "2024-10-13T07:04:38Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1798109851",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1798109851"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": 33,
+      "original_start_line": 33,
+      "start_side": "RIGHT",
+      "line": 37,
+      "original_line": 37,
       "side": "RIGHT"
     }
   ]
