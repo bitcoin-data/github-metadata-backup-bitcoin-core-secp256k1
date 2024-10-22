@@ -60,9 +60,9 @@
       }
     ],
     "created_at": "2024-08-06T21:10:30Z",
-    "updated_at": "2024-10-22T16:46:58Z",
+    "updated_at": "2024-10-22T20:21:14Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merge_commit_sha": "7439911c86442e239cc4c8d887480966dc4d37bc",
     "assignees": [],
     "requested_reviewers": [],
@@ -166,7 +166,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12375,
+        "size": 12414,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -299,7 +299,7 @@
         "watchers_count": 2069,
         "size": 12215,
         "default_branch": "master",
-        "open_issues_count": 147,
+        "open_issues_count": 146,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -341,7 +341,7 @@
     "deletions": 109,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 15,
+    "review_comments": 16,
     "comments": 11
   },
   "events": [
@@ -2665,6 +2665,58 @@
       "start_side": "RIGHT",
       "line": 234,
       "original_line": 234,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1811334286",
+      "pull_request_review_id": 2386216715,
+      "id": 1811334286,
+      "node_id": "PRRC_kwDOAP4Jqs5r9sSO",
+      "diff_hunk": "@@ -221,6 +227,32 @@ static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {\n     }\n }\n \n+/* Cleanses memory to prevent leaking sensitive info. Won't be optimized out. */\n+static SECP256K1_INLINE void secp256k1_memclear(void *ptr, size_t len) {\n+#if defined(_MSC_VER)\n+    /* SecureZeroMemory is guaranteed not to be optimized out by MSVC. */\n+    SecureZeroMemory(ptr, len);\n+#elif defined(__GNUC__)\n+    /* We use a memory barrier that scares the compiler away from optimizing out the memset.\n+     *\n+     * Quoting Adam Langley <agl@google.com> in commit ad1907fe73334d6c696c8539646c21b11178f20f\n+     * in BoringSSL (ISC License):\n+     *    As best as we can tell, this is sufficient to break any optimisations that\n+     *    might try to eliminate \"superfluous\" memsets.\n+     * This method used in memzero_explicit() the Linux kernel, too. Its advantage is that it is\n+     * pretty efficient, because the compiler can still implement the memset() efficently,\n+     * just not remove it entirely. See \"Dead Store Elimination (Still) Considered Harmful\" by\n+     * Yang et al. (USENIX Security 2017) for more background.\n+     */\n+    memset(ptr, 0, len);\n+    __asm__ __volatile__(\"\" : : \"r\"(ptr) : \"memory\");\n+#else\n+    void *(*volatile const volatile_memset)(void *, int, size_t) = memset;\n+    volatile_memset(ptr, 0, len);\n+#endif\n+    SECP256K1_CHECKMEM_UNDEFINE(ptr, len);",
+      "path": "src/util.h",
+      "position": 45,
+      "original_position": 45,
+      "commit_id": "b942b9f70add3b78a771c42c747e0bc2b647c043",
+      "original_commit_id": "767ac092970d8e8aea56c5a962ea4c719cb8c8a2",
+      "in_reply_to_id": 1809704060,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "I see. That's a valid point, which has been brought up before, see https://github.com/bitcoin-core/secp256k1/pull/813#issuecomment-691696004. (This thread is also very helpful to understand why we have run-time flag etc.) The conclusion was that the benefits outweigh the drawback that the build outputs depends on the availability of valgrind, but yeah, there's no perfect solution here. And yes, it's also auto-detected in autotools.",
+      "created_at": "2024-10-22T20:21:14Z",
+      "updated_at": "2024-10-22T20:21:14Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#discussion_r1811334286",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1811334286"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 253,
+      "original_line": 253,
       "side": "RIGHT"
     }
   ]
