@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2024-08-06T21:10:30Z",
-    "updated_at": "2024-10-22T11:06:04Z",
+    "updated_at": "2024-10-22T14:57:14Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "204ea12b1353ff3debc1894ad4151c59ea826de5",
@@ -295,8 +295,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1004,
-        "stargazers_count": 2067,
-        "watchers_count": 2067,
+        "stargazers_count": 2069,
+        "watchers_count": 2069,
         "size": 12215,
         "default_branch": "master",
         "open_issues_count": 146,
@@ -312,7 +312,7 @@
         "visibility": "public",
         "pushed_at": "2024-10-22T10:00:57Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-10-22T10:01:01Z",
+        "updated_at": "2024-10-22T14:59:44Z",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -341,7 +341,7 @@
     "deletions": 109,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 6,
+    "review_comments": 9,
     "comments": 9
   },
   "events": [
@@ -2014,6 +2014,110 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1810513873"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 253,
+      "original_line": 253,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1810790995",
+      "pull_request_review_id": 2385309610,
+      "id": 1810790995,
+      "node_id": "PRRC_kwDOAP4Jqs5r7npT",
+      "diff_hunk": "@@ -221,6 +227,32 @@ static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {\n     }\n }\n \n+/* Cleanses memory to prevent leaking sensitive info. Won't be optimized out. */\n+static SECP256K1_INLINE void secp256k1_memclear(void *ptr, size_t len) {\n+#if defined(_MSC_VER)\n+    /* SecureZeroMemory is guaranteed not to be optimized out by MSVC. */\n+    SecureZeroMemory(ptr, len);\n+#elif defined(__GNUC__)\n+    /* We use a memory barrier that scares the compiler away from optimizing out the memset.\n+     *\n+     * Quoting Adam Langley <agl@google.com> in commit ad1907fe73334d6c696c8539646c21b11178f20f\n+     * in BoringSSL (ISC License):\n+     *    As best as we can tell, this is sufficient to break any optimisations that\n+     *    might try to eliminate \"superfluous\" memsets.\n+     * This method used in memzero_explicit() the Linux kernel, too. Its advantage is that it is\n+     * pretty efficient, because the compiler can still implement the memset() efficently,\n+     * just not remove it entirely. See \"Dead Store Elimination (Still) Considered Harmful\" by\n+     * Yang et al. (USENIX Security 2017) for more background.\n+     */\n+    memset(ptr, 0, len);\n+    __asm__ __volatile__(\"\" : : \"r\"(ptr) : \"memory\");\n+#else\n+    void *(*volatile const volatile_memset)(void *, int, size_t) = memset;\n+    volatile_memset(ptr, 0, len);\n+#endif\n+    SECP256K1_CHECKMEM_UNDEFINE(ptr, len);",
+      "path": "src/util.h",
+      "position": 45,
+      "original_position": 45,
+      "commit_id": "c9210784f7300ad8209094b98e865e96e9efe2e6",
+      "original_commit_id": "767ac092970d8e8aea56c5a962ea4c719cb8c8a2",
+      "in_reply_to_id": 1809704060,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "I think the reasoning is that we want the release binaries to be as close as possible to what we actually test in the ctime test, but disable the effect at runtime using `SECP256K1_CONTEXT_DECLASSIFY` to avoid a performance impact.\r\n\r\nIt wouldn't surprise me that that is overkill; the conditional to determine whether or not to declassify operations at runtime may have a higher cost than actually executing the nop instructions that declassification actually correspond to when not running instrumented by valgrind.",
+      "created_at": "2024-10-22T14:00:58Z",
+      "updated_at": "2024-10-22T14:00:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#discussion_r1810790995",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1810790995"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 253,
+      "original_line": 253,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1810882446",
+      "pull_request_review_id": 2385458033,
+      "id": 1810882446,
+      "node_id": "PRRC_kwDOAP4Jqs5r79-O",
+      "diff_hunk": "@@ -221,6 +227,32 @@ static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {\n     }\n }\n \n+/* Cleanses memory to prevent leaking sensitive info. Won't be optimized out. */\n+static SECP256K1_INLINE void secp256k1_memclear(void *ptr, size_t len) {\n+#if defined(_MSC_VER)\n+    /* SecureZeroMemory is guaranteed not to be optimized out by MSVC. */\n+    SecureZeroMemory(ptr, len);\n+#elif defined(__GNUC__)\n+    /* We use a memory barrier that scares the compiler away from optimizing out the memset.\n+     *\n+     * Quoting Adam Langley <agl@google.com> in commit ad1907fe73334d6c696c8539646c21b11178f20f\n+     * in BoringSSL (ISC License):\n+     *    As best as we can tell, this is sufficient to break any optimisations that\n+     *    might try to eliminate \"superfluous\" memsets.\n+     * This method used in memzero_explicit() the Linux kernel, too. Its advantage is that it is\n+     * pretty efficient, because the compiler can still implement the memset() efficently,\n+     * just not remove it entirely. See \"Dead Store Elimination (Still) Considered Harmful\" by\n+     * Yang et al. (USENIX Security 2017) for more background.\n+     */\n+    memset(ptr, 0, len);\n+    __asm__ __volatile__(\"\" : : \"r\"(ptr) : \"memory\");\n+#else\n+    void *(*volatile const volatile_memset)(void *, int, size_t) = memset;\n+    volatile_memset(ptr, 0, len);\n+#endif\n+    SECP256K1_CHECKMEM_UNDEFINE(ptr, len);",
+      "path": "src/util.h",
+      "position": 45,
+      "original_position": 45,
+      "commit_id": "c9210784f7300ad8209094b98e865e96e9efe2e6",
+      "original_commit_id": "767ac092970d8e8aea56c5a962ea4c719cb8c8a2",
+      "in_reply_to_id": 1809704060,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Oh, sorry, I think we're talking past each other. My suggestion, for which I'd like to have your opinion on, is to wrap `SECP256K1_CHECKMEM_UNDEFINE` in an `#ifdef VERIFY` block **here in this particular case of clearing memory**, i.e., inside `secp256k1_memclear` (and not in `secp256k1_declassify`.  Do you think that's a reasonable thing to do?\r\n\r\n---\r\nBut regarding what you said:\r\n\r\n> I think the reasoning is that we want the release binaries to be as close as possible to what we actually test in the ctime test, but disable the effect at runtime using `SECP256K1_CONTEXT_DECLASSIFY` to avoid a performance impact.\r\n\r\nYes, I agree. Perhaps an additional reason is to avoid any shenanigans that the valgrind syscalls may have. They should be noops, but it's certainly a bit safer not to run them at all. \r\n\r\n> It wouldn't surprise me that that is overkill; the conditional to determine whether or not to declassify operations at runtime may have a higher cost than actually executing the nop instructions that declassification actually correspond to when not running instrumented by valgrind.\r\n\r\nI can imagine that the overhead of the noops is negligible, but at least checking the conditional should be negligible as well because we use `EXCEPT` to help the compiler predict the branch:\r\nhttps://github.com/bitcoin-core/secp256k1/blob/68b55209f1ba3e6c0417789598f5f75649e9c14c/src/secp256k1.c#L236-L238\r\n\r\n\r\n",
+      "created_at": "2024-10-22T14:49:35Z",
+      "updated_at": "2024-10-22T14:49:35Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#discussion_r1810882446",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1810882446"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
