@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2024-08-06T21:10:30Z",
-    "updated_at": "2024-10-21T17:50:47Z",
+    "updated_at": "2024-10-22T00:56:59Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "fe8bb96005a40dea57d4fb577999878e39584a03",
@@ -341,7 +341,7 @@
     "deletions": 109,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 4,
+    "review_comments": 5,
     "comments": 9
   },
   "events": [
@@ -1676,6 +1676,41 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2427358346",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
+    },
+    {
+      "event": "reviewed",
+      "id": 2383545467,
+      "node_id": "PRR_kwDOAP4Jqs6OEgR7",
+      "url": null,
+      "actor": null,
+      "commit_id": "767ac092970d8e8aea56c5a962ea4c719cb8c8a2",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2383545467",
+      "submitted_at": "2024-10-22T00:56:59Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
     }
   ],
   "comments": [
@@ -1885,6 +1920,58 @@
       "start_side": null,
       "line": 503,
       "original_line": 503,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1809704060",
+      "pull_request_review_id": 2383545467,
+      "id": 1809704060,
+      "node_id": "PRRC_kwDOAP4Jqs5r3eR8",
+      "diff_hunk": "@@ -221,6 +227,32 @@ static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {\n     }\n }\n \n+/* Cleanses memory to prevent leaking sensitive info. Won't be optimized out. */\n+static SECP256K1_INLINE void secp256k1_memclear(void *ptr, size_t len) {\n+#if defined(_MSC_VER)\n+    /* SecureZeroMemory is guaranteed not to be optimized out by MSVC. */\n+    SecureZeroMemory(ptr, len);\n+#elif defined(__GNUC__)\n+    /* We use a memory barrier that scares the compiler away from optimizing out the memset.\n+     *\n+     * Quoting Adam Langley <agl@google.com> in commit ad1907fe73334d6c696c8539646c21b11178f20f\n+     * in BoringSSL (ISC License):\n+     *    As best as we can tell, this is sufficient to break any optimisations that\n+     *    might try to eliminate \"superfluous\" memsets.\n+     * This method used in memzero_explicit() the Linux kernel, too. Its advantage is that it is\n+     * pretty efficient, because the compiler can still implement the memset() efficently,\n+     * just not remove it entirely. See \"Dead Store Elimination (Still) Considered Harmful\" by\n+     * Yang et al. (USENIX Security 2017) for more background.\n+     */\n+    memset(ptr, 0, len);\n+    __asm__ __volatile__(\"\" : : \"r\"(ptr) : \"memory\");\n+#else\n+    void *(*volatile const volatile_memset)(void *, int, size_t) = memset;\n+    volatile_memset(ptr, 0, len);\n+#endif\n+    SECP256K1_CHECKMEM_UNDEFINE(ptr, len);",
+      "path": "src/util.h",
+      "position": 45,
+      "original_position": 45,
+      "commit_id": "c9210784f7300ad8209094b98e865e96e9efe2e6",
+      "original_commit_id": "767ac092970d8e8aea56c5a962ea4c719cb8c8a2",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Hm, it seems that in production code, we usually don't call any of the `_CHECKMEM_{DEFINE,UNDEFINE}` macros. There is one reachable code-path in `secp256k1_declassify`, but it would only hit if the context was created with the `SECP256K1_CONTEXT_DECLASSIFY` flag, where the API documentation explicitly says \"Do not use\". Should that _CHECKMEM_UNDEFINE call here be conditional by a preprocessor #if(def) or something alike, so it only applies to tests and can't slow down (and bloat) release builds?\r\n\r\nI noticed that while looking at the disassembly of the .so file and wondering why there was so much extra code after the memory clearing, until I realized this must be valgrind's `VALGRIND_MAKE_MEM_UNDEFINED`. I'm building now explicitly with `-DSECP256K1_VALGRIND=OFF -DSECP256K1_BUILD_CTIME_TESTS=OFF` to avoid that.",
+      "created_at": "2024-10-22T00:56:59Z",
+      "updated_at": "2024-10-22T00:56:59Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#discussion_r1809704060",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1809704060"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 253,
+      "original_line": 253,
       "side": "RIGHT"
     }
   ]
