@@ -60,7 +60,7 @@
       }
     ],
     "created_at": "2024-08-06T21:10:30Z",
-    "updated_at": "2024-10-25T14:08:24Z",
+    "updated_at": "2024-10-25T15:57:45Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "54f16d7aa5e86c6e3278bb2f352d593d733bf922",
@@ -342,7 +342,7 @@
     "changed_files": 22,
     "commits": 9,
     "review_comments": 17,
-    "comments": 11
+    "comments": 12
   },
   "events": [
     {
@@ -1883,6 +1883,60 @@
         "site_admin": false
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2429774451",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
+    },
+    {
+      "event": "commented",
+      "id": 2438190688,
+      "node_id": "IC_kwDOAP4Jqs6RU9Zg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2438190688",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-10-25T15:55:07Z",
+      "updated_at": "2024-10-25T15:57:45Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Regarding the [open question](https://github.com/bitcoin-core/secp256k1/pull/1579#discussion_r1810882446) of whether or not to include the _CHECKMEM_UNDEFINE macro in secp256k1_memclear in non-verify binaries or not, I compared the valgrind-builds on the pr branch with the macro commented out vs. with the macro included. This is what the assembler diff looks like (created for the same function and using the same methodology as in https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2429562469):\r\n\r\n<details>\r\n<summary>disassemble of secp256k1_ec_seckey_verify, without and with the SECP256K1_CHECKMEM_UNDEFINE in a valgrind build</summary>\r\n\r\n```diff\r\n--- pr1579_without_checkmem_undefine.txt\t2024-10-25 17:34:50.639344958 +0200\r\n+++ pr1579_with_checkmem_undefine.txt\t2024-10-25 17:33:35.632626088 +0200\r\n@@ -11,38 +11,59 @@\r\n Disassembly of section .text:\r\n \r\n <secp256k1_ec_seckey_verify>:\r\n+\tpush   %rbp\r\n \tpush   %rbx\r\n-\tsub    $0x30,%rsp\r\n+\tsub    $0x68,%rsp\r\n \ttest   %rsi,%rsi\r\n-\tje     <secp256k1_ec_seckey_verify+0x58>\r\n+\tje     <secp256k1_ec_seckey_verify+0xb8>\r\n+\tlea    0x30(%rsp),%rbp\r\n \tlea    0x10(%rsp),%rbx\r\n-\tlea    0xc(%rsp),%rdx\r\n \tpxor   %xmm0,%xmm0\r\n+\tmov    %rbp,%rdx\r\n \tmov    %rbx,%rdi\r\n \tcall   <secp256k1_scalar_set_b32>\r\n-\tmov    0xc(%rsp),%ecx\r\n-\tmov    0x10(%rsp),%rax\r\n-\tor     0x18(%rsp),%rax\r\n-\tor     0x20(%rsp),%rax\r\n+\tmov    0x10(%rsp),%rdx\r\n+\tor     0x18(%rsp),%rdx\r\n \tmovaps %xmm0,0x10(%rsp)\r\n-\tor     0x28(%rsp),%rax\r\n+\tor     0x20(%rsp),%rdx\r\n+\tor     0x28(%rsp),%rdx\r\n \tmovaps %xmm0,0x20(%rsp)\r\n-\tsetne  %dl\r\n-\txor    %eax,%eax\r\n-\ttest   %ecx,%ecx\r\n-\tsete   %al\r\n-\tand    %edx,%eax\r\n-\tadd    $0x30,%rsp\r\n+\tmov    0x30(%rsp),%edx\r\n+\tsetne  %al\r\n+\txor    %ecx,%ecx\r\n+\ttest   %edx,%edx\r\n+\tsete   %cl\r\n+\tand    %eax,%ecx\r\n+\tmovq   $0x4d430001,0x30(%rsp)\r\n+\txor    %edx,%edx\r\n+\tmov    %rbp,%rax\r\n+\tmov    %rbx,0x38(%rsp)\r\n+\tmovq   $0x20,0x40(%rsp)\r\n+\tmovq   $0x0,0x48(%rsp)\r\n+\tmovq   $0x0,0x50(%rsp)\r\n+\tmovq   $0x0,0x58(%rsp)\r\n+\trol    $0x3,%rdi\r\n+\trol    $0xd,%rdi\r\n+\trol    $0x3d,%rdi\r\n+\trol    $0x33,%rdi\r\n+\txchg   %rbx,%rbx\r\n+\tmov    %rdx,0x8(%rsp)\r\n+\tmov    0x8(%rsp),%rax\r\n+\tadd    $0x68,%rsp\r\n+\tmov    %ecx,%eax\r\n \tpop    %rbx\r\n+\tpop    %rbp\r\n \tret\r\n-\tnopl   0x0(%rax)\r\n+\tnopl   0x0(%rax,%rax,1)\r\n \tmov    %rdi,%rax\r\n \tmov    0xb0(%rdi),%rsi\r\n-\tlea    0x5d09(%rip),%rdi        # <_fini+0x766>\r\n+\tlea    0x7b99(%rip),%rdi        # <_fini+0x14e6>\r\n \tcall   *0xa8(%rax)\r\n-\tadd    $0x30,%rsp\r\n-\txor    %eax,%eax\r\n+\tadd    $0x68,%rsp\r\n+\txor    %ecx,%ecx\r\n+\tmov    %ecx,%eax\r\n \tpop    %rbx\r\n+\tpop    %rbp\r\n \tret\r\n \r\n Disassembly of section .fini:\r\n```\r\n</details>\r\n\r\nSeems like at least in this function, it causes at least 15 extra (no-op like) instructions to be emitted. Considering that previously, these valgrind placeholders were not reachable (unless explicitly specified in the context object) and these extra instructions are added at multiple places spread all over the code, it might be better to not include them in the release binaries? OTOH, \"ctime-tests should run with the same binary as in the release\" then doesn't hold anymore. So really not sure what's better 🤔 ",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2438190688",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
     }
   ],
