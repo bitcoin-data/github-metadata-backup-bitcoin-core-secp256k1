@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1623/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1623",
     "number": 1623,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "not_planned",
     "title": "`src/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints`",
     "body": "```\r\n~/secp256k1 % gcc -c -march=native -O1 -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c                      \r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_mul’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n~/secp256k1 % gcc -c -march=native -O1 -fomit-frame-pointer -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c\r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_mul’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n~/secp256k1 % gcc -c -march=native -O2 -fomit-frame-pointer -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c\r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_reduce_512’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n~/secp256k1 % gcc -c -march=native -O2 -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c         \r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_reduce_512’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n~/secp256k1 % gcc -c -march=native -O3 -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c\r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_reduce_512’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n~/secp256k1 % gcc -c -march=native -O3 -fomit-frame-pointer -DENABLE_MODULE_EXTRAKEYS=1 -DUSE_ASM_X86_64 src/secp256k1.c\r\nIn file included from src/scalar_impl.h:20,\r\n                 from src/secp256k1.c:28:\r\nsrc/scalar_4x64_impl.h: In function ‘secp256k1_scalar_reduce_512’:\r\nsrc/scalar_4x64_impl.h:361:5: error: ‘asm’ operand has impossible constraints\r\n  361 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\nsrc/scalar_4x64_impl.h:475:5: error: ‘asm’ operand has impossible constraints\r\n  475 |     __asm__ __volatile__(\r\n      |     ^~~~~~~\r\n```\r\n\r\n```\r\ngcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0\r\nCopyright (C) 2021 Free Software Foundation, Inc.\r\nThis is free software; see the source for copying conditions.  There is NO\r\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\r\n```\r\n\r\n```\r\n % lscpu \r\nArchitecture:             x86_64\r\n  CPU op-mode(s):         32-bit, 64-bit\r\n  Address sizes:          48 bits physical, 48 bits virtual\r\n  Byte Order:             Little Endian\r\nCPU(s):                   16\r\n  On-line CPU(s) list:    0-15\r\nVendor ID:                AuthenticAMD\r\n  Model name:             AMD Ryzen 7 PRO 8700GE w/ Radeon 780M Graphics\r\n    CPU family:           25\r\n    Model:                117\r\n    Thread(s) per core:   2\r\n    Core(s) per socket:   8\r\n    Socket(s):            1\r\n    Stepping:             2\r\n    Frequency boost:      enabled\r\n```\r\n\r\n```\r\nLinux version 5.15.0-118-generic (buildd@lcy02-amd64-080) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #128-Ubuntu SMP Fri Jul 5 09:28:59 UTC 2024\r\n```\r\n\r\nCommit `68b55209f1ba3e6c0417789598f5f75649e9c14c`",
     "user": {
@@ -48,9 +48,10 @@
     "assignees": [],
     "author_association": "NONE",
     "locked": false,
-    "comments": 5,
+    "comments": 6,
+    "closed_at": "2024-11-01T15:47:22Z",
     "created_at": "2024-10-24T03:23:30Z",
-    "updated_at": "2024-10-24T22:28:54Z"
+    "updated_at": "2024-11-01T15:47:22Z"
   },
   "events": [
     {
@@ -384,6 +385,89 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1623#issuecomment-2436451007",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1623"
+    },
+    {
+      "event": "commented",
+      "id": 2452103575,
+      "node_id": "IC_kwDOAP4Jqs6SKCGX",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2452103575",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-11-01T15:47:22Z",
+      "updated_at": "2024-11-01T15:47:22Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> So my conclusion so far is that this is not our bug.\r\n\r\nClosing for now, but please don't hesitate to reply if you think my analysis is wrong, or if you believe we should do something about this. ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1623#issuecomment-2452103575",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1623"
+    },
+    {
+      "event": "closed",
+      "id": 15071518333,
+      "node_id": "CE_lADOAP4Jqs6blgAuzwAAAAOCVR59",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15071518333",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-11-01T15:47:22Z"
     }
   ]
 }
