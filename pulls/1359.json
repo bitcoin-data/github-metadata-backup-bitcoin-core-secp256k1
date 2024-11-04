@@ -96,7 +96,7 @@
       "due_on": "2024-11-01T07:00:00Z"
     },
     "created_at": "2023-06-26T12:16:22Z",
-    "updated_at": "2024-11-04T10:52:00Z",
+    "updated_at": "2024-11-04T11:00:49Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "7c89afb1c8a10a730790cabdc950efd60b1d637f",
@@ -377,7 +377,7 @@
     "deletions": 9,
     "changed_files": 12,
     "commits": 5,
-    "review_comments": 34,
+    "review_comments": 35,
     "comments": 12
   },
   "events": [
@@ -4383,6 +4383,58 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1827540862"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 67,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1827551834",
+      "pull_request_review_id": 2412766080,
+      "id": 1827551834,
+      "node_id": "PRRC_kwDOAP4Jqs5s7jpa",
+      "diff_hunk": "@@ -0,0 +1,88 @@\n+#!/usr/bin/env python3\n+'''\n+A script to check that a libsecp256k1 shared library\n+exports only expected symbols.\n+\n+Example usage:\n+\n+- when building with Autotools:\n+\n+    ./tools/symbol-check.py .libs/libsecp256k1.so\n+or\n+    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\n+or\n+    ./tools/symbol-check.py .libs/libsecp256k1.dylib\n+\n+- when building with CMake:\n+\n+    ./tools/symbol-check.py build/lib/libsecp256k1.so\n+or\n+    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\n+or\n+    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\n+'''\n+import re\n+import sys\n+import subprocess\n+\n+import lief\n+\n+\n+def grep_exported_symbols() -> list[str]:\n+    grep_output = subprocess.check_output([\"git\", \"grep\", r\"^\\s*SECP256K1_API\", \"--\", \"include\"], universal_newlines=True, encoding=\"utf8\")\n+    lines = grep_output.split(\"\\n\")\n+    exports: list[str] = []\n+    pattern = re.compile(r'\\bsecp256k1_\\w+')\n+    for line in lines:\n+        if line.strip():\n+            function_name = pattern.findall(line)[-1]\n+            exports.append(function_name)\n+    return exports\n+\n+\n+def check_ELF_exported_symbols(library, expected_exports) -> bool:\n+    ok: bool = True\n+    for symbol in library.exported_symbols:\n+        name: str = symbol.name\n+        if name in expected_exports:\n+            continue\n+        print(f'{filename}: export of symbol {name} not expected')\n+        ok = False\n+    return ok\n+\n+\n+def check_PE_exported_functions(library, expected_exports) -> bool:\n+    ok: bool = True\n+    for function in library.exported_functions:\n+        name: str = function.name\n+        if name in expected_exports:\n+            continue\n+        print(f'{filename}: export of function {name} not expected')\n+        ok = False\n+    return ok\n+\n+\n+def check_MACHO_exported_functions(library, expected_exports) -> bool:\n+    ok: bool = True\n+    for function in library.exported_functions:",
+      "path": "tools/symbol-check.py",
+      "position": null,
+      "original_position": 67,
+      "commit_id": "fb5d25dd6a286376852bdbd8bd28efd2d4e330d1",
+      "original_commit_id": "b80743a40f2c91061cb69fcdbe936b58103783d4",
+      "in_reply_to_id": 1826061045,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "Nevermind, my analysis of variables is wrong. LIEF shows them. I'll revisit this later.",
+      "created_at": "2024-11-04T11:00:49Z",
+      "updated_at": "2024-11-04T11:00:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#discussion_r1827551834",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1827551834"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
