@@ -96,7 +96,7 @@
       "due_on": "2024-11-01T07:00:00Z"
     },
     "created_at": "2023-06-26T12:16:22Z",
-    "updated_at": "2024-11-04T11:00:49Z",
+    "updated_at": "2024-11-04T13:36:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "7c89afb1c8a10a730790cabdc950efd60b1d637f",
@@ -377,7 +377,7 @@
     "deletions": 9,
     "changed_files": 12,
     "commits": 5,
-    "review_comments": 35,
+    "review_comments": 36,
     "comments": 12
   },
   "events": [
@@ -2624,6 +2624,41 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-11-02T08:06:44Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2413088237,
+      "node_id": "PRR_kwDOAP4Jqs6P1M3t",
+      "url": null,
+      "actor": null,
+      "commit_id": "fb5d25dd6a286376852bdbd8bd28efd2d4e330d1",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#pullrequestreview-2413088237",
+      "submitted_at": "2024-11-04T13:36:10Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
     }
   ],
   "comments": [
@@ -4445,6 +4480,58 @@
       "start_side": null,
       "line": null,
       "original_line": 67,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1827744514",
+      "pull_request_review_id": 2413088237,
+      "id": 1827744514,
+      "node_id": "PRRC_kwDOAP4Jqs5s8SsC",
+      "diff_hunk": "@@ -0,0 +1,72 @@\n+#!/usr/bin/env python3\n+\"\"\"Check that a libsecp256k1 shared library exports only expected symbols.\n+\n+Usage examples:\n+  - When building with Autotools:\n+    ./tools/symbol-check.py .libs/libsecp256k1.so\n+    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py .libs/libsecp256k1.dylib\n+\n+  - When building with CMake:\n+    ./tools/symbol-check.py build/lib/libsecp256k1.so\n+    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\"\"\"\n+\n+import re\n+import sys\n+import subprocess\n+\n+import lief\n+\n+\n+class UnexpectedExport(RuntimeError):\n+    pass\n+\n+\n+def get_exported_exports(library) -> list[str]:\n+    \"\"\"Adapter function to get exported symbols based on the library format.\"\"\"\n+    if library.format == lief.Binary.FORMATS.ELF:\n+        return [symbol.name for symbol in library.exported_symbols]\n+    elif library.format == lief.Binary.FORMATS.PE:\n+        return [entry.name for entry in library.get_export().entries]\n+    elif library.format == lief.Binary.FORMATS.MACHO:\n+        return [symbol.name[1:] for symbol in library.exported_symbols]\n+    raise NotImplementedError(f\"Unsupported format: {library.format}\")\n+\n+\n+def grep_expected_symbols() -> list[str]:\n+    \"\"\"Guess the list of expected exported symbols from the source code.\"\"\"\n+    grep_output = subprocess.check_output(\n+        [\"git\", \"grep\", \"^\\s*SECP256K1_API\", \"--\", \"include\"],",
+      "path": "tools/symbol-check.py",
+      "position": 40,
+      "original_position": 40,
+      "commit_id": "fb5d25dd6a286376852bdbd8bd28efd2d4e330d1",
+      "original_commit_id": "fb5d25dd6a286376852bdbd8bd28efd2d4e330d1",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "body": "This gives me error `symbol-check.backup.py:40: SyntaxWarning: invalid escape sequence '\\s'`.  I think it should be \r\n```\r\nr\"^\\s*SECP256K1_API\"\r\n```\r\nor \r\n```\r\n\"^\\\\s*SECP256K1_API\"\r\n```",
+      "created_at": "2024-11-04T13:36:04Z",
+      "updated_at": "2024-11-04T13:36:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#discussion_r1827744514",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1827744514"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 40,
+      "original_line": 40,
       "side": "RIGHT"
     }
   ]
