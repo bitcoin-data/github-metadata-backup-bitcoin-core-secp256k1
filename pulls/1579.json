@@ -36,7 +36,8 @@
       "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/theStack/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "patch_url": null
     },
     "body": "This PR picks up #636 (which in turn picked up #448, so this is take number three) and is essentially a rebase on master.\r\n\r\nSome changes to the original PR:\r\n* the clearing function now has the `secp256k1_` prefix again, since the related helper `_memczero` got it as well (see PR #835 / commit e89278f211a526062745c391d48a7baf782b4b2b)\r\n* the original commit b17a7df8145a6a86d49c354c7e7b59a432ea5346 (\"Make _set_fe_int( . , 0 ) set magnitude to 0\") is not needed anymore, since it was already applied in PR #943 (commit d49011f54c2b31807158bdf06364f331558cccc7)\r\n* clearing of stack memory with `secp256k1_memclear` is now also done on modules that have been newly introduced since then, i.e. schnorr and ellswift (of course, there is still no guarantee that all places where clearing is necessary are covered)\r\n\r\nSo far I haven't looked at any disassembly and possible performance implications yet (there were some concerns expressed in https://github.com/bitcoin-core/secp256k1/pull/636#issuecomment-620118629), happy to go deeper there if this gets Concept ACKed.\r\n\r\nThe proposed method of using a memory barrier to prevent optimizating away the memset is still used in BoringSSL (where it was originally picked up from) and in the Linux Kernel, see e.g. https://github.com/google/boringssl/blob/5af122c3dfc163b5d1859f1f450756e8e320a142/crypto/mem.c#L335 and https://github.com/torvalds/linux/blob/d4560686726f7a357922f300fc81f5964be8df04/include/linux/string.h#L348 / https://github.com/torvalds/linux/blob/d4560686726f7a357922f300fc81f5964be8df04/include/linux/compiler.h#L102 \r\n\r\nFixes #185.",
     "labels": [
@@ -60,10 +61,31 @@
       }
     ],
     "created_at": "2024-08-06T21:10:30Z",
-    "updated_at": "2024-11-04T15:53:31Z",
+    "updated_at": "2024-11-21T03:57:32Z",
     "closed_at": "2024-11-04T15:35:02Z",
     "mergeable_state": "unknown",
     "merged_at": "2024-11-04T15:35:02Z",
+    "merged_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "patch_url": null
+    },
     "merge_commit_sha": "b161bffb8bfb2120495434bbc40eda0d9fbb8afb",
     "assignees": [],
     "requested_reviewers": [],
@@ -90,7 +112,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "repo": {
         "id": 452762907,
@@ -115,7 +138,8 @@
           "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/theStack/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/theStack/secp256k1",
@@ -166,7 +190,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12236,
+        "size": 12415,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -179,9 +203,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-11-04T15:53:31Z",
+        "pushed_at": "2024-11-08T02:19:53Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2024-10-14T15:35:51Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -221,7 +246,8 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -246,7 +272,8 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -294,12 +321,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1007,
-        "stargazers_count": 2080,
-        "watchers_count": 2080,
-        "size": 12084,
+        "forks_count": 1009,
+        "stargazers_count": 2093,
+        "watchers_count": 2093,
+        "size": 12269,
         "default_branch": "master",
-        "open_issues_count": 141,
+        "open_issues_count": 143,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -310,9 +337,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-11-04T15:35:01Z",
+        "pushed_at": "2024-11-05T18:36:52Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-11-04T15:35:06Z",
+        "updated_at": "2024-11-20T19:30:55Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -368,7 +396,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -397,7 +426,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -436,7 +466,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2244105228",
       "submitted_at": "2024-08-17T14:09:19Z",
@@ -466,7 +497,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -495,7 +527,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -521,7 +554,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2298512356",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -549,7 +583,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -575,7 +610,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2399671558",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -603,7 +639,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -632,7 +669,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -661,7 +699,8 @@
         "events_url": "https://api.github.com/users/romanz/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/romanz/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -690,7 +729,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -719,7 +759,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -745,7 +786,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2400952438",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -773,7 +815,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -802,7 +845,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -831,7 +875,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -857,7 +902,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2400960359",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -885,7 +931,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -914,7 +961,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -940,7 +988,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2400975542",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -974,7 +1023,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2360104379",
       "submitted_at": "2024-10-10T12:29:16Z",
@@ -1004,7 +1054,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1037,7 +1088,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1063,7 +1115,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2405693607",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1091,7 +1144,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1120,7 +1174,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1149,7 +1204,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1175,7 +1231,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2406021851",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1203,7 +1260,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1232,7 +1290,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1258,7 +1317,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2407754497",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1286,7 +1346,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1312,7 +1373,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2427358346",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1345,7 +1407,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2383545467",
       "submitted_at": "2024-10-22T00:56:59Z",
@@ -1375,7 +1438,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1401,7 +1465,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2429562469",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1435,7 +1500,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2385482858",
       "submitted_at": "2024-10-22T15:51:35Z",
@@ -1505,7 +1571,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1534,7 +1601,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1560,7 +1628,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2429774451",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1588,7 +1657,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1614,7 +1684,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2438190688",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -1642,7 +1713,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1668,7 +1740,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2438267092",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -2016,7 +2089,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2045,7 +2119,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2071,7 +2146,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2438339067",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -2105,7 +2181,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2410453122",
       "submitted_at": "2024-11-01T16:38:48Z",
@@ -2135,7 +2212,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2161,7 +2239,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#issuecomment-2454984246",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1579"
@@ -2189,7 +2268,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": "b161bffb8bfb2120495434bbc40eda0d9fbb8afb",
       "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/b161bffb8bfb2120495434bbc40eda0d9fbb8afb",
@@ -2218,7 +2298,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2247,11 +2328,199 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
       "created_at": "2024-11-04T15:53:31Z"
+    },
+    {
+      "event": "referenced",
+      "id": 15109673158,
+      "node_id": "REFE_lADOAP4Jqs6SIfqhzwAAAAOEm1DG",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15109673158",
+      "actor": {
+        "login": "achow101",
+        "id": 3782274,
+        "node_id": "MDQ6VXNlcjM3ODIyNzQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3782274?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/achow101",
+        "html_url": "https://github.com/achow101",
+        "followers_url": "https://api.github.com/users/achow101/followers",
+        "following_url": "https://api.github.com/users/achow101/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/achow101/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/achow101/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/achow101/subscriptions",
+        "organizations_url": "https://api.github.com/users/achow101/orgs",
+        "repos_url": "https://api.github.com/users/achow101/repos",
+        "events_url": "https://api.github.com/users/achow101/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/achow101/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "2d46a89386d34d72edf93a24b67e44b82fe6e390",
+      "commit_url": "https://api.github.com/repos/achow101/bitcoin/commits/2d46a89386d34d72edf93a24b67e44b82fe6e390",
+      "created_at": "2024-11-04T20:00:21Z"
+    },
+    {
+      "event": "referenced",
+      "id": 15151383868,
+      "node_id": "REFE_lADOAP4Jqs6SIfqhzwAAAAOHF8U8",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15151383868",
+      "actor": {
+        "login": "vmta",
+        "id": 23269741,
+        "node_id": "MDQ6VXNlcjIzMjY5NzQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/23269741?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/vmta",
+        "html_url": "https://github.com/vmta",
+        "followers_url": "https://api.github.com/users/vmta/followers",
+        "following_url": "https://api.github.com/users/vmta/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/vmta/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/vmta/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/vmta/subscriptions",
+        "organizations_url": "https://api.github.com/users/vmta/orgs",
+        "repos_url": "https://api.github.com/users/vmta/repos",
+        "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/vmta/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "b5ae194ce5ff8894e4dbe2d15007530eed36e720",
+      "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/b5ae194ce5ff8894e4dbe2d15007530eed36e720",
+      "created_at": "2024-11-06T14:41:25Z"
+    },
+    {
+      "event": "referenced",
+      "id": 15152116462,
+      "node_id": "REFE_lADOAP4Jqs6SIfqhzwAAAAOHIvLu",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15152116462",
+      "actor": {
+        "login": "vmta",
+        "id": 23269741,
+        "node_id": "MDQ6VXNlcjIzMjY5NzQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/23269741?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/vmta",
+        "html_url": "https://github.com/vmta",
+        "followers_url": "https://api.github.com/users/vmta/followers",
+        "following_url": "https://api.github.com/users/vmta/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/vmta/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/vmta/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/vmta/subscriptions",
+        "organizations_url": "https://api.github.com/users/vmta/orgs",
+        "repos_url": "https://api.github.com/users/vmta/repos",
+        "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/vmta/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "899906842182ed62fca206f0b3d6ea8b5fa7cf5a",
+      "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/899906842182ed62fca206f0b3d6ea8b5fa7cf5a",
+      "created_at": "2024-11-06T15:06:23Z"
+    },
+    {
+      "event": "referenced",
+      "id": 15263454556,
+      "node_id": "REFE_lADOAP4Jqs6SIfqhzwAAAAONxdVc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15263454556",
+      "actor": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "55a2f7a8409b37d502d8b6d1928721a7b01fe6fd",
+      "commit_url": "https://api.github.com/repos/Eunovo/bitcoin/commits/55a2f7a8409b37d502d8b6d1928721a7b01fe6fd",
+      "created_at": "2024-11-12T11:56:32Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 15375435856,
+      "node_id": "SE_lADOAP4Jqs6SIfqhzwAAAAOUcohQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/15375435856",
+      "actor": {
+        "login": "Vin757",
+        "id": 127863830,
+        "node_id": "U_kgDOB58MFg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/127863830?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Vin757",
+        "html_url": "https://github.com/Vin757",
+        "followers_url": "https://api.github.com/users/Vin757/followers",
+        "following_url": "https://api.github.com/users/Vin757/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Vin757/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Vin757/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Vin757/subscriptions",
+        "organizations_url": "https://api.github.com/users/Vin757/orgs",
+        "repos_url": "https://api.github.com/users/Vin757/repos",
+        "events_url": "https://api.github.com/users/Vin757/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Vin757/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-11-21T03:51:55Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2450167253,
+      "node_id": "PRR_kwDOAP4Jqs6SCpXV",
+      "url": null,
+      "actor": null,
+      "commit_id": "765ef53335a3e0fafdafe1e757f6fe0789f2797f",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "NONE",
+      "body": "W",
+      "user": {
+        "login": "Vin757",
+        "id": 127863830,
+        "node_id": "U_kgDOB58MFg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/127863830?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Vin757",
+        "html_url": "https://github.com/Vin757",
+        "followers_url": "https://api.github.com/users/Vin757/followers",
+        "following_url": "https://api.github.com/users/Vin757/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Vin757/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Vin757/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Vin757/subscriptions",
+        "organizations_url": "https://api.github.com/users/Vin757/orgs",
+        "repos_url": "https://api.github.com/users/Vin757/repos",
+        "events_url": "https://api.github.com/users/Vin757/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Vin757/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1579#pullrequestreview-2450167253",
+      "submitted_at": "2024-11-21T03:57:32Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1579"
     }
   ],
   "comments": [
@@ -2285,7 +2554,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "nit: `//`-style comments not allowed in C89. Just for consistency, it appears that MSVC doesn't care...",
       "created_at": "2024-10-10T12:05:41Z",
@@ -2337,7 +2607,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "We should add similar calls in other code locations where we derive secrets via hash functions, e.g., in the schnorrsig and musig modules (and ellswift? now sure). The previous PR predates even the schnorrsig module, see the commit message.",
       "created_at": "2024-10-10T12:23:14Z",
@@ -2389,7 +2660,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Fixed.",
       "created_at": "2024-10-11T16:15:57Z",
@@ -2441,7 +2713,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "> We should add similar calls in other code locations where we derive secrets via hash functions, e.g., in the schnorrsig and musig modules (and ellswift? now sure).\r\n\r\nAs far as I could see by `grep`ing for `_finalize`, all places where we derive secrets via hashing had corresponding hash object clearing calls already (probably I did that already in the first version of this PR, though I honestly don't remember). What I found though was that it was unnecessarily called in the schnorrsig challenge function, so I removed it again, as there are no secrets involved. For the musig module, the _memclear calls were replaced by _sha256_clear calls.\r\n\r\nOne place where I added a hash clearing call was in the public API function `secp256k1_tagged_sha256`. We don't use that internally, but it seems to make sense to clear the hash object, considering that we don't know if the user passes in secret data or not.\r\n\r\n> The previous PR predates even the schnorrsig module, see the commit message.\r\n\r\nRight, removed that part of the commit message.",
       "created_at": "2024-10-11T16:25:47Z",
@@ -2493,7 +2766,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Hm, it seems that in production code, we usually don't call any of the `_CHECKMEM_{DEFINE,UNDEFINE}` macros. There is one reachable code-path in `secp256k1_declassify`, but it would only hit if the context was created with the `SECP256K1_CONTEXT_DECLASSIFY` flag, where the API documentation explicitly says \"Do not use\". Should that _CHECKMEM_UNDEFINE call here be conditional by a preprocessor #if(def) or something alike, so it only applies to tests and can't slow down (and bloat) release builds?\r\n\r\nI noticed that while looking at the disassembly of the .so file and wondering why there was so much extra code after the memory clearing, until I realized this must be valgrind's `VALGRIND_MAKE_MEM_UNDEFINED`. I'm building now explicitly with `-DSECP256K1_VALGRIND=OFF -DSECP256K1_BUILD_CTIME_TESTS=OFF` to avoid that.",
       "created_at": "2024-10-22T00:56:59Z",
@@ -2545,7 +2819,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Hm, great point! The reason why `secp256k1_declassify` uses a run-time flag (instead of compile-time flag) is that we want to run the constant-time tests on the real binary.\r\n\r\nI don't know what the performance impact of these additional instructions is, but I doubt that having a compile-time flag is a concern in this case. That means that we could just wrap the `SECP256K1_CHECKMEM_UNDEFINE` in an `#ifdef VERIFY`. @sipa What do you think?",
       "created_at": "2024-10-22T11:06:04Z",
@@ -2597,7 +2872,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "I think the reasoning is that we want the release binaries to be as close as possible to what we actually test in the ctime test, but disable the effect at runtime using `SECP256K1_CONTEXT_DECLASSIFY` to avoid a performance impact.\r\n\r\nIt wouldn't surprise me that that is overkill; the conditional to determine whether or not to declassify operations at runtime may have a higher cost than actually executing the nop instructions that declassification actually correspond to when not running instrumented by valgrind.",
       "created_at": "2024-10-22T14:00:58Z",
@@ -2649,7 +2925,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Oh, sorry, I think we're talking past each other. My suggestion, for which I'd like to have your opinion on, is to wrap `SECP256K1_CHECKMEM_UNDEFINE` in an `#ifdef VERIFY` block **here in this particular case of clearing memory**, i.e., inside `secp256k1_memclear` (and not in `secp256k1_declassify`.  Do you think that's a reasonable thing to do?\r\n\r\n---\r\nBut regarding what you said:\r\n\r\n> I think the reasoning is that we want the release binaries to be as close as possible to what we actually test in the ctime test, but disable the effect at runtime using `SECP256K1_CONTEXT_DECLASSIFY` to avoid a performance impact.\r\n\r\nYes, I agree. Perhaps an additional reason is to avoid any shenanigans that the valgrind syscalls may have. They should be noops, but it's certainly a bit safer not to run them at all. \r\n\r\n> It wouldn't surprise me that that is overkill; the conditional to determine whether or not to declassify operations at runtime may have a higher cost than actually executing the nop instructions that declassification actually correspond to when not running instrumented by valgrind.\r\n\r\nI can imagine that the overhead of the noops is negligible, but at least checking the conditional should be negligible as well because we use `EXCEPT` to help the compiler predict the branch:\r\nhttps://github.com/bitcoin-core/secp256k1/blob/68b55209f1ba3e6c0417789598f5f75649e9c14c/src/secp256k1.c#L236-L238\r\n\r\n\r\n",
       "created_at": "2024-10-22T14:49:35Z",
@@ -2701,7 +2978,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "s/used/is used/\r\n\r\nApparently that had been fixed in Core:\r\nhttps://github.com/bitcoin/bitcoin/blob/28ce159bc327e6dfec34077ff2e379b23a95db65/src/support/cleanse.cpp#L24",
       "created_at": "2024-10-22T14:57:13Z",
@@ -2753,7 +3031,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "I looked at the same code in Core again, and found this PR, and commented there: https://github.com/bitcoin/bitcoin/pull/26950#issuecomment-2429613882",
       "created_at": "2024-10-22T15:34:44Z",
@@ -2805,7 +3084,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "I've tested this locally, but it would be nice to see a full CI run where this branch is forced (e.g., via `#if 0` / `#elif 0`) ",
       "created_at": "2024-10-22T15:50:50Z",
@@ -2857,7 +3137,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "What bothered me in general (independent on how lightweight the code generated by the valgrind macros might be) is that when users build with the default CMake settings, they could currently end up with different release binaries, depending on whether valgrind is installed or not. Unrelated to this PR, but maybe the SECP256K1_VALGRIND build setting should only be auto-detected in the \"dev-mode\" preset, and OFF by default? (I only looked at the CMake build, don't know if the valgrind setting is also auto-detected on autotools).",
       "created_at": "2024-10-22T16:15:08Z",
@@ -2909,7 +3190,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Thanks, fixed.",
       "created_at": "2024-10-22T16:44:10Z",
@@ -2961,7 +3243,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Opened #1622 for that.",
       "created_at": "2024-10-22T16:45:34Z",
@@ -3013,7 +3296,8 @@
         "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Interesting. I left it as-is for now, happy to adapt once there is clarity that the variant in Bitcoin Core is preferred or needed.",
       "created_at": "2024-10-22T16:46:58Z",
@@ -3065,7 +3349,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "I see. That's a valid point, which has been brought up before, see https://github.com/bitcoin-core/secp256k1/pull/813#issuecomment-691696004. (This thread is also very helpful to understand why we have run-time flag etc.) The conclusion was that the benefits outweigh the drawback that the build outputs depends on the availability of valgrind, but yeah, there's no perfect solution here. And yes, it's also auto-detected in autotools.",
       "created_at": "2024-10-22T20:21:14Z",
@@ -3117,7 +3402,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Everything else being equal, keeping the code in sync with Core is nice, but as I said there, I have a slight preference to stick to the current `#if defined(_MSC_VER)` because we have no OS-specific macros anywhere else in the library (ignoring the examples). See also https://github.com/bitcoin-core/secp256k1/pull/1625.",
       "created_at": "2024-10-25T14:08:24Z",
@@ -3169,7 +3455,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "I see, so the idea is to have\r\n\r\n```c\r\n...\r\n#ifndef VERIFY\r\n     SECP256K1_CHECKMEM_UNDEFINE(ptr, len);\r\n#endif\r\n}\r\n```\r\n\r\nin `secp256k1_memclear()`?\r\n\r\nThat would mean `tests_noverify` wouldn't detect violations of use-after-clear, nor would applications linking against the production library when running in valgrind. The upside would be that the production library definitely does not have its behavior affected by being compiled with valgrind present.\r\n\r\n\r\n",
       "created_at": "2024-10-25T16:30:12Z",
@@ -3221,7 +3508,8 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "Indeed. \r\n\r\n> That would mean `tests_noverify` wouldn't detect violations of use-after-clear\r\n\r\nFwiw, I had this downside in mind, and I don't think it's a big deal because we still have the normal tests.\r\n\r\n> nor would applications linking against the production library when running in valgrind.\r\n\r\nOkay, I had not considered this one... I still think that's acceptable, but yeah, it's a good point... \r\n",
       "created_at": "2024-10-25T16:35:10Z",
@@ -3273,7 +3561,8 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "patch_url": null
       },
       "body": "ACK. I guess it makes sense that if the primary goal is making sure no runtime impact for production code, this should be guarded by a compile-time check, as the runtime check isn't available here (being just for ctime testing).",
       "created_at": "2024-10-25T16:40:04Z",
