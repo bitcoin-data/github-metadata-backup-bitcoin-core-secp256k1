@@ -49,9 +49,9 @@
     "assignees": [],
     "author_association": "NONE",
     "locked": false,
-    "comments": 2,
+    "comments": 3,
     "created_at": "2024-11-20T13:51:04Z",
-    "updated_at": "2024-11-20T19:25:41Z"
+    "updated_at": "2024-11-21T12:16:00Z"
   },
   "events": [
     {
@@ -228,6 +228,62 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1637#issuecomment-2489379047",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1637"
+    },
+    {
+      "event": "commented",
+      "id": 2490982927,
+      "node_id": "IC_kwDOAP4Jqs6UeWIP",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2490982927",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2024-11-21T12:15:59Z",
+      "updated_at": "2024-11-21T12:15:59Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> In Swift, when `secp256k1_context_static` is passed to a function, the compiler complains:\r\n> \r\n> > Reference to var 'secp256k1_context_static' is not concurrency-safe because it involves shared mutable state\r\n> \r\n> This is definitely a false positive, because the instance is `const`.\r\n\r\nNot sure. A pointer to `const` is a promise not to mutate through the pointer, but that doesn't mean that the object pointed to cannot be mutated at all (e.g., there could exist a pointer to non-`const`). In this case, `secp256k1_context_static_` is indeed `static const`, but I assume this is (in general) not obvious if you just see the shared library. I mean, the identifier `secp256k1_context_static_` doesn't even make sense at this level of abstraction.\r\n\r\nAnyway, I agree that if Swift's FFI is happy with a function that returns a pointer to const, then it should also be happy with a variable of the same type...\r\n\r\n---\r\n\r\nI don't think it hurts to add something like this:\r\n\r\n```\r\n/** Return secp256k1_get_context_static. */\r\nconst secp256k1_context* secp256k1_get_context_static(void);\r\n\r\nconst secp256k1_context* secp256k1_get_context_static(void) {\r\n    return secp256k1_context_static;\r\n}\r\n```\r\n\r\nBut then we'd need to do the same for all the other exported variables (and add a rule to `CONTRIBUTING.md`). I'm not entirely convinced that the best place to do this in libsecp256k1. Shouldn't it be the job of bindings to provide a wrapper if necessary? ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1637#issuecomment-2490982927",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1637"
     }
   ]
