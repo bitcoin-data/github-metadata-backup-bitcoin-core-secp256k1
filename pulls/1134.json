@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2022-08-21T08:55:46Z",
-    "updated_at": "2024-12-03T22:07:21Z",
+    "updated_at": "2024-12-07T15:42:33Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "assignees": [],
@@ -300,11 +300,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1012,
-        "stargazers_count": 2102,
-        "watchers_count": 2102,
+        "stargazers_count": 2107,
+        "watchers_count": 2107,
         "size": 12269,
         "default_branch": "master",
-        "open_issues_count": 147,
+        "open_issues_count": 148,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -317,7 +317,7 @@
         "visibility": "public",
         "pushed_at": "2024-11-05T18:36:52Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-12-02T17:31:24Z",
+        "updated_at": "2024-12-07T11:43:21Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -347,7 +347,7 @@
     "deletions": 76,
     "changed_files": 36,
     "commits": 9,
-    "review_comments": 8,
+    "review_comments": 9,
     "comments": 7
   },
   "events": [
@@ -2061,6 +2061,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1506139410"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 71,
+      "original_line": 71,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1874507232",
+      "pull_request_review_id": 2486617651,
+      "id": 1874507232,
+      "node_id": "PRRC_kwDOAP4Jqs5vurXg",
+      "diff_hunk": "@@ -0,0 +1,213 @@\n+#ifndef SECP256K1_MODULE_BATCH_TESTS_H\n+#define SECP256K1_MODULE_BATCH_TESTS_H\n+\n+#include \"../../../include/secp256k1_batch.h\"\n+#ifdef ENABLE_MODULE_SCHNORRSIG\n+#include \"../../../include/secp256k1_schnorrsig.h\"\n+#include \"../../../include/secp256k1_schnorrsig_batch.h\"\n+#endif\n+#ifdef ENABLE_MODULE_EXTRAKEYS\n+#include \"../../../include/secp256k1_extrakeys.h\"\n+#include \"../../../include/secp256k1_tweak_check_batch.h\"\n+#endif\n+\n+/* Tests for the equality of two sha256 structs. This function only produces a\n+ * correct result if an integer multiple of 64 many bytes have been written\n+ * into the hash functions. */\n+void test_batch_sha256_eq(const secp256k1_sha256 *sha1, const secp256k1_sha256 *sha2) {\n+    /* Is buffer fully consumed? */\n+    CHECK((sha1->bytes & 0x3F) == 0);\n+\n+    CHECK(sha1->bytes == sha2->bytes);\n+    CHECK(secp256k1_memcmp_var(sha1->s, sha2->s, sizeof(sha1->s)) == 0);\n+}\n+\n+/* Checks that hash initialized by secp256k1_batch_sha256_tagged has the\n+ * expected state. */\n+void test_batch_sha256_tagged(void) {\n+    unsigned char tag[13] = \"BIP0340/batch\";\n+    secp256k1_sha256 sha;\n+    secp256k1_sha256 sha_optimized;\n+\n+    secp256k1_sha256_initialize_tagged(&sha, (unsigned char *) tag, sizeof(tag));\n+    secp256k1_batch_sha256_tagged(&sha_optimized);\n+    test_batch_sha256_eq(&sha, &sha_optimized);\n+}\n+\n+#define N_SIGS 10\n+#define N_TWK_CHECKS 10\n+#define N_TERMS (N_TWK_CHECKS + 2*N_SIGS)\n+void test_batch_api(void) {\n+\n+#ifdef ENABLE_MODULE_EXTRAKEYS\n+    unsigned char sk[32];\n+    secp256k1_keypair keypair;\n+    secp256k1_xonly_pubkey pk;\n+    /* xonly pubkey tweak checks data */\n+    unsigned char tweaked_pk[N_TWK_CHECKS][32];\n+    int tweaked_pk_parity[N_TWK_CHECKS];\n+    unsigned char tweak[N_TWK_CHECKS][32];\n+    secp256k1_pubkey tmp_pk;\n+    secp256k1_xonly_pubkey tmp_xonly_pk;\n+    size_t i;\n+#endif\n+\n+#ifdef ENABLE_MODULE_SCHNORRSIG\n+    /* schnorr verification data */\n+    unsigned char msg[N_SIGS][32];\n+    unsigned char sig[N_SIGS][64];\n+#endif\n+    /* context and batch setup */\n+    secp256k1_context *none = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    secp256k1_context *sign = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);\n+    secp256k1_context *vrfy = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);\n+    secp256k1_context *both = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);\n+    secp256k1_context *sttc = secp256k1_context_clone(secp256k1_context_no_precomp);\n+    secp256k1_batch *batch_none;\n+    secp256k1_batch *batch_sign;\n+    secp256k1_batch *batch_vrfy;\n+    secp256k1_batch *batch_both;\n+    secp256k1_batch *batch_sttc;\n+    unsigned char aux_rand16[32];",
+      "path": "src/modules/batch/tests_impl.h",
+      "position": 71,
+      "original_position": 71,
+      "commit_id": "eb49e93b50b3e40498789a500e2db8d9a20debbf",
+      "original_commit_id": "eb49e93b50b3e40498789a500e2db8d9a20debbf",
+      "in_reply_to_id": 1506139410,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "In C89 all the variable declarations must precede statements within any block.",
+      "created_at": "2024-12-07T15:42:33Z",
+      "updated_at": "2024-12-07T15:42:33Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1134#discussion_r1874507232",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1874507232"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
