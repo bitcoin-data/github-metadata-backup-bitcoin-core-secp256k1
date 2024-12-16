@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2024-12-14T08:14:36Z",
+    "updated_at": "2024-12-16T09:56:06Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "assignees": [],
@@ -291,8 +291,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1019,
-        "stargazers_count": 2120,
-        "watchers_count": 2120,
+        "stargazers_count": 2121,
+        "watchers_count": 2121,
         "size": 12143,
         "default_branch": "master",
         "open_issues_count": 150,
@@ -308,7 +308,7 @@
         "visibility": "public",
         "pushed_at": "2024-12-09T08:24:01Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2024-12-14T06:33:19Z",
+        "updated_at": "2024-12-16T06:46:24Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -338,7 +338,7 @@
     "deletions": 12,
     "changed_files": 22,
     "commits": 9,
-    "review_comments": 293,
+    "review_comments": 294,
     "comments": 38
   },
   "events": [
@@ -6368,6 +6368,42 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#pullrequestreview-2409505924",
       "submitted_at": "2024-12-12T07:21:44Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+    },
+    {
+      "event": "reviewed",
+      "id": 2505693682,
+      "node_id": "PRR_kwDOAP4Jqs6VWdny",
+      "url": null,
+      "actor": null,
+      "commit_id": "9d6769f4aed4691463f9c591e147df6a0ccfbca3",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "NONE",
+      "user": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#pullrequestreview-2505693682",
+      "submitted_at": "2024-12-16T09:56:06Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
     }
@@ -21794,6 +21830,59 @@
       "start_side": null,
       "line": 483,
       "original_line": 483,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1886516945",
+      "pull_request_review_id": 2505693682,
+      "id": 1886516945,
+      "node_id": "PRRC_kwDOAP4Jqs5wcfbR",
+      "diff_hunk": "@@ -7,10 +7,249 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient. */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n \n-/* TODO: implement functions for receiver side. */\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_hash, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    size_t len;\n+    int ret;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    (void)ret;\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(unsigned char *shared_secret33, const secp256k1_scalar *secret_component, const secp256k1_ge *public_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+    size_t len;\n+    int ret;\n+\n+    /* Compute shared_secret = tweaked_secret_component * Public_component */\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point, considering we have already validated the public key and\n+     * the secret key being used\n+     */\n+    ret = secp256k1_eckey_pubkey_serialize(&ss, shared_secret33, &len, 1);\n+    VERIFY_CHECK(ret && len == 33);\n+    (void)ret;\n+    /* While not technically \"secret\" data, explicitly clear the shared secret since leaking this would allow an attacker\n+     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction\n+     * back to the silent payment address\n+     */\n+    secp256k1_ge_clear(&ss);\n+    secp256k1_gej_clear(&ss_j);\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/SharedSecret\". */\n+static void secp256k1_silentpayments_sha256_init_sharedsecret(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0x88831537ul;\n+    hash->s[1] = 0x5127079bul;\n+    hash->s[2] = 0x69c2137bul;\n+    hash->s[3] = 0xab0303e6ul;\n+    hash->s[4] = 0x98fa21faul;\n+    hash->s[5] = 0x4a888523ul;\n+    hash->s[6] = 0xbd99daabul;\n+    hash->s[7] = 0xf25e5e0aul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_create_t_k(secp256k1_scalar *t_k_scalar, const unsigned char *shared_secret33, unsigned int k) {\n+    secp256k1_sha256 hash;\n+    unsigned char hash_ser[32];\n+    unsigned char k_serialized[4];\n+\n+    /* Compute t_k = hash(shared_secret || ser_32(k))  [sha256 with tag \"BIP0352/SharedSecret\"] */\n+    secp256k1_silentpayments_sha256_init_sharedsecret(&hash);\n+    secp256k1_sha256_write(&hash, shared_secret33, 33);\n+    secp256k1_write_be32(k_serialized, k);\n+    secp256k1_sha256_write(&hash, k_serialized, sizeof(k_serialized));\n+    secp256k1_sha256_finalize(&hash, hash_ser);\n+    secp256k1_scalar_set_b32(t_k_scalar, hash_ser, NULL);\n+    /* While not technically \"secret\" data, explicitly clear hash_ser since leaking this would allow an attacker\n+     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction\n+     * back to the silent payment address\n+     */\n+    memset(hash_ser, 0, sizeof(hash_ser));\n+}\n+\n+static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context *ctx, secp256k1_xonly_pubkey *P_output_xonly, const unsigned char *shared_secret33, const secp256k1_pubkey *recipient_spend_pubkey, unsigned int k) {\n+    secp256k1_ge P_output_ge;\n+    secp256k1_scalar t_k_scalar;\n+    int ret;\n+\n+    /* Calculate and return P_output_xonly = B_spend + t_k * G\n+     * This will fail if B_spend is the point at infinity or if\n+     * B_spend + t_k*G is the point at infinity.\n+     */\n+    secp256k1_silentpayments_create_t_k(&t_k_scalar, shared_secret33, k);\n+    ret = secp256k1_pubkey_load(ctx, &P_output_ge, recipient_spend_pubkey);\n+    ret &= secp256k1_eckey_pubkey_tweak_add(&P_output_ge, &t_k_scalar);\n+    secp256k1_xonly_pubkey_save(P_output_xonly, &P_output_ge);\n+\n+    /* While not technically \"secret\" data, explicitly clear t_k since leaking this would allow an attacker\n+     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction\n+     * back to the silent payment address\n+     */\n+    secp256k1_scalar_clear(&t_k_scalar);\n+    return ret;\n+}\n+\n+int secp256k1_silentpayments_sender_create_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_xonly_pubkey **generated_outputs,\n+    const secp256k1_silentpayments_recipient **recipients,\n+    size_t n_recipients,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_keypair * const *taproot_seckeys,\n+    size_t n_taproot_seckeys,\n+    const unsigned char * const *plain_seckeys,\n+    size_t n_plain_seckeys\n+) {\n+    size_t i, k;\n+    secp256k1_scalar a_sum_scalar, addend, input_hash_scalar;\n+    secp256k1_ge A_sum_ge;\n+    secp256k1_gej A_sum_gej;\n+    unsigned char input_hash[32];\n+    unsigned char shared_secret[33];\n+    secp256k1_silentpayments_recipient last_recipient;\n+    int overflow = 0;\n+    int ret = 1;\n+\n+    /* Sanity check inputs. */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));\n+    ARG_CHECK(generated_outputs != NULL);\n+    ARG_CHECK(recipients != NULL);\n+    ARG_CHECK(n_recipients > 0);\n+    ARG_CHECK((plain_seckeys != NULL) || (taproot_seckeys != NULL));\n+    if (taproot_seckeys != NULL) {\n+        ARG_CHECK(n_taproot_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_taproot_seckeys == 0);\n+    }\n+    if (plain_seckeys != NULL) {\n+        ARG_CHECK(n_plain_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_plain_seckeys == 0);\n+    }\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    /* ensure the index field is set correctly */\n+    for (i = 0; i < n_recipients; i++) {\n+        ARG_CHECK(recipients[i]->index == i);\n+    }\n+\n+    /* Compute input private keys sum: a_sum = a_1 + a_2 + ... + a_n */\n+    a_sum_scalar = secp256k1_scalar_zero;\n+    for (i = 0; i < n_plain_seckeys; i++) {",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 193,
+      "original_position": 189,
+      "commit_id": "f42e0dde59943ad0c9247c61f7af521b70838e8f",
+      "original_commit_id": "9d6769f4aed4691463f9c591e147df6a0ccfbca3",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "How should we handle secret keys that add up to `SECP256k1_N`?\r\nI tested this locally with `ALICE_SECKKEY = 0xeadc78165ff1f8ea94ad7cfdc54990738a4c53f6e0507b42154201b8e5dff3b1` and another secret key I generated with `SECP256K1_N - ALICE_SECKEY = 0x152387e9a00e07156b5283023ab66f8b306288efcef824f9aa905cd3ea564d90`.  Passing these two plain secret keys causes `secp256k1_silentpayments_sender_create_outputs` to fail",
+      "created_at": "2024-12-16T09:56:06Z",
+      "updated_at": "2024-12-16T09:56:06Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1886516945",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1886516945"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 193,
+      "original_line": 193,
       "side": "RIGHT"
     }
   ]
