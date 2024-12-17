@@ -70,7 +70,7 @@
       }
     ],
     "created_at": "2024-12-13T09:50:29Z",
-    "updated_at": "2024-12-16T21:15:53Z",
+    "updated_at": "2024-12-17T17:43:33Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merge_commit_sha": "be0838a6ce0d3831e0ccbda165a1a955bb0d4683",
@@ -178,7 +178,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 12886,
+        "size": 12888,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -191,7 +191,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2024-12-15T13:12:48Z",
+        "pushed_at": "2024-12-17T14:21:48Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2024-12-12T13:13:24Z",
         "allow_forking": true,
@@ -357,7 +357,7 @@
     "deletions": 4,
     "changed_files": 2,
     "commits": 2,
-    "review_comments": 2,
+    "review_comments": 3,
     "comments": 2
   },
   "events": [
@@ -762,6 +762,42 @@
       "submitted_at": "2024-12-16T19:41:07Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1647"
+    },
+    {
+      "event": "reviewed",
+      "id": 2509536651,
+      "node_id": "PRR_kwDOAP4Jqs6VlH2L",
+      "url": null,
+      "actor": null,
+      "commit_id": "4c50d73dd98edc0b968525a291cf14b708bbdbf1",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "NONE",
+      "user": {
+        "login": "gatleas17",
+        "id": 38309181,
+        "node_id": "MDQ6VXNlcjM4MzA5MTgx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/38309181?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gatleas17",
+        "html_url": "https://github.com/gatleas17",
+        "followers_url": "https://api.github.com/users/gatleas17/followers",
+        "following_url": "https://api.github.com/users/gatleas17/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gatleas17/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gatleas17/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gatleas17/subscriptions",
+        "organizations_url": "https://api.github.com/users/gatleas17/orgs",
+        "repos_url": "https://api.github.com/users/gatleas17/repos",
+        "events_url": "https://api.github.com/users/gatleas17/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gatleas17/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1647#pullrequestreview-2509536651",
+      "submitted_at": "2024-12-17T17:06:59Z",
+      "state": "APPROVED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1647"
     }
   ],
   "comments": [
@@ -798,9 +834,9 @@
         "site_admin": false,
         "patch_url": null
       },
-      "body": "I'd prefer to set `/W3` here and `-Wall` with the other `try_append_c_flags` for consistency, as I don't see why it needs to be special-cased.",
+      "body": "~I'd prefer to set `/W3` here and `-Wall` with the other `try_append_c_flags` for consistency, as I don't see why it needs to be special-cased.~\r\n\r\nEdit: Retracted, see below.",
       "created_at": "2024-12-16T19:40:55Z",
-      "updated_at": "2024-12-16T19:41:07Z",
+      "updated_at": "2024-12-17T17:43:57Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1647#discussion_r1887457154",
       "author_association": "CONTRIBUTOR",
       "_links": {
@@ -859,6 +895,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1887595014"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1647"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 253,
+      "original_line": 253,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1888957243",
+      "pull_request_review_id": 2509630225,
+      "id": 1888957243,
+      "node_id": "PRRC_kwDOAP4Jqs5wlzM7",
+      "diff_hunk": "@@ -242,17 +242,21 @@ endif()\n \n include(TryAppendCFlags)\n if(MSVC)\n-  # Keep the following commands ordered lexicographically.\n+  # For both cl and clang-cl compilers.\n   try_append_c_flags(/W3) # Production quality warning level.\n+  # Eliminate deprecation warnings for the older, less secure functions.\n+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)\n+else()\n+  try_append_c_flags(-Wall) # GCC >= 2.95 and probably many other compilers.\n+endif()  \n+if(CMAKE_C_COMPILER_ID STREQUAL \"MSVC\")\n+  # Keep the following commands ordered lexicographically.",
+      "path": "CMakeLists.txt",
+      "position": 13,
+      "original_position": 13,
+      "commit_id": "4c50d73dd98edc0b968525a291cf14b708bbdbf1",
+      "original_commit_id": "4c50d73dd98edc0b968525a291cf14b708bbdbf1",
+      "in_reply_to_id": 1887457154,
+      "user": {
+        "login": "theuni",
+        "id": 417043,
+        "node_id": "MDQ6VXNlcjQxNzA0Mw==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/417043?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theuni",
+        "html_url": "https://github.com/theuni",
+        "followers_url": "https://api.github.com/users/theuni/followers",
+        "following_url": "https://api.github.com/users/theuni/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theuni/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theuni/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theuni/subscriptions",
+        "organizations_url": "https://api.github.com/users/theuni/orgs",
+        "repos_url": "https://api.github.com/users/theuni/repos",
+        "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theuni/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Wow. Confirmed: https://godbolt.org/z/WEr3qGeox\r\n\r\nThat's... hugely unexpected. It really doesn't give me much faith in the proper forwarding of other options :(",
+      "created_at": "2024-12-17T17:43:33Z",
+      "updated_at": "2024-12-17T17:43:33Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1647#discussion_r1888957243",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1888957243"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1647"
