@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2025-02-12T16:12:45Z",
+    "updated_at": "2025-02-13T09:46:26Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merge_commit_sha": "5932f03e0cc7883316c4530ca72c7029223641de",
@@ -173,7 +173,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-02-12T15:59:36Z",
+        "pushed_at": "2025-02-13T09:14:00Z",
         "created_at": "2024-02-01T15:52:50Z",
         "updated_at": "2025-02-11T09:42:33Z",
         "allow_forking": true,
@@ -292,8 +292,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1033,
-        "stargazers_count": 2165,
-        "watchers_count": 2165,
+        "stargazers_count": 2166,
+        "watchers_count": 2166,
         "size": 12149,
         "default_branch": "master",
         "open_issues_count": 150,
@@ -309,7 +309,7 @@
         "visibility": "public",
         "pushed_at": "2025-02-10T13:23:35Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-02-12T10:03:25Z",
+        "updated_at": "2025-02-12T17:56:09Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -339,7 +339,7 @@
     "deletions": 12,
     "changed_files": 24,
     "commits": 10,
-    "review_comments": 304,
+    "review_comments": 305,
     "comments": 41
   },
   "events": [
@@ -22954,6 +22954,59 @@
       "start_side": null,
       "line": 114,
       "original_line": 114,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1954170319",
+      "pull_request_review_id": 2614438905,
+      "id": 1954170319,
+      "node_id": "PRRC_kwDOAP4Jqs50ekXP",
+      "diff_hunk": "@@ -25,6 +26,87 @@ extern \"C\" {\n  * any further elliptic-curve operations from the wallet.\n  */\n \n+/* This struct serves as an In param for passing the silent payment address\n+ * data. The index field is for when more than one address is being sent to in\n+ * a transaction. Index is set based on the original ordering of the addresses\n+ * and used to return the generated outputs matching the original ordering.\n+ * When more than one recipient is used the recipient array will be sorted in\n+ * place as part of generating the outputs, but the generated outputs will be\n+ * returned in the original ordering specified by the index to ensure the\n+ * caller is able to match up the generated outputs to the correct silent\n+ * payment address (e.g. to be able to assign the correct amounts to the\n+ * correct generated outputs in the final transaction).\n+ */\n+typedef struct {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payment outputs for recipient(s).\n+ *\n+ *  Given a list of n private keys a_1...a_n (one for each silent payment\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment.\n+ *\n+ *  If necessary, the private keys are negated to enforce the right y-parity.\n+ *  For that reason, the private keys have to be passed in via two different\n+ *  parameter pairs, depending on whether the seckeys correspond to x-only\n+ *  outputs or not.\n+ *\n+ *  Returns: 1 if creation of outputs was successful. 0 if an error occured.\n+ *  Args:                ctx: pointer to a context object\n+ *  Out:   generated_outputs: pointer to an array of pointers to xonly pubkeys,\n+ *                            one per recipient.\n+ *                            The order of outputs here matches the original\n+ *                            ordering of the recipients array.\n+ *  In:           recipients: pointer to an array of pointers to silent payment\n+ *                            recipients, where each recipient is a scan public\n+ *                            key, a spend public key, and an index indicating\n+ *                            its position in the original ordering. The\n+ *                            recipient array will be sorted in place, but\n+ *                            generated outputs are saved in the\n+ *                            `generated_outputs` array to match the ordering\n+ *                            from the index field. This ensures the caller is\n+ *                            able to match the generated outputs to the\n+ *                            correct silent payment addresses. The same\n+ *                            recipient can be passed multiple times to create\n+ *                            multiple outputs for the same recipient.\n+ *              n_recipients: the number of recipients. This is equal to the\n+ *                            total number of outputs to be generated as each\n+ *                            recipient may passed multiple times to generate\n+ *                            multiple outputs for the same recipient\n+ *       outpoint_smallest36: serialized smallest outpoint (lexicographically)\n+ *                            from the transaction inputs\n+ *           taproot_seckeys: pointer to an array of pointers to 32-byte\n+ *                            private keys of taproot inputs (can be NULL if no\n+ *                            private keys of taproot inputs are used)\n+ *         n_taproot_seckeys: the number of sender's taproot input private keys\n+ *             plain_seckeys: pointer to an array of pointers to 32-byte",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 96,
+      "original_position": 74,
+      "commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "original_commit_id": "9d6769f4aed4691463f9c591e147df6a0ccfbca3",
+      "in_reply_to_id": 1750039449,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> why can't this be secp256k1_keypair as well?\r\n\r\nSorry, misunderstood your original question. The rest of libsecp uses 32 byte arrays for legacy secret keys and keypairs for x-only secret keys, so I'd prefer to keep the same convention here.",
+      "created_at": "2025-02-13T09:46:26Z",
+      "updated_at": "2025-02-13T09:46:26Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1954170319",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1954170319"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 96,
+      "original_line": 96,
       "side": "RIGHT"
     }
   ]
