@@ -98,7 +98,7 @@
       "due_on": "2025-04-20T07:00:00Z"
     },
     "created_at": "2023-06-26T12:16:22Z",
-    "updated_at": "2025-03-12T08:44:48Z",
+    "updated_at": "2025-03-12T11:50:26Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -386,7 +386,7 @@
     "deletions": 8,
     "changed_files": 11,
     "commits": 4,
-    "review_comments": 40,
+    "review_comments": 42,
     "comments": 16
   },
   "events": [
@@ -5486,6 +5486,112 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1990964271"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 59,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1991301841",
+      "pull_request_review_id": 2678125091,
+      "id": 1991301841,
+      "node_id": "PRRC_kwDOAP4Jqs52sNrR",
+      "diff_hunk": "@@ -0,0 +1,72 @@\n+#!/usr/bin/env python3\n+\"\"\"Check that a libsecp256k1 shared library exports only expected symbols.\n+\n+Usage examples:\n+  - When building with Autotools:\n+    ./tools/symbol-check.py .libs/libsecp256k1.so\n+    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py .libs/libsecp256k1.dylib\n+\n+  - When building with CMake:\n+    ./tools/symbol-check.py build/lib/libsecp256k1.so\n+    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\"\"\"\n+\n+import re\n+import sys\n+import subprocess\n+\n+import lief\n+\n+\n+class UnexpectedExport(RuntimeError):\n+    pass\n+\n+\n+def get_exported_exports(library) -> list[str]:\n+    \"\"\"Adapter function to get exported symbols based on the library format.\"\"\"\n+    if library.format == lief.Binary.FORMATS.ELF:\n+        return [symbol.name for symbol in library.exported_symbols]\n+    elif library.format == lief.Binary.FORMATS.PE:\n+        return [entry.name for entry in library.get_export().entries]\n+    elif library.format == lief.Binary.FORMATS.MACHO:\n+        return [symbol.name[1:] for symbol in library.exported_symbols]\n+    raise NotImplementedError(f\"Unsupported format: {library.format}\")\n+\n+\n+def grep_expected_symbols() -> list[str]:\n+    \"\"\"Guess the list of expected exported symbols from the source code.\"\"\"\n+    grep_output = subprocess.check_output(\n+        [\"git\", \"grep\", r\"^\\s*SECP256K1_API\", \"--\", \"include\"],\n+        universal_newlines=True,\n+        encoding=\"utf-8\"\n+    )\n+    lines = grep_output.split(\"\\n\")\n+    pattern = re.compile(r'\\bsecp256k1_\\w+')\n+    exported: list[str] = [pattern.findall(line)[-1] for line in lines if line.strip()]\n+    return exported\n+\n+\n+def check_symbols(library, expected_exports) -> None:\n+    \"\"\"Check that the library exports only the expected symbols.\"\"\"\n+    actual_exports = get_exported_exports(library)\n+    unexpected_exports = set(actual_exports) - set(expected_exports)\n+    if unexpected_exports != set():\n+        raise UnexpectedExport(f\"Unexpected exported symbols: {unexpected_exports}\")\n+\n+def main():\n+    if len(sys.argv) != 2:\n+        print(__doc__)",
+      "path": "tools/symbol-check.py",
+      "position": 59,
+      "original_position": 59,
+      "commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "original_commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "in_reply_to_id": 1990964271,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "What platform and Python version are you using?\r\n\r\nOn my Ubuntu 24.04.2 LTS with Python 3.12.3:\r\n```\r\n$ ./tools/symbol-check.py \r\nCheck that a libsecp256k1 shared library exports only expected symbols.\r\n\r\nUsage examples:\r\n  - When building with Autotools:\r\n    ./tools/symbol-check.py .libs/libsecp256k1.so\r\n    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\r\n    ./tools/symbol-check.py .libs/libsecp256k1.dylib\r\n\r\n  - When building with CMake:\r\n    ./tools/symbol-check.py build/lib/libsecp256k1.so\r\n    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\r\n    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\r\n```",
+      "created_at": "2025-03-12T11:45:49Z",
+      "updated_at": "2025-03-12T11:45:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#discussion_r1991301841",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1991301841"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 59,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1991314739",
+      "pull_request_review_id": 2678148734,
+      "id": 1991314739,
+      "node_id": "PRRC_kwDOAP4Jqs52sQ0z",
+      "diff_hunk": "@@ -0,0 +1,72 @@\n+#!/usr/bin/env python3\n+\"\"\"Check that a libsecp256k1 shared library exports only expected symbols.\n+\n+Usage examples:\n+  - When building with Autotools:\n+    ./tools/symbol-check.py .libs/libsecp256k1.so\n+    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py .libs/libsecp256k1.dylib\n+\n+  - When building with CMake:\n+    ./tools/symbol-check.py build/lib/libsecp256k1.so\n+    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\"\"\"\n+\n+import re\n+import sys\n+import subprocess\n+\n+import lief\n+\n+\n+class UnexpectedExport(RuntimeError):\n+    pass\n+\n+\n+def get_exported_exports(library) -> list[str]:\n+    \"\"\"Adapter function to get exported symbols based on the library format.\"\"\"\n+    if library.format == lief.Binary.FORMATS.ELF:\n+        return [symbol.name for symbol in library.exported_symbols]\n+    elif library.format == lief.Binary.FORMATS.PE:\n+        return [entry.name for entry in library.get_export().entries]\n+    elif library.format == lief.Binary.FORMATS.MACHO:\n+        return [symbol.name[1:] for symbol in library.exported_symbols]\n+    raise NotImplementedError(f\"Unsupported format: {library.format}\")\n+\n+\n+def grep_expected_symbols() -> list[str]:\n+    \"\"\"Guess the list of expected exported symbols from the source code.\"\"\"\n+    grep_output = subprocess.check_output(\n+        [\"git\", \"grep\", r\"^\\s*SECP256K1_API\", \"--\", \"include\"],\n+        universal_newlines=True,\n+        encoding=\"utf-8\"\n+    )\n+    lines = grep_output.split(\"\\n\")\n+    pattern = re.compile(r'\\bsecp256k1_\\w+')\n+    exported: list[str] = [pattern.findall(line)[-1] for line in lines if line.strip()]\n+    return exported\n+\n+\n+def check_symbols(library, expected_exports) -> None:\n+    \"\"\"Check that the library exports only the expected symbols.\"\"\"\n+    actual_exports = get_exported_exports(library)\n+    unexpected_exports = set(actual_exports) - set(expected_exports)\n+    if unexpected_exports != set():\n+        raise UnexpectedExport(f\"Unexpected exported symbols: {unexpected_exports}\")\n+\n+def main():\n+    if len(sys.argv) != 2:\n+        print(__doc__)",
+      "path": "tools/symbol-check.py",
+      "position": 59,
+      "original_position": 59,
+      "commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "original_commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "in_reply_to_id": 1990964271,
+      "user": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "macOS & Python 3.13.2",
+      "created_at": "2025-03-12T11:50:26Z",
+      "updated_at": "2025-03-12T11:50:26Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#discussion_r1991314739",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1991314739"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
