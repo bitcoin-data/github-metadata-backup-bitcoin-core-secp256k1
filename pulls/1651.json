@@ -40,9 +40,19 @@
       "patch_url": null
     },
     "body": "built on top of f42e0dde59943ad0c9247c61f7af521b70838e8f.\r\n\r\n> BIP352 requires senders to compute output scripts using ECDH shared secrets from the same secret keys used to sign the inputs. Generating an incorrect signature will produce an invalid transaction that will be rejected by consensus. An incorrectly generated output script can still be consensus-valid, meaning funds may be lost if it gets broadcast. By producing a DLEQ proof for the generated ECDH shared secrets, the signing entity can prove to other entities that the output scripts have been generated correctly without revealing the private keys.\r\n\r\n(from [BIP 374](https://github.com/bitcoin/bips/blob/master/bip-0374.mediawiki))\r\n\r\nThis PR:\r\n\r\n- adds support for DLEQ proof generation and verification using `secp256k1_dleq_prove`, `secp256k1_dleq_verify` based on implementation in [secp256k1-zkp](https://github.com/BlockstreamResearch/secp256k1-zkp/blob/master/src/modules/ecdsa_adaptor/dleq_impl.h)\r\n- introduces a new structure for storing proofs in silent payment module - `secp256k1_silentpayments_dleq_data` which stores the shared secret computed using ECDH, DLEQ proof and also the index of which recipient in the [original unsorted recipient array](https://github.com/bitcoin-core/secp256k1/blob/f42e0dde59943ad0c9247c61f7af521b70838e8f/include/secp256k1_silentpayments.h#L43)  the proof refers to.\r\n- adds 4 new APIs in silent payments module to create, verify, serialize and parse proof\r\n    1. sender can create proof using `secp256k1_silentpayments_sender_create_outputs_with_proof`\r\n        - in the existing `secp256k1_silentpayments_sender_create_outputs` API, output pubkey is created by iterating over all the recipients and computing ECDH for each unique recipient.\r\n        - since creating the proof also requites iterating over all recipients and computing ECDH for each unique recipient, compute both proof(s) and output pubkey(s) in a new function - `secp256k1_silentpayments_sender_create_outputs_with_proof`.\r\n        - `secp256k1_silentpayments_sender_create_outputs` can use `secp256k1_silentpayments_sender_create_outputs_with_proof`internally.\r\n    2.  both sender and receiver can verify proof using `secp256k1_silentpayments_verify_proof`\r\n    3. Serialisation function (`secp256k1_silentpayments_dleq_data_serialize`) serialises  `secp256k1_silentpayments_dleq_data` structure into bytes. `secp256k1_silentpayments_dleq_data_parse` parses the bytes back into `secp256k1_silentpayments_dleq_data` structure.\r\n        1. useful if proof creation is done on 1 sender side device (ex: hardware wallet) and proof verification is done on another sender side device (ex: software wallet). `secp256k1_silentpayments_dleq_data` structure can be serialised into bytes using `secp256k1_silentpayments_dleq_data_serialize` and then the bytes can be sent from 1 device to another.\r\n        2. `secp256k1_silentpayments_dleq_data_parse` can reconstruct the bytes back into `secp256k1_silentpayments_dleq_data` structure which can then be used for proof verification.\r\n\r\nopen questions:\r\n\r\n1. is the API design ok?\r\n    1. see `examples/silentpayments.c` for 2 scenarios in which proof verification could be useful. (Alice sends bitcoins to Bob and Carol in 1 silent payment transaction)\r\n        1. useful situation - On Alice’s side\r\n            1. Alice’s hardware wallet creates proof\r\n            2. Alice’s hardware wallet sends proof to Alice’s software wallet\r\n            3. Alice’s software wallet verifies proof and makes sure ECDH shared secrets for generating SP output is computed correctly. Alice can get additional safety guarantee about computed SP output before sending funds.\r\n        2. not sure if this situation is useful - On Bob’s/Carol’s side\r\n            1. Alice’s software wallet sends proof to Bob’s/Carol’s  software wallet\r\n            2. Bob’s/Carol’s software wallet verifies proof and makes sure ECDH shared secrets for generating SP output is computed correctly.\r\n2. should this be shipped with SP module or separately? only problem with separate release would be redundant APIs like `secp256k1_silentpayments_sender_create_outputs` and `secp256k1_silentpayments_sender_create_outputs_with_proof` for backward compatibility. \r\n\r\nHuge thanks to @ theStack for brainstorming and discussing this with me! ❤️",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975353639,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+        "name": "feature",
+        "description": "",
+        "color": "731E95",
+        "default": false
+      }
+    ],
     "created_at": "2025-02-03T17:32:28Z",
-    "updated_at": "2025-02-27T19:29:04Z",
+    "updated_at": "2025-03-13T10:04:34Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -150,7 +160,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12341,
+        "size": 12346,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -163,9 +173,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-02-26T04:23:15Z",
+        "pushed_at": "2025-03-10T14:43:08Z",
         "created_at": "2022-07-30T06:55:56Z",
-        "updated_at": "2025-02-26T04:23:19Z",
+        "updated_at": "2025-03-10T14:43:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -281,12 +291,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1037,
-        "stargazers_count": 2170,
-        "watchers_count": 2170,
-        "size": 12200,
+        "forks_count": 1042,
+        "stargazers_count": 2181,
+        "watchers_count": 2181,
+        "size": 12342,
         "default_branch": "master",
-        "open_issues_count": 146,
+        "open_issues_count": 142,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -297,9 +307,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-02-25T09:54:31Z",
+        "pushed_at": "2025-03-13T09:07:24Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-02-25T09:54:36Z",
+        "updated_at": "2025-03-13T09:16:44Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -1125,6 +1135,40 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-2688913408",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1651"
+    },
+    {
+      "event": "labeled",
+      "id": 16731258556,
+      "node_id": "LE_lADOAP4Jqs6okbW9zwAAAAPlQr68",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/16731258556",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-03-13T10:04:34Z",
+      "label": {
+        "name": "feature",
+        "color": "731E95"
+      }
     }
   ],
   "comments": [
