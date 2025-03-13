@@ -91,18 +91,18 @@
         "site_admin": false,
         "patch_url": null
       },
-      "open_issues": 4,
-      "closed_issues": 0,
+      "open_issues": 3,
+      "closed_issues": 1,
       "created_at": "2024-11-04T16:42:33Z",
-      "updated_at": "2025-03-10T15:20:57Z",
+      "updated_at": "2025-03-12T20:02:10Z",
       "due_on": "2025-04-20T07:00:00Z"
     },
     "created_at": "2023-06-26T12:16:22Z",
-    "updated_at": "2025-03-12T19:49:46Z",
+    "updated_at": "2025-03-13T00:46:09Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "6528feae6f8d930261a4e1829fd84d9b7bb316b3",
+    "merge_commit_sha": "c6c1084c277ceb7129653623daeb6077400b458c",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -341,9 +341,9 @@
         "forks_count": 1042,
         "stargazers_count": 2179,
         "watchers_count": 2179,
-        "size": 12221,
+        "size": 12322,
         "default_branch": "master",
-        "open_issues_count": 143,
+        "open_issues_count": 142,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -354,9 +354,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-03-11T21:08:56Z",
+        "pushed_at": "2025-03-12T20:02:09Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-03-11T21:09:01Z",
+        "updated_at": "2025-03-12T20:02:14Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -386,7 +386,7 @@
     "deletions": 8,
     "changed_files": 11,
     "commits": 4,
-    "review_comments": 44,
+    "review_comments": 45,
     "comments": 16
   },
   "events": [
@@ -5698,6 +5698,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1992195254"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 59,
+      "original_line": 59,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1992485996",
+      "pull_request_review_id": 2680176384,
+      "id": 1992485996,
+      "node_id": "PRRC_kwDOAP4Jqs52wuxs",
+      "diff_hunk": "@@ -0,0 +1,72 @@\n+#!/usr/bin/env python3\n+\"\"\"Check that a libsecp256k1 shared library exports only expected symbols.\n+\n+Usage examples:\n+  - When building with Autotools:\n+    ./tools/symbol-check.py .libs/libsecp256k1.so\n+    ./tools/symbol-check.py .libs/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py .libs/libsecp256k1.dylib\n+\n+  - When building with CMake:\n+    ./tools/symbol-check.py build/lib/libsecp256k1.so\n+    ./tools/symbol-check.py build/bin/libsecp256k1-<V>.dll\n+    ./tools/symbol-check.py build/lib/libsecp256k1.dylib\"\"\"\n+\n+import re\n+import sys\n+import subprocess\n+\n+import lief\n+\n+\n+class UnexpectedExport(RuntimeError):\n+    pass\n+\n+\n+def get_exported_exports(library) -> list[str]:\n+    \"\"\"Adapter function to get exported symbols based on the library format.\"\"\"\n+    if library.format == lief.Binary.FORMATS.ELF:\n+        return [symbol.name for symbol in library.exported_symbols]\n+    elif library.format == lief.Binary.FORMATS.PE:\n+        return [entry.name for entry in library.get_export().entries]\n+    elif library.format == lief.Binary.FORMATS.MACHO:\n+        return [symbol.name[1:] for symbol in library.exported_symbols]\n+    raise NotImplementedError(f\"Unsupported format: {library.format}\")\n+\n+\n+def grep_expected_symbols() -> list[str]:\n+    \"\"\"Guess the list of expected exported symbols from the source code.\"\"\"\n+    grep_output = subprocess.check_output(\n+        [\"git\", \"grep\", r\"^\\s*SECP256K1_API\", \"--\", \"include\"],\n+        universal_newlines=True,\n+        encoding=\"utf-8\"\n+    )\n+    lines = grep_output.split(\"\\n\")\n+    pattern = re.compile(r'\\bsecp256k1_\\w+')\n+    exported: list[str] = [pattern.findall(line)[-1] for line in lines if line.strip()]\n+    return exported\n+\n+\n+def check_symbols(library, expected_exports) -> None:\n+    \"\"\"Check that the library exports only the expected symbols.\"\"\"\n+    actual_exports = get_exported_exports(library)\n+    unexpected_exports = set(actual_exports) - set(expected_exports)\n+    if unexpected_exports != set():\n+        raise UnexpectedExport(f\"Unexpected exported symbols: {unexpected_exports}\")\n+\n+def main():\n+    if len(sys.argv) != 2:\n+        print(__doc__)",
+      "path": "tools/symbol-check.py",
+      "position": 59,
+      "original_position": 59,
+      "commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "original_commit_id": "d1478763a5f400fafb42af5911db4a9460dd4a5d",
+      "in_reply_to_id": 1990964271,
+      "user": {
+        "login": "fanquake",
+        "id": 863730,
+        "node_id": "MDQ6VXNlcjg2MzczMA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/863730?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fanquake",
+        "html_url": "https://github.com/fanquake",
+        "followers_url": "https://api.github.com/users/fanquake/followers",
+        "following_url": "https://api.github.com/users/fanquake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fanquake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fanquake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fanquake/subscriptions",
+        "organizations_url": "https://api.github.com/users/fanquake/orgs",
+        "repos_url": "https://api.github.com/users/fanquake/repos",
+        "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fanquake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "@real-or-random eh, I think an older version must have been the case.",
+      "created_at": "2025-03-13T00:46:09Z",
+      "updated_at": "2025-03-13T00:46:09Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1359#discussion_r1992485996",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1992485996"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1359"
