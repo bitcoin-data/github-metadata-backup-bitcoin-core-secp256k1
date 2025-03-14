@@ -89,7 +89,7 @@
       "due_on": "2025-04-20T07:00:00Z"
     },
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2025-03-13T17:10:39Z",
+    "updated_at": "2025-03-14T09:07:33Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -197,7 +197,7 @@
         "forks_count": 1,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 12697,
+        "size": 12704,
         "default_branch": "master",
         "open_issues_count": 1,
         "is_template": false,
@@ -331,7 +331,7 @@
         "forks_count": 1042,
         "stargazers_count": 2182,
         "watchers_count": 2182,
-        "size": 12348,
+        "size": 12237,
         "default_branch": "master",
         "open_issues_count": 140,
         "is_template": false,
@@ -344,9 +344,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-03-13T13:07:17Z",
+        "pushed_at": "2025-03-13T18:40:39Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-03-13T13:07:21Z",
+        "updated_at": "2025-03-13T18:40:43Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -376,7 +376,7 @@
     "deletions": 12,
     "changed_files": 24,
     "commits": 10,
-    "review_comments": 333,
+    "review_comments": 334,
     "comments": 50
   },
   "events": [
@@ -8465,7 +8465,7 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-03-13T15:53:31Z",
-      "updated_at": "2025-03-13T15:53:31Z",
+      "updated_at": "2025-03-14T09:07:32Z",
       "author_association": "CONTRIBUTOR",
       "body": "@LLFourn I've included the possibility of x-only ECDH (and x-only B_scan) in my review document of the BIP: https://gist.github.com/sipa/c9299811fb1f56abdcd2451a8a078d20",
       "user": {
@@ -25883,6 +25883,59 @@
       "start_side": null,
       "line": 104,
       "original_line": 104,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1995165702",
+      "pull_request_review_id": 2684855799,
+      "id": 1995165702,
+      "node_id": "PRRC_kwDOAP4Jqs5269AG",
+      "diff_hunk": "@@ -0,0 +1,674 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n+#define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n+\n+#include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n+#include \"../../../include/secp256k1_silentpayments.h\"\n+\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient. */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_hash, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    size_t len;\n+    int ret;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    (void)ret;\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_scalar *secret_component, const secp256k1_ge *public_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+    size_t len;\n+    int ret;\n+\n+    /* Compute shared_secret = tweaked_secret_component * Public_component */\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 74,
+      "original_position": 74,
+      "commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "original_commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "in_reply_to_id": 1992409713,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "(@sipa Replying here in the thread to keep things organized in this huge PR.)\r\n\r\n> @LLFourn I've included the possibility of x-only ECDH (and x-only B_scan) in my review document of the BIP: [gist.github.com/sipa/c9299811fb1f56abdcd2451a8a078d20](https://gist.github.com/sipa/c9299811fb1f56abdcd2451a8a078d20)\r\n\r\n> Note that in terms of code all that has to change is to make the shared secret just the x coordinate (change it to `shared_secret32`) and the actual optimization could be implemented later. It seems like it could be worth changing the spec slightly even at this stage\r\n\r\nYeah, I think x-only ECDH has fallen between the cracks. For all other protocols, there was not enough pressure to optimize our existing ECDH because it's fast enough (BIP324 is an exception in that we had to redo it anyway from scratch due to ellswift). \r\n\r\nBut I agree that the situation is different here. Scanning is the bottleneck, and it will be nice to save a few percent.\r\n\r\nWe even have draft implementations:\r\n - input=xonly, shared_secret=xonly: https://github.com/bitcoin-core/secp256k1/pull/1198 (this one is in a good shape)\r\n - input=compressed, shared_secret=xonly: https://github.com/bitcoin-core/secp256k1/pull/262\r\n\r\nThe big question is whether the spec can be changed at this point, and I'm afraid the answer is no. If I recall correctly, others have picked it up already? @josibake @rubensomsen  ",
+      "created_at": "2025-03-14T09:06:41Z",
+      "updated_at": "2025-03-14T09:06:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1995165702",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1995165702"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 74,
+      "original_line": 74,
       "side": "RIGHT"
     }
   ]
