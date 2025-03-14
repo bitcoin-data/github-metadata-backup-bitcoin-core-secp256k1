@@ -89,7 +89,7 @@
       "due_on": "2025-04-20T07:00:00Z"
     },
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2025-03-14T17:17:33Z",
+    "updated_at": "2025-03-14T19:03:22Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -376,7 +376,7 @@
     "deletions": 12,
     "changed_files": 24,
     "commits": 10,
-    "review_comments": 346,
+    "review_comments": 347,
     "comments": 50
   },
   "events": [
@@ -26714,6 +26714,59 @@
       "start_side": null,
       "line": 405,
       "original_line": 405,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1996130672",
+      "pull_request_review_id": 2686566788,
+      "id": 1996130672,
+      "node_id": "PRRC_kwDOAP4Jqs52-olw",
+      "diff_hunk": "@@ -0,0 +1,543 @@\n+/*************************************************************************\n+ * To the extent possible under law, the author(s) have dedicated all    *\n+ * copyright and related and neighboring rights to the software in this  *\n+ * file to the public domain worldwide. This software is distributed     *\n+ * without any warranty. For the CC0 Public Domain Dedication, see       *\n+ * EXAMPLES_COPYING or https://creativecommons.org/publicdomain/zero/1.0 *\n+ *************************************************************************/\n+\n+#include <stdio.h>\n+#include <assert.h>\n+#include <string.h>\n+\n+#include <secp256k1_extrakeys.h>\n+#include <secp256k1_silentpayments.h>\n+\n+#include \"examples_util.h\"\n+\n+/* Static data for Bob and Carol's silent payment addresses */\n+static unsigned char smallest_outpoint[36] = {\n+    0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+    0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+    0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+    0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00\n+};\n+static unsigned char bob_scan_key[32] = {\n+    0xa8, 0x90, 0x54, 0xc9, 0x5b, 0xe3, 0xc3, 0x01,\n+    0x56, 0x65, 0x74, 0xf2, 0xaa, 0x93, 0xad, 0xe0,\n+    0x51, 0x85, 0x09, 0x03, 0xa6, 0x9c, 0xbd, 0xd1,\n+    0xd4, 0x7e, 0xae, 0x26, 0x3d, 0x7b, 0xc0, 0x31\n+};\n+static unsigned char bob_spend_pubkey[33] = {\n+    0x02, 0xee, 0x97, 0xdf, 0x83, 0xb2, 0x54, 0x6a,\n+    0xf5, 0xa7, 0xd0, 0x62, 0x15, 0xd9, 0x8b, 0xcb,\n+    0x63, 0x7f, 0xe0, 0x5d, 0xd0, 0xfa, 0x37, 0x3b,\n+    0xd8, 0x20, 0xe6, 0x64, 0xd3, 0x72, 0xde, 0x9a, 0x01\n+};\n+static unsigned char bob_address[2][33] = {\n+    {\n+        0x02, 0x15, 0x40, 0xae, 0xa8, 0x97, 0x54, 0x7a,\n+        0xd4, 0x39, 0xb4, 0xe0, 0xf6, 0x09, 0xe5, 0xf0,\n+        0xfa, 0x63, 0xde, 0x89, 0xab, 0x11, 0xed, 0xe3,\n+        0x1e, 0x8c, 0xde, 0x4b, 0xe2, 0x19, 0x42, 0x5f, 0x23\n+    },\n+    {\n+        0x02, 0x3e, 0xff, 0xf8, 0x18, 0x51, 0x65, 0xea,\n+        0x63, 0xa9, 0x92, 0xb3, 0x9f, 0x31, 0xd8, 0xfd,\n+        0x8e, 0x0e, 0x64, 0xae, 0xf9, 0xd3, 0x88, 0x07,\n+        0x34, 0x97, 0x37, 0x14, 0xa5, 0x3d, 0x83, 0x11, 0x8d\n+    }\n+};\n+static unsigned char carol_scan_key[32] = {\n+    0x04, 0xb2, 0xa4, 0x11, 0x63, 0x5c, 0x09, 0x77,\n+    0x59, 0xaa, 0xcd, 0x0f, 0x00, 0x5a, 0x4c, 0x82,\n+    0xc8, 0xc9, 0x28, 0x62, 0xc6, 0xfc, 0x28, 0x4b,\n+    0x80, 0xb8, 0xef, 0xeb, 0xc2, 0x0c, 0x3d, 0x17\n+};\n+static unsigned char carol_address[2][33] = {\n+    {\n+        0x03, 0xbb, 0xc6, 0x3f, 0x12, 0x74, 0x5d, 0x3b,\n+        0x9e, 0x9d, 0x24, 0xc6, 0xcd, 0x7a, 0x1e, 0xfe,\n+        0xba, 0xd0, 0xa7, 0xf4, 0x69, 0x23, 0x2f, 0xbe,\n+        0xcf, 0x31, 0xfb, 0xa7, 0xb4, 0xf7, 0xdd, 0xed, 0xa8\n+    },\n+    {\n+        0x03, 0x81, 0xeb, 0x9a, 0x9a, 0x9e, 0xc7, 0x39,\n+        0xd5, 0x27, 0xc1, 0x63, 0x1b, 0x31, 0xb4, 0x21,\n+        0x56, 0x6f, 0x5c, 0x2a, 0x47, 0xb4, 0xab, 0x5b,\n+        0x1f, 0x6a, 0x68, 0x6d, 0xfb, 0x68, 0xea, 0xb7, 0x16\n+    }\n+};\n+\n+/** Labels\n+ *\n+ *  The structs and call back function are implemented here as a demonstration\n+ *  of how the label lookup callback is meant to query a label cache and return\n+ *  the label tweak when a match is found. This is for demonstration purposes\n+ *  only and not optimized. In a production usecase, it is expected that the\n+ *  caller will be using a much more performant method for storing and querying\n+ *  labels.\n+ *\n+ *  Recipients not using labels can ignore these steps and simply pass `NULL`\n+ *  for the label_lookup and label_context arguments:\n+ *\n+ *      secp256k1_silentpayments_recipient_scan_outputs(..., NULL, NULL);\n+ */\n+\n+struct label_cache_entry {\n+    unsigned char label[33];\n+    unsigned char label_tweak[32];\n+};\n+\n+struct labels_cache {\n+    size_t entries_used;\n+    struct label_cache_entry entries[5];\n+};\n+\n+const unsigned char* label_lookup(\n+    const unsigned char* label33,\n+    const void* cache_ptr\n+) {\n+    const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;\n+    size_t i;\n+    for (i = 0; i < cache->entries_used; i++) {\n+        if (memcmp(cache->entries[i].label, label33, 33) == 0) {\n+            return cache->entries[i].label_tweak;\n+        }\n+    }\n+    return NULL;\n+}\n+\n+int main(void) {\n+    enum { N_INPUTS = 2, N_OUTPUTS = 3 };\n+    unsigned char randomize[32];\n+    unsigned char xonly_print[32];\n+    secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\n+    const secp256k1_xonly_pubkey *tx_input_ptrs[N_INPUTS];\n+    secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\n+    const secp256k1_xonly_pubkey *tx_output_ptrs[N_OUTPUTS];\n+    int ret;\n+    size_t i;\n+\n+    /* Before we can call actual API functions, we need to create a \"context\" */\n+    secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    if (!fill_random(randomize, sizeof(randomize))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return 1;\n+    }\n+    /* Randomizing the context is recommended to protect against side-channel\n+     * leakage. See `secp256k1_context_randomize` in secp256k1.h for more\n+     * information about it. This should never fail. */\n+    ret = secp256k1_context_randomize(ctx, randomize);\n+    assert(ret);\n+\n+    /*** Sending ***/\n+    {\n+        secp256k1_keypair sender_keypairs[N_INPUTS];\n+        const secp256k1_keypair *sender_keypair_ptrs[N_INPUTS];\n+        secp256k1_silentpayments_recipient recipients[N_OUTPUTS];\n+        const secp256k1_silentpayments_recipient *recipient_ptrs[N_OUTPUTS];\n+        char* address_amounts[N_OUTPUTS] = {\"1.0 BTC\", \"2.0 BTC\", \"3.0 BTC\"};\n+        unsigned char (*sp_addresses[N_OUTPUTS])[2][33];\n+        unsigned char seckey[32];\n+\n+        /*** Generate private keys for the sender ***\n+         *\n+         * In this example, only taproot inputs are used but the function can be\n+         * called with a mix of taproot seckeys and plain seckeys. Taproot\n+         * seckeys are passed as keypairs to allow the sending function to check\n+         * if the private keys need to be negated without needing to do an\n+         * expensive pubkey generation. This is not needed for plain seckeys\n+         * since there is no need for negation.\n+         *\n+         * The public key from each input keypair is saved in the `tx_inputs`\n+         * array. This array will be used later in the example to represent the\n+         * public keys the recipient will extract from the transaction inputs.\n+         *\n+         * If the secret key is zero or out of range (bigger than secp256k1's\n+         * order), fail. Note that the probability of this happening is\n+         * negligible. */\n+        for (i = 0; i < N_INPUTS; i++) {\n+            if (!fill_random(seckey, sizeof(seckey))) {\n+                printf(\"Failed to generate randomness\\n\");\n+                return 1;\n+            }\n+            /* Try to create a keypair with a valid context, it should only fail\n+             * if the secret key is zero or out of range. */\n+            if (secp256k1_keypair_create(ctx, &sender_keypairs[i], seckey)) {\n+                sender_keypair_ptrs[i] = &sender_keypairs[i];\n+                ret = secp256k1_keypair_xonly_pub(\n+                    ctx,\n+                    &tx_inputs[i],\n+                    NULL,\n+                    &sender_keypairs[i]\n+                );\n+                assert(ret);\n+            } else {\n+                printf(\"Failed to create keypair\\n\");\n+                return 1;\n+            }\n+        }\n+        /*** Create the recipient objects ***/\n+\n+        /* Alice is sending to Bob and Carol in this transaction:\n+         *\n+         *     1. One output to Bob's labelled address (2.0 BTC)\n+         *     2. Two outputs for Carol (1.0 and 3.0 BTC)\n+         *\n+         * To create multiple outputs for Carol, Alice simply passes Carol's\n+         * silent payment address mutltiple times.\n+         */\n+        sp_addresses[0] = &carol_address; /* : 1.0 BTC */\n+        sp_addresses[1] = &bob_address;   /* : 2.0 BTC */\n+        sp_addresses[2] = &carol_address; /* : 3.0 BTC */\n+        for (i = 0; i < N_OUTPUTS; i++) { ret =\n+            secp256k1_ec_pubkey_parse(ctx,\n+                &recipients[i].scan_pubkey,\n+                (*(sp_addresses[i]))[0],\n+                33\n+            );\n+            assert(ret);\n+            ret = secp256k1_ec_pubkey_parse(ctx,\n+                &recipients[i].spend_pubkey,\n+                (*(sp_addresses[i]))[1],\n+                33\n+            );\n+            assert(ret);\n+            /* Alice creates the recipient objects and adds the index of the\n+             * original ordering (the ordering of the `sp_addresses` array) to\n+             * each object. This index is used to return the generated outputs\n+             * in the original ordering so that Alice can match up the generated\n+             * outputs with the correct amounts.\n+             */\n+            recipients[i].index = i;\n+            recipient_ptrs[i] = &recipients[i];\n+        }\n+        for (i = 0; i < N_OUTPUTS; i++) {\n+            tx_output_ptrs[i] = &tx_outputs[i];\n+        }\n+        /* To keep things simple, we cast the tx_output_ptr array to remove the\n+         * const qualifer, so that we can create the outputs. We want the const\n+         * qualifer because this same array will be passed to the scan function\n+         * later in the example.\n+         */\n+        ret = secp256k1_silentpayments_sender_create_outputs(ctx,\n+            (secp256k1_xonly_pubkey **)tx_output_ptrs,",
+      "path": "examples/silentpayments.c",
+      "position": 225,
+      "original_position": 225,
+      "commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "original_commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "in_reply_to_id": 1995935100,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> If we only want to use one array for creating and scanning, then we should just remove const from the declaration of tx_output_ptrs.\r\n\r\nStrongly agree with this.\r\n\r\nFor the sake of education, it is safe because the pointers in `tx_out_ptrs` point to the elements of `tx_outputs`, which is not declared `const`. So the \"object\" we're modifying is not declared `const`. And only this would be UB: \"If an attempt is made to modify an object defined with a const-qualified type through use of an lvalue with non-const-qualified type, the behavior is undefined.\"  (https://port70.net/~nsz/c/c99/n1256.html#6.7.3p5) \r\n\r\nBut yep, relying on this is probably not the kind of programming style we should encourage in an example. ^^",
+      "created_at": "2025-03-14T19:03:22Z",
+      "updated_at": "2025-03-14T19:03:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r1996130672",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1996130672"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": 219,
+      "original_start_line": 219,
+      "start_side": "RIGHT",
+      "line": 225,
+      "original_line": 225,
       "side": "RIGHT"
     }
   ]
