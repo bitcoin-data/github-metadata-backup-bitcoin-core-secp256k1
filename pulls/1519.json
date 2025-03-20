@@ -89,7 +89,7 @@
       "due_on": "2025-04-20T07:00:00Z"
     },
     "created_at": "2024-04-19T14:21:15Z",
-    "updated_at": "2025-03-20T10:18:35Z",
+    "updated_at": "2025-03-20T17:36:02Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -211,7 +211,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-03-18T17:02:18Z",
+        "pushed_at": "2025-03-20T17:04:25Z",
         "created_at": "2024-02-01T15:52:50Z",
         "updated_at": "2025-03-17T10:40:51Z",
         "allow_forking": true,
@@ -377,7 +377,7 @@
     "deletions": 12,
     "changed_files": 24,
     "commits": 10,
-    "review_comments": 368,
+    "review_comments": 369,
     "comments": 52
   },
   "events": [
@@ -28239,6 +28239,59 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 234,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2006144436",
+      "pull_request_review_id": 2703591241,
+      "id": 2006144436,
+      "node_id": "PRRC_kwDOAP4Jqs53k1W0",
+      "diff_hunk": "@@ -0,0 +1,674 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n+#define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n+\n+#include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n+#include \"../../../include/secp256k1_silentpayments.h\"\n+\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient. */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_hash, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    size_t len;\n+    int ret;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    (void)ret;\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_scalar *secret_component, const secp256k1_ge *public_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+    size_t len;\n+    int ret;\n+\n+    /* Compute shared_secret = tweaked_secret_component * Public_component */\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 74,
+      "original_position": 74,
+      "commit_id": "592f2517c44c25009e3021d06ff4ed9c8eee9069",
+      "original_commit_id": "71df073ade5bf54d593ce95a2fdaefe3552318d0",
+      "in_reply_to_id": 1992409713,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Out of curiosity, I tried implementing x-only ecdh using `secp256k1_ecmult_const_xonly` here: https://github.com/josibake/secp256k1/commit/e7ec39eac44fdf704d24c931f3725d9b90edb02b\r\n\r\nWhen I ran the benchmarks between the old and the new, I didn't see any speedup. This means:\r\n\r\n1. I didn't implement the x-only ECDH correctly\r\n2. The benchmark is not accurate\r\n3. The speedup doesn't make a noticeable difference in the context of scanning\r\n\r\n@real-or-random @sipa others have indeed picked it up, but it's a small enough group that I think we could sneak in a breaking change and coordinate an update if there is a compelling enough reason to do so. Assuming 3) is correct, this doesn't seem like a compelling enough speedup to warrant a breaking change. However, it would be great if someone could double check my work as I'm a bit skeptical of my results.\r\n\r\nMy results:\r\n\r\n```\r\n❯ ./new/bin/bench silentpayments\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\nsilentpayments_full_tx_scan   ,    98.1       ,    98.2       ,    98.7\r\nsilentpayments_output_scan    ,    74.5       ,    74.6       ,    74.8\r\n\r\n❯ ./old/bin/bench silentpayments\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\nsilentpayments_full_tx_scan   ,    98.3       ,    98.3       ,    98.3\r\nsilentpayments_output_scan    ,    74.5       ,    74.5       ,    74.6\r\n```",
+      "created_at": "2025-03-20T17:36:01Z",
+      "updated_at": "2025-03-20T17:36:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1519#discussion_r2006144436",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2006144436"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1519"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 74,
+      "original_line": 74,
       "side": "RIGHT"
     }
   ]
