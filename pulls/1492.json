@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2024-02-04T02:06:08Z",
-    "updated_at": "2025-04-30T16:11:17Z",
+    "updated_at": "2025-05-01T12:39:06Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -340,7 +340,7 @@
     "deletions": 11,
     "changed_files": 10,
     "commits": 1,
-    "review_comments": 37,
+    "review_comments": 38,
     "comments": 8
   },
   "events": [
@@ -1794,6 +1794,42 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-04-30T16:11:17Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 2809711802,
+      "node_id": "PRR_kwDOAP4Jqs6neMy6",
+      "url": null,
+      "actor": null,
+      "commit_id": "fba627bea1829e34c63113f87091866b1c408156",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1492#pullrequestreview-2809711802",
+      "submitted_at": "2025-05-01T12:39:06Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1492"
     }
   ],
   "comments": [
@@ -3756,6 +3792,59 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 174,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2070222508",
+      "pull_request_review_id": 2809711802,
+      "id": 2070222508,
+      "node_id": "PRRC_kwDOAP4Jqs57ZRas",
+      "diff_hunk": "@@ -142,11 +149,50 @@ static void test_result_basepoint(void) {\n     }\n }\n \n+static void test_ecdh_wycheproof(void) {\n+#include \"../../wycheproof/ecdh_secp256k1_test.h\"\n+    int t;\n+    for (t = 0; t < SECP256K1_ECDH_WYCHEPROOF_NUMBER_TESTVECTORS; t++) {\n+        int parsed_ok;\n+        secp256k1_pubkey point;\n+        const unsigned char *pk;\n+        const unsigned char *sk;\n+        const unsigned char *expected_shared_secret;\n+        unsigned char output_ecdh[65] = { 0 };\n+\n+        int expected_result;\n+        int actual;\n+\n+        memset(&point, 0, sizeof(point));\n+        pk = &wycheproof_ecdh_public_keys[testvectors[t].pk_offset];\n+        parsed_ok = secp256k1_ec_pubkey_parse(CTX, &point, pk, testvectors[t].pk_len);\n+\n+        expected_result = testvectors[t].expected_result;\n+        CHECK(parsed_ok == expected_result);\n+        if (!parsed_ok) {\n+            continue;\n+        }\n+\n+        sk = &wycheproof_ecdh_private_keys[testvectors[t].sk_offset];\n+        CHECK(testvectors[t].sk_len == 32);\n+\n+        actual = secp256k1_ecdh(CTX, output_ecdh, &point, sk, ecdh_hash_function_test_xpassthru, NULL);\n+        expected_shared_secret = &wycheproof_ecdh_shared_secrets[testvectors[t].shared_offset];\n+\n+        CHECK(actual == expected_result);\n+        if (expected_result == 0) {",
+      "path": "src/modules/ecdh/tests_impl.h",
+      "position": 49,
+      "original_position": 49,
+      "commit_id": "fba627bea1829e34c63113f87091866b1c408156",
+      "original_commit_id": "fba627bea1829e34c63113f87091866b1c408156",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "This branch can never trigger, I think? Because if `expected_result == 0`, then due to `CHECK(parsed_ok == expected_result);` above, `parsed_ok == 0`, and `continue` would have been hit?",
+      "created_at": "2025-05-01T12:39:06Z",
+      "updated_at": "2025-05-01T12:39:07Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1492#discussion_r2070222508",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2070222508"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1492"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 183,
+      "original_line": 183,
       "side": "RIGHT"
     }
   ]
