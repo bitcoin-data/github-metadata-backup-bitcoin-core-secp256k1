@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1681/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1681/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
     "number": 1681,
     "state": "open",
     "locked": false,
@@ -39,7 +39,7 @@
       "site_admin": false,
       "patch_url": null
     },
-    "body": "Clang-cl can yield noticeably better benchmark results compared to MSVC.\r\n\r\nFor example, on the master branch @ 201b2b8f06eb2daa5342c1fe5a14cb9934773cc3:\r\n- using [MSVC](https://github.com/bitcoin-core/secp256k1/actions/runs/15439981265/job/43455271726):\r\n```\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \r\n\r\necdsa_verify                  ,    66.0       ,    71.0       ,   113.0    \r\necdsa_sign                    ,    37.0       ,    37.1       ,    37.5    \r\nec_keygen                     ,    28.5       ,    28.9       ,    29.0    \r\necdh                          ,    66.0       ,    66.2       ,    67.0    \r\necdsa_recover                 ,    67.0       ,    74.9       ,   123.0    \r\nschnorrsig_sign               ,    30.0       ,    30.3       ,    30.5    \r\nschnorrsig_verify             ,    66.5       ,    70.6       ,   104.0    \r\nellswift_encode               ,    17.5       ,    17.9       ,    18.0    \r\nellswift_decode               ,    14.5       ,    15.3       ,    19.0    \r\nellswift_keygen               ,    55.0       ,    56.4       ,    63.5    \r\nellswift_ecdh                 ,    72.5       ,    73.5       ,    79.5  \r\n```\r\n\r\n- using [clang-cl](https://github.com/bitcoin-core/secp256k1/actions/runs/15439981265/job/43455271749):\r\n```\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \r\n\r\necdsa_verify                  ,    41.0       ,    47.5       ,   100.0    \r\necdsa_sign                    ,    27.0       ,    27.2       ,    27.5    \r\nec_keygen                     ,    19.0       ,    19.3       ,    19.5    \r\necdh                          ,    42.0       ,    42.4       ,    43.0    \r\necdsa_recover                 ,    41.5       ,    45.7       ,    80.0    \r\nschnorrsig_sign               ,    20.0       ,    20.5       ,    20.5    \r\nschnorrsig_verify             ,    41.5       ,    45.5       ,    77.5    \r\nellswift_encode               ,    13.0       ,    13.0       ,    13.0    \r\nellswift_decode               ,    10.0       ,    10.4       ,    10.5    \r\nellswift_keygen               ,    38.5       ,    39.1       ,    41.5    \r\nellswift_ecdh                 ,    47.0       ,    48.5       ,    59.0    \r\n```\r\n\r\nOn my local machine, the \"Release\" build configuration:\r\n- using MSVC:\r\n```\r\n> .\\build-msvc\\bin\\Release\\bench.exe\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    81.2       ,    90.6       ,   102.0\r\necdsa_sign                    ,    46.5       ,    48.6       ,    52.9\r\nec_keygen                     ,    31.6       ,    34.8       ,    36.2\r\necdh                          ,    73.0       ,    76.4       ,    79.5\r\nschnorrsig_sign               ,    32.1       ,    34.4       ,    35.8\r\nschnorrsig_verify             ,    74.6       ,    76.2       ,    79.8\r\nellswift_encode               ,    33.4       ,    34.0       ,    34.8\r\nellswift_decode               ,    14.9       ,    15.5       ,    17.1\r\nellswift_keygen               ,    64.5       ,    65.6       ,    67.1\r\nellswift_ecdh                 ,    78.3       ,    80.7       ,    90.1\r\n```\r\n\r\n- using clang-cl:\r\n```\r\n> .\\build-clangcl\\bin\\Release\\bench.exe\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    40.3       ,    40.6       ,    40.9\r\necdsa_sign                    ,    30.6       ,    30.9       ,    31.3\r\nec_keygen                     ,    21.2       ,    21.3       ,    21.5\r\necdh                          ,    41.5       ,    42.4       ,    44.8\r\nschnorrsig_sign               ,    22.5       ,    22.7       ,    22.8\r\nschnorrsig_verify             ,    41.2       ,    41.4       ,    41.7\r\nellswift_encode               ,    20.3       ,    20.6       ,    20.8\r\nellswift_decode               ,     8.50      ,     8.64      ,     8.76\r\nellswift_keygen               ,    41.7       ,    42.0       ,    42.4\r\nellswift_ecdh                 ,    45.1       ,    45.5       ,    46.3\r\n```",
+    "body": "There are several reasons to prefer clang-cl over MSVC, such as improved [security](https://github.com/bitcoin-core/secp256k1/issues/1164) and performance.\r\n\r\nBelow are the benchmark results for the master branch @ 201b2b8f06eb2daa5342c1fe5a14cb9934773cc3:\r\n- using [MSVC](https://github.com/bitcoin-core/secp256k1/actions/runs/15439981265/job/43455271726):\r\n```\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \r\n\r\necdsa_verify                  ,    66.0       ,    71.0       ,   113.0    \r\necdsa_sign                    ,    37.0       ,    37.1       ,    37.5    \r\nec_keygen                     ,    28.5       ,    28.9       ,    29.0    \r\necdh                          ,    66.0       ,    66.2       ,    67.0    \r\necdsa_recover                 ,    67.0       ,    74.9       ,   123.0    \r\nschnorrsig_sign               ,    30.0       ,    30.3       ,    30.5    \r\nschnorrsig_verify             ,    66.5       ,    70.6       ,   104.0    \r\nellswift_encode               ,    17.5       ,    17.9       ,    18.0    \r\nellswift_decode               ,    14.5       ,    15.3       ,    19.0    \r\nellswift_keygen               ,    55.0       ,    56.4       ,    63.5    \r\nellswift_ecdh                 ,    72.5       ,    73.5       ,    79.5  \r\n```\r\n\r\n- using [clang-cl](https://github.com/bitcoin-core/secp256k1/actions/runs/15439981265/job/43455271749):\r\n```\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \r\n\r\necdsa_verify                  ,    41.0       ,    47.5       ,   100.0    \r\necdsa_sign                    ,    27.0       ,    27.2       ,    27.5    \r\nec_keygen                     ,    19.0       ,    19.3       ,    19.5    \r\necdh                          ,    42.0       ,    42.4       ,    43.0    \r\necdsa_recover                 ,    41.5       ,    45.7       ,    80.0    \r\nschnorrsig_sign               ,    20.0       ,    20.5       ,    20.5    \r\nschnorrsig_verify             ,    41.5       ,    45.5       ,    77.5    \r\nellswift_encode               ,    13.0       ,    13.0       ,    13.0    \r\nellswift_decode               ,    10.0       ,    10.4       ,    10.5    \r\nellswift_keygen               ,    38.5       ,    39.1       ,    41.5    \r\nellswift_ecdh                 ,    47.0       ,    48.5       ,    59.0    \r\n```\r\n\r\nOn my local machine, the \"Release\" build configuration:\r\n- using MSVC:\r\n```\r\n> .\\build-msvc\\bin\\Release\\bench.exe\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    81.2       ,    90.6       ,   102.0\r\necdsa_sign                    ,    46.5       ,    48.6       ,    52.9\r\nec_keygen                     ,    31.6       ,    34.8       ,    36.2\r\necdh                          ,    73.0       ,    76.4       ,    79.5\r\nschnorrsig_sign               ,    32.1       ,    34.4       ,    35.8\r\nschnorrsig_verify             ,    74.6       ,    76.2       ,    79.8\r\nellswift_encode               ,    33.4       ,    34.0       ,    34.8\r\nellswift_decode               ,    14.9       ,    15.5       ,    17.1\r\nellswift_keygen               ,    64.5       ,    65.6       ,    67.1\r\nellswift_ecdh                 ,    78.3       ,    80.7       ,    90.1\r\n```\r\n\r\n- using clang-cl:\r\n```\r\n> .\\build-clangcl\\bin\\Release\\bench.exe\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    40.3       ,    40.6       ,    40.9\r\necdsa_sign                    ,    30.6       ,    30.9       ,    31.3\r\nec_keygen                     ,    21.2       ,    21.3       ,    21.5\r\necdh                          ,    41.5       ,    42.4       ,    44.8\r\nschnorrsig_sign               ,    22.5       ,    22.7       ,    22.8\r\nschnorrsig_verify             ,    41.2       ,    41.4       ,    41.7\r\nellswift_encode               ,    20.3       ,    20.6       ,    20.8\r\nellswift_decode               ,     8.50      ,     8.64      ,     8.76\r\nellswift_keygen               ,    41.7       ,    42.0       ,    42.4\r\nellswift_ecdh                 ,    45.1       ,    45.5       ,    46.3\r\n```",
     "labels": [
       {
         "id": 165020207,
@@ -61,11 +61,11 @@
       }
     ],
     "created_at": "2025-06-04T20:12:07Z",
-    "updated_at": "2025-06-05T19:47:07Z",
+    "updated_at": "2025-06-05T20:27:27Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "c9c7d49583c4925e2efd9edf3617205fbfa2a1e1",
+    "merge_commit_sha": "458edb1f335b38ac3e04239416cec9f3c34d02bf",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -73,7 +73,7 @@
     "head": {
       "label": "hebasto:250604-clang-cl",
       "ref": "250604-clang-cl",
-      "sha": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+      "sha": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -183,9 +183,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-06-05T16:15:41Z",
+        "pushed_at": "2025-06-05T20:32:31Z",
         "created_at": "2021-12-03T12:27:02Z",
-        "updated_at": "2025-06-04T10:30:45Z",
+        "updated_at": "2025-06-05T20:32:24Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -306,7 +306,7 @@
         "watchers_count": 2245,
         "size": 12443,
         "default_branch": "master",
-        "open_issues_count": 142,
+        "open_issues_count": 141,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -317,9 +317,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-06-04T10:30:07Z",
+        "pushed_at": "2025-06-05T20:31:25Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-06-05T18:14:30Z",
+        "updated_at": "2025-06-05T20:31:26Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,54 +345,14 @@
     },
     "author_association": "MEMBER",
     "draft": false,
-    "additions": 13,
+    "additions": 12,
     "deletions": 3,
     "changed_files": 2,
     "commits": 2,
-    "review_comments": 3,
-    "comments": 7
+    "review_comments": 4,
+    "comments": 8
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI1MGQ3YmUxNzM2OTcwN2I0MTM0NjNkZTliMTJlYTNkODU0YzdmMGM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/250d7be17369707b413463de9b12ea3d854c7f0c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/250d7be17369707b413463de9b12ea3d854c7f0c",
-      "tree": {
-        "sha": "8607e3a54306700eff9e4af6a709522a64cfd35f",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8607e3a54306700eff9e4af6a709522a64cfd35f"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 8607e3a54306700eff9e4af6a709522a64cfd35f\nparent 201b2b8f06eb2daa5342c1fe5a14cb9934773cc3\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749066934 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749066934 +0100\n\ndoc: Recommend clang-cl when building on Windows\n\nClang-cl can yield noticeably better benchmark results compared to MSVC.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmhApLYACgkQQQEIES5+\nqB+1Eg/9HJb9hBTYlvjePKulUxo5TeUu33cX35n+/8CPIjyfdv+vabXZVKpHa9hE\nDBIg2ly6d4iCOKKPn53qLtHdanbkBD2iZQgqUmCGlNuqm01Qh1Pr+lc7smXqkJrv\nOlSPNX4PqYm7Xbg718NJOfW01BscnakS3UudMfP3KvzJNsJd1qp3BCT54itXn7Xy\nQiP68QVdv78uzo/V+DsBB7SDGhk+yxvZUGPBZBhBgIMF8V6HBhaZ7KcRLvu1uD68\ngN7WEBry10bGaHChvjXljasjyhw90CbILSZNCYmQWZ7AtNCQRQiS1nV6NSYjr2w1\nAxOS+pQM4Ddg8W1exxN26qRjD9cTAjZNfMHZVzHXQvD1GZlhNTUumvDfdmqRQEJa\n4lV9TbNdcAXnwzsHKJfvm5hKakjFVNZ6bUqZ1KlvhpScsq1+RzawGCHWWhStsTYG\nAfN4olaJpdB5EEPuGgUQ2PlawPnmetpMlMd/c9K7mGeTaJihbZtYUewVYIifF2AG\n3RcXOj0jqwfUB5sgIo1MQIM5x6911aFojNwazMIN1Rdt81qIx1FNBpmv/cnohtHX\n4tez901Mi2Jw9dxAhmjlf8V8/A3vJdVoSeDPZMVpr1NOYYkFd6gNdBJcEEXDxJWW\npxuUB0Wfd/FC4AhPXyf0Tuvlgfyc6nh5QYH1cfumFXdsYkgGXFU=\n=+No4\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/201b2b8f06eb2daa5342c1fe5a14cb9934773cc3",
-          "sha": "201b2b8f06eb2daa5342c1fe5a14cb9934773cc3",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/201b2b8f06eb2daa5342c1fe5a14cb9934773cc3"
-        }
-      ],
-      "message": "doc: Recommend clang-cl when building on Windows\n\nClang-cl can yield noticeably better benchmark results compared to MSVC.",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2025-06-04T19:55:34Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2025-06-04T19:55:34Z"
-      },
-      "sha": "250d7be17369707b413463de9b12ea3d854c7f0c"
-    },
     {
       "event": "labeled",
       "id": 17995243329,
@@ -864,46 +824,6 @@
       "created_at": "2025-06-05T15:01:08Z"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDkyNDNlMjE5OTc3YzNiODRhMDkwYjVjZGM4YmNkNmYyNjJmMjczYjA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9243e219977c3b84a090b5cdc8bcd6f262f273b0",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9243e219977c3b84a090b5cdc8bcd6f262f273b0",
-      "tree": {
-        "sha": "5631be1e85145657886832fa072e549a9e6117d8",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5631be1e85145657886832fa072e549a9e6117d8"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 5631be1e85145657886832fa072e549a9e6117d8\nparent 250d7be17369707b413463de9b12ea3d854c7f0c\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749140114 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749140114 +0100\n\nci: Add more tests for clang-cl\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmhBwpIACgkQQQEIES5+\nqB8Ktg/+PHmDEhVsFwZKFbNgMt9WCqzMFpVysAMFoPtSUZOkZnUBHRwgEFpLnwMa\n/o8AkAMEdcbz6fe8psqnjJw1NocRDcWLA09evxfmda7yYiRVbWNTtBlUlP/nQH7D\nKtC+zSPQYFuqYCVNM5A052oEF7UQ2D0ai+bqqJqz9uDxxRFOBXRk7v9MgeX2hxnv\nHBusjL14A7lDme8U+p9e5Tg+sAOj+jrg/bfmFQ8BKA/3xaUb/sxGT/tf+jqJO1Bk\nVq6Fmrl0IQmJ3gAcNtiEK3Uu0YbmJPLtJAjObF6GGVEQGSfAq04FRusxqotbUj53\nDZt8pehOh7PxBT+jI+DopWj4XYXzGrvng8rVCJ2A7SwXVD5c7S//VK2MmrbQhzRw\ndBZ8XAmBYZUyQSQ9uJHmFEjFqlPG8INaSv4z85cBp0+Fx/SfN9sP+W3Quw0wGLR1\nxDIHqKDR0psRzE4pHPuS/ytiXl4ZL/img5VHsCsW0x+LdpBE4tb0D0QwtzuGp+JW\npEkx+/jZcJCOAC530w/rGVWqvCPwq4jY/hkaDlnYUpbNLTTLJ/IHP4RpQZlBFDK9\nb2c+Tj0obd+mv/16kBGs6A3cHgPcvfaBfKh154xG/PSP7yeg04EzATU1d4kC1hO1\ng0csoSgrSL/GORfMF+SKAE4w/tEa/YCx9200sp2K3RJ1Cu2eS9Y=\n=j0Mw\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/250d7be17369707b413463de9b12ea3d854c7f0c",
-          "sha": "250d7be17369707b413463de9b12ea3d854c7f0c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/250d7be17369707b413463de9b12ea3d854c7f0c"
-        }
-      ],
-      "message": "ci: Add more tests for clang-cl",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2025-06-05T16:15:14Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2025-06-05T16:15:14Z"
-      },
-      "sha": "9243e219977c3b84a090b5cdc8bcd6f262f273b0"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 18004982928,
       "node_id": "HRFPE_lADOAP4Jqs656BolzwAAAAQxLjyQ",
@@ -1024,6 +944,262 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1681#issuecomment-2945913063",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1681"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 18009031356,
+      "node_id": "HRFPE_lADOAP4Jqs656BolzwAAAAQxbAK8",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/18009031356",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "0a393dc4da7b590bbc9f3c4eaf90bf595074276a",
+      "commit_url": "https://api.github.com/repos/hebasto/secp256k1/commits/0a393dc4da7b590bbc9f3c4eaf90bf595074276a",
+      "created_at": "2025-06-05T20:02:27Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDFmOTJkM2IzODRjNWVjNWQzNzhhY2ZmNjVjMTU2OGQwMWY4N2E1NmQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1f92d3b384c5ec5d378acff65c1568d01f87a56d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1f92d3b384c5ec5d378acff65c1568d01f87a56d",
+      "tree": {
+        "sha": "0702128f399e020e0db40b9eb4b0c580dab1db9d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/0702128f399e020e0db40b9eb4b0c580dab1db9d"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 0702128f399e020e0db40b9eb4b0c580dab1db9d\nparent 201b2b8f06eb2daa5342c1fe5a14cb9934773cc3\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749153817 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749153817 +0100\n\ndoc: Recommend clang-cl when building on Windows\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmhB+BkACgkQQQEIES5+\nqB+A0Q//Q90YrCq5qx2aucV8XaljNPTxY+e3AsCodiLb5e/SEtRo4QHU+6CZAgRR\nlapq33lYiKTFoakPGB9R6RrYB6Y8itouE/M/aboDdRdkVOFMDeaSXwKEdU4j0JaZ\nAmzQ8LpEjhAjgeRo8FrEHSxrqTiE/zhJpNChBEdlPJEB8qxEPAUNsBkHMlKL03iI\ntPE/3SbDhU+FQibJkAcbiMwc1MaOPV4KisZYp7vkuZBEw3K2Qq8WLPpCTV3zRb+v\n8MJzpgnx2nQwS9bF9f9dboA1Zo92bj4DJ/AYsaSE/3aM6zgjTcdew4vx86eTZpn9\nLfdgvawy89XBvHYuMslt4mukNNlg/Cp32fJhI50E6EHhCyIXXvinehy6iZ1gFwYj\n0xWsf0k+P8+z1u3kooY9V5zb62ek497viS4zRvJimhrU6Mp2gbiWaXSZJk1JnM4y\n5mlxgVhLk0EM/AAgFq6IGZQNJ9rIrZz0t0BWH3qBcC2B7nNVQZKIHWSvaIufn7zA\n6qpEndkDE6x0MIYiBehHnUB+hgxYq9p/8PQe8lQbmzdVs383Stiaz2a1/pQf/zEu\nwoXAwyytqI1HLE9CIA/RF4MgwYyaZtUbcJcm5fEglsftnEx1ZG/XrFcZ0OVbchdK\n1ojfa/v+M1CUDt/YbVOHWPro5LjZA7Tzev+Z3MUIhAPde8dVrlE=\n=cXDb\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/201b2b8f06eb2daa5342c1fe5a14cb9934773cc3",
+          "sha": "201b2b8f06eb2daa5342c1fe5a14cb9934773cc3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/201b2b8f06eb2daa5342c1fe5a14cb9934773cc3"
+        }
+      ],
+      "message": "doc: Recommend clang-cl when building on Windows",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2025-06-05T20:03:37Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2025-06-05T20:03:37Z"
+      },
+      "sha": "1f92d3b384c5ec5d378acff65c1568d01f87a56d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGRiMGM1Zjk0MzlmMWNkYTlmMzZkZmExOTdlYzVmNWNjNGQ3YzQ1YTY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
+      "tree": {
+        "sha": "e3f6c84b27da8ef345a9a353f1b644e25e61be8f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e3f6c84b27da8ef345a9a353f1b644e25e61be8f"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree e3f6c84b27da8ef345a9a353f1b644e25e61be8f\nparent 1f92d3b384c5ec5d378acff65c1568d01f87a56d\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749153740 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1749153819 +0100\n\nci: Add more tests for clang-cl\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmhB+BsACgkQQQEIES5+\nqB8q7hAAviRGJ1Du42TEu1aY3xfZufyJkaqnZpfq0KxNljwcLOIstRC8JQ9RoYWG\nmHFrypFidBhrapAGLYN/WUINli29J0jwpdCxWJueG/EVR2vVk3csXaFZzQGTazM2\nDbpGs7bbEwDw6RXsWyAWd65y0rs0KCFfgSMfA9L5/iPc7raYBb2IoQcjnZdiqBuG\nFCrJly55wUSjwOfkY8rkAAnNN8ptguSxeCDgYbvnM4co7RZGevhdK6xQFDRTH8Nc\nD9mzsK2Dprz86cdsdkFJvseGs/Cm66pUZMEEu4GuF3Xuv3j9wWi7P7OQMmevCMST\ndgPpoNMnlxp0nI49q8i3ADAFTl+m5rHDliu2rn+4/KXnRt2YvpzZT81zU2eCgGYM\nI11MRcRuPxk+KPz6ocVlibdZ9GjnAZgIts7CMUeYqR1q/rUF4rsO4FMDQwS+3SdE\n1iinldebsmr17x/J7bErcunhYMqrm0AImhhHrcnIPkuarGaMOgJLBQhSckrB8+sW\n3Pir3MrtTQYYrHornn4n7WR+f9DhZ/bouPOcETQ0/2gxlnABADokzDpAznwwnrHr\nXXyYZo8aCGkPyzaE0fgewGU4ApX+SudhmArc3N8/NcW68bATzV+V88V2PpVUS2/F\nudMzIds+xbbMS1iLd3HnpPklDsTNA8y2x2RCZT3q07qj1wCEbCg=\n=RBXU\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1f92d3b384c5ec5d378acff65c1568d01f87a56d",
+          "sha": "1f92d3b384c5ec5d378acff65c1568d01f87a56d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1f92d3b384c5ec5d378acff65c1568d01f87a56d"
+        }
+      ],
+      "message": "ci: Add more tests for clang-cl",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2025-06-05T20:03:39Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2025-06-05T20:02:20Z"
+      },
+      "sha": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 18009057106,
+      "node_id": "HRFPE_lADOAP4Jqs656BolzwAAAAQxbGdS",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/18009057106",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
+      "commit_url": "https://api.github.com/repos/hebasto/secp256k1/commits/db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
+      "created_at": "2025-06-05T20:03:45Z"
+    },
+    {
+      "event": "commented",
+      "id": 2946091805,
+      "node_id": "IC_kwDOAP4Jqs6vmcsd",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/2946091805",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-06-05T20:27:26Z",
+      "updated_at": "2025-06-05T20:27:26Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "@sipa What do you think?",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1681#issuecomment-2946091805",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1681"
+    },
+    {
+      "event": "mentioned",
+      "id": 18009483134,
+      "node_id": "MEE_lADOAP4Jqs656BolzwAAAAQxcud-",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/18009483134",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-06-05T20:27:27Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 18009483154,
+      "node_id": "SE_lADOAP4Jqs656BolzwAAAAQxcueS",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/18009483154",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-06-05T20:27:27Z"
     }
   ],
   "comments": [
@@ -1036,7 +1212,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 7,
-      "commit_id": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+      "commit_id": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
       "original_commit_id": "7428961441c0087b78bbbcfee4360499a2ccdc14",
       "in_reply_to_id": null,
       "user": {
@@ -1089,7 +1265,7 @@
       "path": ".github/workflows/ci.yml",
       "position": null,
       "original_position": 7,
-      "commit_id": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+      "commit_id": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
       "original_commit_id": "7428961441c0087b78bbbcfee4360499a2ccdc14",
       "in_reply_to_id": 2129028867,
       "user": {
@@ -1140,9 +1316,9 @@
       "node_id": "PRRC_kwDOAP4Jqs5-9lTr",
       "diff_hunk": "@@ -137,11 +137,13 @@ To cross compile for Android with [NDK](https://developer.android.com/ndk/guides\n \n To build on Windows with Visual Studio, a proper [generator](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators) must be specified for a new build tree.\n \n+Using clang-cl is recommended, as it tends to produce better-performing binaries compared to MSVC.\n+",
       "path": "README.md",
-      "position": 5,
+      "position": null,
       "original_position": 5,
-      "commit_id": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+      "commit_id": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
       "original_commit_id": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
       "in_reply_to_id": null,
       "user": {
@@ -1179,10 +1355,63 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1681"
         }
       },
-      "start_line": 140,
+      "start_line": null,
       "original_start_line": 140,
       "start_side": "RIGHT",
-      "line": 141,
+      "line": null,
+      "original_line": 141,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2130159981",
+      "pull_request_review_id": 2902104296,
+      "id": 2130159981,
+      "node_id": "PRRC_kwDOAP4Jqs5-96lt",
+      "diff_hunk": "@@ -137,11 +137,13 @@ To cross compile for Android with [NDK](https://developer.android.com/ndk/guides\n \n To build on Windows with Visual Studio, a proper [generator](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators) must be specified for a new build tree.\n \n+Using clang-cl is recommended, as it tends to produce better-performing binaries compared to MSVC.\n+",
+      "path": "README.md",
+      "position": null,
+      "original_position": 5,
+      "commit_id": "db0c5f9439f1cda9f36dfa197ec5f5cc4d7c45a6",
+      "original_commit_id": "9243e219977c3b84a090b5cdc8bcd6f262f273b0",
+      "in_reply_to_id": 2130072811,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Thanks! Updated, including dropping the empty line.",
+      "created_at": "2025-06-05T20:08:07Z",
+      "updated_at": "2025-06-05T20:08:07Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1681#discussion_r2130159981",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2130159981"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1681"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 140,
+      "start_side": "RIGHT",
+      "line": null,
       "original_line": 141,
       "side": "RIGHT"
     }
