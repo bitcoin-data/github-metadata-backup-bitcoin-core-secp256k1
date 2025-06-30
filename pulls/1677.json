@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-06-03T11:23:30Z",
-    "updated_at": "2025-06-30T12:57:13Z",
+    "updated_at": "2025-06-30T13:59:32Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -350,7 +350,7 @@
     "changed_files": 1,
     "commits": 1,
     "review_comments": 6,
-    "comments": 11
+    "comments": 12
   },
   "events": [
     {
@@ -1399,9 +1399,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-06-30T12:57:13Z",
-      "updated_at": "2025-06-30T12:57:13Z",
+      "updated_at": "2025-06-30T13:16:52Z",
       "author_association": "CONTRIBUTOR",
-      "body": "NACK\r\n\r\nI find the deeply nested `#ifdef` code quite convoluted and hard to reason about. It can be much simplified if you first define a platform abstraction for how exporting/importing works:\r\n\r\n```c\r\n#if defined(_WIN32) || defined(__CYGWIN__)\r\n#  define SECP256K1_EXPORT __declspec(dllexport)\r\n#  define SECP256K1_IMPORT __declspec(dllimport)\r\n#else\r\n#  define SECP256K1_EXPORT __attribute__ ((visibility (\"default\")))\r\n#  define SECP256K1_IMPORT __attribute__ ((visibility (\"default\")))\r\n#endif\r\n```\r\n\r\nAnd then use that abstraction for defining the API:\r\n\r\n```c\r\n#if defined(SECP256K1_STATIC)\r\n#  define SECP256K1_API\r\n#elif defined(SECP256K1_BUILD)\r\n#  define SECP256K1_API SECP256K1_EXPORT\r\n#else\r\n#  define SECP256K1_API SECP256K1_IMPORT\r\n#endif\r\n```\r\n\r\nIn CMake the two preprocessor definitions are set like this:\r\n\r\n```cmake\r\ntarget_compile_definitions(libsecp256k1 PUBLIC\r\n  $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,STATIC_LIBRARY>:SECP256K1_STATIC>\r\n)\r\nset_target_properties(libsecp256k1 PROPERTIES\r\n  DEFINE_SYMBOL SECP256K1_BUILD # if this is not set, it defaults to libsecp256k1_EXPORTS\r\n)\r\n```\r\n\r\nNote that `SECP256K1_STATIC` is defined as `PUBLIC`. This means that it affects both the library itself, but also other targets that use the library. The generator expression evaluates to nothing when the library is build as a shared object.\r\n\r\n`SECP256K1_BUILD` only affects the library itself. This could be archived as well by setting a `PRIVATE` compile definition, but setting the `DEFINE_SYMBOL` has the advantage of overriding the builtin default of `<target>_EXPORTS`.\r\n\r\nThe result is that there are **three** modes that the header file can be interpreted in:\r\n\r\n* Building a shared library: The API is exported.\r\n* Using a shared library: The API is imported.\r\n* Building / using a static library: The API is neither imported nor exported.\r\n\r\nThe advantage of that approach is that the information of how clients need to consume the library is tied to the library interface. There are no extra flags that clients need to set. It is impossible for them to get to a situation where the `-D` and `-L` flags mismatch. They just add a dependency to their target, and it will correctly import the API **iff** needed.\r\n\r\nI am convinced the above approach works for autotools just as well. All that needs to be done is add `-DSECP256K1_STATIC` to the `.pc` file when the package is built with static libraries.",
+      "body": "NACK\r\n\r\nI find the deeply nested `#ifdef` code quite convoluted and hard to reason about. It can be much simplified if you first define a platform abstraction for how exporting/importing works:\r\n\r\n```c\r\n#if defined(_WIN32) || defined(__CYGWIN__)\r\n#  define SECP256K1_EXPORT __declspec(dllexport)\r\n#  define SECP256K1_IMPORT __declspec(dllimport)\r\n#else\r\n#  define SECP256K1_EXPORT __attribute__ ((visibility (\"default\")))\r\n#  define SECP256K1_IMPORT __attribute__ ((visibility (\"default\")))\r\n#endif\r\n```\r\n\r\nAnd then use that abstraction for defining the API:\r\n\r\n```c\r\n#if defined(SECP256K1_STATIC)\r\n#  define SECP256K1_API\r\n#elif defined(SECP256K1_BUILD)\r\n#  define SECP256K1_API SECP256K1_EXPORT\r\n#else\r\n#  define SECP256K1_API SECP256K1_IMPORT\r\n#endif\r\n```\r\n\r\nIn CMake the two preprocessor definitions are set like this:\r\n\r\n```cmake\r\ntarget_compile_definitions(libsecp256k1 PUBLIC\r\n  $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,STATIC_LIBRARY>:SECP256K1_STATIC>\r\n)\r\nset_target_properties(libsecp256k1 PROPERTIES\r\n  DEFINE_SYMBOL SECP256K1_BUILD # if this is not set, it defaults to libsecp256k1_EXPORTS\r\n)\r\n```\r\n\r\nNote that `SECP256K1_STATIC` is defined as `PUBLIC`. This means that it affects both the library itself, but also other targets that use the library. The generator expression evaluates to nothing when the library is build as a shared object.\r\n\r\n`SECP256K1_BUILD` only affects the library itself. This could be achieved as well by setting a `PRIVATE` compile definition, but setting the `DEFINE_SYMBOL` has the advantage of overriding the builtin default of `<target>_EXPORTS`.\r\n\r\nThe result is that there are **three** modes that the header file can be interpreted in:\r\n\r\n* Building a shared library: The API is exported.\r\n* Using a shared library: The API is imported.\r\n* Building / using a static library: The API is neither imported nor exported.\r\n\r\nThe advantage of that approach is that the information of how clients need to consume the library is tied to the library interface. There are no extra flags that clients need to set. It is impossible for them to get to a situation where the `-D` and `-L` flags mismatch. They just add a dependency to their target, and it will correctly import the API **iff** needed.\r\n\r\nI don't see a reason why this approach shouldn't works for autotools just as well. All that needs to be done is add `-DSECP256K1_STATIC` to the `.pc` file when the package is built with static libraries.",
       "user": {
         "login": "purpleKarrot",
         "id": 185240,
@@ -1424,6 +1424,62 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1677#issuecomment-3019054216",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1677"
+    },
+    {
+      "event": "commented",
+      "id": 3019280907,
+      "node_id": "IC_kwDOAP4Jqs6z9pIL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3019280907",
+      "actor": {
+        "login": "purpleKarrot",
+        "id": 185240,
+        "node_id": "MDQ6VXNlcjE4NTI0MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/185240?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/purpleKarrot",
+        "html_url": "https://github.com/purpleKarrot",
+        "followers_url": "https://api.github.com/users/purpleKarrot/followers",
+        "following_url": "https://api.github.com/users/purpleKarrot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/purpleKarrot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/purpleKarrot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/purpleKarrot/subscriptions",
+        "organizations_url": "https://api.github.com/users/purpleKarrot/orgs",
+        "repos_url": "https://api.github.com/users/purpleKarrot/repos",
+        "events_url": "https://api.github.com/users/purpleKarrot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/purpleKarrot/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-06-30T13:59:32Z",
+      "updated_at": "2025-06-30T13:59:32Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "To avoid name collisions when libraries form diamond of death dependencies, it might be good to provide a way for clients to define their own \"namespace\" (prefix) for public symbols. An example library that supports this use case is  https://gitlab.kitware.com/utils/kwsys. To understand how that is used, look at https://github.com/Kitware/CMake/blob/master/Source/kwsys/String.h.in for example.",
+      "user": {
+        "login": "purpleKarrot",
+        "id": 185240,
+        "node_id": "MDQ6VXNlcjE4NTI0MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/185240?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/purpleKarrot",
+        "html_url": "https://github.com/purpleKarrot",
+        "followers_url": "https://api.github.com/users/purpleKarrot/followers",
+        "following_url": "https://api.github.com/users/purpleKarrot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/purpleKarrot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/purpleKarrot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/purpleKarrot/subscriptions",
+        "organizations_url": "https://api.github.com/users/purpleKarrot/orgs",
+        "repos_url": "https://api.github.com/users/purpleKarrot/repos",
+        "events_url": "https://api.github.com/users/purpleKarrot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/purpleKarrot/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1677#issuecomment-3019280907",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1677"
     }
   ],
