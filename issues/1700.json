@@ -49,9 +49,9 @@
     "assignees": [],
     "author_association": "NONE",
     "locked": false,
-    "comments": 10,
+    "comments": 11,
     "created_at": "2025-07-13T23:29:02Z",
-    "updated_at": "2025-07-17T14:06:16Z"
+    "updated_at": "2025-07-17T15:53:20Z"
   },
   "events": [
     {
@@ -594,9 +594,9 @@
     },
     {
       "event": "commented",
-      "id": 3084215936,
-      "node_id": "IC_kwDOAP4Jqs631WaA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3084215936",
+      "id": 3084504755,
+      "node_id": "IC_kwDOAP4Jqs632c6z",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3084504755",
       "actor": {
         "login": "Raimo33",
         "id": 104778891,
@@ -620,10 +620,10 @@
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2025-07-17T14:06:16Z",
-      "updated_at": "2025-07-17T14:06:16Z",
+      "created_at": "2025-07-17T15:27:22Z",
+      "updated_at": "2025-07-17T15:29:13Z",
       "author_association": "NONE",
-      "body": "editing `field_10x26_impl.h` I'm struggling to understand this:\n\n```c\ntypedef struct {\n    uint64_t n[5];\n} secp256k1_fe;\n\nstatic void secp256k1_fe_impl_get_bounds(secp256k1_fe *r, int m) {\n\n    r->n[0] = 0x3FFFFFFUL * 2 * m;\n    r->n[1] = 0x3FFFFFFUL * 2 * m;\n    r->n[2] = 0x3FFFFFFUL * 2 * m;\n    r->n[3] = 0x3FFFFFFUL * 2 * m;\n    r->n[4] = 0x3FFFFFFUL * 2 * m;\n    r->n[5] = 0x3FFFFFFUL * 2 * m;\n    r->n[6] = 0x3FFFFFFUL * 2 * m;\n    r->n[7] = 0x3FFFFFFUL * 2 * m;\n    r->n[8] = 0x3FFFFFFUL * 2 * m;\n    r->n[9] = 0x03FFFFFUL * 2 * m;\n}\n```\n\nhow can it work without UB by addressing the 10th element if `r->n[]` is only 5 elements? I understand it is probably interpreting it as `uint32_t`, but that isn't explicitly set anywhere.",
+      "body": "it seems that no function of `field_10x26_impl.h` ever get's compiled in the final binaries and it's never tested. I can add garbage to `field_10x26_impl.h`, run the `ctest .` and everything still passes.\n\nI'm avoiding optimization of `field_10x26_impl.h` as I see no way to test correctness.",
       "user": {
         "login": "Raimo33",
         "id": 104778891,
@@ -645,7 +645,63 @@
         "site_admin": false,
         "patch_url": null
       },
-      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1700#issuecomment-3084215936",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1700#issuecomment-3084504755",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1700"
+    },
+    {
+      "event": "commented",
+      "id": 3084584277,
+      "node_id": "IC_kwDOAP4Jqs632wVV",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3084584277",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-07-17T15:53:20Z",
+      "updated_at": "2025-07-17T15:53:20Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "We have two finite implementations:\n - One that represents a field element by 5 limbs of uint64_t, where 52 bits are used if elements are reduced (5x52). This is used on 64-bit platforms.\n - One that represents a field element by 10 limbs of uint32_t where 26 bits are used if elements are fully reduced (10x26). This is used on 32-bit platforms.\n\nWhen using cmake, create a `build32` dir and run `CC=\"$CC -m32\" cmake -B build32`. This should set up a 32-bit build on x86_64. \n",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1700#issuecomment-3084584277",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1700"
     }
   ]
