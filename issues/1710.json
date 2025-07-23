@@ -49,9 +49,9 @@
     "assignees": [],
     "author_association": "MEMBER",
     "locked": false,
-    "comments": 1,
+    "comments": 2,
     "created_at": "2025-07-22T11:09:20Z",
-    "updated_at": "2025-07-23T08:16:47Z"
+    "updated_at": "2025-07-23T11:33:13Z"
   },
   "events": [
     {
@@ -173,6 +173,62 @@
         "name": "assurance",
         "color": "A6DF3D"
       }
+    },
+    {
+      "event": "commented",
+      "id": 3107313662,
+      "node_id": "IC_kwDOAP4Jqs65Ndf-",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3107313662",
+      "actor": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-07-23T11:33:13Z",
+      "updated_at": "2025-07-23T11:33:13Z",
+      "author_association": "MEMBER",
+      "body": "> It's uncommon\n\nI assume you are using uncommon here to mean \"the class of errors that this protects against are uncommon errors.\" Anecdotally, having this would have saved me _a lot_ of time and effort when using this module in Bitcoin Core. More specifically, the hardest to chase down bugs were always due to incorrect argument ordering (e.g., using an unsigned char array for the smallest_outpoint, that wasn't actually a 36 byte smallest outpoint), or using what I thought was a valid pointer to a fixed length array, but was in fact just a pointer to.. something.\n\nIn general, I think anything we can do to protect against \"garbage\" arguments being seen as valid arguments at compile time goes a long way towards saving users of the library and helps protect against particularly nasty bugs where the function succeeds, but the resulting output is garbage, effectively burning the funds by making them unfindable by the recipient.\n\n> I'm a huge fan of consistency, but in this case, I could live with having it in just the silentpayments module.\n\nInconsistency with the rest of the library is the biggest drawback, imo. Perhaps a sufficient mitigation is require the new convention for all new modules, and then old modules can be converted one at a time, or converted to use something backwards compatible, like the `#ifdef` solution you mention below.\n\n> How ugly would it be to have this as an optional `#ifdef`\n\nBig fan of this, as it would allow us to convert existing modules to opt-in, and perhaps eventually deprecate the old method? Using https://github.com/josibake/secp256k1/commit/5a1088066b2ce5e2e77b4e4bc190575d1171c374 as a concrete example, the majority of changes were in the header, with only a few lines in the implementation needing to be changed. When something in the implementation needed to be changed, it was always due to an argument being passed through from the top-level function to some lower level function and needing either a `&` or `*` prepended to the function argument, of which some I think could even be eliminated by being a bit more clever. I'll revisit https://github.com/josibake/secp256k1/commit/5a1088066b2ce5e2e77b4e4bc190575d1171c374 and try the `ifdef` approach to see how it looks.\n\nIf there is conceptual buy-in on the approach, I'd be happy to sketch out a more general approach for converting the rest of the library. My intuition is in cases where the implementation would need to change, we can come up with some helper functions that encapsulate the `ifdef` logic and then just wrap lower level function calls where needed.",
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1710#issuecomment-3107313662",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1710"
     }
   ]
 }
