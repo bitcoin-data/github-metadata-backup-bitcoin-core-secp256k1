@@ -42,7 +42,7 @@
     "body": "The `recovery` module is probably not super-relevant these days for newer projects (the primary use-case I'm aware of is message signing in Bitcoin Core and Electrum, likely other wallets; something that is hopefully replaced by [BIP-322](https://github.com/bitcoin/bips/blob/master/bip-0322.mediawiki) one day), but it still seems better to have an example than to have none. It contains all of the five API calls, i.e. for signing, recovering, converting, serializing, parsing. As usual with examples, a lot of code and comments are duplicated (e.g. context creation, keypair generation, cleanup with secret key clearing etc.).",
     "labels": [],
     "created_at": "2025-07-30T12:50:34Z",
-    "updated_at": "2025-07-30T12:50:34Z",
+    "updated_at": "2025-07-30T13:01:44Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -151,7 +151,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12243,
+        "size": 12733,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -330,7 +330,7 @@
     "deletions": 3,
     "changed_files": 9,
     "commits": 2,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 0
   },
   "events": [
@@ -413,7 +413,97 @@
         "date": "2025-07-30T12:34:00Z"
       },
       "sha": "a58848ddfcfb8abdfabc6c10e21397b0135971b7"
+    },
+    {
+      "event": "reviewed",
+      "id": 3071420895,
+      "node_id": "PRR_kwDOAP4Jqs63Einf",
+      "url": null,
+      "actor": null,
+      "commit_id": "8b3cecfb1960182354c102a099d2e8f28abd2a5c",
+      "commit_url": null,
+      "created_at": null,
+      "author_association": "MEMBER",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1714#pullrequestreview-3071420895",
+      "submitted_at": "2025-07-30T13:01:44Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1714"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2242608630",
+      "pull_request_review_id": 3071420895,
+      "id": 2242608630,
+      "node_id": "PRRC_kwDOAP4Jqs6Fq332",
+      "diff_hunk": "@@ -163,6 +163,17 @@ if BUILD_WINDOWS\n ecdsa_example_LDFLAGS += -lbcrypt\n endif\n TESTS += ecdsa_example\n+if ENABLE_MODULE_RECOVERY\n+noinst_PROGRAMS += recovery_example\n+recovery_example_SOURCES = examples/recovery.c\n+recovery_example_CPPFLAGS = -I$(top_srcdir)/include -DSECP256K1_STATIC",
+      "path": "Makefile.am",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "a58848ddfcfb8abdfabc6c10e21397b0135971b7",
+      "original_commit_id": "8b3cecfb1960182354c102a099d2e8f28abd2a5c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "I understand that this line follows the pattern, but `-DSECP256K1_STATIC` flag is relevant for Windows only:https://github.com/bitcoin-core/secp256k1/blob/20e3b4474639edf8fab6766ac6bda161bd9f52e5/include/secp256k1.h#L165-L168",
+      "created_at": "2025-07-30T13:01:43Z",
+      "updated_at": "2025-07-30T13:01:44Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1714#discussion_r2242608630",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2242608630"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1714"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 169,
+      "original_line": 169,
+      "side": "RIGHT"
+    }
+  ]
 }
