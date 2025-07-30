@@ -52,11 +52,11 @@
       }
     ],
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-07-29T20:08:33Z",
+    "updated_at": "2025-07-30T10:48:11Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "2c57dd0e3b7be661429a4ea33b8dacc166e350ce",
+    "merge_commit_sha": "757bc60a7eab5ea90d6eea530393f599b1472e8a",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -295,9 +295,9 @@
         "forks_count": 1070,
         "stargazers_count": 2280,
         "watchers_count": 2280,
-        "size": 12602,
+        "size": 12605,
         "default_branch": "master",
-        "open_issues_count": 149,
+        "open_issues_count": 147,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -308,9 +308,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-07-29T14:11:27Z",
+        "pushed_at": "2025-07-30T08:33:46Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-07-29T19:38:14Z",
+        "updated_at": "2025-07-30T08:33:51Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -340,7 +340,7 @@
     "deletions": 30,
     "changed_files": 25,
     "commits": 10,
-    "review_comments": 25,
+    "review_comments": 26,
     "comments": 9
   },
   "events": [
@@ -3407,6 +3407,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2240863450"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 111,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2242248473",
+      "pull_request_review_id": 3070874257,
+      "id": 2242248473,
+      "node_id": "PRRC_kwDOAP4Jqs6Fpf8Z",
+      "diff_hunk": "@@ -0,0 +1,156 @@\n+/***********************************************************************\n+ * Copyright (c) 2024 josibake                                         *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_SILENTPAYMENTS_BENCH_H\n+#define SECP256K1_MODULE_SILENTPAYMENTS_BENCH_H\n+\n+#include \"../../../include/secp256k1_silentpayments.h\"\n+\n+typedef struct {\n+    secp256k1_context *ctx;\n+    secp256k1_pubkey spend_pubkey;\n+    unsigned char scan_key[32];\n+    unsigned char input_pubkey33[33];\n+    secp256k1_xonly_pubkey tx_outputs[2];\n+    secp256k1_xonly_pubkey tx_inputs[2];\n+    secp256k1_silentpayments_found_output found_outputs[2];\n+    unsigned char scalar[32];\n+    unsigned char smallest_outpoint[36];\n+} bench_silentpayments_data;\n+\n+/* we need a non-null pointer for the cache */\n+static int noop;\n+void* label_cache = &noop;\n+const unsigned char* label_lookup(const unsigned char* key, const void* cache_ptr) {\n+    (void)key;\n+    (void)cache_ptr;\n+    return NULL;\n+}\n+\n+static void bench_silentpayments_scan_setup(void* arg) {\n+    int i;\n+    bench_silentpayments_data *data = (bench_silentpayments_data*)arg;\n+    const unsigned char tx_outputs[2][32] = {\n+        {0x84,0x17,0x92,0xc3,0x3c,0x9d,0xc6,0x19,0x3e,0x76,0x74,0x41,0x34,0x12,0x5d,0x40,0xad,0xd8,0xf2,0xf4,0xa9,0x64,0x75,0xf2,0x8b,0xa1,0x50,0xbe,0x03,0x2d,0x64,0xe8},\n+        {0x2e,0x84,0x7b,0xb0,0x1d,0x1b,0x49,0x1d,0xa5,0x12,0xdd,0xd7,0x60,0xb8,0x50,0x96,0x17,0xee,0x38,0x05,0x70,0x03,0xd6,0x11,0x5d,0x00,0xba,0x56,0x24,0x51,0x32,0x3a},\n+    };\n+    const unsigned char static_tx_input[32] = {\n+        0xf2,0x07,0x16,0x2b,0x1a,0x7a,0xbc,0x51,\n+        0xc4,0x20,0x17,0xbe,0xf0,0x55,0xe9,0xec,\n+        0x1e,0xfc,0x3d,0x35,0x67,0xcb,0x72,0x03,\n+        0x57,0xe2,0xb8,0x43,0x25,0xdb,0x33,0xac\n+    };\n+    const unsigned char smallest_outpoint[36] = {\n+        0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+        0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+        0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+        0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00,\n+    };\n+    const unsigned char spend_pubkey[33] = {\n+        0x02,0xee,0x97,0xdf,0x83,0xb2,0x54,0x6a,\n+        0xf5,0xa7,0xd0,0x62,0x15,0xd9,0x8b,0xcb,\n+        0x63,0x7f,0xe0,0x5d,0xd0,0xfa,0x37,0x3b,\n+        0xd8,0x20,0xe6,0x64,0xd3,0x72,0xde,0x9a,0x01\n+    };\n+    const unsigned char scan_key[32] = {\n+        0xa8,0x90,0x54,0xc9,0x5b,0xe3,0xc3,0x01,\n+        0x56,0x65,0x74,0xf2,0xaa,0x93,0xad,0xe0,\n+        0x51,0x85,0x09,0x03,0xa6,0x9c,0xbd,0xd1,\n+        0xd4,0x7e,0xae,0x26,0x3d,0x7b,0xc0,0x31\n+    };\n+    secp256k1_keypair input_keypair;\n+    secp256k1_pubkey input_pubkey;\n+    size_t pubkeylen = 33;\n+\n+    for (i = 0; i < 32; i++) {\n+        data->scalar[i] = i + 1;\n+    }\n+    for (i = 0; i < 2; i++) {\n+        CHECK(secp256k1_xonly_pubkey_parse(data->ctx, &data->tx_outputs[i], tx_outputs[i]));\n+    }\n+    /* Create the first input public key from the scalar.\n+     * This input is also used to create the serialized public data object for the light client\n+     */\n+    CHECK(secp256k1_keypair_create(data->ctx, &input_keypair, data->scalar));\n+    CHECK(secp256k1_keypair_pub(data->ctx, &input_pubkey, &input_keypair));\n+    CHECK(secp256k1_ec_pubkey_serialize(data->ctx, data->input_pubkey33, &pubkeylen, &input_pubkey, SECP256K1_EC_COMPRESSED));\n+    /* Create the input public keys for the full scan */\n+    CHECK(secp256k1_keypair_xonly_pub(data->ctx, &data->tx_inputs[0], NULL, &input_keypair));\n+    CHECK(secp256k1_xonly_pubkey_parse(data->ctx, &data->tx_inputs[1], static_tx_input));\n+    CHECK(secp256k1_ec_pubkey_parse(data->ctx, &data->spend_pubkey, spend_pubkey, pubkeylen));\n+    memcpy(data->scan_key, scan_key, 32);\n+    memcpy(data->smallest_outpoint, smallest_outpoint, 36);\n+}\n+\n+static void bench_silentpayments_output_scan(void* arg, int iters) {\n+    int i, k = 0;\n+    bench_silentpayments_data *data = (bench_silentpayments_data*)arg;\n+    secp256k1_silentpayments_recipient_public_data public_data;\n+\n+    for (i = 0; i < iters; i++) {\n+        unsigned char shared_secret[33];\n+        secp256k1_xonly_pubkey xonly_output;\n+        CHECK(secp256k1_silentpayments_recipient_public_data_parse(data->ctx, &public_data, data->input_pubkey33));\n+        CHECK(secp256k1_silentpayments_recipient_create_shared_secret(data->ctx,\n+            shared_secret,\n+            data->scan_key,\n+            &public_data\n+        ));\n+        CHECK(secp256k1_silentpayments_recipient_create_output_pubkey(data->ctx,\n+            &xonly_output,\n+            shared_secret,\n+            &data->spend_pubkey,\n+            k\n+        ));\n+    }\n+}\n+\n+static void bench_silentpayments_full_tx_scan(void* arg, int iters) {",
+      "path": "src/modules/silentpayments/bench_impl.h",
+      "position": null,
+      "original_position": 111,
+      "commit_id": "3c4af8fee015bb8b10f53ae560d83ab51738b838",
+      "original_commit_id": "e18e04f63c130738952f3f61717befd852ac0eec",
+      "in_reply_to_id": 2236470910,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Excellent point regarding the hashmap. I'll leave the TODO comment for now, but it might be that the follow-up is simply to remove the comment in favour of, as you suggest, benchmarking this in a more realistic setting like Bitcoin Core.",
+      "created_at": "2025-07-30T10:48:11Z",
+      "updated_at": "2025-07-30T10:48:11Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2242248473",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2242248473"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
