@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-08-12T00:32:21Z",
+    "updated_at": "2025-08-12T08:59:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -293,8 +293,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1072,
-        "stargazers_count": 2285,
-        "watchers_count": 2285,
+        "stargazers_count": 2286,
+        "watchers_count": 2286,
         "size": 12651,
         "default_branch": "master",
         "open_issues_count": 152,
@@ -310,7 +310,7 @@
         "visibility": "public",
         "pushed_at": "2025-08-10T11:18:59Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-08-11T08:02:13Z",
+        "updated_at": "2025-08-12T08:11:39Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -340,7 +340,7 @@
     "deletions": 35,
     "changed_files": 25,
     "commits": 10,
-    "review_comments": 64,
+    "review_comments": 65,
     "comments": 15
   },
   "events": [
@@ -6615,6 +6615,59 @@
       "start_side": "RIGHT",
       "line": 279,
       "original_line": 279,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2269183460",
+      "pull_request_review_id": 3109372347,
+      "id": 2269183460,
+      "node_id": "PRRC_kwDOAP4Jqs6HQP3k",
+      "diff_hunk": "@@ -164,6 +167,262 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipien\n     const secp256k1_pubkey *label\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Opaque data structure that holds silent payments public input data.\n+ *\n+ *  This structure does not contain secret data. Guaranteed to be 101 bytes in\n+ *  size. It can be safely copied/moved. Created with\n+ *  `secp256k1_silentpayments_recipient_public_data_create`. Can be serialized as a\n+ *  compressed public key using\n+ *  `secp256k1_silentpayments_recipient_public_data_serialize`. The serialization is\n+ *  intended for sending the public input data to light clients. Light clients\n+ *  can use this serialization with\n+ *  `secp256k1_silentpayments_recipient_public_data_parse`.\n+ */\n+typedef struct secp256k1_silentpayments_recipient_public_data {\n+    unsigned char data[101];\n+} secp256k1_silentpayments_recipient_public_data;\n+\n+/** Compute Silent Payment public data from input public keys and transaction\n+ *  inputs.\n+ *\n+ *  Given a list of n public keys A_1...A_n (one for each silent payment\n+ *  eligible input to spend) and a serialized outpoint_smallest36, create a\n+ *  `public_data` object. This object summarizes the public data from the\n+ *  transaction inputs needed for scanning.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment.\n+ *\n+ *  The public keys have to be passed in via two different parameter pairs, one\n+ *  for regular and one for x-only public keys, in order to avoid the need of\n+ *  users converting to a common pubkey format before calling this function.\n+ *  The resulting data can be used for scanning on the recipient side, or\n+ *  stored in an index for later use (e.g., wallet rescanning, sending data to\n+ *  light clients).\n+ *\n+ *  If calling this function for simply aggregating the public transaction data\n+ *  for later use, the caller can save the result with\n+ *  `silentpayments_recipient_public_data_serialize`.\n+ *\n+ *  Returns: 1 if public data creation was successful.\n+ *           0 if the input public keys sum to zero,\n+ *             or the input_hash is an invalid scalar (statistically improbable).\n+ *  Args:                 ctx: pointer to a context object\n+ *  Out:          public_data: pointer to public_data object containing the\n+ *                             summed public key and input_hash.\n+ *  In:   outpoint_smallest36: serialized smallest outpoint (lexicographically)\n+ *                             from the transaction inputs\n+ *              xonly_pubkeys: pointer to an array of pointers to taproot\n+ *                             x-only public keys (can be NULL if no taproot\n+ *                             inputs are used)\n+ *            n_xonly_pubkeys: the number of taproot input public keys\n+ *              plain_pubkeys: pointer to an array of pointers to non-taproot\n+ *                             public keys (can be NULL if no non-taproot\n+ *                             inputs are used)\n+ *            n_plain_pubkeys: the number of non-taproot input public keys\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_public_data_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_recipient_public_data *public_data,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *plain_pubkeys,\n+    size_t n_plain_pubkeys\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Serialize a silentpayments_recipient_public_data object into a 33-byte sequence.\n+ *\n+ *  Returns: 1 always.\n+ *\n+ *  Args:         ctx: pointer to a context object\n+ *  Out:     output33: pointer to a 33-byte array to place the serialized\n+ *                     `silentpayments_recipient_public_data` in\n+ *  In:   public_data: pointer to an initialized silentpayments_recipient_public_data\n+ *                     object\n+ */\n+SECP256K1_API int secp256k1_silentpayments_recipient_public_data_serialize(\n+    const secp256k1_context *ctx,\n+    unsigned char *output33,\n+    const secp256k1_silentpayments_recipient_public_data *public_data\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Parse a 33-byte sequence into a silentpayments_recipients_public_data object.\n+ *\n+ *  Returns: 1 if the data was able to be parsed.\n+ *           0 if the sequence is invalid (e.g., does not represent a valid\n+ *           public key).\n+ *\n+ *  Args:         ctx: pointer to a context object.\n+ *  Out:  public_data: pointer to a silentpayments_recipient_public_data object. If 1 is\n+ *                     returned, it is set to a parsed version of input33.\n+ *  In:       input33: pointer to a serialized silentpayments_recipient_public_data.\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_public_data_parse(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_recipient_public_data *public_data,\n+    const unsigned char *input33\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Callback function for label lookups\n+ *\n+ *  This function is implemented by the recipient to check if a value exists in\n+ *  the recipients label cache during scanning.\n+ *\n+ *  For creating the labels cache,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 275,
+      "original_position": 135,
+      "commit_id": "142f07bf6bacee1a695c2bb21f0a2cf77eaa96cd",
+      "original_commit_id": "b107203694439ddf261f474c132d42040bd3db6c",
+      "in_reply_to_id": 2268208257,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "I think \"data\" should be sufficient, considering the data is better explained in the documentation for the `_create_label` function.",
+      "created_at": "2025-08-12T08:59:10Z",
+      "updated_at": "2025-08-12T08:59:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2269183460",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2269183460"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 275,
+      "original_line": 275,
       "side": "RIGHT"
     }
   ]
