@@ -1,0 +1,976 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1724",
+    "id": 2745839446,
+    "node_id": "PR_kwDOAP4Jqs6jqi9W",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1724",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1724.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1724.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1724",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1724/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1724/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1724/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+    "number": 1724,
+    "state": "open",
+    "locked": false,
+    "maintainer_can_modify": true,
+    "title": "Make files mostly self-contained",
+    "user": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "patch_url": null
+    },
+    "body": "This is a set of commits, each one trivial, that reorganizes code so that all C files are *mostly* self-contained. \r\n\r\nThese changes are merely fixes that make the files adhere to our current implicit style, which I'd describe as:\r\n  - Every C file (library, tests.c, ...) is a single translation unit (\"unit build\"), except that the libsepc256k1_precomputed is separate to speed up compilation.\r\n  - Internal \"modules\" are organized in headers (`.h`) and implementation files (`_impl.h`). Symbols not present in the header are private to that module.\r\n  - Internal \"modules\" should include the headers of all other modules they use.  \r\n  - `secp256k1.c` includes all `_impl.h` files. Other C files include simply `secp256k1.c`, or, if that isn't possible for some reason (e.g., in the `precompute_*.c` files), the individual necessary `_impl.h` files.\r\n\r\nSo, none of these changes here should be controversial. In particular, I refrain from changing the above rules (e.g., by renaming the `_impl.h` to `.c` as suggested in https://github.com/bitcoin-core/secp256k1/issues/1039).\r\n\r\n####  Why \"mostly\" self-contained?\r\n\r\n After this PR, some errors remain when I run `clang src/*.c` and `clang src/*.h` on my machine. But all of them are special cases: \r\n - `ctime_tests.c` refuses to be compiled without valgrind or msan enabled.\r\n - `src/field_10x26_impl.h`, `src/int128_struct_impl.h`, and `src/scalar_low_impl.h` are confused because the autodetection logic in the preprocessor  picks field_5x64, native int 128, and scalar_4x64 on my machine. \r\n\r\n<details>\r\n<summary>Full output of \"clang src/*.c\" and \"clang src/*.h` </summary>\r\n\r\n```\r\n> clang src/*.c\r\nsrc/ctime_tests.c:16:4: error: \"This tool cannot be compiled without memory-checking interface (valgrind or msan)\"\r\n   16 | #  error \"This tool cannot be compiled without memory-checking interface (valgrind or msan)\"\r\n      |    ^\r\n1 error generated.\r\n```\r\n\r\n```\r\n> clang src/*.h -ferror-limit=100\r\nsrc/field_10x26_impl.h:265:21: warning: incompatible pointer types initializing 'const uint32_t *' (aka 'const unsigned int *') with an expression of type 'const uint64_t[5]' (aka 'const unsigned long[5]') [-Wincompatible-pointer-types]\r\n  265 |     const uint32_t *t = a->n;\r\n      |                     ^   ~~~~\r\nsrc/field_10x26_impl.h:1007:28: warning: incompatible pointer types passing 'uint64_t[5]' (aka 'unsigned long[5]') to parameter of type 'uint32_t *' (aka 'unsigned int *') [-Wincompatible-pointer-types]\r\n 1007 |     secp256k1_fe_mul_inner(r->n, a->n, b->n);\r\n      |                            ^~~~\r\nsrc/field_10x26_impl.h:401:63: note: passing argument to parameter 'r' here\r\n  401 | SECP256K1_INLINE static void secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, const uint32_t * SECP256K1_RESTRICT b) {\r\n      |                                                               ^\r\nsrc/field_10x26_impl.h:1007:34: warning: incompatible pointer types passing 'const uint64_t[5]' (aka 'const unsigned long[5]') to parameter of type 'const uint32_t *' (aka 'const unsigned int *') [-Wincompatible-pointer-types]\r\n 1007 |     secp256k1_fe_mul_inner(r->n, a->n, b->n);\r\n      |                                  ^~~~\r\nsrc/field_10x26_impl.h:401:82: note: passing argument to parameter 'a' here\r\n  401 | SECP256K1_INLINE static void secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, const uint32_t * SECP256K1_RESTRICT b) {\r\n      |                                                                                  ^\r\nsrc/field_10x26_impl.h:1007:40: warning: incompatible pointer types passing 'const uint64_t[5]' (aka 'const unsigned long[5]') to parameter of type 'const uint32_t *' (aka 'const unsigned int *') [-Wincompatible-pointer-types]\r\n 1007 |     secp256k1_fe_mul_inner(r->n, a->n, b->n);\r\n      |                                        ^~~~\r\nsrc/field_10x26_impl.h:401:121: note: passing argument to parameter 'b' here\r\n  401 | SECP256K1_INLINE static void secp256k1_fe_mul_inner(uint32_t *r, const uint32_t *a, const uint32_t * SECP256K1_RESTRICT b) {\r\n      |                                                                                                                         ^\r\nsrc/field_10x26_impl.h:1011:28: warning: incompatible pointer types passing 'uint64_t[5]' (aka 'unsigned long[5]') to parameter of type 'uint32_t *' (aka 'unsigned int *') [-Wincompatible-pointer-types]\r\n 1011 |     secp256k1_fe_sqr_inner(r->n, a->n);\r\n      |                            ^~~~\r\nsrc/field_10x26_impl.h:731:63: note: passing argument to parameter 'r' here\r\n  731 | SECP256K1_INLINE static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {\r\n      |                                                               ^\r\nsrc/field_10x26_impl.h:1011:34: warning: incompatible pointer types passing 'const uint64_t[5]' (aka 'const unsigned long[5]') to parameter of type 'const uint32_t *' (aka 'const unsigned int *') [-Wincompatible-pointer-types]\r\n 1011 |     secp256k1_fe_sqr_inner(r->n, a->n);\r\n      |                                  ^~~~\r\nsrc/field_10x26_impl.h:731:82: note: passing argument to parameter 'a' here\r\n  731 | SECP256K1_INLINE static void secp256k1_fe_sqr_inner(uint32_t *r, const uint32_t *a) {\r\n      |                                                                                  ^\r\n6 warnings generated.\r\nsrc/int128_struct_impl.h:54:6: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   54 |     r->hi = hi;\r\n      |     ~^ ~~\r\nsrc/int128_struct_impl.h:55:6: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   55 |     r->lo = lo;\r\n      |     ~^ ~~\r\nsrc/int128_struct_impl.h:59:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   59 |    r->lo = secp256k1_umul128(a, b, &r->hi);\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:59:38: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   59 |    r->lo = secp256k1_umul128(a, b, &r->hi);\r\n      |                                     ~^ ~~\r\nsrc/int128_struct_impl.h:65:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   65 |    r->lo += lo;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:66:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   66 |    r->hi += hi + (r->lo < lo);\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:66:20: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   66 |    r->hi += hi + (r->lo < lo);\r\n      |                   ~^ ~~\r\nsrc/int128_struct_impl.h:70:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   70 |    r->lo += a;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:71:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   71 |    r->hi += r->lo < a;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:71:14: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   71 |    r->hi += r->lo < a;\r\n      |             ~^ ~~\r\nsrc/int128_struct_impl.h:80:7: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   80 |      r->lo = r->hi >> (n-64);\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:80:15: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   80 |      r->lo = r->hi >> (n-64);\r\n      |              ~^ ~~\r\nsrc/int128_struct_impl.h:81:7: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   81 |      r->hi = 0;\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:87:7: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   87 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:87:22: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   87 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |                     ~^ ~~\r\nsrc/int128_struct_impl.h:87:42: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   87 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |                                         ~^ ~~\r\nsrc/int128_struct_impl.h:89:7: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n   89 |      r->hi >>= n;\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:94:12: error: member reference base type 'const secp256k1_uint128' (aka 'const unsigned __int128') is not a structure or union\r\n   94 |    return a->lo;\r\n      |           ~^ ~~\r\nsrc/int128_struct_impl.h:98:12: error: member reference base type 'const secp256k1_uint128' (aka 'const unsigned __int128') is not a structure or union\r\n   98 |    return a->hi;\r\n      |           ~^ ~~\r\nsrc/int128_struct_impl.h:102:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n  102 |    r->hi = 0;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:103:5: error: member reference base type 'secp256k1_uint128' (aka 'unsigned __int128') is not a structure or union\r\n  103 |    r->lo = a;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:108:22: error: member reference base type 'const secp256k1_uint128' (aka 'const unsigned __int128') is not a structure or union\r\n  108 |    return n >= 64 ? r->hi >> (n - 64) == 0\r\n      |                     ~^ ~~\r\nsrc/int128_struct_impl.h:109:22: error: member reference base type 'const secp256k1_uint128' (aka 'const unsigned __int128') is not a structure or union\r\n  109 |                   : r->hi == 0 && r->lo >> n == 0;\r\n      |                     ~^ ~~\r\nsrc/int128_struct_impl.h:109:36: error: member reference base type 'const secp256k1_uint128' (aka 'const unsigned __int128') is not a structure or union\r\n  109 |                   : r->hi == 0 && r->lo >> n == 0;\r\n      |                                   ~^ ~~\r\nsrc/int128_struct_impl.h:113:6: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  113 |     r->hi = hi;\r\n      |     ~^ ~~\r\nsrc/int128_struct_impl.h:114:6: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  114 |     r->lo = lo;\r\n      |     ~^ ~~\r\nsrc/int128_struct_impl.h:119:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  119 |    r->lo = (uint64_t)secp256k1_mul128(a, b, &hi);\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:120:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  120 |    r->hi = (uint64_t)hi;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:126:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  126 |    r->lo += lo;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:127:11: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  127 |    hi += r->lo < lo;\r\n      |          ~^ ~~\r\nsrc/int128_struct_impl.h:139:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  139 |    r->hi += hi;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:145:11: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  145 |    hi += r->lo < lo;\r\n      |          ~^ ~~\r\nsrc/int128_struct_impl.h:156:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  156 |    r->hi -= hi;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:157:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  157 |    r->lo -= lo;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:171:7: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  171 |      r->lo = (uint64_t)((int64_t)(r->hi) >> (n-64));\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:171:36: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  171 |      r->lo = (uint64_t)((int64_t)(r->hi) >> (n-64));\r\n      |                                   ~^ ~~\r\nsrc/int128_struct_impl.h:172:7: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  172 |      r->hi = (uint64_t)((int64_t)(r->hi) >> 63);\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:172:36: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  172 |      r->hi = (uint64_t)((int64_t)(r->hi) >> 63);\r\n      |                                   ~^ ~~\r\nsrc/int128_struct_impl.h:174:7: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  174 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:174:22: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  174 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |                     ~^ ~~\r\nsrc/int128_struct_impl.h:174:42: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  174 |      r->lo = ((1U * r->hi) << (64-n)) | r->lo >> n;\r\n      |                                         ~^ ~~\r\nsrc/int128_struct_impl.h:175:7: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  175 |      r->hi = (uint64_t)((int64_t)(r->hi) >> n);\r\n      |      ~^ ~~\r\nsrc/int128_struct_impl.h:175:36: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  175 |      r->hi = (uint64_t)((int64_t)(r->hi) >> n);\r\n      |                                   ~^ ~~\r\nsrc/int128_struct_impl.h:180:12: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  180 |    return a->lo;\r\n      |           ~^ ~~\r\nsrc/int128_struct_impl.h:190:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  190 |    r->hi = (uint64_t)(a >> 63);\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:191:5: error: member reference base type 'secp256k1_int128' (aka '__int128') is not a structure or union\r\n  191 |    r->lo = (uint64_t)a;\r\n      |    ~^ ~~\r\nsrc/int128_struct_impl.h:195:12: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  195 |    return a->hi == b->hi && a->lo == b->lo;\r\n      |           ~^ ~~\r\nsrc/int128_struct_impl.h:195:21: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  195 |    return a->hi == b->hi && a->lo == b->lo;\r\n      |                    ~^ ~~\r\nsrc/int128_struct_impl.h:195:30: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  195 |    return a->hi == b->hi && a->lo == b->lo;\r\n      |                             ~^ ~~\r\nsrc/int128_struct_impl.h:195:39: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  195 |    return a->hi == b->hi && a->lo == b->lo;\r\n      |                                      ~^ ~~\r\nsrc/int128_struct_impl.h:201:23: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  201 |     return n >= 64 ? r->hi == (uint64_t)sign << (n - 64) && r->lo == 0\r\n      |                      ~^ ~~\r\nsrc/int128_struct_impl.h:201:62: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  201 |     return n >= 64 ? r->hi == (uint64_t)sign << (n - 64) && r->lo == 0\r\n      |                                                             ~^ ~~\r\nsrc/int128_struct_impl.h:202:23: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  202 |                    : r->hi == (uint64_t)(sign >> 1) && r->lo == (uint64_t)sign << n;\r\n      |                      ~^ ~~\r\nsrc/int128_struct_impl.h:202:57: error: member reference base type 'const secp256k1_int128' (aka 'const __int128') is not a structure or union\r\n  202 |                    : r->hi == (uint64_t)(sign >> 1) && r->lo == (uint64_t)sign << n;\r\n      |                                                        ~^ ~~\r\n54 errors generated.\r\nsrc/scalar_low_impl.h:19:17: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n   19 |     return !(*a & 1);\r\n      |              ~~ ^ ~\r\nsrc/scalar_low_impl.h:23:14: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n   23 |     *r = v % EXHAUSTIVE_TEST_ORDER;\r\n      |              ^\r\nsrc/scalar_low_impl.h:33:20: error: invalid operands to binary expression ('const secp256k1_scalar' and 'unsigned int')\r\n   33 |         return (*a >> offset) & (0xFFFFFFFF >> (32 - count));\r\n      |                 ~~ ^  ~~~~~~\r\nsrc/scalar_low_impl.h:45:103: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n   45 | SECP256K1_INLINE static int secp256k1_scalar_check_overflow(const secp256k1_scalar *a) { return *a >= EXHAUSTIVE_TEST_ORDER; }\r\n      |                                                                                                       ^\r\nsrc/scalar_low_impl.h:51:14: error: invalid operands to binary expression ('const secp256k1_scalar' and 'const secp256k1_scalar')\r\n   51 |     *r = (*a + *b) % EXHAUSTIVE_TEST_ORDER;\r\n      |           ~~ ^ ~~\r\nsrc/scalar_low_impl.h:51:22: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n   51 |     *r = (*a + *b) % EXHAUSTIVE_TEST_ORDER;\r\n      |                      ^\r\nsrc/scalar_low_impl.h:54:15: error: invalid operands to binary expression ('secp256k1_scalar' and 'const secp256k1_scalar')\r\n   54 |     return *r < *b;\r\n      |            ~~ ^ ~~\r\nsrc/scalar_low_impl.h:61:12: error: invalid operands to binary expression ('secp256k1_scalar' and 'uint32_t' (aka 'unsigned int'))\r\n   61 |         *r += ((uint32_t)1 << bit);\r\n      |         ~~ ^  ~~~~~~~~~~~~~~~~~~~~\r\nsrc/scalar_low_impl.h:72:8: error: assigning to 'secp256k1_scalar' from incompatible type 'int'\r\n   72 |     *r = 0;\r\n      |        ^ ~\r\nsrc/scalar_low_impl.h:74:18: error: invalid operands to binary expression ('secp256k1_scalar' and 'int')\r\n   74 |         *r = (*r * 0x100) + b32[i];\r\n      |               ~~ ^ ~~~~~\r\nsrc/scalar_low_impl.h:75:19: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n   75 |         if (*r >= EXHAUSTIVE_TEST_ORDER) {\r\n      |                   ^\r\nsrc/scalar_low_impl.h:77:19: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n   77 |             *r %= EXHAUSTIVE_TEST_ORDER;\r\n      |                   ^\r\nsrc/scalar_low_impl.h:89:18: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n   89 |     bin[28] = *a >> 24; bin[29] = *a >> 16; bin[30] = *a >> 8; bin[31] = *a;\r\n      |               ~~ ^  ~~\r\nsrc/scalar_low_impl.h:89:38: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n   89 |     bin[28] = *a >> 24; bin[29] = *a >> 16; bin[30] = *a >> 8; bin[31] = *a;\r\n      |                                   ~~ ^  ~~\r\nsrc/scalar_low_impl.h:89:58: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n   89 |     bin[28] = *a >> 24; bin[29] = *a >> 16; bin[30] = *a >> 8; bin[31] = *a;\r\n      |                                                       ~~ ^  ~\r\nsrc/scalar_low_impl.h:89:72: error: assigning to 'unsigned char' from incompatible type 'const secp256k1_scalar'\r\n   89 |     bin[28] = *a >> 24; bin[29] = *a >> 16; bin[30] = *a >> 8; bin[31] = *a;\r\n      |                                                                        ^ ~~\r\nsrc/scalar_low_impl.h:95:15: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n   95 |     return *a == 0;\r\n      |            ~~ ^  ~\r\nsrc/scalar_low_impl.h:101:12: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n  101 |     if (*a == 0) {\r\n      |         ~~ ^  ~\r\nsrc/scalar_low_impl.h:102:12: error: assigning to 'secp256k1_scalar' from incompatible type 'int'\r\n  102 |         *r = 0;\r\n      |            ^ ~\r\nsrc/scalar_low_impl.h:104:14: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  104 |         *r = EXHAUSTIVE_TEST_ORDER - *a;\r\n      |              ^\r\nsrc/scalar_low_impl.h:113:15: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n  113 |     return *a == 1;\r\n      |            ~~ ^  ~\r\nsrc/scalar_low_impl.h:119:17: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  119 |     return *a > EXHAUSTIVE_TEST_ORDER / 2;\r\n      |                 ^\r\nsrc/scalar_low_impl.h:135:14: error: invalid operands to binary expression ('const secp256k1_scalar' and 'const secp256k1_scalar')\r\n  135 |     *r = (*a * *b) % EXHAUSTIVE_TEST_ORDER;\r\n      |           ~~ ^ ~~\r\nsrc/scalar_low_impl.h:135:22: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  135 |     *r = (*a * *b) % EXHAUSTIVE_TEST_ORDER;\r\n      |                      ^\r\nsrc/scalar_low_impl.h:144:9: error: assigning to 'secp256k1_scalar' from incompatible type 'int'\r\n  144 |     *r2 = 0;\r\n      |         ^ ~\r\nsrc/scalar_low_impl.h:154:15: error: invalid operands to binary expression ('const secp256k1_scalar' and 'const secp256k1_scalar')\r\n  154 |     return *a == *b;\r\n      |            ~~ ^  ~~\r\nsrc/scalar_low_impl.h:165:14: error: invalid operands to binary expression ('secp256k1_scalar' and 'uint32_t' (aka 'unsigned int'))\r\n  165 |     *r = (*r & mask0) | (*a & mask1);\r\n      |           ~~ ^ ~~~~~\r\nsrc/scalar_low_impl.h:165:29: error: invalid operands to binary expression ('const secp256k1_scalar' and 'uint32_t' (aka 'unsigned int'))\r\n  165 |     *r = (*r & mask0) | (*a & mask1);\r\n      |                          ~~ ^ ~~~~~\r\nsrc/scalar_low_impl.h:175:21: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  175 |     for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {\r\n      |                     ^\r\nsrc/scalar_low_impl.h:176:16: error: invalid operands to binary expression ('int' and 'const secp256k1_scalar')\r\n  176 |         if ((i * *x) % EXHAUSTIVE_TEST_ORDER == 1) {\r\n      |              ~ ^ ~~\r\nsrc/scalar_low_impl.h:176:24: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  176 |         if ((i * *x) % EXHAUSTIVE_TEST_ORDER == 1) {\r\n      |                        ^\r\nsrc/scalar_low_impl.h:185:8: error: assigning to 'secp256k1_scalar' from incompatible type 'uint32_t' (aka 'unsigned int')\r\n  185 |     *r = res;\r\n      |        ^ ~~~\r\nsrc/scalar_low_impl.h:201:33: error: invalid operands to binary expression ('const secp256k1_scalar' and 'int')\r\n  201 |     *r = (*a + ((-(uint32_t)(*a & 1)) & EXHAUSTIVE_TEST_ORDER)) >> 1;\r\n      |                              ~~ ^ ~\r\nsrc/scalar_low_impl.h:201:41: error: use of undeclared identifier 'EXHAUSTIVE_TEST_ORDER'\r\n  201 |     *r = (*a + ((-(uint32_t)(*a & 1)) & EXHAUSTIVE_TEST_ORDER)) >> 1;\r\n      |                                         ^\r\n34 errors generated.\r\n```\r\n</details>\r\n\r\nPerhaps some of these cases can be improved further, but these improvements should go to a separate PR. \r\n\r\n#### What is the motivation for these changes?\r\n\r\nSelf-contained files work much better with tooling. For example, the `[clangd](https://clangd.llvm.org/installation)` language server works great in my editor after this PR (ignoring the four files mentioned above) and gives me much better completion, symbol lookup, etc. In fact, what made me create this PR is that I got annoyed by not being able to jump to symbols when trying to review silent payments. \r\n \r\nHere's my `~/.config/clangd/config.yaml` if you're interested:\r\n```yaml\r\n# libsecp256k1\r\nIf:\r\n  PathMatch: .*/secp256k1/.*\r\nCompileFlags:\r\n    # clangd compiles even _impl.h files individually, so it won't\r\n    # find definitions of static functions in other files.\r\n    Add: [-Wno-undefined-internal]\r\nDiagnostics:\r\n  # Disable hints about unused and missing includes. The assumptions that clangd\r\n  # make about inclusion style are too far off from what libsecp256k1 does.\r\n  UnusedIncludes: None\r\n  MissingIncludes: None\r\n```\r\n\r\nYou'll also need to run `make clean` and `bear -- make` once to create a `compile_commands.json` file in the repo root that contains the compiler flags so that clangd knows the configured `-D` flags etc. Get [bear](https://github.com/rizsotto/Bear) first. \r\n\r\nedit: CMake can also generate the json file:\r\n```\r\n$ mkdir build\r\n$ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -B build\r\n$ cmake --build build\r\n```\t\r\nThen the file will be stored in the `build` subdirectory, whose name is special-cased in clangd so that it the file will be found automatically.\r\n\r\n Or the flags can be added above in `CompileFlags` manually.  \r\n\r\n",
+    "labels": [
+      {
+        "id": 5492448291,
+        "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/tweak/refactor",
+        "name": "tweak/refactor",
+        "description": "",
+        "color": "FBCA04",
+        "default": false
+      },
+      {
+        "id": 5922723218,
+        "node_id": "LA_kwDOAP4Jqs8AAAABYQWVkg",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/meta/development",
+        "name": "meta/development",
+        "description": "processes, conventions, developer documentation, etc.",
+        "color": "E2E0F5",
+        "default": false
+      }
+    ],
+    "created_at": "2025-08-14T11:16:39Z",
+    "updated_at": "2025-08-14T11:56:54Z",
+    "mergeable": true,
+    "mergeable_state": "unstable",
+    "merged": false,
+    "merge_commit_sha": "f508f67881255173f83ef76b2ec27f371c7fccd8",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "rebaseable": true,
+    "head": {
+      "label": "real-or-random:202508-selfcontained",
+      "ref": "202508-selfcontained",
+      "sha": "925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 93596674,
+        "node_id": "MDEwOlJlcG9zaXRvcnk5MzU5NjY3NA==",
+        "name": "secp256k1",
+        "full_name": "real-or-random/secp256k1",
+        "owner": {
+          "login": "real-or-random",
+          "id": 1071625,
+          "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+          "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/real-or-random",
+          "html_url": "https://github.com/real-or-random",
+          "followers_url": "https://api.github.com/users/real-or-random/followers",
+          "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+          "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+          "repos_url": "https://api.github.com/users/real-or-random/repos",
+          "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+          "type": "User",
+          "site_admin": false,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/real-or-random/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/real-or-random/secp256k1",
+        "archive_url": "https://api.github.com/repos/real-or-random/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/real-or-random/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/real-or-random/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/real-or-random/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/real-or-random/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/real-or-random/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/real-or-random/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/real-or-random/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/real-or-random/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/real-or-random/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/real-or-random/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/real-or-random/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/real-or-random/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/real-or-random/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/real-or-random/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/real-or-random/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/real-or-random/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/real-or-random/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/real-or-random/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/real-or-random/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/real-or-random/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/real-or-random/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/real-or-random/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/real-or-random/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/real-or-random/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/real-or-random/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/real-or-random/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/real-or-random/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/real-or-random/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:real-or-random/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/real-or-random/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/real-or-random/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/real-or-random/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/real-or-random/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/real-or-random/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/real-or-random/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/real-or-random/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/real-or-random/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/real-or-random/secp256k1/hooks",
+        "svn_url": "https://github.com/real-or-random/secp256k1",
+        "language": "C",
+        "forks_count": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "size": 16439,
+        "default_branch": "master",
+        "open_issues_count": 1,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-08-14T11:56:53Z",
+        "created_at": "2017-06-07T05:39:43Z",
+        "updated_at": "2025-03-10T14:14:26Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "d599714147b20dda092ec4af44ef4174d584bb7d",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 1072,
+        "stargazers_count": 2287,
+        "watchers_count": 2287,
+        "size": 12611,
+        "default_branch": "master",
+        "open_issues_count": 152,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-08-13T11:07:57Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2025-08-14T07:29:37Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1724"
+      }
+    },
+    "author_association": "CONTRIBUTOR",
+    "draft": false,
+    "additions": 236,
+    "deletions": 167,
+    "changed_files": 30,
+    "commits": 13,
+    "review_comments": 0,
+    "comments": 0
+  },
+  "events": [
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDA1N2VkZTIxNzJlZGQ3OTAxMjU1NmIwMTFhNzM0ZjQxYjBjYzY5ZTA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/057ede2172edd79012556b011a734f41b0cc69e0",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/057ede2172edd79012556b011a734f41b0cc69e0",
+      "tree": {
+        "sha": "d5399455309173850a066bd1ebdd8d3a090e950a",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d5399455309173850a066bd1ebdd8d3a090e950a"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e523e4f90e1b1c0fba49cd8a08016e1a8dff9232",
+          "sha": "e523e4f90e1b1c0fba49cd8a08016e1a8dff9232",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e523e4f90e1b1c0fba49cd8a08016e1a8dff9232"
+        }
+      ],
+      "message": "tests: Make ecmult tests use internal scratch API\n\nThis has the advantage of keeping the ecmult tests focused on the ecmult\ncode, and so this change might be desirable anyway. That's why it is\ndone in a separate commit, so it can be kept if we ever bring back the\npublic scratch space API.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:17:04Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:09:11Z"
+      },
+      "sha": "057ede2172edd79012556b011a734f41b0cc69e0"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGViYTRmNTI0YmUzNDkyOTRkNjFkNDBlNTFjNjZjZDRhNDkzOTY1OGE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eba4f524be349294d61d40e51c66cd4a4939658a",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eba4f524be349294d61d40e51c66cd4a4939658a",
+      "tree": {
+        "sha": "b0ca8d35b2d4329643f307eb0f0b448ada6e0915",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b0ca8d35b2d4329643f307eb0f0b448ada6e0915"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/057ede2172edd79012556b011a734f41b0cc69e0",
+          "sha": "057ede2172edd79012556b011a734f41b0cc69e0",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/057ede2172edd79012556b011a734f41b0cc69e0"
+        }
+      ],
+      "message": "Remove ununsed scratch space functions\n\nThese were in the public API at some point but they have been made\nstatic in 712e7f8722eba5dec2bc6b37d75aadeb6f6e633b.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:17:04Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T07:08:27Z"
+      },
+      "sha": "eba4f524be349294d61d40e51c66cd4a4939658a"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGY2MzQ3NjlkOTJhM2EyZGU1ODc3OGRkZTk5NTdjMTUwMjhiMTEyNzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f634769d92a3a2de58778dde9957c15028b11272",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f634769d92a3a2de58778dde9957c15028b11272",
+      "tree": {
+        "sha": "86933a6d47757b0fca39043ba0cb74f97c0398da",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/86933a6d47757b0fca39043ba0cb74f97c0398da"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eba4f524be349294d61d40e51c66cd4a4939658a",
+          "sha": "eba4f524be349294d61d40e51c66cd4a4939658a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eba4f524be349294d61d40e51c66cd4a4939658a"
+        }
+      ],
+      "message": "scalar: Declare scalar constants in scalar.h",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:17:29Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:17:29Z"
+      },
+      "sha": "f634769d92a3a2de58778dde9957c15028b11272"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGIyYzA5MzQyYTA4NjM5NzZmYzE3NmRhN2IxMTg1Zjc5YmU4ZWI4ZDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b2c09342a0863976fc176da7b1185f79be8eb8d3",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b2c09342a0863976fc176da7b1185f79be8eb8d3",
+      "tree": {
+        "sha": "7709014d5c31ca5ac53dfa6e6e2e12a376668ed4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7709014d5c31ca5ac53dfa6e6e2e12a376668ed4"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f634769d92a3a2de58778dde9957c15028b11272",
+          "sha": "f634769d92a3a2de58778dde9957c15028b11272",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f634769d92a3a2de58778dde9957c15028b11272"
+        }
+      ],
+      "message": "scalar: Move EXHAUSTIVE_TEST_LAMBDA to header",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T11:56:28Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T11:45:18Z"
+      },
+      "sha": "b2c09342a0863976fc176da7b1185f79be8eb8d3"
+    },
+    {
+      "event": "labeled",
+      "id": 19157282219,
+      "node_id": "LE_lADOAP4Jqs7F_0kLzwAAAAR13O2r",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19157282219",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-08-14T11:17:04Z",
+      "label": {
+        "name": "tweak/refactor",
+        "color": "FBCA04"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 19157282228,
+      "node_id": "LE_lADOAP4Jqs7F_0kLzwAAAAR13O20",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19157282228",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-08-14T11:17:04Z",
+      "label": {
+        "name": "meta/development",
+        "color": "E2E0F5"
+      }
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGE4MTA0ZjM2NmU5ZWY4ZDg1N2QwNzVhNDNkZWFkZjVjYjk1YmM4NmY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a8104f366e9ef8d857d075a43deadf5cb95bc86f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a8104f366e9ef8d857d075a43deadf5cb95bc86f",
+      "tree": {
+        "sha": "db384e83eeb5fe43deb52ee0c082cd15aabd84ae",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/db384e83eeb5fe43deb52ee0c082cd15aabd84ae"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b2c09342a0863976fc176da7b1185f79be8eb8d3",
+          "sha": "b2c09342a0863976fc176da7b1185f79be8eb8d3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b2c09342a0863976fc176da7b1185f79be8eb8d3"
+        }
+      ],
+      "message": "Create header for internal API in secp256k1.c",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:49:45Z"
+      },
+      "sha": "a8104f366e9ef8d857d075a43deadf5cb95bc86f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGVjMzc0MzQ4NTVjNTBmYzdkNDFiZmQ3ZTQzMGNmMWI3MDQ1OTcyMDY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ec37434855c50fc7d41bfd7e430cf1b704597206",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ec37434855c50fc7d41bfd7e430cf1b704597206",
+      "tree": {
+        "sha": "a9f2600a480abe7cbc239f98e4b5124300f1007d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a9f2600a480abe7cbc239f98e4b5124300f1007d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a8104f366e9ef8d857d075a43deadf5cb95bc86f",
+          "sha": "a8104f366e9ef8d857d075a43deadf5cb95bc86f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a8104f366e9ef8d857d075a43deadf5cb95bc86f"
+        }
+      ],
+      "message": "gitignore: Add precompiled headers (.gch and .pch)\n\nWe don't use precompiled headers in our builds but those files are what\nyou get if you invoke gcc or clang, respectively, on a .h file, e.g., to check\nif it's self-contained.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:53:24Z"
+      },
+      "sha": "ec37434855c50fc7d41bfd7e430cf1b704597206"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGNiZTRhNTU2OGNmYWU4Y2VlNjZlYjFjZDlmODY2MDNjZDE0N2MzNmU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cbe4a5568cfae8cee66eb1cd9f86603cd147c36e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cbe4a5568cfae8cee66eb1cd9f86603cd147c36e",
+      "tree": {
+        "sha": "abf4cfaae7e759a69b828c781430d988a03a4570",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/abf4cfaae7e759a69b828c781430d988a03a4570"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ec37434855c50fc7d41bfd7e430cf1b704597206",
+          "sha": "ec37434855c50fc7d41bfd7e430cf1b704597206",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ec37434855c50fc7d41bfd7e430cf1b704597206"
+        }
+      ],
+      "message": "group: Add missing declarations to internal header",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T09:05:26Z"
+      },
+      "sha": "cbe4a5568cfae8cee66eb1cd9f86603cd147c36e"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc1NTM0OWQ4MmY1NmM1MTI4ZGFjZWEwYjBlMWIzNjFlZjZjM2EwZDg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/755349d82f56c5128dacea0b0e1b361ef6c3a0d8",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/755349d82f56c5128dacea0b0e1b361ef6c3a0d8",
+      "tree": {
+        "sha": "206c8b8d7ab060b0686027bab27bcef85e4b6d9f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/206c8b8d7ab060b0686027bab27bcef85e4b6d9f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cbe4a5568cfae8cee66eb1cd9f86603cd147c36e",
+          "sha": "cbe4a5568cfae8cee66eb1cd9f86603cd147c36e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cbe4a5568cfae8cee66eb1cd9f86603cd147c36e"
+        }
+      ],
+      "message": "Tidy includes to make many headers self-contained",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T09:48:48Z"
+      },
+      "sha": "755349d82f56c5128dacea0b0e1b361ef6c3a0d8"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDYwOGJiMzZkNTE5NjgzZDZiNzIyM2JjMzZjZGJiZDkzZTU5ZjE3NWY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/608bb36d519683d6b7223bc36cdbbd93e59f175f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/608bb36d519683d6b7223bc36cdbbd93e59f175f",
+      "tree": {
+        "sha": "45dfd47250cdec2ade84b8b0c54554740a925617",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/45dfd47250cdec2ade84b8b0c54554740a925617"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/755349d82f56c5128dacea0b0e1b361ef6c3a0d8",
+          "sha": "755349d82f56c5128dacea0b0e1b361ef6c3a0d8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/755349d82f56c5128dacea0b0e1b361ef6c3a0d8"
+        }
+      ],
+      "message": "field: Inline fe_verify fields in repr headers\n\nOtherwise, the repr headers field_AxB.h would need to include field.h to\nbe self-contained but this recursive inclusion leaves clangd confused,\nsee https://github.com/clangd/clangd/issues/337 .",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T10:12:39Z"
+      },
+      "sha": "608bb36d519683d6b7223bc36cdbbd93e59f175f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQxZjYwOWM4ODU2Nzg4NGNkOTkzMzc0NGVjZWRjY2RhZTgzOTU3Mjg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/41f609c88567884cd9933744ecedccdae8395728",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/41f609c88567884cd9933744ecedccdae8395728",
+      "tree": {
+        "sha": "b8dc9a4d38c7984d8be6d4c55f05caaa361e30c6",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b8dc9a4d38c7984d8be6d4c55f05caaa361e30c6"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/608bb36d519683d6b7223bc36cdbbd93e59f175f",
+          "sha": "608bb36d519683d6b7223bc36cdbbd93e59f175f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/608bb36d519683d6b7223bc36cdbbd93e59f175f"
+        }
+      ],
+      "message": "bench_internal: Remove unnecessary includes\n\nsecp256k1.c is included anyway, so there's no need to include the\nindividual _impl.h files.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T11:46:27Z"
+      },
+      "sha": "41f609c88567884cd9933744ecedccdae8395728"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBkMGQwYTc4ZmM2M2Q1NWVlYzRjNTRiM2Y5MzA3Mzc3Zjk4MTU1YTM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0d0d0a78fc63d55eec4c54b3f9307377f98155a3",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0d0d0a78fc63d55eec4c54b3f9307377f98155a3",
+      "tree": {
+        "sha": "eda61132179792945b1b15c134726d1aa0b81388",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/eda61132179792945b1b15c134726d1aa0b81388"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/41f609c88567884cd9933744ecedccdae8395728",
+          "sha": "41f609c88567884cd9933744ecedccdae8395728",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/41f609c88567884cd9933744ecedccdae8395728"
+        }
+      ],
+      "message": "group: Move definitions of constants to header\n\n SECP256K1_B and secp256k1_ge_const_g are used outside of\n group_impl.h, e.g., in ecmult_const_impl.h and ecmult_gen_impl.h,\n respectively.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T16:05:56Z"
+      },
+      "sha": "0d0d0a78fc63d55eec4c54b3f9307377f98155a3"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGViOWY2MTVmYzAzOWRlYWRmZTZhYTA0MmYwMmU2YTcwOTFjNTc5YmY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eb9f615fc039deadfe6aa042f02e6a7091c579bf",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eb9f615fc039deadfe6aa042f02e6a7091c579bf",
+      "tree": {
+        "sha": "85ca4e55cc2474b8890fe682be57098d7e61fa38",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/85ca4e55cc2474b8890fe682be57098d7e61fa38"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0d0d0a78fc63d55eec4c54b3f9307377f98155a3",
+          "sha": "0d0d0a78fc63d55eec4c54b3f9307377f98155a3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0d0d0a78fc63d55eec4c54b3f9307377f98155a3"
+        }
+      ],
+      "message": "Include modinv32/64 like other internal modules\n\nAnd also sort the _impl.h includes.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T19:45:42Z"
+      },
+      "sha": "eb9f615fc039deadfe6aa042f02e6a7091c579bf"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDkyNTA3MGUzMzJjMTdkY2Q4YTlkMjFhYzlmOTVmZDIwYzE1MmE3Y2Y",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+      "tree": {
+        "sha": "fd9867c686ddc9ede5a52701c87d4284004ea13b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/fd9867c686ddc9ede5a52701c87d4284004ea13b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/eb9f615fc039deadfe6aa042f02e6a7091c579bf",
+          "sha": "eb9f615fc039deadfe6aa042f02e6a7091c579bf",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/eb9f615fc039deadfe6aa042f02e6a7091c579bf"
+        }
+      ],
+      "message": "selftest: Split into .h and _impl.h",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T11:54:38Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T08:22:23Z"
+      },
+      "sha": "925070e332c17dcd8a9d21ac9f95fd20c152a7cf"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19157929839,
+      "node_id": "HRFPE_lADOAP4Jqs7F_0kLzwAAAAR15s9v",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19157929839",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+      "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
+      "created_at": "2025-08-14T11:56:54Z"
+    }
+  ],
+  "comments": []
+}
