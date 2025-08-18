@@ -42,7 +42,7 @@
     "body": "Opened in response to https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2269449070\r\n\r\n---\r\n\r\nWe use tagged hashes in `modules/musig`, `modules/schnorrsig`, `modules/ellswift`, and the proposed `modules/silentpayments`. In looking for inspiration on how to add tagged hash midstate verification for https://github.com/bitcoin-core/secp256k1/pull/1698, it seemed like a good opportunity to DRY up the code across all of the modules.\r\n\r\nI chose the convention used in the musig module as this seemed the most readable to me as a reviewer, and also allows for easily grepping for the string values. Since the tags are normally specified as strings in the BIPs, using the string values in the tests seems preferable to specifying the tags character by character (as was done in the schnorrsig and ellswift modules).\r\n\r\nIf its deemed too invasive to refactor the existing modules in this PR, I'm happy to drop the refactor commits for the ellswift and schnorrsig modules. All I need for https://github.com/bitcoin-core/secp256k1/pull/1698 is the first commit which moves the utility function out of the musig module to make it available to use in the silent payments module.",
     "labels": [],
     "created_at": "2025-08-15T10:05:36Z",
-    "updated_at": "2025-08-15T16:53:10Z",
+    "updated_at": "2025-08-18T09:55:02Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -282,9 +282,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1073,
-        "stargazers_count": 2289,
-        "watchers_count": 2289,
+        "forks_count": 1074,
+        "stargazers_count": 2292,
+        "watchers_count": 2292,
         "size": 12611,
         "default_branch": "master",
         "open_issues_count": 154,
@@ -300,7 +300,7 @@
         "visibility": "public",
         "pushed_at": "2025-08-13T11:07:57Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-08-15T16:08:57Z",
+        "updated_at": "2025-08-17T13:55:22Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -330,7 +330,7 @@
     "deletions": 51,
     "changed_files": 4,
     "commits": 3,
-    "review_comments": 1,
+    "review_comments": 3,
     "comments": 0
   },
   "events": [
@@ -534,6 +534,112 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2279484546"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 410,
+      "original_line": 410,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2281848508",
+      "pull_request_review_id": 3127580548,
+      "id": 2281848508,
+      "node_id": "PRRC_kwDOAP4Jqs6IAj68",
+      "diff_hunk": "@@ -405,31 +405,22 @@ void run_ellswift_tests(void) {\n \n     /* Test hash initializers. */\n     {\n-        secp256k1_sha256 sha, sha_optimized;\n-        static const unsigned char encode_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'e', 'n', 'c', 'o', 'd', 'e'};\n-        static const unsigned char create_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'c', 'r', 'e', 'a', 't', 'e'};\n-        static const unsigned char bip324_tag[] = {'b', 'i', 'p', '3', '2', '4', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'x', 'o', 'n', 'l', 'y', '_', 'e', 'c', 'd', 'h'};\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_encode has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, encode_tag, sizeof(encode_tag));\n-        secp256k1_ellswift_sha256_init_encode(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_create has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, create_tag, sizeof(create_tag));\n-        secp256k1_ellswift_sha256_init_create(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_bip324 has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, bip324_tag, sizeof(bip324_tag));\n-        secp256k1_ellswift_sha256_init_bip324(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n+        secp256k1_sha256 sha_optimized;\n+        {\n+            unsigned char tag[] = \"secp256k1_ellswift_encode\";",
+      "path": "src/modules/ellswift/tests_impl.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "original_commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "in_reply_to_id": 2279484546,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Nice find! The commit message states \"However, it requires exactly specifying the array size, which can be\r\ncumbersome,\" but I don't think this is true.\r\n\r\nUsing the test program:\r\n\r\n```c\r\n// repro.c\r\n#include <stdio.h>\r\n\r\nint main() {\r\n    char str[] = \"hello world\";  // This should trigger the warning\r\n    printf(\"%s\\n\", str);\r\n    return 0;\r\n}\r\n```\r\n\r\nI am able to compile with gcc14:\r\n\r\n```shell\r\nnix-shell --expr 'with import <nixpkgs> {}; mkShell.override { stdenv = overrideCC stdenv gcc14; }'\r\ngcc -v\r\ngcc -Wall -Wextra -Wpedantic -Werror repro.c -o out\r\n```\r\n\r\nand able to compile with gcc15:\r\n\r\n```shell\r\nnix-shell --expr 'with import <nixpkgs> {}; mkShell.override { stdenv = overrideCC stdenv gcc15; }'\r\ngcc -v\r\ngcc -Wall -Wextra -Wpedantic -Werror repro.c -o out\r\n```\r\n\r\nHowever, if I specify the array size, I can reproduce the error:\r\n\r\n```c\r\n// repro.c\r\n#include <stdio.h>\r\n\r\nint main() {\r\n    char str[11] = \"hello world\";  // This should trigger the warning\r\n    printf(\"%s\\n\", str);\r\n    return 0;\r\n}\r\n```\r\n\r\nNo error with:\r\n\r\n```shell\r\nnix-shell --expr 'with import <nixpkgs> {}; mkShell.override { stdenv = overrideCC stdenv gcc14; }'\r\ngcc -Wall -Wextra -Wpedantic -Werror repro.c -o out\r\n```\r\n\r\nAnd an error with:\r\n\r\n```shell\r\nnix-shell --expr 'with import <nixpkgs> {}; mkShell.override { stdenv = overrideCC stdenv gcc15; }'\r\ngcc -Wall -Wextra -Wpedantic -Werror repro.c -o out\r\n\r\nrepro.c: In function ‘main’:\r\nrepro.c:4:20: error: initializer-string for array of ‘char’ truncates NUL terminator but destination lacks ‘nonstring’ attribute (12 chars into 11 available) [-Werror=unterminated-string-initialization]\r\n    4 |     char str[11] = \"hello world\";  // This should trigger the warning\r\n      |                    ^~~~~~~~~~~~~\r\ncc1: all warnings being treated as errors\r\n```\r\n\r\n---\r\n\r\nBased on the above, I'd recommend we prefer the approach in this PR of not specifying the array size and perhaps document it as the preferred convention going forward? I find being able to specify the tag as a string to be much more reviewable than specifying the tag as an array of characters.\r\n\r\nThat being said, also happy to go the other way and update the musig tests to match the other modules if thats the preferred convention, as I think the main benefit is to have all of the modules follow the same convention.\r\n\r\n",
+      "created_at": "2025-08-18T09:32:45Z",
+      "updated_at": "2025-08-18T09:32:46Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1725#discussion_r2281848508",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2281848508"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 410,
+      "original_line": 410,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2281907097",
+      "pull_request_review_id": 3127669951,
+      "id": 2281907097,
+      "node_id": "PRRC_kwDOAP4Jqs6IAyOZ",
+      "diff_hunk": "@@ -405,31 +405,22 @@ void run_ellswift_tests(void) {\n \n     /* Test hash initializers. */\n     {\n-        secp256k1_sha256 sha, sha_optimized;\n-        static const unsigned char encode_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'e', 'n', 'c', 'o', 'd', 'e'};\n-        static const unsigned char create_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'c', 'r', 'e', 'a', 't', 'e'};\n-        static const unsigned char bip324_tag[] = {'b', 'i', 'p', '3', '2', '4', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'x', 'o', 'n', 'l', 'y', '_', 'e', 'c', 'd', 'h'};\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_encode has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, encode_tag, sizeof(encode_tag));\n-        secp256k1_ellswift_sha256_init_encode(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_create has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, create_tag, sizeof(create_tag));\n-        secp256k1_ellswift_sha256_init_create(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_bip324 has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, bip324_tag, sizeof(bip324_tag));\n-        secp256k1_ellswift_sha256_init_bip324(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n+        secp256k1_sha256 sha_optimized;\n+        {\n+            unsigned char tag[] = \"secp256k1_ellswift_encode\";",
+      "path": "src/modules/ellswift/tests_impl.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "original_commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "in_reply_to_id": 2279484546,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "To convince myself, I also verified with a few versions of clang, e.g.,:\r\n\r\n```shell\r\nnix-shell --expr 'with import <nixpkgs> {}; mkShell.override { stdenv = llvmPackages_16.stdenv; }'\r\nclang -Wall -Wextra -Wpedantic -Werror -Wmost repro.c\r\n```\r\n",
+      "created_at": "2025-08-18T09:55:02Z",
+      "updated_at": "2025-08-18T09:55:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1725#discussion_r2281907097",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2281907097"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
