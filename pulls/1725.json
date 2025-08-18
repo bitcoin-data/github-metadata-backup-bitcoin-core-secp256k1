@@ -40,9 +40,28 @@
       "patch_url": null
     },
     "body": "Opened in response to https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2269449070\r\n\r\n---\r\n\r\nWe use tagged hashes in `modules/musig`, `modules/schnorrsig`, `modules/ellswift`, and the proposed `modules/silentpayments`. In looking for inspiration on how to add tagged hash midstate verification for https://github.com/bitcoin-core/secp256k1/pull/1698, it seemed like a good opportunity to DRY up the code across all of the modules.\r\n\r\nI chose the convention used in the musig module as this seemed the most readable to me as a reviewer, and also allows for easily grepping for the string values. Since the tags are normally specified as strings in the BIPs, using the string values in the tests seems preferable to specifying the tags character by character (as was done in the schnorrsig and ellswift modules).\r\n\r\nIf its deemed too invasive to refactor the existing modules in this PR, I'm happy to drop the refactor commits for the ellswift and schnorrsig modules. All I need for https://github.com/bitcoin-core/secp256k1/pull/1698 is the first commit which moves the utility function out of the musig module to make it available to use in the silent payments module.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      },
+      {
+        "id": 5492448291,
+        "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/tweak/refactor",
+        "name": "tweak/refactor",
+        "description": "",
+        "color": "FBCA04",
+        "default": false
+      }
+    ],
     "created_at": "2025-08-15T10:05:36Z",
-    "updated_at": "2025-08-18T09:55:02Z",
+    "updated_at": "2025-08-18T10:59:25Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -330,7 +349,7 @@
     "deletions": 51,
     "changed_files": 4,
     "commits": 3,
-    "review_comments": 3,
+    "review_comments": 5,
     "comments": 0
   },
   "events": [
@@ -490,6 +509,112 @@
       "submitted_at": "2025-08-15T16:53:10Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+    },
+    {
+      "event": "reviewed",
+      "id": 3127845283,
+      "node_id": "PRR_kwDOAP4Jqs66byGj",
+      "url": null,
+      "actor": null,
+      "commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-08-18T10:44:02Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Concept ACK it's a good idea to make this consistent",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1725#pullrequestreview-3127845283",
+      "submitted_at": "2025-08-18T10:44:02Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+    },
+    {
+      "event": "labeled",
+      "id": 19200985882,
+      "node_id": "LE_lADOAP4Jqs7GLfq_zwAAAAR4d8sa",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19200985882",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-08-18T10:44:39Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 19200985894,
+      "node_id": "LE_lADOAP4Jqs7GLfq_zwAAAAR4d8sm",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19200985894",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-08-18T10:44:39Z",
+      "label": {
+        "name": "tweak/refactor",
+        "color": "FBCA04"
+      }
     }
   ],
   "comments": [
@@ -640,6 +765,112 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2281907097"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 410,
+      "original_line": 410,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2282016863",
+      "pull_request_review_id": 3127827044,
+      "id": 2282016863,
+      "node_id": "PRRC_kwDOAP4Jqs6IBNBf",
+      "diff_hunk": "@@ -405,31 +405,22 @@ void run_ellswift_tests(void) {\n \n     /* Test hash initializers. */\n     {\n-        secp256k1_sha256 sha, sha_optimized;\n-        static const unsigned char encode_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'e', 'n', 'c', 'o', 'd', 'e'};\n-        static const unsigned char create_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'c', 'r', 'e', 'a', 't', 'e'};\n-        static const unsigned char bip324_tag[] = {'b', 'i', 'p', '3', '2', '4', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'x', 'o', 'n', 'l', 'y', '_', 'e', 'c', 'd', 'h'};\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_encode has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, encode_tag, sizeof(encode_tag));\n-        secp256k1_ellswift_sha256_init_encode(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_create has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, create_tag, sizeof(create_tag));\n-        secp256k1_ellswift_sha256_init_create(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_bip324 has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, bip324_tag, sizeof(bip324_tag));\n-        secp256k1_ellswift_sha256_init_bip324(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n+        secp256k1_sha256 sha_optimized;\n+        {\n+            unsigned char tag[] = \"secp256k1_ellswift_encode\";",
+      "path": "src/modules/ellswift/tests_impl.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "original_commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "in_reply_to_id": 2279484546,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "@josibake The NUL byte resulting from `char str[] = \"hello world\"` does not hurt per se, but there are two minor issues with this: First, it's conceptually the wrong thing: If we want a char array, the simplest thing to do is to define a char array instead of a NUL-terminated string. Second and probably more relevant, it changes `sizeof(str)` to be 12 instead of 11. (See https://godbolt.org/z/da6PExKTh for demonstration. godbolt.org is the easiest way to test toy examples on many compilers.) We could, of course, accept this and always use `sizeof(str) - 1`, but it's easy to miss this. \r\n\r\nedit: Sorry, I now saw that you're aware of the `- 1` thing. And I agree, the ability to grep for the string is a good argument for the NUL-terminated string. If you ask me, I prefer to forego the grepability and define the right kind of object and have `sizeof` correct. But there's no definitive answer in the end. ",
+      "created_at": "2025-08-18T10:38:19Z",
+      "updated_at": "2025-08-18T10:43:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1725#discussion_r2282016863",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2282016863"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 410,
+      "original_line": 410,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2282068816",
+      "pull_request_review_id": 3127902133,
+      "id": 2282068816,
+      "node_id": "PRRC_kwDOAP4Jqs6IBZtQ",
+      "diff_hunk": "@@ -405,31 +405,22 @@ void run_ellswift_tests(void) {\n \n     /* Test hash initializers. */\n     {\n-        secp256k1_sha256 sha, sha_optimized;\n-        static const unsigned char encode_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'e', 'n', 'c', 'o', 'd', 'e'};\n-        static const unsigned char create_tag[] = {'s', 'e', 'c', 'p', '2', '5', '6', 'k', '1', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'c', 'r', 'e', 'a', 't', 'e'};\n-        static const unsigned char bip324_tag[] = {'b', 'i', 'p', '3', '2', '4', '_', 'e', 'l', 'l', 's', 'w', 'i', 'f', 't', '_', 'x', 'o', 'n', 'l', 'y', '_', 'e', 'c', 'd', 'h'};\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_encode has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, encode_tag, sizeof(encode_tag));\n-        secp256k1_ellswift_sha256_init_encode(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_create has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, create_tag, sizeof(create_tag));\n-        secp256k1_ellswift_sha256_init_create(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n-\n-        /* Check that hash initialized by\n-         * secp256k1_ellswift_sha256_init_bip324 has the expected\n-         * state. */\n-        secp256k1_sha256_initialize_tagged(&sha, bip324_tag, sizeof(bip324_tag));\n-        secp256k1_ellswift_sha256_init_bip324(&sha_optimized);\n-        test_sha256_eq(&sha, &sha_optimized);\n+        secp256k1_sha256 sha_optimized;\n+        {\n+            unsigned char tag[] = \"secp256k1_ellswift_encode\";",
+      "path": "src/modules/ellswift/tests_impl.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "original_commit_id": "6424805039c647c548c609d1c666a3173bddfcaa",
+      "in_reply_to_id": 2279484546,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "@real-or-random thanks for the context! That explains the `sizeof(str) - 1` for the musig examples. So it seems the choices are:\r\n\r\n1. Do something conceptually wrong for something that is slightly easier to review\r\n2. Do the conceptually correct thing for something that is slightly harder to review\r\n\r\n\"Slightly harder/easier\" is a bit hand-wavy, but the fact that we used to specify the tags as strings (and the recently added musig also adopted this convention vs staying consistent with the existing modules) indicates option 1 is the more natural option. However, it likely needs an explainer, especially for why we are using `sizeof(tag) - 1`. On the flipside, I'm guessing option 2 feels more natural for reviewers who review/write a majority of the time in C?\r\n\r\nRegardless of which convention is chosen, I do think its worth documenting in `CONTRIBUTING.md`. I'll add a commit for that once reviewers have weighed in on which convention they prefer.",
+      "created_at": "2025-08-18T10:59:25Z",
+      "updated_at": "2025-08-18T10:59:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1725#discussion_r2282068816",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2282068816"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1725"
