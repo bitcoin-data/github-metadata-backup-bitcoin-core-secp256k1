@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1724/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1724/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/024e15423b8f1e958517e874da151736d5de3c5a",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/8cce3922b4d330356a621dbcbe354527391f0cad",
     "number": 1724,
     "state": "open",
     "locked": false,
@@ -61,11 +61,11 @@
       }
     ],
     "created_at": "2025-08-14T11:16:39Z",
-    "updated_at": "2025-08-14T12:46:08Z",
+    "updated_at": "2025-08-18T15:48:37Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "a3865ba3ae9e0c06535c9a3da293542958d33891",
+    "merge_commit_sha": "e54e73978bfcc99932592a27b24a8985293b8772",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -73,7 +73,7 @@
     "head": {
       "label": "real-or-random:202508-selfcontained",
       "ref": "202508-selfcontained",
-      "sha": "024e15423b8f1e958517e874da151736d5de3c5a",
+      "sha": "8cce3922b4d330356a621dbcbe354527391f0cad",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -183,7 +183,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-08-14T12:46:07Z",
+        "pushed_at": "2025-08-18T15:45:22Z",
         "created_at": "2017-06-07T05:39:43Z",
         "updated_at": "2025-03-10T14:14:26Z",
         "allow_forking": true,
@@ -207,7 +207,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "d599714147b20dda092ec4af44ef4174d584bb7d",
+      "sha": "d2dcf52091d529f46c4847c909268ee051f630bd",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -301,12 +301,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1072,
-        "stargazers_count": 2287,
-        "watchers_count": 2287,
-        "size": 12611,
+        "forks_count": 1074,
+        "stargazers_count": 2292,
+        "watchers_count": 2292,
+        "size": 12615,
         "default_branch": "master",
-        "open_issues_count": 152,
+        "open_issues_count": 153,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -317,9 +317,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-08-13T11:07:57Z",
+        "pushed_at": "2025-08-18T13:28:34Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-08-14T07:29:37Z",
+        "updated_at": "2025-08-18T13:28:39Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,12 +345,12 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 236,
+    "additions": 237,
     "deletions": 170,
-    "changed_files": 30,
-    "commits": 13,
+    "changed_files": 31,
+    "commits": 14,
     "review_comments": 2,
-    "comments": 1
+    "comments": 2
   },
   "events": [
     {
@@ -480,9 +480,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-08-14T12:27:53Z",
-      "updated_at": "2025-08-14T12:27:53Z",
+      "updated_at": "2025-08-18T13:30:35Z",
       "author_association": "CONTRIBUTOR",
-      "body": "#### Remaining pain points that I noticed\r\n\r\n - There's no way to enforce that we keep this in the future. I consider adding a check to CI that just compiles all files individually (with a list of exceptions for now).\r\n - It's still annoying to include the right header (=non-impl) `.h` files. CI can tell us if we forget a file but not if we have too many files. Our inclusion structure is too complicated for [tools](https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/WhyIWYU.md) to figure out automatically (e.g., you should include `scalar.h` even if some defs you use are in `scalar_4x64.h`, and I'm not convinced that adding special code comments to explain our structure to tools is the right approach. I'd tend to think that we should just do the opposite thing and create an \"umbrella\" header `internal.h` that includes all the internal headers. This makes it simpler for the developer, and the only cost is perhaps a slightly increased compilation time but *only when individual files are compiled*, i.e., in your IDE if you choose to use clangd or some other language server). But the project is not huge, and I doubt that this will be a problem.\r\n - `util.h` is a bit special. It has mostly preprocessor stuff and some small functions, so I guess it's acceptable not to have a `util_impl.h`. But `util.h` currently contains also the preprocessor logic that picks the scalar, field, and int128 implementations based on the availability of widemul implementations. And this logic needs to happen before any of the resulting macros are used. So I think that part serves a different purpose than what the name \"util\" suggests and should be moved to a separate file.",
+      "body": "#### Remaining pain points that I noticed\r\n\r\n - There's no way to enforce that we keep this in the future. I consider adding a check to CI that just compiles all files individually (with a list of exceptions for now).\r\n - It's still annoying to include the right header (=non-impl) `.h` files. CI can tell us if we forget a file but not if we have too many files. Our inclusion structure is too complicated for [tools](https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/WhyIWYU.md) to figure out automatically (e.g., you should include `scalar.h` even if some defs you use are in `scalar_4x64.h`, and I'm not convinced that adding special code comments to explain our structure to tools is the right approach. I'd tend to think that we should just do the opposite thing and create an \"umbrella\" header `internal.h` that includes all the internal headers. This makes it simpler for the developer, and the only cost is perhaps a slightly increased compilation time but *only when individual files are compiled*, i.e., in your IDE if you choose to use clangd or some other language server). But the project is not huge, and I doubt that this will be a problem.\r\n - `util.h` is a bit special. It has mostly preprocessor stuff and some small functions, so I guess it's acceptable not to have a `util_impl.h`. But `util.h` currently contains also the preprocessor logic that picks the scalar, field, and int128 implementations based on the availability of widemul implementations. And this logic needs to happen before any of the resulting macros are used. So I think that part serves a different purpose than what the name \"util\" suggests and should be moved to a separate file.\r\n - We should also have headers for module implementation files, e.g., the extrakeys module \"exports\" `secp256k1_extrakeys_ge_even_y` which is used in the musig module.  ",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -575,526 +575,6 @@
       "created_at": "2025-08-14T12:45:34Z"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDcxYzBkMmNjM2RhM2IwMTc1ZGRmZTRkYTZiNDFiOWJmZDZkZGE3YmI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb",
-      "tree": {
-        "sha": "3638a70c175680072d798e878f66e7bb10128395",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3638a70c175680072d798e878f66e7bb10128395"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d599714147b20dda092ec4af44ef4174d584bb7d",
-          "sha": "d599714147b20dda092ec4af44ef4174d584bb7d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d599714147b20dda092ec4af44ef4174d584bb7d"
-        }
-      ],
-      "message": "tests: Make ecmult tests use internal scratch API\n\nThis has the advantage of keeping the ecmult tests focused on the ecmult\ncode, and so this change might be desirable anyway. That's why it is\ndone in a separate commit, so it can be kept if we ever bring back the\npublic scratch space API.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T08:09:11Z"
-      },
-      "sha": "71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBlYjhlZTc0NjVmNjcxYzZhNjI3OGU4MTExYTMzZGExODA3N2U3YWM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0eb8ee7465f671c6a6278e8111a33da18077e7ac",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0eb8ee7465f671c6a6278e8111a33da18077e7ac",
-      "tree": {
-        "sha": "494bd8ba23d56a89522f1c80a6c6eb201671faa2",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/494bd8ba23d56a89522f1c80a6c6eb201671faa2"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb",
-          "sha": "71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/71c0d2cc3da3b0175ddfe4da6b41b9bfd6dda7bb"
-        }
-      ],
-      "message": "Remove ununsed scratch space functions\n\nThese were in the public API at some point but they have been made\nstatic in 712e7f8722eba5dec2bc6b37d75aadeb6f6e633b.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T07:08:27Z"
-      },
-      "sha": "0eb8ee7465f671c6a6278e8111a33da18077e7ac"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDVjZmM4YjA3NDVlMzRmNDVlMDUzMTBjZmM2YTdlNzE1YmEyYWJlNmQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d",
-      "tree": {
-        "sha": "0e2ae54a433e0db2980ff9b2f25edd31ddc20f8a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/0e2ae54a433e0db2980ff9b2f25edd31ddc20f8a"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0eb8ee7465f671c6a6278e8111a33da18077e7ac",
-          "sha": "0eb8ee7465f671c6a6278e8111a33da18077e7ac",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0eb8ee7465f671c6a6278e8111a33da18077e7ac"
-        }
-      ],
-      "message": "scalar: Move definitions of constants to header",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T08:17:29Z"
-      },
-      "sha": "5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGZiYjVjOTMyMTM5YzNmMzk3YjVjMGIwMmY0YzlmMDhjYWM0MDZhYTU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fbb5c932139c3f397b5c0b02f4c9f08cac406aa5",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fbb5c932139c3f397b5c0b02f4c9f08cac406aa5",
-      "tree": {
-        "sha": "4513fc9684fbf4534e6322d1bd3002b44686e42b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4513fc9684fbf4534e6322d1bd3002b44686e42b"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d",
-          "sha": "5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5cfc8b0745e34f45e05310cfc6a7e715ba2abe6d"
-        }
-      ],
-      "message": "scalar: Move EXHAUSTIVE_TEST_LAMBDA to header",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T11:45:18Z"
-      },
-      "sha": "fbb5c932139c3f397b5c0b02f4c9f08cac406aa5"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDQ2ZmY3OThkYTQ4YjA2MjlhNGIxOTlhMzc5ZTAzYWZhNDJiY2U2OGM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/46ff798da48b0629a4b199a379e03afa42bce68c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/46ff798da48b0629a4b199a379e03afa42bce68c",
-      "tree": {
-        "sha": "db88f8da7e84b1e11da6f4def0e7848bd2dc35d1",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/db88f8da7e84b1e11da6f4def0e7848bd2dc35d1"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fbb5c932139c3f397b5c0b02f4c9f08cac406aa5",
-          "sha": "fbb5c932139c3f397b5c0b02f4c9f08cac406aa5",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fbb5c932139c3f397b5c0b02f4c9f08cac406aa5"
-        }
-      ],
-      "message": "Create header for internal API in secp256k1.c",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T08:49:45Z"
-      },
-      "sha": "46ff798da48b0629a4b199a379e03afa42bce68c"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDRlMDVjNmUwNjFhYzc1ODkxMTg1ZjZmMjQ1ZjI5YTBmZWY0ODI5MjU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4e05c6e061ac75891185f6f245f29a0fef482925",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4e05c6e061ac75891185f6f245f29a0fef482925",
-      "tree": {
-        "sha": "8fd184c69476a3df44e87f27538347aec12810f7",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8fd184c69476a3df44e87f27538347aec12810f7"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/46ff798da48b0629a4b199a379e03afa42bce68c",
-          "sha": "46ff798da48b0629a4b199a379e03afa42bce68c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/46ff798da48b0629a4b199a379e03afa42bce68c"
-        }
-      ],
-      "message": "gitignore: Add precompiled headers (.gch and .pch)\n\nWe don't use precompiled headers in our builds but those files are what\nyou get if you invoke gcc or clang, respectively, on a .h file, e.g., to check\nif it's self-contained.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T08:53:24Z"
-      },
-      "sha": "4e05c6e061ac75891185f6f245f29a0fef482925"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDk3MGEyOTViYzAxNjYzYWI3NTNiMGY2MGRjYzY4NTM1N2VlNzhiOTc",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/970a295bc01663ab753b0f60dcc685357ee78b97",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/970a295bc01663ab753b0f60dcc685357ee78b97",
-      "tree": {
-        "sha": "b64df1937b5c384dfb1de8661b944f56954251d9",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b64df1937b5c384dfb1de8661b944f56954251d9"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4e05c6e061ac75891185f6f245f29a0fef482925",
-          "sha": "4e05c6e061ac75891185f6f245f29a0fef482925",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4e05c6e061ac75891185f6f245f29a0fef482925"
-        }
-      ],
-      "message": "group: Add missing declarations to internal header",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T09:05:26Z"
-      },
-      "sha": "970a295bc01663ab753b0f60dcc685357ee78b97"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGQzOWM0MWY1ZjA1YTllMTQxYTU0Nzg0NzUzZGRhZTZlMmM3MDZlYWQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d39c41f5f05a9e141a54784753ddae6e2c706ead",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d39c41f5f05a9e141a54784753ddae6e2c706ead",
-      "tree": {
-        "sha": "18982ac34cfa2a7ff0f406a34203c9fb719837ad",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/18982ac34cfa2a7ff0f406a34203c9fb719837ad"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/970a295bc01663ab753b0f60dcc685357ee78b97",
-          "sha": "970a295bc01663ab753b0f60dcc685357ee78b97",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/970a295bc01663ab753b0f60dcc685357ee78b97"
-        }
-      ],
-      "message": "Tidy includes to make many headers self-contained",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T09:48:48Z"
-      },
-      "sha": "d39c41f5f05a9e141a54784753ddae6e2c706ead"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBhN2NhNWZjYWMzYTQ1MzBkYWZmMTdkZmRmYTczN2E5MTBiMzVmYjM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0a7ca5fcac3a4530daff17dfdfa737a910b35fb3",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0a7ca5fcac3a4530daff17dfdfa737a910b35fb3",
-      "tree": {
-        "sha": "b3d6819bb4aa53c8c02bd44eaee241545c19b003",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b3d6819bb4aa53c8c02bd44eaee241545c19b003"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d39c41f5f05a9e141a54784753ddae6e2c706ead",
-          "sha": "d39c41f5f05a9e141a54784753ddae6e2c706ead",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d39c41f5f05a9e141a54784753ddae6e2c706ead"
-        }
-      ],
-      "message": "field: Inline fe_verify fields in repr headers\n\nOtherwise, the repr headers field_AxB.h would need to include field.h to\nbe self-contained but this recursive inclusion leaves clangd confused,\nsee https://github.com/clangd/clangd/issues/337 .",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T10:12:39Z"
-      },
-      "sha": "0a7ca5fcac3a4530daff17dfdfa737a910b35fb3"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGYwNWE4OWVjNmYzYWE3NDE5ODJhM2EyMTdkYTA5Y2Q4Y2NkNDlhNWQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f05a89ec6f3aa741982a3a217da09cd8ccd49a5d",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f05a89ec6f3aa741982a3a217da09cd8ccd49a5d",
-      "tree": {
-        "sha": "1a87d53a23e22905ffc8ed35572177d90621bd9f",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/1a87d53a23e22905ffc8ed35572177d90621bd9f"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0a7ca5fcac3a4530daff17dfdfa737a910b35fb3",
-          "sha": "0a7ca5fcac3a4530daff17dfdfa737a910b35fb3",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0a7ca5fcac3a4530daff17dfdfa737a910b35fb3"
-        }
-      ],
-      "message": "bench_internal: Remove unnecessary includes\n\nsecp256k1.c is included anyway, so there's no need to include the\nindividual _impl.h files.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T11:46:27Z"
-      },
-      "sha": "f05a89ec6f3aa741982a3a217da09cd8ccd49a5d"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDhhMDA3Y2Q1NWIzNWY2MmJlMDZjMTQyNzE3ODk0MmRhMDU1NzcwYjU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8a007cd55b35f62be06c1427178942da055770b5",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8a007cd55b35f62be06c1427178942da055770b5",
-      "tree": {
-        "sha": "35838020f39e669c5b966fa2cc66333dc1878b7a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/35838020f39e669c5b966fa2cc66333dc1878b7a"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f05a89ec6f3aa741982a3a217da09cd8ccd49a5d",
-          "sha": "f05a89ec6f3aa741982a3a217da09cd8ccd49a5d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f05a89ec6f3aa741982a3a217da09cd8ccd49a5d"
-        }
-      ],
-      "message": "group: Move definitions of constants to header\n\n SECP256K1_B and secp256k1_ge_const_g are used outside of\n group_impl.h, e.g., in ecmult_const_impl.h and ecmult_gen_impl.h,\n respectively.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T16:05:56Z"
-      },
-      "sha": "8a007cd55b35f62be06c1427178942da055770b5"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGE5ZmU2ZTQ5YTZmM2YwMjM1MDUxMjA0NmUzZjVhYTBmNmUyOTQyMzM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a9fe6e49a6f3f02350512046e3f5aa0f6e294233",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a9fe6e49a6f3f02350512046e3f5aa0f6e294233",
-      "tree": {
-        "sha": "b3aaf690cb53fa989438b1e36d68070be4a45a4c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b3aaf690cb53fa989438b1e36d68070be4a45a4c"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8a007cd55b35f62be06c1427178942da055770b5",
-          "sha": "8a007cd55b35f62be06c1427178942da055770b5",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8a007cd55b35f62be06c1427178942da055770b5"
-        }
-      ],
-      "message": "Include modinv32/64 like other internal modules\n\nAnd also sort the _impl.h includes.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-13T19:45:42Z"
-      },
-      "sha": "a9fe6e49a6f3f02350512046e3f5aa0f6e294233"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDAyNGUxNTQyM2I4ZjFlOTU4NTE3ZTg3NGRhMTUxNzM2ZDVkZTNjNWE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/024e15423b8f1e958517e874da151736d5de3c5a",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/024e15423b8f1e958517e874da151736d5de3c5a",
-      "tree": {
-        "sha": "deee104e5e201e2cd04632dbbb71ca1ecce1a1bc",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/deee104e5e201e2cd04632dbbb71ca1ecce1a1bc"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a9fe6e49a6f3f02350512046e3f5aa0f6e294233",
-          "sha": "a9fe6e49a6f3f02350512046e3f5aa0f6e294233",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a9fe6e49a6f3f02350512046e3f5aa0f6e294233"
-        }
-      ],
-      "message": "selftest: Split into .h and _impl.h",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T12:46:02Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2025-08-14T08:22:23Z"
-      },
-      "sha": "024e15423b8f1e958517e874da151736d5de3c5a"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 19158792391,
       "node_id": "HRFPE_lADOAP4Jqs7F_0kLzwAAAAR18_jH",
@@ -1123,6 +603,652 @@
       "commit_id": "024e15423b8f1e958517e874da151736d5de3c5a",
       "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/024e15423b8f1e958517e874da151736d5de3c5a",
       "created_at": "2025-08-14T12:46:08Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc2Y2U2MDdkZjQ1MzVmMGU2ZDU5Y2M4ZTJlODJmN2NhNzEzZmJjODM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/76ce607df4535f0e6d59cc8e2e82f7ca713fbc83",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/76ce607df4535f0e6d59cc8e2e82f7ca713fbc83",
+      "tree": {
+        "sha": "d1c69a8f55581054483a75c8f26b777bbf6663d9",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d1c69a8f55581054483a75c8f26b777bbf6663d9"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d2dcf52091d529f46c4847c909268ee051f630bd",
+          "sha": "d2dcf52091d529f46c4847c909268ee051f630bd",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d2dcf52091d529f46c4847c909268ee051f630bd"
+        }
+      ],
+      "message": "tests: Make ecmult tests use internal scratch API\n\nThis has the advantage of keeping the ecmult tests focused on the ecmult\ncode, and so this change might be desirable anyway. That's why it is\ndone in a separate commit, so it can be kept if we ever bring back the\npublic scratch space API.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:09:11Z"
+      },
+      "sha": "76ce607df4535f0e6d59cc8e2e82f7ca713fbc83"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGJiMzdhZDhmYTA1ZTdlZTBjNWQ5NjVlZjlkODdkNmU1MGJmNTliY2E",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca",
+      "tree": {
+        "sha": "2d5c6731e2ec6b11b86873e4c394ecc26da53a01",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2d5c6731e2ec6b11b86873e4c394ecc26da53a01"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/76ce607df4535f0e6d59cc8e2e82f7ca713fbc83",
+          "sha": "76ce607df4535f0e6d59cc8e2e82f7ca713fbc83",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/76ce607df4535f0e6d59cc8e2e82f7ca713fbc83"
+        }
+      ],
+      "message": "Remove ununsed scratch space functions\n\nThese were in the public API at some point but they have been made\nstatic in 712e7f8722eba5dec2bc6b37d75aadeb6f6e633b.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T07:08:27Z"
+      },
+      "sha": "bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ3MmYzNjEzY2M1ODc5YzFkOWI3NWEwMTYwYzZlMjExYzEzNmViNmE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d72f3613cc5879c1d9b75a0160c6e211c136eb6a",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d72f3613cc5879c1d9b75a0160c6e211c136eb6a",
+      "tree": {
+        "sha": "a27efcf27afd8202a41477f991cfcb5a9ab67a2d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a27efcf27afd8202a41477f991cfcb5a9ab67a2d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca",
+          "sha": "bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bb37ad8fa05e7ee0c5d965ef9d87d6e50bf59bca"
+        }
+      ],
+      "message": "scalar: Move definitions of constants to header",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:17:29Z"
+      },
+      "sha": "d72f3613cc5879c1d9b75a0160c6e211c136eb6a"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDI5ZTgyZTc2NDllODA3ZTBjMThkMjcwMjExNTBiMmNmZWQwNDVlN2Y",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/29e82e7649e807e0c18d27021150b2cfed045e7f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/29e82e7649e807e0c18d27021150b2cfed045e7f",
+      "tree": {
+        "sha": "dad2aa128ed3da7ef0447c12103c42b6c43c5ed7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/dad2aa128ed3da7ef0447c12103c42b6c43c5ed7"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d72f3613cc5879c1d9b75a0160c6e211c136eb6a",
+          "sha": "d72f3613cc5879c1d9b75a0160c6e211c136eb6a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d72f3613cc5879c1d9b75a0160c6e211c136eb6a"
+        }
+      ],
+      "message": "scalar: Move EXHAUSTIVE_TEST_LAMBDA to header",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T11:45:18Z"
+      },
+      "sha": "29e82e7649e807e0c18d27021150b2cfed045e7f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDMzMDRjZTBjOTkzMjExYTFkMjVlOWYzZjcyY2YyNzUwYjkzMTEwMTY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/3304ce0c993211a1d25e9f3f72cf2750b9311016",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/3304ce0c993211a1d25e9f3f72cf2750b9311016",
+      "tree": {
+        "sha": "47ceb6d62d0431bb056ff62f19863291da5d85d9",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/47ceb6d62d0431bb056ff62f19863291da5d85d9"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/29e82e7649e807e0c18d27021150b2cfed045e7f",
+          "sha": "29e82e7649e807e0c18d27021150b2cfed045e7f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/29e82e7649e807e0c18d27021150b2cfed045e7f"
+        }
+      ],
+      "message": "Create header for internal API in secp256k1.c",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:49:45Z"
+      },
+      "sha": "3304ce0c993211a1d25e9f3f72cf2750b9311016"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGYxODFhZjAwZDc3NzNhYzE1MDI0M2RjMWExZTdlMDYyNTI1MjI5ZWU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f181af00d7773ac150243dc1a1e7e062525229ee",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f181af00d7773ac150243dc1a1e7e062525229ee",
+      "tree": {
+        "sha": "5c018e2baae4002b494f149685c871d2c2e9d2be",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5c018e2baae4002b494f149685c871d2c2e9d2be"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/3304ce0c993211a1d25e9f3f72cf2750b9311016",
+          "sha": "3304ce0c993211a1d25e9f3f72cf2750b9311016",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/3304ce0c993211a1d25e9f3f72cf2750b9311016"
+        }
+      ],
+      "message": "gitignore: Add precompiled headers (.gch and .pch)\n\nWe don't use precompiled headers in our builds but those files are what\nyou get if you invoke gcc or clang, respectively, on a .h file, e.g., to check\nif it's self-contained.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T08:53:24Z"
+      },
+      "sha": "f181af00d7773ac150243dc1a1e7e062525229ee"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDE1MWEyZGEwYWU5M2IwYjE0NTg5MjEyMDE3YjMwYTNkMWY1NzU5MDI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/151a2da0ae93b0b14589212017b30a3d1f575902",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/151a2da0ae93b0b14589212017b30a3d1f575902",
+      "tree": {
+        "sha": "4466f1a170dea06d2ce1d2fdd0d5e317ac340c07",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4466f1a170dea06d2ce1d2fdd0d5e317ac340c07"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f181af00d7773ac150243dc1a1e7e062525229ee",
+          "sha": "f181af00d7773ac150243dc1a1e7e062525229ee",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f181af00d7773ac150243dc1a1e7e062525229ee"
+        }
+      ],
+      "message": "group: Add missing declarations to internal header",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T09:05:26Z"
+      },
+      "sha": "151a2da0ae93b0b14589212017b30a3d1f575902"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDI1MGM2MTQ1MGYzNmU3OTg2NjU1N2ViNzhiZDc2M2FjY2ViZDE5OTg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/250c61450f36e79866557eb78bd763accebd1998",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/250c61450f36e79866557eb78bd763accebd1998",
+      "tree": {
+        "sha": "b255d70ae5f9de9c5694587f49b37c3b1a1194be",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b255d70ae5f9de9c5694587f49b37c3b1a1194be"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/151a2da0ae93b0b14589212017b30a3d1f575902",
+          "sha": "151a2da0ae93b0b14589212017b30a3d1f575902",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/151a2da0ae93b0b14589212017b30a3d1f575902"
+        }
+      ],
+      "message": "Tidy includes to make many headers self-contained",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T09:48:48Z"
+      },
+      "sha": "250c61450f36e79866557eb78bd763accebd1998"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDg5NjlkZWI5NDI4YzNlMjU0ZmFmMWM4ZjM4YzBhMDBkZTBiMDk5YWQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8969deb9428c3e254faf1c8f38c0a00de0b099ad",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8969deb9428c3e254faf1c8f38c0a00de0b099ad",
+      "tree": {
+        "sha": "74a559d8a1e58489d165071544e9e76a8bd2ca7f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/74a559d8a1e58489d165071544e9e76a8bd2ca7f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/250c61450f36e79866557eb78bd763accebd1998",
+          "sha": "250c61450f36e79866557eb78bd763accebd1998",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/250c61450f36e79866557eb78bd763accebd1998"
+        }
+      ],
+      "message": "field: Inline fe_verify fields in repr headers\n\nOtherwise, the repr headers field_AxB.h would need to include field.h to\nbe self-contained but this recursive inclusion leaves clangd confused,\nsee https://github.com/clangd/clangd/issues/337 .",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T10:12:39Z"
+      },
+      "sha": "8969deb9428c3e254faf1c8f38c0a00de0b099ad"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBlMTc0MDNiYjY1MzNiZTM5Yzg5MmJjODdjMmMwNDNlZTkzNWM2OWI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0e17403bb6533be39c892bc87c2c043ee935c69b",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0e17403bb6533be39c892bc87c2c043ee935c69b",
+      "tree": {
+        "sha": "fa710ea814e95c7f5f7cd5093724553a8312bdb2",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/fa710ea814e95c7f5f7cd5093724553a8312bdb2"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8969deb9428c3e254faf1c8f38c0a00de0b099ad",
+          "sha": "8969deb9428c3e254faf1c8f38c0a00de0b099ad",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8969deb9428c3e254faf1c8f38c0a00de0b099ad"
+        }
+      ],
+      "message": "bench_internal: Remove unnecessary includes\n\nsecp256k1.c is included anyway, so there's no need to include the\nindividual _impl.h files.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T11:46:27Z"
+      },
+      "sha": "0e17403bb6533be39c892bc87c2c043ee935c69b"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGI3ODQwYmU2ZGNiZDg2NWZlNjU5ZTg1OThiNzZkYjdmMTIzODYxZjY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b7840be6dcbd865fe659e8598b76db7f123861f6",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b7840be6dcbd865fe659e8598b76db7f123861f6",
+      "tree": {
+        "sha": "edd61bb7c250e5578cbe5bed1878c8cd31c3824d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/edd61bb7c250e5578cbe5bed1878c8cd31c3824d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0e17403bb6533be39c892bc87c2c043ee935c69b",
+          "sha": "0e17403bb6533be39c892bc87c2c043ee935c69b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0e17403bb6533be39c892bc87c2c043ee935c69b"
+        }
+      ],
+      "message": "group: Move definitions of constants to header\n\n SECP256K1_B and secp256k1_ge_const_g are used outside of\n group_impl.h, e.g., in ecmult_const_impl.h and ecmult_gen_impl.h,\n respectively.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T16:05:56Z"
+      },
+      "sha": "b7840be6dcbd865fe659e8598b76db7f123861f6"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDVhYzY5MjlmNTQ4MTg2NGRkMmQ5YjRlMjkxNzA1MWRhNzJjNDMyOGM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5ac6929f5481864dd2d9b4e2917051da72c4328c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5ac6929f5481864dd2d9b4e2917051da72c4328c",
+      "tree": {
+        "sha": "d11ea5f5fef05f742108cd40e9b682d2c0008b02",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d11ea5f5fef05f742108cd40e9b682d2c0008b02"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b7840be6dcbd865fe659e8598b76db7f123861f6",
+          "sha": "b7840be6dcbd865fe659e8598b76db7f123861f6",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b7840be6dcbd865fe659e8598b76db7f123861f6"
+        }
+      ],
+      "message": "Include modinv32/64 like other internal modules\n\nAnd also sort the _impl.h includes.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-13T19:45:42Z"
+      },
+      "sha": "5ac6929f5481864dd2d9b4e2917051da72c4328c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGEyZjExOGU2YTk3OWNiYjc1N2FlOGM4ZjY3ZmQ4ZjQ4ZjZlOWUwYmI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb",
+      "tree": {
+        "sha": "653bea8f6f13c994f992813fa5a009dc286c7da9",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/653bea8f6f13c994f992813fa5a009dc286c7da9"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5ac6929f5481864dd2d9b4e2917051da72c4328c",
+          "sha": "5ac6929f5481864dd2d9b4e2917051da72c4328c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5ac6929f5481864dd2d9b4e2917051da72c4328c"
+        }
+      ],
+      "message": "selftest: Split into .h and _impl.h",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-14T08:22:23Z"
+      },
+      "sha": "a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDhjY2UzOTIyYjRkMzMwMzU2YTYyMWRiY2JlMzU0NTI3MzkxZjBjYWQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8cce3922b4d330356a621dbcbe354527391f0cad",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8cce3922b4d330356a621dbcbe354527391f0cad",
+      "tree": {
+        "sha": "a88b9987112128acd4259da823fe866b85cf678d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a88b9987112128acd4259da823fe866b85cf678d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb",
+          "sha": "a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a2f118e6a979cbb757ae8c8f67fd8f48f6e9e0bb"
+        }
+      ],
+      "message": "ecmult_gen: Export _ecmult_gen_context_is_built()",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:45:18Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-08-18T15:43:01Z"
+      },
+      "sha": "8cce3922b4d330356a621dbcbe354527391f0cad"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19206845098,
+      "node_id": "HRFPE_lADOAP4Jqs7F_0kLzwAAAAR40TKq",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19206845098",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "8cce3922b4d330356a621dbcbe354527391f0cad",
+      "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/8cce3922b4d330356a621dbcbe354527391f0cad",
+      "created_at": "2025-08-18T15:45:23Z"
+    },
+    {
+      "event": "commented",
+      "id": 3197473753,
+      "node_id": "IC_kwDOAP4Jqs6-lZPZ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3197473753",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-08-18T15:48:37Z",
+      "updated_at": "2025-08-18T15:48:37Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Added another commit that fixes a missing declaration in `ecmult_gen.h`",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1724#issuecomment-3197473753",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1724"
     }
   ],
   "comments": [
@@ -1188,7 +1314,7 @@
       "path": "src/secp256k1.c",
       "position": 30,
       "original_position": 30,
-      "commit_id": "024e15423b8f1e958517e874da151736d5de3c5a",
+      "commit_id": "8cce3922b4d330356a621dbcbe354527391f0cad",
       "original_commit_id": "925070e332c17dcd8a9d21ac9f95fd20c152a7cf",
       "in_reply_to_id": null,
       "user": {
