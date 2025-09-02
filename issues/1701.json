@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1701/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1701",
     "number": 1701,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "not_planned",
     "title": "Benchmark CPU cycles",
     "body": "## Proposal: Replace Wall-Clock Time Measurements with CPU Cycle Counting in Benchmarks\n\n### Summary\n\nI propose replacing the current `gettimeofday()`-based timing measurements in the benchmark suite with CPU cycle counting using hardware performance counters (`RDTSC`). This change would significantly improve benchmark reliability, precision, and consistency.\n\n### Current Issues with Time-Based Measurements\nThe current benchmarking implementation in [bench.h](https://github.com/bitcoin-core/secp256k1/blob/master/src/bench.h) uses wall-clock time measurements with microsecond precision:\n```c\nstatic int64_t gettime_i64(void) {\n    struct timeval tv;\n    gettimeofday(&tv, NULL);\n    return (int64_t)tv.tv_usec + (int64_t)tv.tv_sec * 1000000LL;\n}\n```\n\nThis approach has several significant limitations:\n\n1.  **Limited Precision:** Microsecond resolution is insufficient for modern CPUs where cryptographic operations can complete in hundreds of nanoseconds\n2.  **System Interference:** Wall-clock time is affected by:\n    *   OS scheduler interrupts and context switches\n    *   Other running processes competing for CPU time\n    *   Power management and frequency scaling\n    *   Thermal throttling\n3.  **High Variability:** Benchmark results can vary by 50%+ between runs due to system noise\n4.  **Non-deterministic:** Results depend on system load, making comparisons unreliable\n5.  **Overhead:** System call overhead affects measurement accuracy\n\n### Benefits of CPU Cycle Counting\nCPU cycle counting using RDTSC (Read Time-Stamp Counter) provides:\n1. **Sub-nanosecond Precision**: Hardware counters offer the highest possible temporal resolution\n2. **Immunity to System Interference**: Cycles are counted at the hardware level, unaffected by OS scheduling\n3. **Deterministic Results**: Same code will produce consistent cycle counts regardless of system load\n4. **Lower Overhead**: Single instruction vs. system call\n5. **Hardware-level Accuracy**: Direct measurement of actual CPU work performed\n6. **Better for Performance Analysis**: Cycles directly correlate with instruction efficiency\n7. **Better coordination with other devs**: Provides a stable, reliable metric for team-wide performance discussions and comparisons.\n\n### Proposed Implementation\nReplace the timing mechanism with CPU cycle counting:\n\n",
     "user": {
@@ -40,8 +40,61 @@
     "author_association": "NONE",
     "locked": false,
     "comments": 0,
+    "closed_at": "2025-09-01T23:11:15Z",
+    "closed_by": {
+      "login": "Raimo33",
+      "id": 104778891,
+      "node_id": "U_kgDOBj7Miw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Raimo33",
+      "html_url": "https://github.com/Raimo33",
+      "followers_url": "https://api.github.com/users/Raimo33/followers",
+      "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+      "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+      "repos_url": "https://api.github.com/users/Raimo33/repos",
+      "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+      "type": "User",
+      "site_admin": false,
+      "patch_url": null
+    },
     "created_at": "2025-07-14T16:08:39Z",
-    "updated_at": "2025-09-01T22:34:47Z"
+    "updated_at": "2025-09-01T23:11:15Z"
   },
-  "events": []
+  "events": [
+    {
+      "event": "closed",
+      "id": 19448665481,
+      "node_id": "CE_lADOAP4Jqs7AesEgzwAAAASHOxWJ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19448665481",
+      "actor": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-09-01T23:11:15Z"
+    }
+  ]
 }
