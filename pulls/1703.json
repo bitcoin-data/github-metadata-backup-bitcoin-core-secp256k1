@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1703/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1703/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/54783bd8d3546b2626fa3c50770c0b2aea496a31",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/b050834e451d68e97435b0fb9449742cf06817f0",
     "number": 1703,
     "state": "open",
     "locked": false,
@@ -42,11 +42,11 @@
     "body": "This adds **avx2** support to the library in general, as discussed in https://github.com/bitcoin-core/secp256k1/issues/1700, wherever it yields an improvement as per the benchmarks.\r\n\r\nWhy not **sse2** and **avx512f**?\r\n- **sse2** is only useful in the 32bit code path (USE_FORCE_WIDEMUL_INT64=1). but practically, almost all 32bit SSE2 enabled CPUs are armv7 architectures, not X86\r\n- **avx512** would not be beneficial anywhere, and thermal throttling is a problem on most CPUs that support it.\r\n\r\narm has [different SIMD instruction set](https://developer.arm.com/architectures/instruction-sets/intrinsics/); it would be nice to have a separate PR implementing that as well. Maybe after this is merged...\r\n\r\n## Tasks:\r\n- [ ] Add 1 CI/CD flow with permutation of  `-mavx2` when building for amd64\r\n- [ ] Precompute vectors at startup (the ones marked with `TODO: precompute` )\r\n\r\n## Test & Benchmark\r\nTo reproduce the following results I temporarily added 3 scripts for building, testing, benchmarking as well as a jupyter notebook to visualize results.\r\nYou can verify yourself by running: `./simd-build.sh && ./simd-test.sh && ./simd-bench.sh` and executing the notebook as is.\r\n\r\n## Results\r\nThe baseline is compiled with `\"-O3 -mavx2 -U__AVX2__\"` so that spontaneous gcc vectorization is allowed, but my manual vectorization is not compiled. ",
     "labels": [],
     "created_at": "2025-07-18T11:26:24Z",
-    "updated_at": "2025-09-02T14:59:34Z",
+    "updated_at": "2025-09-03T18:54:34Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "166838c06a25e49b0b78720af6758d2a8c915994",
+    "merge_commit_sha": "ca85372d93c129e095467f7854a873d1a1bcd552",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -54,7 +54,7 @@
     "head": {
       "label": "Raimo33:simd",
       "ref": "simd",
-      "sha": "54783bd8d3546b2626fa3c50770c0b2aea496a31",
+      "sha": "b050834e451d68e97435b0fb9449742cf06817f0",
       "user": {
         "login": "Raimo33",
         "id": 104778891,
@@ -151,7 +151,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12657,
+        "size": 12663,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -164,7 +164,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-09-02T14:52:42Z",
+        "pushed_at": "2025-09-03T18:54:33Z",
         "created_at": "2025-07-18T11:21:10Z",
         "updated_at": "2025-07-28T13:19:07Z",
         "allow_forking": true,
@@ -188,7 +188,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393",
+      "sha": "03fb60ad2e38ae9415e64bf5ba523a10100d4c3c",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -282,12 +282,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1082,
+        "forks_count": 1084,
         "stargazers_count": 2296,
         "watchers_count": 2296,
-        "size": 12652,
+        "size": 12663,
         "default_branch": "master",
-        "open_issues_count": 156,
+        "open_issues_count": 152,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -298,9 +298,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-08-21T07:56:30Z",
+        "pushed_at": "2025-09-02T20:55:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-09-01T06:43:11Z",
+        "updated_at": "2025-09-02T20:55:19Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -326,9 +326,9 @@
     },
     "author_association": "NONE",
     "draft": true,
-    "additions": 690,
+    "additions": 671,
     "deletions": 202,
-    "changed_files": 13,
+    "changed_files": 12,
     "commits": 1,
     "review_comments": 0,
     "comments": 4
@@ -1017,46 +1017,6 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1703"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDU0NzgzYmQ4ZDM1NDZiMjYyNmZhM2M1MDc3MGMwYjJhZWE0OTZhMzE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/54783bd8d3546b2626fa3c50770c0b2aea496a31",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/54783bd8d3546b2626fa3c50770c0b2aea496a31",
-      "tree": {
-        "sha": "51653b8acff33e9b4da4f390ce9cdf0de40a74e4",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/51653b8acff33e9b4da4f390ce9cdf0de40a74e4"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 51653b8acff33e9b4da4f390ce9cdf0de40a74e4\nparent f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393\nauthor Claudio Raimondi <claudio.raimondi@protonmail.com> 1752837741 +0200\ncommitter Claudio Raimondi <claudio.raimondi@protonmail.com> 1756808451 +0200\n\nAdd intel simd [skip ci]\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niHUEABYKAB0WIQT3Bgs/ry8S3d/jnkVrUBvycIswNgUCaLbFBwAKCRBrUBvycIsw\nNiTPAQC9/zQexEJ9f9fMwFtK8vd+u/mC8v0ezFKc1cbUGnHo7wD/Tg//ZtQEZ8TP\nS29RpSCfyNbBNK0cz6nuKMNdf1Fewgc=\n=zSJ/\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393",
-          "sha": "f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393"
-        }
-      ],
-      "message": "Add intel simd [skip ci]",
-      "committer": {
-        "name": "Claudio Raimondi",
-        "email": "claudio.raimondi@protonmail.com",
-        "date": "2025-09-02T10:20:51Z"
-      },
-      "author": {
-        "name": "Claudio Raimondi",
-        "email": "claudio.raimondi@protonmail.com",
-        "date": "2025-07-18T11:22:21Z"
-      },
-      "sha": "54783bd8d3546b2626fa3c50770c0b2aea496a31"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 19456809205,
       "node_id": "HRFPE_lADOAP4Jqs7BSucnzwAAAASHt1j1",
@@ -1085,6 +1045,136 @@
       "commit_id": "54783bd8d3546b2626fa3c50770c0b2aea496a31",
       "commit_url": "https://api.github.com/repos/Raimo33/secp256k1/commits/54783bd8d3546b2626fa3c50770c0b2aea496a31",
       "created_at": "2025-09-02T10:21:06Z"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19488300563,
+      "node_id": "HRFPE_lADOAP4Jqs7BSucnzwAAAASJl94T",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19488300563",
+      "actor": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "fdd8411c285aa15109f91787a11a0a51bc27fd0b",
+      "commit_url": "https://api.github.com/repos/Raimo33/secp256k1/commits/fdd8411c285aa15109f91787a11a0a51bc27fd0b",
+      "created_at": "2025-09-03T18:32:32Z"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19488405340,
+      "node_id": "HRFPE_lADOAP4Jqs7BSucnzwAAAASJmXdc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19488405340",
+      "actor": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "f7371dad21b245f4dbd2087ae156b05cbef5a576",
+      "commit_url": "https://api.github.com/repos/Raimo33/secp256k1/commits/f7371dad21b245f4dbd2087ae156b05cbef5a576",
+      "created_at": "2025-09-03T18:39:27Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGIwNTA4MzRlNDUxZDY4ZTk3NDM1YjBmYjk0NDk3NDJjZjA2ODE3ZjA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b050834e451d68e97435b0fb9449742cf06817f0",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b050834e451d68e97435b0fb9449742cf06817f0",
+      "tree": {
+        "sha": "c38b9b7fa39238313f978bba051a9ff57c598218",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c38b9b7fa39238313f978bba051a9ff57c598218"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree c38b9b7fa39238313f978bba051a9ff57c598218\nparent f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393\nauthor Claudio Raimondi <claudio.raimondi@protonmail.com> 1752837741 +0200\ncommitter Claudio Raimondi <claudio.raimondi@protonmail.com> 1756925666 +0200\n\nAdd intel simd [skip ci]\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niHUEABYKAB0WIQT3Bgs/ry8S3d/jnkVrUBvycIswNgUCaLiO5AAKCRBrUBvycIsw\nNpUZAP4wq+09E8DqsmjvUhfuHdKw2/vX5+UGKwZMxvMH31SojgEAqZUqO4tSioB1\nJKaFZ+bgP6MuLpqXzz0WkkuglSF0PQE=\n=k8H6\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393",
+          "sha": "f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f36afb8b3dd7daf9edf4bf15c49fcd540f8ce393"
+        }
+      ],
+      "message": "Add intel simd [skip ci]",
+      "committer": {
+        "name": "Claudio Raimondi",
+        "email": "claudio.raimondi@protonmail.com",
+        "date": "2025-09-03T18:54:26Z"
+      },
+      "author": {
+        "name": "Claudio Raimondi",
+        "email": "claudio.raimondi@protonmail.com",
+        "date": "2025-07-18T11:22:21Z"
+      },
+      "sha": "b050834e451d68e97435b0fb9449742cf06817f0"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19488643015,
+      "node_id": "HRFPE_lADOAP4Jqs7BSucnzwAAAASJnRfH",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19488643015",
+      "actor": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "b050834e451d68e97435b0fb9449742cf06817f0",
+      "commit_url": "https://api.github.com/repos/Raimo33/secp256k1/commits/b050834e451d68e97435b0fb9449742cf06817f0",
+      "created_at": "2025-09-03T18:54:34Z"
     }
   ],
   "comments": []
