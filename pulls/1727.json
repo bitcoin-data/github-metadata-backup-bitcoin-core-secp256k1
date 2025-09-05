@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-08-20T08:09:15Z",
-    "updated_at": "2025-09-03T19:28:13Z",
+    "updated_at": "2025-09-05T09:33:56Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -306,7 +306,7 @@
         "watchers_count": 2296,
         "size": 12663,
         "default_branch": "master",
-        "open_issues_count": 152,
+        "open_issues_count": 155,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -349,7 +349,7 @@
     "deletions": 16,
     "changed_files": 1,
     "commits": 2,
-    "review_comments": 3,
+    "review_comments": 4,
     "comments": 2
   },
   "events": [
@@ -860,6 +860,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2319975461"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1727"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 341,
+      "original_line": 341,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2324596075",
+      "pull_request_review_id": 3188657970,
+      "id": 2324596075,
+      "node_id": "PRRC_kwDOAP4Jqs6KjoVr",
+      "diff_hunk": "@@ -336,34 +336,35 @@ SECP256K1_API void secp256k1_context_destroy(\n  *\n  *  The philosophy is that these shouldn't be dealt with through a\n  *  specific return value, as calling code should not have branches to deal with\n- *  the case that this code itself is broken.\n+ *  the case that this code itself is broken. On the other hand, during debug\n+ *  stage, one would want to be informed about such mistakes, and the default\n+ *  (crashing) may be inadvisable.",
+      "path": "include/secp256k1.h",
+      "position": 16,
+      "original_position": 16,
+      "commit_id": "d2793799c70e33cc73d0b3bb94c342935d3cedc5",
+      "original_commit_id": "d2793799c70e33cc73d0b3bb94c342935d3cedc5",
+      "in_reply_to_id": 2319844769,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Huh, I think the guarantee we want to provide is:\r\n\"An API function called is guaranteed not to crash after the callback returns.\" \r\n\r\nThis guarantee holds no matter what the callback function is set to, which corresponds to what you called \"in any \"stage\". Now, of course, this guarantee doesn't say anything if the callback itself causes a crash (and the default callback does) because then the callback never returns, so there's no \"after the callback returns\".\r\n\r\n\r\n---\r\n\r\nNow that I've written this, I'm not sure what this actually means. In simple cases, the only thing the API function does after the callback returns is to return 0. This shouldn't crash. But there are more complex cases: \r\n - Some functions try to read more arguments from memory, e.g., `secp256k1_ec_pubkey_cmp` tries to read the memory at `pubkey1` even after an invalid `pubkey0` triggered the callback. This may crash if `pubkey1` points to an invalid memory region.       \r\n - Some functions write to their output arguments after the callback has returned (see #1736 for another rabbit hole...).\r\n\r\nPerhaps what we should want to say here is something like this: \"An API function called is guaranteed not to crash after the callback returns (unless the crash is unrelated to the violation that triggered the callback)\". But this is imprecise and ugly.\r\n\r\nPerhaps we should drop this sentence entirely. It creates more confusion than it resolves. What about this?\r\n\r\n \"Should the callback return, the return value and output arguments of the API function call are undefined. Moreover, the same API call may trigger the callback again in this case.\"\r\n\r\n--- \r\n\r\nNote that all of this is about API guarantees, so the audience is API users. As a result, \"debug stage\" means \"debug stage of a program using libsecp256k1\". (And as a side remark, note that the callbacks can be set at runtime, so strictly speaking, this is not (necessarily) about debug vs. release *builds*.) So if you develop a program (an application or another library) that uses the libsecp256k1 API, you may want to set a callback that does not crash for debugging purposes. I'm not entirely sure how useful this functionality is to API users, but this is what the docs here describe.  \r\n\r\nIn practice, where this is useful is exactly in our internal tests, as you correctly point out. But what I'm trying to say is that these are our internal tests, where we may do everything because we control the implementation of the API functions. So we could also have an internal way of setting a counting callback that is not exposed through the public API.\r\n\r\nIf you ask me, the main purpose of setting callback functions is that you can control *how* the library crashes in production code. Maybe in your application, you don't want `abort()` but a more graceful termination. Or you can't use the default callback because it writes an error message to `stdout` but you don't have `stdout` because you're developing for a hardware wallet. (In the latter case, setting callbacks at runtime won't help you because the program won't compile in the first place. We've added [compile-time overrides](https://github.com/bitcoin-core/secp256k1/pull/595) for this case.)\r\n\r\nAnd on a last note, I don't think all of this is optimally designed. I believe we'd do some things differently if we had a chance to start from scratch.   ",
+      "created_at": "2025-09-05T09:33:56Z",
+      "updated_at": "2025-09-05T09:33:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1727#discussion_r2324596075",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2324596075"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1727"
