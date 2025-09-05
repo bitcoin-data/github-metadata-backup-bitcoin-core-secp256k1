@@ -39,7 +39,7 @@
       "site_admin": false,
       "patch_url": null
     },
-    "body": "Context:\r\nCurrently, all tests run single-threaded sequentially and the library lacks the ability to specify which test (or group of tests) you would like to run. This is not only inconvenient as more tests are added but also time consuming during development and affects downstream projects that may want to parallelize the workload (such as Bitcoin-Core CI).\r\n\r\nPR Goal:\r\nIntroduce a lightweight, extensible unit test framework with no dynamic memory allocations, providing a structured way to register, execute, and report tests. The framework supports named command-line arguments in `-key=value` form, parallel test execution across multiple worker processes, granular test selection (selecting tests either by name or by module name), and time accumulation reports.\r\n\r\nThe introduced framework supports:\r\n* `-jobs=<num>`: distribute tests across multiple worker processes (default: sequential if 0).\r\n* `-target=<name>` or `-t=<name>`: run only specific tests by name; can be repeated to select multiple tests.\r\n* `-seed=<hex>`: set a specific RNG seed (defaults to random if unspecified).\r\n* `-iter=<n>`: specify the number of iterations.\r\n* `-print_tests`:   display list of available tests.\r\n\r\nBeyond these features, the idea is to also make future developments smoother, as adding new tests require only a single entry in the central test registry, and new command-line options can be introduced easily by extending the framework’s `parse_arg()` function.\r\n\r\nCompatibility Note:\r\nThe framework continues accepting the two positional arguments previously supported (iterations and seed), ensuring existing workflows remain intact.\r\n\r\nTesting Notes:\r\nHave fun. You can quickly try it through `./tests -j=<workers_num>` for parallel execution  or `./tests -t=<test_name>` to run a specific test (check the test registry on `tests.c` for test names).\r\n\r\nExtra Note:\r\nI haven't checked the exhaustive tests file so far, but I will soon. For now, this only runs all tests declared in `tests.c`.\r\n\r\nExtra Extra Note:\r\nI’d be happy to hear your experience running this on different systems. I’ve only tested it on a very small subset of environments so far.",
+    "body": "Context:\r\nCurrently, all tests run single-threaded sequentially and the library lacks the ability to specify which test (or group of tests) you would like to run. This is not only inconvenient as more tests are added but also time consuming during development and affects downstream projects that may want to parallelize the workload (such as Bitcoin-Core CI).\r\n\r\nPR Goal:\r\nIntroduce a lightweight, extensible unit test framework with no dynamic memory allocations, providing a structured way to register, execute, and report tests. The framework supports named command-line arguments in `-key=value` form, parallel test execution across multiple worker processes, granular test selection (selecting tests either by name or by module name), and time accumulation reports.\r\n\r\nThe introduced framework supports:\r\n* `-jobs=<num>`: distribute tests across multiple worker processes (default: sequential if 0).\r\n* `-target=<name>` or `-t=<name>`: run only specific tests by name; can be repeated to select multiple tests.\r\n* `-seed=<hex>`: set a specific RNG seed (defaults to random if unspecified).\r\n* `-iter=<n>`: specify the number of iterations.\r\n* `-print_tests`:   display list of available tests.\r\n\r\nBeyond these features, the idea is to also make future developments smoother, as adding new tests require only a single entry in the central test registry, and new command-line options can be introduced easily by extending the framework’s `parse_arg()` function.\r\n\r\nCompatibility Note:\r\nThe framework continues accepting the two positional arguments previously supported (iterations and seed), ensuring existing workflows remain intact.\r\n\r\nTesting Notes:\r\nHave fun. You can quickly try it through `./tests -j=<workers_num>` for parallel execution  or `./tests -t=<test_name>` to run a specific test (call `./tests -print_tests` to display all available tests).\r\n\r\nExtra Note:\r\nI haven't checked the exhaustive tests file so far, but I will soon. For now, this only runs all tests declared in `tests.c`.\r\n\r\nExtra Extra Note:\r\nI’d be happy to hear your experience running this on different systems. I’ve only tested it on a very small subset of environments so far.",
     "labels": [
       {
         "id": 165017692,
@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-05T18:36:34Z",
+    "updated_at": "2025-09-05T19:28:42Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -169,7 +169,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12666,
+        "size": 12672,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
