@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-09-05T16:03:50Z",
+    "updated_at": "2025-09-05T17:32:24Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -163,7 +163,7 @@
         "watchers_count": 1,
         "size": 13643,
         "default_branch": "master",
-        "open_issues_count": 2,
+        "open_issues_count": 1,
         "is_template": false,
         "topics": [],
         "has_issues": false,
@@ -297,7 +297,7 @@
         "watchers_count": 2297,
         "size": 12663,
         "default_branch": "master",
-        "open_issues_count": 155,
+        "open_issues_count": 156,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -340,7 +340,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 136,
+    "review_comments": 137,
     "comments": 27
   },
   "events": [
@@ -5286,6 +5286,43 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3189856649",
       "submitted_at": "2025-09-05T16:03:50Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+    },
+    {
+      "event": "reviewed",
+      "id": 3190266602,
+      "node_id": "PRR_kwDOAP4Jqs6-J5rq",
+      "url": null,
+      "actor": null,
+      "commit_id": "76a0451c76c8497571cb75f2cb4bdba50c734600",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-09-05T17:32:24Z",
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3190266602",
+      "submitted_at": "2025-09-05T17:32:24Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
     }
@@ -12497,6 +12534,59 @@
       "start_side": null,
       "line": 153,
       "original_line": 151,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2325675833",
+      "pull_request_review_id": 3190266602,
+      "id": 2325675833,
+      "node_id": "PRRC_kwDOAP4Jqs6Knv85",
+      "diff_hunk": "@@ -25,6 +26,99 @@ extern \"C\" {\n  *  any further elliptic-curve operations from the wallet.\n  */\n \n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public must\n+ *  be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payment outputs for recipient(s).\n+ *\n+ *  Given a list of n secret keys a_1...a_n (one for each silent payment\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs. Inputs with conditional branches or multiple\n+ *  public keys are excluded from silent payments eligible inputs; see BIP352\n+ *  for more information.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment. Determining the smallest outpoint from the list of transaction\n+ *  inputs is the responsibility of the caller. It is strongly recommended\n+ *  that implementations ensure they are doing this correctly by using the\n+ *  test vectors from BIP352.\n+ *\n+ *  Returns: 1 if creation of outputs was successful.\n+ *           0 if the input private keys sum to zero,\n+ *             or input_hash or hash(shared_secret || k) are invalid scalars\n+ *             (statistically improbable).\n+ *  Args:                ctx: pointer to a context object",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 74,
+      "original_position": 55,
+      "commit_id": "aa85bfb530b9ffc3dde6eaa7a976e129b8bd2f58",
+      "original_commit_id": "76a0451c76c8497571cb75f2cb4bdba50c734600",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "```suggestion \r\n *  Args:                ctx: pointer to a context object (not secp256k1_context_static)\r\n ```\r\nas the sending functions needs the generator point multiplication context (for calculating the pubkey sum from the seckey sum), and this is how we usually denote that in the API header (see also #1737)",
+      "created_at": "2025-09-05T17:32:24Z",
+      "updated_at": "2025-09-05T17:32:24Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2325675833",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2325675833"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 74,
+      "original_line": 72,
       "side": "RIGHT"
     }
   ]
