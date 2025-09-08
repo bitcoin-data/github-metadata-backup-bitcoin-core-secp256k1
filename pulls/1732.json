@@ -39,10 +39,10 @@
       "site_admin": false,
       "patch_url": null
     },
-    "body": "## Goal\r\nThis PR refactors the benchmarking functions as per #1701, in order to make benchmarks more deterministic, less influenced by the environvment, and generally simpler to run. \r\n\r\n## Changes\r\n- [x] (?) remove needless fixed point conversion in favor of simpler floating point divisions. abf4566dfb7f8257a11635f639c68c50d4a8b818\r\n- [x] replace Wall-Clock Time with Per-Thread CPU Time when possible. 02a6fc449261147c3fbae68ac4703d34e261ebd1\r\n- [x] (?) remove min/max from benchmarks as they increase execution time 10x without even being a precise measurement of variance f41048e8f4a085bd740f51bb4e7c3e4123e02113\r\n\r\nfeel free to exclude any commits from the merge, these changes ultimately reflect how I'd have refactored it if the repo was mine.",
+    "body": "## Goal\r\nThis PR refactors the benchmarking functions as per #1701, in order to make benchmarks more deterministic and less influenced by the environvment. \r\n\r\nThis is achieved by replacing Wall-Clock Timer with Per-Process CPU Timer when possible. ",
     "labels": [],
     "created_at": "2025-09-02T14:58:38Z",
-    "updated_at": "2025-09-08T08:43:36Z",
+    "updated_at": "2025-09-08T09:37:08Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -352,7 +352,7 @@
     "deletions": 158,
     "changed_files": 10,
     "commits": 3,
-    "review_comments": 23,
+    "review_comments": 24,
     "comments": 14
   },
   "events": [
@@ -3496,6 +3496,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2329544816"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1732"
+        }
+      },
+      "start_line": 13,
+      "original_start_line": 13,
+      "start_side": "RIGHT",
+      "line": 14,
+      "original_line": 14,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2329699782",
+      "pull_request_review_id": 3195746360,
+      "id": 2329699782,
+      "node_id": "PRRC_kwDOAP4Jqs6K3GXG",
+      "diff_hunk": "@@ -7,30 +7,63 @@\n #ifndef SECP256K1_BENCH_H\n #define SECP256K1_BENCH_H\n \n+#if defined(_WIN32)\n+# include <windows.h>\n+#else\n+# include <time.h>\n+# include <sys/time.h>",
+      "path": "src/bench.h",
+      "position": 8,
+      "original_position": 8,
+      "commit_id": "bc556d82a00e1a92675451202c3414feb8100e64",
+      "original_commit_id": "66745f741fb3db0db834ea261e2c9470d51b740d",
+      "in_reply_to_id": 2317915337,
+      "user": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "You're right, the latest specification makes `CLOCK_MONOTONIC` support mandatory, this makes it way simpler. no need to include `<sys/time.h>` anymore.",
+      "created_at": "2025-09-08T09:37:07Z",
+      "updated_at": "2025-09-08T09:37:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1732#discussion_r2329699782",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2329699782"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1732"
