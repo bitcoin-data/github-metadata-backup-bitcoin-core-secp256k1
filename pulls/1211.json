@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2023-02-09T16:45:22Z",
-    "updated_at": "2025-09-10T13:51:36Z",
+    "updated_at": "2025-09-10T14:31:18Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -339,7 +339,7 @@
     "deletions": 89,
     "changed_files": 7,
     "commits": 3,
-    "review_comments": 1,
+    "review_comments": 2,
     "comments": 5
   },
   "events": [
@@ -979,6 +979,43 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1211#issuecomment-3275078830",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1211"
+    },
+    {
+      "event": "reviewed",
+      "id": 3206469152,
+      "node_id": "PRR_kwDOAP4Jqs6_HtYg",
+      "url": null,
+      "actor": null,
+      "commit_id": "3e404f2b8643493854e664389dbc7817763ad4ac",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-09-10T14:31:18Z",
+      "author_association": "MEMBER",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1211#pullrequestreview-3206469152",
+      "submitted_at": "2025-09-10T14:31:18Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1211"
     }
   ],
   "comments": [
@@ -1033,6 +1070,59 @@
       "start_side": null,
       "line": 33,
       "original_line": 33,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2336973938",
+      "pull_request_review_id": 3206469152,
+      "id": 2336973938,
+      "node_id": "PRRC_kwDOAP4Jqs6LS2Ry",
+      "diff_hunk": "@@ -7428,7 +7430,96 @@ static void run_cmov_tests(void) {\n     ge_storage_cmov_test();\n }\n \n+static int process_args(int *all_enabled, int argc, char **argv) {\n+    int is_count_arg_set = 0;\n+    const char* env = getenv(\"SECP256K1_TEST_ITERS\");\n+    char* valid_args[] = {\"integer\", \"hash\", \"scalar\", \"field\", \"group\",\n+                          \"ecmult\", \"ecdh\", \"ecdsa\", \"recovery\", \"extrakeys\",\n+                          \"schnorrsig\"};\n+    size_t valid_args_size = sizeof(valid_args)/sizeof(valid_args[0]);\n+\n+    if (argc > 1) {\n+        int count_arg = strtol(argv[1], NULL, 0);\n+        if (count_arg > 0) {\n+            is_count_arg_set = 1;\n+            COUNT = count_arg;\n+        }\n+    }\n+\n+    if (env && strlen(env) > 0) {\n+        COUNT = strtol(env, NULL, 0);\n+        if (is_count_arg_set) {\n+            fputs(\"Environment variable SECP256K1_TEST_ITERS and command line argument both try to set the iteration count.\\n\", stderr);\n+            return 0;\n+        }\n+        if (COUNT <= 0) {\n+            fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n+            return 0;\n+        }\n+    }\n+\n+    *all_enabled = argc == 1 || (argc == 2 && is_count_arg_set);\n+\n+    if (is_count_arg_set) {\n+        argc--;\n+        argv++;\n+    }\n+    if (have_invalid_args(argc, argv, valid_args, valid_args_size)) {\n+        fprintf(stderr, \"./tests: unrecognized argument.\\n\\n\");\n+        return 0;\n+    }\n+\n+    return 1;\n+}\n+\n+static int module_unavailable(int argc, char **argv, char *module) {\n+    if (have_flag(argc, argv, module)) {\n+        fprintf(stderr, \"./tests: %s module not enabled.\\n\", module);\n+        fprintf(stderr, \"Use ./configure --enable-module-%s.\\n\\n\", module);\n+        return 1;",
+      "path": "src/tests.c",
+      "position": 68,
+      "original_position": 68,
+      "commit_id": "3e404f2b8643493854e664389dbc7817763ad4ac",
+      "original_commit_id": "3e404f2b8643493854e664389dbc7817763ad4ac",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "```suggestion\r\n        fprintf(stderr, \"Use ./configure --enable-module-%s.\\n\\n\", module);\r\n        fprintf(stderr, \"%s tests skipped.\\n\\n\", module);\r\n        return 1;\r\n```\r\n\r\nThis change allows CTest to skip tests for disabled modules gracefully, rather than merely ignoring them:\r\n```\r\n...\r\n27/27 Test #19: secp256k1_tests::ecmult ................   Passed   19.21 sec\r\n\r\n100% tests passed, 0 tests failed out of 27\r\n\r\nTotal Test time (real) =  19.24 sec\r\n\r\nThe following tests did not run:\r\n\t  9 - secp256k1_noverify_tests::recovery (Skipped)\r\n\t 22 - secp256k1_tests::recovery (Skipped)\r\n```",
+      "created_at": "2025-09-10T14:31:18Z",
+      "updated_at": "2025-09-10T14:31:18Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1211#discussion_r2336973938",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2336973938"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1211"
+        }
+      },
+      "start_line": 7478,
+      "original_start_line": 7478,
+      "start_side": "RIGHT",
+      "line": 7479,
+      "original_line": 7479,
       "side": "RIGHT"
     }
   ]
