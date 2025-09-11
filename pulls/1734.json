@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-11T11:47:16Z",
+    "updated_at": "2025-09-11T14:21:12Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -348,7 +348,7 @@
     "deletions": 236,
     "changed_files": 12,
     "commits": 7,
-    "review_comments": 12,
+    "review_comments": 14,
     "comments": 16
   },
   "events": [
@@ -3139,6 +3139,112 @@
       "start_side": null,
       "line": 29,
       "original_line": 29,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2341117736",
+      "pull_request_review_id": 3211924681,
+      "id": 2341117736,
+      "node_id": "PRRC_kwDOAP4Jqs6Lip8o",
+      "diff_hunk": "@@ -25,6 +25,8 @@\n #include \"checkmem.h\"\n #include \"testutil.h\"\n #include \"util.h\"\n+#include \"unit_test.h\"\n+#include \"unit_test.c\"",
+      "path": "src/tests.c",
+      "position": 5,
+      "original_position": 5,
+      "commit_id": "785c34ea86ff502ddb774a4c1f3ec8d60879cef2",
+      "original_commit_id": "785c34ea86ff502ddb774a4c1f3ec8d60879cef2",
+      "in_reply_to_id": 2340384653,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Just left you a comment there: https://github.com/hebasto/secp256k1/commit/082b928b7d16f83d8749a695f2a4b4e293e322a4#r165610965",
+      "created_at": "2025-09-11T14:20:51Z",
+      "updated_at": "2025-09-11T14:20:52Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2341117736",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2341117736"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 29,
+      "original_line": 29,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2341119665",
+      "pull_request_review_id": 3211927153,
+      "id": 2341119665,
+      "node_id": "PRRC_kwDOAP4Jqs6Liqax",
+      "diff_hunk": "@@ -0,0 +1,408 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef LIBSECP256K1_UNIT_TEST_C\n+#define LIBSECP256K1_UNIT_TEST_C\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+/* Check for POSIX process headers */\n+#if defined(__has_include)\n+#  if __has_include(<sys/wait.h>) && __has_include(<unistd.h>)\n+#    include <sys/wait.h>\n+#    include <unistd.h>\n+/* Ensure pid_t is defined. Include <sys/types.h> only if necessary (strict C89 mode) */\n+#if !defined(_PID_T) && !defined(pid_t)\n+#   include <sys/types.h>\n+#endif\n+#    define SUPPORTS_CONCURRENCY 1\n+#  endif\n+#endif\n+#ifndef SUPPORTS_CONCURRENCY\n+#  define SUPPORTS_CONCURRENCY 0\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out);\n+static int parse_iterations(const char* arg);\n+static int parse_target(const char* value, struct TestFramework* tf);\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   This function is responsible for parsing a single key/value pair\n+ *   (e.g., -jobs=4) and updating the provided Args struct accordingly.\n+ *\n+ *   Developers should extend this function whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in the 'Args' struct.\n+ */\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    /* Number of concurrent tasks */\n+    if (strcmp(key, \"j\") == 0 || strcmp(key, \"jobs\") == 0) {\n+        return parse_jobs_count(key, value, &tf->args);\n+    }\n+    /* Number of iterations */\n+    if (strcmp(key, \"iter\") == 0 || strcmp(key, \"iterations\") == 0) {\n+        return parse_iterations(value);\n+    }\n+    /* Custom seed */\n+    if (strcmp(key, \"seed\") == 0) {\n+        tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+        return 0;\n+    }\n+    /* Test target */\n+    if (strcmp(key, \"t\") == 0 || strcmp(key, \"target\") == 0) {\n+        return parse_target(value, tf);\n+    }\n+    /* Logging */\n+    if (strcmp(key, \"log\") == 0) {\n+        tf->args.logging = value && strcmp(value, \"1\") == 0;\n+        return 0;\n+    }\n+\n+    /* Unknown key: report just so typos don’t silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static void help(void) {\n+    printf(\"Usage: ./tests [options]\\n\\n\");\n+    printf(\"Run the test suite for the project with optional configuration.\\n\\n\");\n+    printf(\"Options:\\n\");\n+    printf(\"    -help, -h                           Show this help message\\n\");\n+    printf(\"    -print_tests                        Display list of all available tests and modules\\n\");\n+    printf(\"    -j=<num>, -jobs=<num>               Number of parallel worker processes (default: 0 = sequential)\\n\");\n+    printf(\"    -iter=<num>, -iterations=<num>      Number of iterations for each test (default: 16)\\n\");\n+    printf(\"    -seed=<hex>                         Set a specific RNG seed (default: random)\\n\");\n+    printf(\"    -target=<test name>, -t=<name>      Run a specific test (can be provided multiple times)\\n\");\n+    printf(\"    -target=<module name>, -t=<module>  Run all tests within a specific module (can be provided multiple times)\\n\");",
+      "path": "src/unit_test.c",
+      "position": 90,
+      "original_position": 90,
+      "commit_id": "785c34ea86ff502ddb774a4c1f3ec8d60879cef2",
+      "original_commit_id": "aa5f041f2fe77624bb77fdb64ca6974b5cc23542",
+      "in_reply_to_id": 2337043438,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "nice!",
+      "created_at": "2025-09-11T14:21:12Z",
+      "updated_at": "2025-09-11T14:21:12Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2341119665",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2341119665"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": 89,
+      "original_start_line": 89,
+      "start_side": "RIGHT",
+      "line": 90,
+      "original_line": 90,
       "side": "RIGHT"
     }
   ]
