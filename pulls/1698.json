@@ -89,7 +89,7 @@
       "due_on": "2025-10-17T07:00:00Z"
     },
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-09-12T13:36:41Z",
+    "updated_at": "2025-09-12T17:54:55Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -198,7 +198,7 @@
         "forks_count": 1,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 13662,
+        "size": 13732,
         "default_branch": "master",
         "open_issues_count": 1,
         "is_template": false,
@@ -377,7 +377,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 187,
+    "review_comments": 188,
     "comments": 31
   },
   "events": [
@@ -16303,6 +16303,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2343939144"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": 70,
+      "original_start_line": 68,
+      "start_side": "RIGHT",
+      "line": 73,
+      "original_line": 73,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2345047308",
+      "pull_request_review_id": 3218091998,
+      "id": 2345047308,
+      "node_id": "PRRC_kwDOAP4Jqs6LxpUM",
+      "diff_hunk": "@@ -25,6 +26,100 @@ extern \"C\" {\n  *  any further elliptic-curve operations from the wallet.\n  */\n \n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public must\n+ *  be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payment outputs for recipient(s).\n+ *\n+ *  Given a list of n secret keys a_1...a_n (one for each silent payment\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs. Inputs with conditional branches or multiple\n+ *  public keys are excluded from silent payments eligible inputs; see BIP352\n+ *  for more information.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment. Determining the smallest outpoint from the list of transaction\n+ *  inputs is the responsibility of the caller. It is strongly recommended\n+ *  that implementations ensure they are doing this correctly by using the\n+ *  test vectors from BIP352.\n+ *\n+ *  Returns: 1 if creation of outputs was successful.\n+ *           0 if the input private keys sum to zero,\n+ *             or input_hash or hash(shared_secret || k) are invalid scalars\n+ *             (statistically improbable).",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 73,
+      "original_position": 54,
+      "commit_id": "bc716fbcc4b836c490a2c3c1cc87d8c738e2f61b",
+      "original_commit_id": "307df90a62e76d5a42e0f04afd8a4e980efafab7",
+      "in_reply_to_id": 2341875760,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> I've gone back and forth on this in my own head so many times 😅 You're correct that the documentation is incorrect. Looking at this with fresh eyes, I do think the best thing to do here is return an error to ensure strict compliance with the BIP. This does introduce a few untestable branches, but I think a comment explaining why we have an untestable branch is sufficient.\r\n\r\nI tend to agree, and it seems a very reasonable choice to strictly follow the BIP [1] when in doubt. My current stance on this is that either approach should be fine (as long as the API docs are accurate), and this is much more of a theoretical/philosophical question, rather than one that would ever be relevant in practice, but happy to hear more arguments for either side.\r\n\r\n[1] in theory one option would be to change the BIP to reduce these hash scalars modulo n (like e.g. done in BIP340), but I assume it's a bit too late for that, and that still wouldn't eliminate the zero-scalar failure case (though that one is again orders of magnitude less likely than the equal-or-above-group-order case :P).",
+      "created_at": "2025-09-12T17:54:55Z",
+      "updated_at": "2025-09-12T17:54:55Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2345047308",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2345047308"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
