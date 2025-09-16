@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-16T12:53:35Z",
+    "updated_at": "2025-09-16T13:15:21Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -300,7 +300,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1089,
+        "forks_count": 1090,
         "stargazers_count": 2301,
         "watchers_count": 2301,
         "size": 12717,
@@ -348,7 +348,7 @@
     "deletions": 238,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 43,
+    "review_comments": 45,
     "comments": 20
   },
   "events": [
@@ -3242,6 +3242,44 @@
       "submitted_at": "2025-09-16T12:53:35Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+    },
+    {
+      "event": "reviewed",
+      "id": 3205587106,
+      "node_id": "PRR_kwDOAP4Jqs6_EWCi",
+      "url": null,
+      "actor": null,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-09-16T13:15:21Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "nice! useful to be able to run a subset of tests.",
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#pullrequestreview-3205587106",
+      "submitted_at": "2025-09-16T13:15:21Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
     }
   ],
   "comments": [
@@ -4995,6 +5033,59 @@
       "side": "RIGHT"
     },
     {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2349501254",
+      "pull_request_review_id": 3205587106,
+      "id": 2349501254,
+      "node_id": "PRRC_kwDOAP4Jqs6MCotG",
+      "diff_hunk": "@@ -7666,179 +7679,215 @@ static void run_cmov_tests(void) {\n     ge_storage_cmov_test();\n }\n \n-int main(int argc, char **argv) {\n-    /* Disable buffering for stdout to improve reliability of getting\n-     * diagnostic information. Happens right at the start of main because\n-     * setbuf must be used before any other operation on the stream. */\n-    setbuf(stdout, NULL);\n-    /* Also disable buffering for stderr because it's not guaranteed that it's\n-     * unbuffered on all systems. */\n-    setbuf(stderr, NULL);\n-\n-    /* find iteration count */\n-    if (argc > 1) {\n-        COUNT = strtol(argv[1], NULL, 0);\n-    } else {\n-        const char* env = getenv(\"SECP256K1_TEST_ITERS\");\n-        if (env && strlen(env) > 0) {\n-            COUNT = strtol(env, NULL, 0);\n-        }\n-    }\n-    if (COUNT <= 0) {\n-        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n-        return EXIT_FAILURE;\n-    }\n-    printf(\"test count = %i\\n\", COUNT);\n-\n-    /* run test RNG tests (must run before we really initialize the test RNG) */\n-    run_xoshiro256pp_tests();\n+/* --------------------------------------------------------- */\n+/* Test Registry                                             */\n+/* --------------------------------------------------------- */\n \n-    /* find random seed */\n-    testrand_init(argc > 2 ? argv[2] : NULL);\n+/* --- Context Independent tests --- */\n+static struct TestEntry tests_no_ctx[] = {\n+    CASE(xoshiro256pp_tests),\n+};\n+static struct TestModule registry_modules_no_ctx = MAKE_TEST_MODULE(no_ctx);\n+\n+/* --- Context-dependent tests start here --- */\n+static struct TestEntry tests_general[] = {\n+    CASE(selftest_tests),",
+      "path": "src/tests.c",
+      "position": 84,
+      "original_position": 87,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "4e7bdc135a6bb876a389431d4df209df212974ad",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "0423532: nit: `selftest_tests` doesn't require a context though unlike other tests inside `tests_general`.",
+      "created_at": "2025-09-15T16:17:56Z",
+      "updated_at": "2025-09-16T13:15:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2349501254",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2349501254"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 7694,
+      "original_line": 7694,
+      "side": "RIGHT"
+    },
+    {
       "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2349664292",
       "pull_request_review_id": 3225632653,
       "id": 2349664292,
@@ -5204,6 +5295,271 @@
       "start_side": null,
       "line": null,
       "original_line": 140,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2350767994",
+      "pull_request_review_id": 3205587106,
+      "id": 2350767994,
+      "node_id": "PRRC_kwDOAP4Jqs6MHd96",
+      "diff_hunk": "@@ -0,0 +1,111 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef LIBSECP256K1_UNIT_TEST_H",
+      "path": "src/unit_test.h",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "0423532ea998599c9e099e034b163c65aceabb68",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "0423532: `SECP256K1_UNIT_TEST_H` here as well",
+      "created_at": "2025-09-16T04:48:55Z",
+      "updated_at": "2025-09-16T13:15:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2350767994",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2350767994"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 7,
+      "original_line": 7,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2351170774",
+      "pull_request_review_id": 3205587106,
+      "id": 2351170774,
+      "node_id": "PRRC_kwDOAP4Jqs6MJATW",
+      "diff_hunk": "@@ -0,0 +1,278 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if defined(SUPPORTS_CONCURRENCY) && SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out);\n+static int parse_iterations(const char* arg);\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   This function is responsible for parsing a single key/value pair\n+ *   (e.g., -jobs=4) and updating the provided Args struct accordingly.\n+ *\n+ *   Developers should extend this function whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in the 'Args' struct.\n+ */\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    /* Number of concurrent tasks */\n+    if (strcmp(key, \"j\") == 0 || strcmp(key, \"jobs\") == 0) {\n+        return parse_jobs_count(key, value, &tf->args);\n+    }\n+    /* Number of iterations */\n+    if (strcmp(key, \"iter\") == 0 || strcmp(key, \"iterations\") == 0) {\n+        return parse_iterations(value);\n+    }\n+    /* Custom seed */\n+    if (strcmp(key, \"seed\") == 0) {\n+        tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+        return 0;\n+    }\n+\n+    /* Unknown key: report just so typos don’t silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out) {\n+    char* ptr_val;\n+    long val = strtol(value, &ptr_val, 10); /* base 10 */\n+    if (*ptr_val != '\\0') {\n+        fprintf(stderr, \"Invalid number for -%s=%s\\n\", key, value);\n+        return -1;\n+    }\n+    if (val < 0 || val > MAX_SUBPROCESSES) {\n+        fprintf(stderr, \"Arg '-%s' out of range: '%ld'. Range: 0..%d\\n\", key, val, MAX_SUBPROCESSES);\n+        return -1;\n+    }\n+    out->num_processes = (int) val;\n+    return 0;\n+}\n+\n+static int parse_iterations(const char* arg) {\n+    /* Find iteration count */\n+    if (arg) {\n+        COUNT = (int) strtol(arg, NULL, 0);\n+    } else {\n+        const char* env = getenv(\"SECP256K1_TEST_ITERS\");",
+      "path": "src/unit_test.c",
+      "position": 125,
+      "original_position": 77,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "0423532ea998599c9e099e034b163c65aceabb68",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "0423532: weird, not able to use the environment variable option. I'm seeing:\r\n- `time ./build/bin/tests -iter=64` in 1m10.047s\r\n- `time SECP256K1_TEST_ITERS=64 ./build/bin/tests` in 0m26.908s",
+      "created_at": "2025-09-16T07:16:07Z",
+      "updated_at": "2025-09-16T13:15:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2351170774",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2351170774"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 125,
+      "original_line": 77,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2351202637",
+      "pull_request_review_id": 3205587106,
+      "id": 2351202637,
+      "node_id": "PRRC_kwDOAP4Jqs6MJIFN",
+      "diff_hunk": "@@ -0,0 +1,278 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if defined(SUPPORTS_CONCURRENCY) && SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out);\n+static int parse_iterations(const char* arg);\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   This function is responsible for parsing a single key/value pair\n+ *   (e.g., -jobs=4) and updating the provided Args struct accordingly.\n+ *\n+ *   Developers should extend this function whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in the 'Args' struct.\n+ */\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    /* Number of concurrent tasks */\n+    if (strcmp(key, \"j\") == 0 || strcmp(key, \"jobs\") == 0) {\n+        return parse_jobs_count(key, value, &tf->args);\n+    }\n+    /* Number of iterations */\n+    if (strcmp(key, \"iter\") == 0 || strcmp(key, \"iterations\") == 0) {\n+        return parse_iterations(value);\n+    }\n+    /* Custom seed */\n+    if (strcmp(key, \"seed\") == 0) {\n+        tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+        return 0;\n+    }\n+\n+    /* Unknown key: report just so typos don’t silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out) {\n+    char* ptr_val;\n+    long val = strtol(value, &ptr_val, 10); /* base 10 */\n+    if (*ptr_val != '\\0') {\n+        fprintf(stderr, \"Invalid number for -%s=%s\\n\", key, value);\n+        return -1;\n+    }\n+    if (val < 0 || val > MAX_SUBPROCESSES) {\n+        fprintf(stderr, \"Arg '-%s' out of range: '%ld'. Range: 0..%d\\n\", key, val, MAX_SUBPROCESSES);\n+        return -1;\n+    }\n+    out->num_processes = (int) val;\n+    return 0;\n+}\n+\n+static int parse_iterations(const char* arg) {\n+    /* Find iteration count */\n+    if (arg) {\n+        COUNT = (int) strtol(arg, NULL, 0);\n+    } else {\n+        const char* env = getenv(\"SECP256K1_TEST_ITERS\");\n+        if (env && strlen(env) > 0) {\n+            COUNT = (int) strtol(env, NULL, 0);\n+        }\n+    }\n+    if (COUNT <= 0) {\n+        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n+        return -1;\n+    }\n+    printf(\"Iterations count = %i\\n\", COUNT);",
+      "path": "src/unit_test.c",
+      "position": 134,
+      "original_position": 86,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "0423532ea998599c9e099e034b163c65aceabb68",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "0423532: also don't see the `Iterations count =` [log](https://github.com/bitcoin-core/secp256k1/actions/runs/17744147415/job/50425143241?pr=1734#step:7:1258) in the CI. I guess this is related to the environment variable not being set.\r\n\r\nmaybe useful to always print the log even if it's the default value being used/`-iters` isn't used ?",
+      "created_at": "2025-09-16T07:24:54Z",
+      "updated_at": "2025-09-16T13:15:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2351202637",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2351202637"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 134,
+      "original_line": 86,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2352411596",
+      "pull_request_review_id": 3205587106,
+      "id": 2352411596,
+      "node_id": "PRRC_kwDOAP4Jqs6MNvPM",
+      "diff_hunk": "@@ -0,0 +1,111 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef LIBSECP256K1_UNIT_TEST_H\n+#define LIBSECP256K1_UNIT_TEST_H\n+\n+/* --------------------------------------------------------- */\n+/* Configurable constants                                    */\n+/* --------------------------------------------------------- */\n+\n+/* Maximum number of command-line arguments.\n+ * Must be at least as large as the total number of tests\n+ * to allow specifying all tests individually. */\n+#define MAX_ARGS 150\n+/* Maximum number of parallel jobs */\n+#define MAX_SUBPROCESSES 16\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework Registry Macros                            */\n+/* --------------------------------------------------------- */\n+\n+#define CASE(name) { #name, run_##name }\n+\n+#define MAKE_TEST_MODULE(name) {\\\n+    #name, \\\n+    tests_##name, \\\n+    sizeof(tests_##name) / sizeof(tests_##name[0]) \\\n+}\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework API                                        */\n+/* --------------------------------------------------------- */\n+\n+typedef void (*test_fn)(void);\n+\n+struct TestEntry {\n+    const char* name;\n+    test_fn func;\n+};\n+\n+struct TestModule {\n+    const char* name;\n+    struct TestEntry* data;\n+    int size;\n+};\n+\n+typedef int (*setup_ctx_fn)(void);\n+typedef int (*teardown_fn)(void);\n+\n+/* Reference to a test in the registry. Group index and test index */\n+typedef struct {\n+    int group;\n+    int idx;\n+} TestRef;\n+\n+/* --- Command-line args --- */\n+struct Args {\n+    /* 0 => sequential; 1..MAX_SUBPROCESSES => parallel workers */\n+    int num_processes;\n+    /* Specific RNG seed */\n+    const char* custom_seed;\n+};\n+\n+struct TestFramework {\n+    /* Command-line args */\n+    struct Args args;\n+    /* Test modules registry */\n+    struct TestModule* registry_modules;\n+    /* Num of modules */\n+    int num_modules;\n+    /* Registry for tests that require no context setup */\n+    struct TestModule* registry_no_ctx;",
+      "path": "src/unit_test.h",
+      "position": 100,
+      "original_position": 75,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "0423532ea998599c9e099e034b163c65aceabb68",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "0423532: is there any particular reason for separating the tests which don't require context setup? many other tests in the other `registry_modules` like integer, scalar, field, group don't require a context either.\r\n",
+      "created_at": "2025-09-16T12:52:32Z",
+      "updated_at": "2025-09-16T13:15:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2352411596",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2352411596"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 100,
+      "original_line": 75,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2352450501",
+      "pull_request_review_id": 3229910841,
+      "id": 2352450501,
+      "node_id": "PRRC_kwDOAP4Jqs6MN4vF",
+      "diff_hunk": "@@ -443,6 +443,16 @@ if test x\"$enable_experimental\" = x\"no\"; then\n   fi\n fi\n \n+# Check for concurrency support (tests only)\n+if test \"x$enable_tests\" != x\"no\"; then\n+  AC_CHECK_HEADERS([sys/types.h sys/wait.h unistd.h])\n+  SUPPORTS_CONCURRENCY=0\n+  if test \"x$HAVE_SYS_TYPES_H\" = xyes -a \"x$HAVE_SYS_WAIT_H\" = xyes -a \"x$HAVE_UNISTD_H\" = xyes; then",
+      "path": "configure.ac",
+      "position": 1,
+      "original_position": 8,
+      "commit_id": "aaacb77019be040c0e92c1c42c44c48e81dffa9d",
+      "original_commit_id": "726e70b899f370e26990d74dfbdde1d6df5ddd11",
+      "in_reply_to_id": 2349664292,
+      "user": {
+        "login": "john-moffett",
+        "id": 116917595,
+        "node_id": "U_kgDOBvgFWw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/116917595?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/john-moffett",
+        "html_url": "https://github.com/john-moffett",
+        "followers_url": "https://api.github.com/users/john-moffett/followers",
+        "following_url": "https://api.github.com/users/john-moffett/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/john-moffett/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/john-moffett/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/john-moffett/subscriptions",
+        "organizations_url": "https://api.github.com/users/john-moffett/orgs",
+        "repos_url": "https://api.github.com/users/john-moffett/repos",
+        "events_url": "https://api.github.com/users/john-moffett/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/john-moffett/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Successful 👍 ",
+      "created_at": "2025-09-16T13:06:22Z",
+      "updated_at": "2025-09-16T13:06:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2352450501",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2352450501"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 450,
       "side": "RIGHT"
     }
   ]
