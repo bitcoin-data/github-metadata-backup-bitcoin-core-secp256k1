@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1718/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1718",
     "number": 1718,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Clarify API doc of ecdsa_recover return value",
     "body": "The API doc for `ecdsa_recover` states the following:\n\n```C\n/** Recover an ECDSA public key from a signature.\n *\n *  Returns: 1: public key successfully recovered (which guarantees a correct signature).\n *           0: otherwise.\n```\n\nAfter reading this, one may assume that when `ecdsa_recover` successfully recovers a pubkey, `ecdsa_verify` on the same signature, message and public key will never fail. Or more precisely, the assertion in the following code snippet never fails:\n\n```C\nsecp256k1_ecdsa_signature sig;\nsecp256k1_ecdsa_recoverable_signature rsig;\n\n/* Set rsig to something */\n/* ... */\n\nif (secp256k1_ecdsa_recover(ctx, pubkey, rsig, msg)) {\n    secp256k1_ecdsa_recoverable_signature_convert(ctx, &sig, &rsig);\n    assert(secp256k1_ecdsa_verify(CTX, &sig, msg, &pubkey));\n\n}\n```\n\nHowever, this is **not** true due to \"s-malleability\" of ECDSA signatures: `ecdsa_verify` requires low-s while `ecdsa_recover` does not. Thus, if we add\n```\n    secp256k1_ecdsa_signature_normalize(CTX, &sig, &sig);\n```\nafter the `ecdsa_recoverable_signature_convert` call in above code snipped, then the assertion *never* fails.\n\nIn other words, `ecdsa_recover` returning 1 *does* guarantee a correct signature, but `ecdsa_verify` passes only after the signature is normalized. We should document this fact more clearly.\n\nThanks to @erickcestari for reporting this!",
     "user": {
@@ -89,15 +89,37 @@
         "patch_url": null
       },
       "open_issues": 3,
-      "closed_issues": 0,
+      "closed_issues": 1,
       "created_at": "2025-07-22T09:26:32Z",
-      "updated_at": "2025-09-08T15:17:17Z",
+      "updated_at": "2025-09-17T08:35:54Z",
       "due_on": "2025-10-17T07:00:00Z"
     },
     "locked": false,
     "comments": 1,
+    "closed_at": "2025-09-17T08:35:54Z",
+    "closed_by": {
+      "login": "jonasnick",
+      "id": 2582071,
+      "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/jonasnick",
+      "html_url": "https://github.com/jonasnick",
+      "followers_url": "https://api.github.com/users/jonasnick/followers",
+      "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+      "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+      "repos_url": "https://api.github.com/users/jonasnick/repos",
+      "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+      "type": "User",
+      "site_admin": false,
+      "patch_url": null
+    },
     "created_at": "2025-08-05T19:51:42Z",
-    "updated_at": "2025-09-09T07:27:32Z"
+    "updated_at": "2025-09-17T08:35:54Z"
   },
   "events": [
     {
@@ -376,6 +398,36 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-09-09T07:27:33Z"
+    },
+    {
+      "event": "closed",
+      "id": 19744605568,
+      "node_id": "CE_lADOAP4Jqs7EWluUzwAAAASY3sWA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19744605568",
+      "actor": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-09-17T08:35:54Z"
     }
   ]
 }
