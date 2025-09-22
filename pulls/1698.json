@@ -89,7 +89,7 @@
       "due_on": "2025-10-17T07:00:00Z"
     },
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-09-20T21:42:49Z",
+    "updated_at": "2025-09-22T09:20:11Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -330,8 +330,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1090,
-        "stargazers_count": 2306,
-        "watchers_count": 2306,
+        "stargazers_count": 2307,
+        "watchers_count": 2307,
         "size": 12674,
         "default_branch": "master",
         "open_issues_count": 157,
@@ -347,7 +347,7 @@
         "visibility": "public",
         "pushed_at": "2025-09-19T06:35:29Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-09-20T20:19:55Z",
+        "updated_at": "2025-09-22T04:44:42Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -377,7 +377,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 239,
+    "review_comments": 241,
     "comments": 35
   },
   "events": [
@@ -19862,6 +19862,59 @@
       "start_side": null,
       "line": 60,
       "original_line": 60,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2367252974",
+      "pull_request_review_id": 3251365737,
+      "id": 2367252974,
+      "node_id": "PRRC_kwDOAP4Jqs6NGWnu",
+      "diff_hunk": "@@ -7,10 +7,310 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../ecmult_const.h\"\n+#include \"../../ecmult_gen.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../hsort.h\"\n \n-/* TODO: implement functions for receiver side. */\n+/** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient.\n+ */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar *input_hash_scalar, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    unsigned char input_hash[32];\n+    size_t len;\n+    int ret, overflow;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\n+    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+    /* Convert input_hash to a scalar to ensure the value is less than the curve order.\n+     *\n+     * This can only fail if the output of the hash function is zero or greater than the curve order, which",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 75,
+      "original_position": 71,
+      "commit_id": "4428fd35f3733ba799da8e45762bdd6d6d8155d1",
+      "original_commit_id": "e9350ffd2346e48713ede92e74ce1b62dec1a342",
+      "in_reply_to_id": 2365817902,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "Good point, initially I was thinking this is correct since a scalar equal to the curve order _is_ zero when reduced module p. But this comment refers to the output of the hash function, meaning the modulus step has not happened yet. So, indeed, `>=` is correct.",
+      "created_at": "2025-09-22T09:20:10Z",
+      "updated_at": "2025-09-22T09:20:11Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2367252974",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2367252974"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 75,
+      "original_line": 75,
       "side": "RIGHT"
     }
   ]
