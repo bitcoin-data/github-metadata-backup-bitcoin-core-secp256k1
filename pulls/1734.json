@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-23T14:27:36Z",
+    "updated_at": "2025-09-23T17:01:06Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -6690,6 +6690,59 @@
       "start_side": "RIGHT",
       "line": 283,
       "original_line": 283,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2372510740",
+      "pull_request_review_id": 3258234092,
+      "id": 2372510740,
+      "node_id": "PRRC_kwDOAP4Jqs6NaaQU",
+      "diff_hunk": "@@ -0,0 +1,404 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if defined(SUPPORTS_CONCURRENCY) && SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct Args* out);\n+static int parse_iterations(const char* arg);\n+static int parse_target(const char* value, struct TestFramework* tf);\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   This function is responsible for parsing a single key/value pair\n+ *   (e.g., -jobs=4) and updating the provided Args struct accordingly.\n+ *\n+ *   Developers should extend this function whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in the 'Args' struct.\n+ */\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    /* Number of concurrent tasks */\n+    if (strcmp(key, \"j\") == 0 || strcmp(key, \"jobs\") == 0) {\n+        return parse_jobs_count(key, value, &tf->args);\n+    }\n+    /* Number of iterations */\n+    if (strcmp(key, \"iter\") == 0 || strcmp(key, \"iterations\") == 0) {\n+        return parse_iterations(value);\n+    }\n+    /* Custom seed */\n+    if (strcmp(key, \"seed\") == 0) {\n+        tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+        return 0;\n+    }\n+    /* Test target */\n+    if (strcmp(key, \"t\") == 0 || strcmp(key, \"target\") == 0) {\n+        return parse_target(value, tf);\n+    }\n+    /* Logging */\n+    if (strcmp(key, \"log\") == 0) {\n+        tf->args.logging = value && strcmp(value, \"1\") == 0;\n+        return 0;\n+    }\n+\n+    /* Unknown key: report just so typos don’t silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+/* Main entry point for reading environment variables */\n+static int read_env(void) {\n+    const char* env_iter = getenv(\"SECP256K1_TEST_ITERS\");\n+    if (env_iter && strlen(env_iter) > 0) {\n+        return parse_iterations(env_iter);\n+    }\n+    return 0;\n+}\n+\n+static void help(void) {\n+    printf(\"Usage: ./tests [options]\\n\\n\");\n+    printf(\"Run the test suite for the project with optional configuration.\\n\\n\");\n+    printf(\"Options:\\n\");\n+    printf(\"    -help, -h                           Show this help message\\n\");",
+      "path": "src/unit_test.c",
+      "position": 80,
+      "original_position": 80,
+      "commit_id": "7b51e53607889d443b64d90f7a363a962d6a54ec",
+      "original_commit_id": "7b51e53607889d443b64d90f7a363a962d6a54ec",
+      "in_reply_to_id": 2372140378,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> Is there a reason for not using the GNU standard of using `--` for multi character options?\r\n\r\nNot a fully rational reason, just way too many years working on Core. Happy to switch to the double-dash style to follow the GNU convention.",
+      "created_at": "2025-09-23T14:23:28Z",
+      "updated_at": "2025-09-23T17:05:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2372510740",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2372510740"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": 79,
+      "original_start_line": 79,
+      "start_side": "RIGHT",
+      "line": 80,
+      "original_line": 80,
       "side": "RIGHT"
     }
   ]
