@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1754/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1754/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/13a34e4921bb123d74fa4974327ba2ee33654118",
     "number": 1754,
     "state": "open",
     "locked": false,
@@ -42,11 +42,11 @@
     "body": "This is sharing some early, experimental work on a Schnorr signature full aggregation module per the [DahLIAS protocol](https://eprint.iacr.org/2025/692). The paper has not yet been translated into a BIP but I was eager to try implementing module here from scratch and I wanted to share it as a base for some discussions while working on a BIP. Obviously, the code here will be subject to change because of this.\r\n\r\nAside from all the stuff that is still missing the most interesting question so far seems to be: How can code be shared between two modules that might be not be considered low level and general enough to enter the main library but that is behaving exactly the same between two separate modules? In the code here there a many helper functions, almost all of them related to the effective nonce logic, that are (intentionally) exactly the same as in the Musig module (grep for TODO in the main impl file). This code might be shared with a FROST module as well in the future but to me this code doesn't feel like it really belongs into the lower level library code because it is very specific to these higher level protocols. Maybe I am wrong here but if not there could be some common code section that is shared between modules but is not accessible from the other library code.\r\n\r\nTODOs\r\n\r\n- [ ] Write an actual BIP\r\n- [ ] Add tweaking support\r\n- [ ] Share duplicated code with the MuSig module\r\n- [ ] Add benchmarking code\r\n- [ ] Implement test vectors (from the BIP)\r\n- [ ] Add ctime tests",
     "labels": [],
     "created_at": "2025-09-25T23:02:03Z",
-    "updated_at": "2025-09-26T14:51:15Z",
+    "updated_at": "2025-09-26T16:02:49Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "b758d3c71b6b63ff3b8e08e38bb27cc01df79a99",
+    "merge_commit_sha": "52d50e9d75477358487e3d730cb6f1c592e0b422",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -54,7 +54,7 @@
     "head": {
       "label": "fjahr:dahlias",
       "ref": "dahlias",
-      "sha": "d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
+      "sha": "13a34e4921bb123d74fa4974327ba2ee33654118",
       "user": {
         "login": "fjahr",
         "id": 1322187,
@@ -151,7 +151,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12892,
+        "size": 12916,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -164,7 +164,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-09-26T14:51:14Z",
+        "pushed_at": "2025-09-26T16:02:48Z",
         "created_at": "2019-07-22T22:39:26Z",
         "updated_at": "2019-07-22T22:39:29Z",
         "allow_forking": true,
@@ -326,7 +326,7 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": true,
-    "additions": 2544,
+    "additions": 2541,
     "deletions": 75,
     "changed_files": 19,
     "commits": 7,
@@ -365,286 +365,6 @@
       "created_at": "2025-09-25T23:08:57Z"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDYzYzFiMDc5N2I1MzAwMzlhYzMxM2U1OGZlMzdiNzdlMzliNmUyM2Y",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/63c1b0797b530039ac313e58fe37b77e39b6e23f",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/63c1b0797b530039ac313e58fe37b77e39b6e23f",
-      "tree": {
-        "sha": "154b93ea841d133ce8c3b3604067d1d84058f062",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/154b93ea841d133ce8c3b3604067d1d84058f062"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 154b93ea841d133ce8c3b3604067d1d84058f062\nparent baa265429fa8f1686138380e52a75c25b0344719\nauthor Fabian Jahr <fjahr@protonmail.com> 1757454700 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898266 +0200\n\nrefactor: Move GE related musig functions in to group.h\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFsVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNDrwQAJI4/tXhh8cNQzaaLMtNqVGzk6ck\nmNX/CeRy9dlI0DPleXoUOhsg4XzqeP+0KnYUdeR5FlWvN6LTZtINI0pfTRpiAMXj\nUh0/81J4CfGH7fnvG7kYYPBn5sOXVu25Ax1I9sioGULigv4QErly6AYfsRH6slDA\na7PpWaJUiJEKPDo30M65/jPcJDf54yCmTZNPMKUXcoomTxHKXYFGLUPy9OVdob2j\nhpwl21OwnJ3qyrRfnWqxThNRyKVyNIEc7612OqRKAym15avNpQKbOdU9Ys2+NVBJ\nJK19foTX3wkTI2bvpSL7coBprXe13whBFV8NC1CnKOg+zAQp8eqmdsiGKjr7axc/\nCgCPENY+OHlGM6L7VHnr7+guYM7seBOUmOiGK8SO8Chx+fNDxmvnhE0Ll6rV4MqA\nn/GMkAY7EkamBdH0r/myi/RK9/kDF3TKHeEzLGkXYY3iaLo6e9XIZ30ICsoT8Zvd\nmYbYAoSBOuN1mrC8I/JghRWSpaJGA5kXh65VG8wTZw5f+We96SI3OMsOcXJvwDjt\nSvRLaRG2eHriBrZLoFZE0ZOETr76qnGLI2sBya33idl4oNYTJJcPQ8BRPmd4ZnH9\nzEdCb7jNkzZz8i5fMQ2GZWT98MKIoKWiY5ehfMNEGExfH1OhqgLCyFEhSEdZwCPt\n8hKz4eOfOwDtefGT\n=3Fwp\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/baa265429fa8f1686138380e52a75c25b0344719",
-          "sha": "baa265429fa8f1686138380e52a75c25b0344719",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/baa265429fa8f1686138380e52a75c25b0344719"
-        }
-      ],
-      "message": "refactor: Move GE related musig functions in to group.h",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:06Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-09T21:51:40Z"
-      },
-      "sha": "63c1b0797b530039ac313e58fe37b77e39b6e23f"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGNkNGYzOGVmNTdkYTZhNjM5MWUwOWQ2MWFmZDdiNWM5ZmZmYzliNzY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76",
-      "tree": {
-        "sha": "3d616e2977ecca0a59cfc1a0006562be0d359e61",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3d616e2977ecca0a59cfc1a0006562be0d359e61"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 3d616e2977ecca0a59cfc1a0006562be0d359e61\nparent 63c1b0797b530039ac313e58fe37b77e39b6e23f\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692517 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add module\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNJigP/R0vLTTHZRO2s+G1Az61yvUi72Yr\nglJk3AA3EJoyZlVoDc8hWqiw+qDPUnISUXZ5LMI+3eUqTki2EDN+m+qTvG2GtNzG\nqvJr+KPCLKO19Y4yxe0u5KN9ZXkvHAQLq3u2xtBR6C1IG4dvw2CPhpXG0U30iSrU\nQsO6sxJskvflfpLvMaCtMZ7sHE+69C3NPwsHvDsY/5zRT3GXUifuQ7Y1lk+OcVai\nS6z+CPut8dW2dXmr8XU8xWcRDJmvlWx2flfhNBfzs2JmlxnQB+6K0rUq66haXfJZ\nORX6+J47lngdf7qKflpxvgrTUhgBm3UDLMjo0TDSiqPj+LxUyRI6nPOw66l6G2fc\n/LETGFO4Rd8rLDEyfOtHlx83fJ8Yr3frfjA6nmTski/YApPQKtZ/xIfZEGV7o3aF\nnr+xxvF0D/Dmn3y8UpIVIwm2s7hvcNoNtpI5NvIeKCTgYZeWaFfPtUWsd3QnoRMk\nLg9IgPwcuORDMX6XDChcc5gqQKJfE7XKEbhLv7gHgMHl2qdZQbrpcTpMUb21DU8L\nB1fhTLPbp6mBPOQHfhKnyXhJRvJ5CgdkIetebV0BmC6ka9zY0KVnG/pynqA7pnrN\n4CzsWbyWPeM1IkkdThR8J5jI5WDnsbdL1fA9ablK9nsQKxcPy78XszLI4gKXBWCz\n5NtlRiKIE22zPT71\n=5w2C\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/63c1b0797b530039ac313e58fe37b77e39b6e23f",
-          "sha": "63c1b0797b530039ac313e58fe37b77e39b6e23f",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/63c1b0797b530039ac313e58fe37b77e39b6e23f"
-        }
-      ],
-      "message": "fullagg: Add module",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T15:55:17Z"
-      },
-      "sha": "cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI2OWVhMWRiYTA0ODczNjc5ZGEwNDc4MDQwOWIzYTQ1YTcxNTI2MWY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/269ea1dba04873679da04780409b3a45a715261f",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/269ea1dba04873679da04780409b3a45a715261f",
-      "tree": {
-        "sha": "59c8f3db5b1b1cf403337ee5b1de93df21540eb5",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/59c8f3db5b1b1cf403337ee5b1de93df21540eb5"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 59c8f3db5b1b1cf403337ee5b1de93df21540eb5\nparent cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692533 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add include file\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNUhEP/0oCaL1e5iSzu31ENps7O6+UcodM\nTO9Nj88sZKH+nLWtPkcV576qlFEPGzf1CjUhwcnPqSbnJbeljq4lv4hzwDy4jdDw\n9fcoZhMUvAnYrUAWzLDG/Phpw1hbjCcQQPcCvFIQiOfbfvh2Vj5oA2fHTxIRDFOl\nPm5K8eik8OUmoIunyaQRaus0bpd9q4CL1o9WxHfjHTBRizpbQP+rh4dgrzzXW+i1\nzt3/kzw8YJDrkq4PN8L4QKnXWM/nmqKTwrgo2v8WHh/6voMsyKw55fRig05BQ0eF\nca17QOk7tsuHp4hzaHeO+IXsPnexEvdlQsC2aQt2EE2eFbiqKiJ0jhhECnJZYAep\nGnbWfxsFywE/dEeLw0xiJ2o91OIXw+pPSG0HaV5MQ2DMJZNjzmLHVa9JRSiAigQO\nfAMpFbPORkXnu1Y3Kki1FcCUvKs7kM07FBE+tDFy8JVyjuVuRzvdGl/BVraNHuKf\n0LiFfcjPuu3UvxmFbUCtGZIyOHsAYKcCo3GKkiRy0KYr4iTvjujnMQRao0VA+DJV\ndijGSi4jpN9twceJ4wMQNkvWuFlwNq0FZM5Z1i9NwXFEhaWFf0bzeiz2hAZDNKku\nPsCwFpUblAPS2v+t4BS2RfdGl/HD+S/8t1PNgQd0YVLU69V8Bqxim4w9riBs+/9I\neh+NtFytau88tnaI\n=ElZS\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76",
-          "sha": "cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/cd4f38ef57da6a6391e09d61afd7b5c9fffc9b76"
-        }
-      ],
-      "message": "fullagg: Add include file",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T15:55:33Z"
-      },
-      "sha": "269ea1dba04873679da04780409b3a45a715261f"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGE3ZmJlOWJiNjQxYTg3ZDI0MmI5M2YzODBhMWVjZDRmYzMxYjEzOGI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a7fbe9bb641a87d242b93f380a1ecd4fc31b138b",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a7fbe9bb641a87d242b93f380a1ecd4fc31b138b",
-      "tree": {
-        "sha": "ace7a01ef37f3dc90cc2e32e97ebd9227acbda7c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ace7a01ef37f3dc90cc2e32e97ebd9227acbda7c"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree ace7a01ef37f3dc90cc2e32e97ebd9227acbda7c\nparent 269ea1dba04873679da04780409b3a45a715261f\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692553 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add example\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNvqwP/2tJ+xIUKLJZ2suOtg0s/kYWNMli\nknDbHX6Kn0Bd2zWwyGwdh/77iXGrQYdYBc7XfI4DnJpFBK8/Bk0maBssoHgftiGm\n17vnOQ2skQOang7+My7epgPtwWBngk6y/A4bVdwphKbJEWdg25p/599pE+CeGF6j\nliLuXPUjmhJ2JE3wcAf8ibmGFleV5tdu3VmOBoXjd6U+DM9ON2KSvQEzXhGygCB6\nGLwmViLhzQc6k1nAoU5Un5tb8tM5bA4Q9EUCI9Lz01tX6lvcNAABBsOqUkZ6+GKw\nmEOrP8S3UeE4r2rNLRblK6Q8MD6RDgLl9d8MQFImwsWOYcMKd9wnVuzNn5Lem7+R\n3qS4Jk+FvTEYBM6CM6x77i9u8TQV7xBS9vtGh+uKceTbK7+PdqjqaoZg4EL5jP4c\nUDy36xaqGA4MRoz1zMw7Z7WV8ZTxvAy1pjUVyJZ8sL0C6vY17EC5yYAgRK/NrAYz\nt9KdLJocfm2Jnp8woEIfAuZPtWDVxfEF5o727/bB6I1eXbaMJd2zpYlMK0z9l6DD\nxx6El3nhtgqG7tCtl//jWYkyDLEejoH01MVYGPl2K6JldAZV5w+azF/uvGQ1lef8\neaU3u6aIp8vmo49oKMuM1u9/++KMp01VdYf3v3Q6c4gOjWSwuL3CrmnZlA0Ep0op\nnp6tB/WlStw6syUG\n=kMsA\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/269ea1dba04873679da04780409b3a45a715261f",
-          "sha": "269ea1dba04873679da04780409b3a45a715261f",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/269ea1dba04873679da04780409b3a45a715261f"
-        }
-      ],
-      "message": "fullagg: Add example",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T15:55:53Z"
-      },
-      "sha": "a7fbe9bb641a87d242b93f380a1ecd4fc31b138b"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDgzODdiYTU2NzNhZmUzNjkxMmE4MzQ0ZTZhYmU5YWIzYzdiNGEwMDk",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8387ba5673afe36912a8344e6abe9ab3c7b4a009",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8387ba5673afe36912a8344e6abe9ab3c7b4a009",
-      "tree": {
-        "sha": "5c6655dc220605915b0483831c97881da22217f4",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5c6655dc220605915b0483831c97881da22217f4"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 5c6655dc220605915b0483831c97881da22217f4\nparent a7fbe9bb641a87d242b93f380a1ecd4fc31b138b\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692795 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add to CI\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNCLwP/jbqLoAzDT/1DiY0iTSv/vKM8i3+\nsp6Z3Vn1L8gvYgsSEkaWrnjJmzwNj8flZR46Ye6owQXvDhnV56cM+p4FYgaV2rGF\nev4tx0PDZGaU5kUtInzyLSRYXPU1lk7lXm53Hah2bxLoAdS9KTxdSGii+ngx6uJF\n6B6G8NT+3REFOzMbq0Pk7A6QqiZLYuIpBOwDMhAYedK1TqtHKsG5N65p78bkg0p5\nt/s8a3jEL6qvb5nw8VsLW8EsMSzhxC3uDxTcZW5B4RE9HklKSNtWyjHkox0zvr/7\nFy+HvdRDTdWtqHP4v6vm0nNobr/nk9mtop8rggzZ5/A/LkhF3jhRKHoY/CFbrNGN\npWOqa8Z1umBQsRCxpW+p/iQUTCDljgX9D2buZVQFf8jDmqSK4oKiW+K7kY5Tuzfx\n98YlI0ZFE/55/kc2oxHbSJjssH2s2OBH/3fdo70nGfv8OwmSuxwaxS0PXbvOD1u3\ndSEt9WzfwH4IPz7dljErNjV+OHz2tXZtxKugigAJDRvnSXZGZeLCUvvLXgmzZUpX\no2eOnGDXOWgUYB074mvMjlWc90jgZIFN01rp3mMWnBy8u81vUuITDL3WjWBevVTe\ngABcDWcZDVPHvD7FKg+NFQxPLNjPxoNXOfutl9EFhdNi5hW01WCNNKQ17vyR+g4p\nWmzkJZinPm652+WT\n=yH2p\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a7fbe9bb641a87d242b93f380a1ecd4fc31b138b",
-          "sha": "a7fbe9bb641a87d242b93f380a1ecd4fc31b138b",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a7fbe9bb641a87d242b93f380a1ecd4fc31b138b"
-        }
-      ],
-      "message": "fullagg: Add to CI",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T15:59:55Z"
-      },
-      "sha": "8387ba5673afe36912a8344e6abe9ab3c7b4a009"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDY4MWFjMmQyYzk1NjdiN2U4MjNiNjU1MTE2YzViNTY4ZWQxM2MxMzE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/681ac2d2c9567b7e823b655116c5b568ed13c131",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/681ac2d2c9567b7e823b655116c5b568ed13c131",
-      "tree": {
-        "sha": "67fe93333733c4ba6e3cfad6b4d288f55bbc4f4d",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/67fe93333733c4ba6e3cfad6b4d288f55bbc4f4d"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 67fe93333733c4ba6e3cfad6b4d288f55bbc4f4d\nparent 8387ba5673afe36912a8344e6abe9ab3c7b4a009\nauthor Fabian Jahr <fjahr@protonmail.com> 1757693480 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add to build system\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNtwIP/07gOCOjCqF35yOTla7vObGplWsu\nvl8D4/ASVx2jihjoylsm9cnCAgqczB7sQ5IdRVccE3sl05SyKsUSVpr23q+/oFPj\nTEOsGn24b29XhBP4zmkOUyDF7VU6dT3j8/7XqSxcJ5OTKPIDBBYO5+RHIgDUT7rp\nOQY4GZ/TvvllQd8YE7YRJJAssjtHtrm3IhrDTv8E0UEi6DZcUKRgNeHt5gpoTKih\nW8g3M4NXZY9kTT2vHMNCFHN+3ikaRRIhaq/wX3aA0BBgLu08Cbr27w9GMpCOpy4m\n+bm+8backMtQfxYCZzTQUmN7JF8JaSMvQP2eO7FgrgmoXTjQPUE+8Ml48C6U2iTt\nvp6meE1cLFNWJYS6+AwclJBgD/M1XC4HM8/x2nv8uIm1weBfJe09SlZ4/E9trbpX\nKP2TAJ5DmaZJ2TqcwRhEcEHnhvD7rBoEzUlywmMAtE45w7G/e2FKGr/6irxM0oMW\n3Hnrr0f9K0FCyKTUZMvpJTmcVUhpzXccxa3E6GD504tVBpZHo6nPHhUctOrH6n4o\nF/T7gTHJsbcpOHOgJRsaPvV5DJA5r0K8uO5W4HNWBMxvuEmDXNJz50YU891jdyCk\n/IBR4CQhWA8yzALrvm/V6cgR6to4iTN4Cww4PiOt2CUipFasXie5dk2AyyHE7rcB\nQ+kbZKbmDJardQv3\n=bnxH\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8387ba5673afe36912a8344e6abe9ab3c7b4a009",
-          "sha": "8387ba5673afe36912a8344e6abe9ab3c7b4a009",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8387ba5673afe36912a8344e6abe9ab3c7b4a009"
-        }
-      ],
-      "message": "fullagg: Add to build system",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T16:11:20Z"
-      },
-      "sha": "681ac2d2c9567b7e823b655116c5b568ed13c131"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGQ5NjJmOWJjYmUyYmUxMGRlYmM2Y2Q0YzVhYjI0M2UxNjA0Yjc0OTM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
-      "tree": {
-        "sha": "b04bbc88602d695900266fdc289f04e93c0a6593",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b04bbc88602d695900266fdc289f04e93c0a6593"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree b04bbc88602d695900266fdc289f04e93c0a6593\nparent 681ac2d2c9567b7e823b655116c5b568ed13c131\nauthor Fabian Jahr <fjahr@protonmail.com> 1757693494 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758898268 +0200\n\nfullagg: Add docs\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWqFwVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNUicP/1wHYmB3qum2Bl68EdfhH8mT0A4t\navO7ZQoow3d60Ou6g7wfsZlQNnXxTo8PkEOrDwDQg1Y4HWeeCOk6kAcIcV3dHach\nKjjlBOwms6Zed/9bilVo8QyQVjmsy3VtM41rW1nU9OtvxSeLrjZPc5nyqMhJ4xaa\nmHvsyuvtSxZWsAxtHyfSj9Ng1Lpy55MMdaRxdYufQAkNFiq/crkKdhrylSX49dLJ\nvyGKkJnJaYOqh8yuY6Gt/IgO1qwswg/yspDh7ZLy141yPOZxWcUvIDJN5cSJpzUd\n0nnyx2VL2+GbYGnt0zFsqmj1Y4QechS3DfWAJgXpNA2i2aIa9EAt6VlxsZunpFbv\nq3vBm82sJ6g68fSqB+RuuubvDYX8htzjT6CQFZEgHSFHjPx5+r/Q8/aJaHyyd2PK\nv4z1Xhh+eF0IXL0VOSb8Uayzr5N4cz3KSfT1+bwrvrN6FK78dWk0TeLmInJOWGYT\ne4Cto5laIVsn2aRdDGAR5E3+YYioMYzmBVXmKJVf8tV5iVLtlPOxOfMHy6rOSWdw\naNcJiYnpJS6OrPoJkAwZvdf3h40mrM4CTOLKSddbCINr8WIjeL9tuRHr+ePGLBDl\nPeMve5xoCO2d2UpaCRXHuiMwd/haPyVAWYofpH7ZGSx0BTva+VcpnpAgTJW95QoS\nG/dk3V5jq8c57WSq\n=GWm1\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/681ac2d2c9567b7e823b655116c5b568ed13c131",
-          "sha": "681ac2d2c9567b7e823b655116c5b568ed13c131",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/681ac2d2c9567b7e823b655116c5b568ed13c131"
-        }
-      ],
-      "message": "fullagg: Add docs",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-26T14:51:08Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-12T16:11:34Z"
-      },
-      "sha": "d962f9bcbe2be10debc6cd4c5ab243e1604b7493"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 19946207270,
       "node_id": "HRFPE_lADOAP4Jqs7N83t7zwAAAASk4vgm",
@@ -673,6 +393,316 @@
       "commit_id": "d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
       "commit_url": "https://api.github.com/repos/fjahr/secp256k1/commits/d962f9bcbe2be10debc6cd4c5ab243e1604b7493",
       "created_at": "2025-09-26T14:51:15Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGMwYzlhY2I3N2U5MzRjNDc4YWQxMjUxZGRkYjJiN2Y1YzliYWRlYWE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c0c9acb77e934c478ad1251dddb2b7f5c9badeaa",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c0c9acb77e934c478ad1251dddb2b7f5c9badeaa",
+      "tree": {
+        "sha": "8f3158bf5c271980430199d1da217f9774152cbf",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8f3158bf5c271980430199d1da217f9774152cbf"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 8f3158bf5c271980430199d1da217f9774152cbf\nparent baa265429fa8f1686138380e52a75c25b0344719\nauthor Fabian Jahr <fjahr@protonmail.com> 1757454700 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902271 +0200\n\nrefactor: Move parsing helpers from musig to eckey\n\nThe naming of these functions suggested they should be moved to group.h\nbut this didn't seem practical since these functions depended on eckey.h\ninternally which is higher level than group.h.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuHAVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jN2QsQAJnp+1Vy2cMpU7hy/I0J7GScytic\nnTn7Av94F9cpNrVHmeBIK8TlbFckL8GRmncwTGKXqxFmkVCU69MqwkfXduB+x5O3\ntsaW5MckPcZGrnJSUKX3WAZe7WtKnTMDjW20SKd9/FU9Os6+kaoZ0NP5IQAkXt/r\nf0pS4YsLKBF5jEL1qW91f66KOn58PnUAE+CLK0aon58ZaMai2PVsnu/gjSjAkKk4\nvSje0faWLl18Ym5gHBYsOOYvWW+YWjJboDcZUk8/KHBFZyDOnn/FfrTTKHi4xYrf\nieVtTqFRRSqZLhg16JlxpfqQMBmilkbXhSA6Gg33/AtcxsM/nqoHnMRRmHH11HX8\nYH5cXxS2cClcZGpB3mTBddqWg0wK6yXQ9wu8gFw3Jvg/vri4BaRDT7b6ZdtDDXgU\ndeaSkvtsmaWYBsC94ZTdTWKuvIOkubAaKg7elqHg8WG3nldRw25TDoYPUDPb44Jv\nS7E4nw/qEXv+WD/NI5vrtEJx/vi8+Knjlffdu9aAYJ9z1SvpfVrdwL2PMrjV1pNb\nD//2qW9202x4rvvCU/Pt9SMUDl8D0Vln9KydeTKxJu3YWEyS/LABNgEKbtol7jEE\nnr/TO1JErcY6u4VxqhFkuph/5qtHlqnsT3vJ+UJSYsfT4/xvjhxwAetu5rNtjopY\nSVKThN0jB2PAe6Q1\n=45fV\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/baa265429fa8f1686138380e52a75c25b0344719",
+          "sha": "baa265429fa8f1686138380e52a75c25b0344719",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/baa265429fa8f1686138380e52a75c25b0344719"
+        }
+      ],
+      "message": "refactor: Move parsing helpers from musig to eckey\n\nThe naming of these functions suggested they should be moved to group.h\nbut this didn't seem practical since these functions depended on eckey.h\ninternally which is higher level than group.h.",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T15:57:51Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-09T21:51:40Z"
+      },
+      "sha": "c0c9acb77e934c478ad1251dddb2b7f5c9badeaa"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGVjOWU4ZTdhOTk2OTZjZjE4N2Y2MmMwYTcyMDU2NmZhMDFmNTUzN2Y",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ec9e8e7a99696cf187f62c0a720566fa01f5537f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ec9e8e7a99696cf187f62c0a720566fa01f5537f",
+      "tree": {
+        "sha": "b394ab107e0722ded668e5224a28d8217982faca",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b394ab107e0722ded668e5224a28d8217982faca"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree b394ab107e0722ded668e5224a28d8217982faca\nparent c0c9acb77e934c478ad1251dddb2b7f5c9badeaa\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692517 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902503 +0200\n\nfullagg: Add module\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNRHAP/3T/dyGfKUxQJQkchUz5xizAiUT2\nZsm3EoJL1wqxAjFUrIZGsabdL30P+rJKDXmfzwCY/RWvkTl+T4moYKLQmWSHNsVS\nWSSmZpJLNIFgmbHRH5FClKEpPksSS0k9+UoNdej4HkrZ/0P0DUnT0m9Rezh9t+CW\n3+E1Lw6H1NaYTC4/Mj+YIpMbIYgtM90a6VzI4ozR1kfQSO7KfFIV4yyGIwQTxI0G\n5JQqjDnhAeZAIVBCJUEQpm1V3OqQ3X7HCpeJ3R50tvObgKEEB5aJ6+aXc9LqSMNu\nF5pY6sDdeis1sYG4yGuL/dDKZTfTWiuzudN+Awl5Qj5goqRF2Nb1VBh5AWUB5vcU\nwRRq1M2p3P0QysLiX12KjlK45SvYAjez6z1Qrb842HB4AfsbLmusy1/WFykdZa0f\n1otGBOWo0BHtncOh5Don/Wg3OB1gm4dwu5qvjHXx9JDv+E/8xY5Xd9GrxANuzd8W\n8Vi2+/CMiEctfohTzqB0bCKLYS/sVpfxiYBQAJf6MgvkgkbNVyGjL4K/GxYQ8j55\nhk60R8KVYiz7/K/33Mt93lSbQo9pQ6apXNZrIQkM6iRyL3e2Rvj+faFDVMDy9U2o\nWEwK5FzX8QoWLtPWfJ6vr7APET5GCUZXW31hDKUNW4DCIslQRnO5K7dRx+1IOq/H\nu1YdQajAUm/JL7AL\n=h8Lw\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c0c9acb77e934c478ad1251dddb2b7f5c9badeaa",
+          "sha": "c0c9acb77e934c478ad1251dddb2b7f5c9badeaa",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c0c9acb77e934c478ad1251dddb2b7f5c9badeaa"
+        }
+      ],
+      "message": "fullagg: Add module",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:43Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T15:55:17Z"
+      },
+      "sha": "ec9e8e7a99696cf187f62c0a720566fa01f5537f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDJkOGMxYjEwYWJkYWRlNzlkMDIzMDU4NzI2YjEyNDhjNzk1Yjc1YzU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2d8c1b10abdade79d023058726b1248c795b75c5",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2d8c1b10abdade79d023058726b1248c795b75c5",
+      "tree": {
+        "sha": "f95929114cbd24ac251cb1666e79d3dbd6e135e9",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f95929114cbd24ac251cb1666e79d3dbd6e135e9"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree f95929114cbd24ac251cb1666e79d3dbd6e135e9\nparent ec9e8e7a99696cf187f62c0a720566fa01f5537f\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692533 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902505 +0200\n\nfullagg: Add include file\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNCloQAKSMirFQgD0USd87q8M3un7/ffcy\nz9myl7sGQQoq3yJcyK/lgfCMpW/aNEZ5OetUbsL1vOHrL+gwvQNeFOMdxgWny8/+\n5TZTPpe2T5YPyovwEYSCWV3O8QqnG68J2yl2nKyCWYIJWbB2ug4DyS3/762DL4wK\nWhhb2GWihjAL5K1oSk2mjauNErRadmzSAV9kJlM51abd7si0Z0cRB3hG1ZxYG96t\nl+HdNBi9btsuitlGNe9pwjkruSRkB1iIaLmzWFgpFjclc1csC5hDo0+aZSE/oTbJ\nWy0lYhTjA+0L+6LZWmDofAOKoFUQCq2KBcKrzA1l/5R+grqo8zA8YOc01MawIVzg\nltxC6sw6Pv3CmO0SZG3F359PlIavAahongYFhBcsVRvWxYkWTsesf5CDi3u3rCzn\nv5+X73m+OS8ycPVjMxQSaeQ5QJ+ssD63BVgCpY3LnF0la2TNfJFgiTDyE+UY7izp\nJ8wa7/89Wub1jiH2JwTqI3qoUjptddl125nlW7CgHX+j6ij1b//P/FbapHhqsIU5\nOmvHRjTF9ERjpGrMIxff8xLCiMMN+zCHY05Nlgo85KaaQUMYxoZ2CKWF6M7uIXpH\nRmN8v/XJCKkN30GjA4T8NGuMHSFvpF3DemVzCvUMwWPQlOicNXwpuA/QPNLwrJ1f\nt/8HUj/ioLA2eLJW\n=xF5P\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ec9e8e7a99696cf187f62c0a720566fa01f5537f",
+          "sha": "ec9e8e7a99696cf187f62c0a720566fa01f5537f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ec9e8e7a99696cf187f62c0a720566fa01f5537f"
+        }
+      ],
+      "message": "fullagg: Add include file",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:45Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T15:55:33Z"
+      },
+      "sha": "2d8c1b10abdade79d023058726b1248c795b75c5"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDU5NjhhZWI2NDI2NzkyY2FjNWMwNDRhOWVkM2Q4Nzk2MmRlYWNhYzg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5968aeb6426792cac5c044a9ed3d87962deacac8",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5968aeb6426792cac5c044a9ed3d87962deacac8",
+      "tree": {
+        "sha": "b0de54b31ba7575b66367ca95081471f72a36bbf",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b0de54b31ba7575b66367ca95081471f72a36bbf"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree b0de54b31ba7575b66367ca95081471f72a36bbf\nparent 2d8c1b10abdade79d023058726b1248c795b75c5\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692553 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902505 +0200\n\nfullagg: Add example\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNHT0P/0fAxcnxTkbi2pK87S6bxU0IzBAN\nTcGGNO8t9Ba053xKxpg3ArAOE8n2BOZeAihdXPI1pCk8EqQyfImAsXguNW/B13Ph\ntW9g7dXsMVc/imEhIk7Pb1by7xGjt9oP/rahHGbrZ/+JxZatSzY7Mh8lmiuz4VKn\nBYQjl7YF2ElDekyoMBJZ6GUK+NsJ16OVmEVZnrDTsmJXx72Cca1rS5it5hB3TMln\n5Z05cdBybzMYqcLIdjqS0/SJhH4uf3jiVtvGNyN3mq2ZgDOpGOWFZ1ArD1QTojXy\nrRFOvWtp7d6Dz7qlxTVw6a+7UYgdtZFYCs1TX40ixEx/FHGJwuzKayT1BBmYLkc4\n2+gSTsUQqVsEC+HsLIswAXZQyf3qWy/N+c/u7Eow0ZZxsGqaMzN9X9APM1GOa60B\nMXpwO4JuYRnVUurWWSE6VXwxgV2fFembrOhN2dcO1XmBYcaeSVpCRnSC1nIPHXeg\nRWLsu3GC8HmSFHM0udIMr4ckYXCPDT3cjCy9vAqm4xSKcaGNlv8u8+hvLs5YEubV\nnk926C/NeswjYXz5UwgtwEXh2wHkdru320DuxHz24jCKiNVgF+Owl6pOTAkKRbIK\ngm+1LCIRabf3iCaNMgGTnPgNpXwo4nSo7f9Zb5WyGrNBYVh9e5tekwaA+wSNWfGd\nlno+REUBOlMxnRz9\n=GJ03\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2d8c1b10abdade79d023058726b1248c795b75c5",
+          "sha": "2d8c1b10abdade79d023058726b1248c795b75c5",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2d8c1b10abdade79d023058726b1248c795b75c5"
+        }
+      ],
+      "message": "fullagg: Add example",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:45Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T15:55:53Z"
+      },
+      "sha": "5968aeb6426792cac5c044a9ed3d87962deacac8"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDM5ZTM2MTkwZTA2YmQ4ZmU2MDg4YTBkOTk3Mzg5MDc1OGIzYmNlM2M",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/39e36190e06bd8fe6088a0d9973890758b3bce3c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/39e36190e06bd8fe6088a0d9973890758b3bce3c",
+      "tree": {
+        "sha": "f28e540444b004c55bce162f431690532a15db2b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f28e540444b004c55bce162f431690532a15db2b"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree f28e540444b004c55bce162f431690532a15db2b\nparent 5968aeb6426792cac5c044a9ed3d87962deacac8\nauthor Fabian Jahr <fjahr@protonmail.com> 1757692795 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902505 +0200\n\nfullagg: Add to CI\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNElcP/0VOiHj4mxF0ajFwFTWYxMRjDR4I\nT4J1vCb9n0R8bQjAck+QOEP4+e1FcV/PxDdGPsNY1YX7KatruwK9IuCbmKCvL9un\n3h/Tu87lTuKTTi9FPFGj0EK/YzDiyDq+OIHeg+5Qc+JtLSpaZBqmstVZuOeCkAFC\nVY7xBcdwf58I+PsEolJPKNo3jXtQ2gnWIcYcZh2PSB0q2dbYaM/wimOq76i5Kxwp\nNxRxWCBu6BHRNWACYjHNUQYFQ+VJ0VDr3paP7VJqXU1S7oAkK3B7krSq/+qCEWGh\nFrAGfcA0mFPG49dg16ewGj/qK6R+uQHdCe0XhjBE9Sw97J/iyPAPZtRdqJcoWRBK\npFTG6Z7NF7RPXAqIyQdNV9n4sxI1+yVL2Z/j1gcGwkaTRAD9sSxJHhE3F5o8T777\nbnjmdq75YhT/kBLsSRTd+kuzdnfPrpO8+T8lmRJvqc2lEHoDE28PQtuC+zMbpGbl\nPwcOprYrD3U5FgQ8DjjZzDGkkNUOlMmhI/4JcKxuiIZDt2Quwd+Wt+4FViru4hnh\nUQ87i4HEv0YVH6BI3z+qvcVH2Oa387vJESmZNW8mXW7ghEo3m4K2Rzk8D9672NyI\nrnNqkxECFosWWTxyYWEAGXhmoyGr7Z1BLLQiRy7d47VgXdH4CqU5ilwiZEMbNKGQ\ncKGH02H0yHxC2jmU\n=pmAv\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5968aeb6426792cac5c044a9ed3d87962deacac8",
+          "sha": "5968aeb6426792cac5c044a9ed3d87962deacac8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5968aeb6426792cac5c044a9ed3d87962deacac8"
+        }
+      ],
+      "message": "fullagg: Add to CI",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:45Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T15:59:55Z"
+      },
+      "sha": "39e36190e06bd8fe6088a0d9973890758b3bce3c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGJmZDM4OGY1YTJhMTRlNzY2NzdjYzY2ZjdhM2VkMDAyNTY5ODFkMWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfd388f5a2a14e76677cc66f7a3ed00256981d1c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfd388f5a2a14e76677cc66f7a3ed00256981d1c",
+      "tree": {
+        "sha": "d607990db730705fa0d085c56900c9b97f87c899",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d607990db730705fa0d085c56900c9b97f87c899"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree d607990db730705fa0d085c56900c9b97f87c899\nparent 39e36190e06bd8fe6088a0d9973890758b3bce3c\nauthor Fabian Jahr <fjahr@protonmail.com> 1757693480 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902505 +0200\n\nfullagg: Add to build system\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jN+cUP/RGWHub/23iSWRpo3L4cRe1me8EE\ndHIp0KDMsxHiP+ppa9koq3/rXkpQ5UXHk8iv1cxNzutOyABztSnnQQLNDLoL7qHK\ncYG/2GjWAvgLD769DzeFlTkMrRB3XmIbutqlgLqxBddjIqDzBf3LrEAaZGHVASlF\nFXw34KFJCpeUmdMxxtlkrH6AWAY6FCzP1QCJf/eTMswXsZQ1fxhSmVMNxhthFUg4\nu+PDiKbl1IFZQd3ZLEniUYjXmft1dvA1TS8aWiDuutSwJwlBwKtF7yg2gQmTdcL6\nEUQuvHB9tQOe4SoLfe3wl/WPC4FzLREP1p2cCbNzX/tBUwmpiCjqcgakPoE0JYNb\njOBXLS6NjMoK6Aq252aCbCIz6GLFyTd8VpNspXoTpMy6HUgDf0UYB1Kc2PvhrM+Q\nJUZuN77vCVzyjaVhla7ScBTKcgz8RBAdiz7a9xRT7V+vqiKpiAp+O2clC19ZsxMH\nMP0/8+9MF2ekzqkuUB74nfOBnHZGQXru+Ryox/g9tOAeBbmSuL8SouH69bRBnHQ1\nFaD0E/bLEEt4fVcJIt6bBfF+A6fEneGDVbORurlg/Fmrz4ewDK/VbSAACNP34TE6\n5Nc6B/i7EyPTS7K62LddjGqG0jpaPqRS/U6KFZE07mRNCVL2kK4nqRxwvH82oc67\nBHyUWUvrvQ95W930\n=MTHc\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/39e36190e06bd8fe6088a0d9973890758b3bce3c",
+          "sha": "39e36190e06bd8fe6088a0d9973890758b3bce3c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/39e36190e06bd8fe6088a0d9973890758b3bce3c"
+        }
+      ],
+      "message": "fullagg: Add to build system",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:45Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T16:11:20Z"
+      },
+      "sha": "bfd388f5a2a14e76677cc66f7a3ed00256981d1c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDEzYTM0ZTQ5MjFiYjEyM2Q3NGZhNDk3NDMyN2JhMmVlMzM2NTQxMTg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/13a34e4921bb123d74fa4974327ba2ee33654118",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/13a34e4921bb123d74fa4974327ba2ee33654118",
+      "tree": {
+        "sha": "dcbbd809e4d316d357c54add350c5bfc651409fc",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/dcbbd809e4d316d357c54add350c5bfc651409fc"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree dcbbd809e4d316d357c54add350c5bfc651409fc\nparent bfd388f5a2a14e76677cc66f7a3ed00256981d1c\nauthor Fabian Jahr <fjahr@protonmail.com> 1757693494 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1758902505 +0200\n\nfullagg: Add docs\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJJBAABCgAzFiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmjWuOkVHGZqYWhyQHBy\nb3Rvbm1haWwuY29tAAoJEPE9Hp2JB5jNmcEP/0nEoCWLJ0IRSdxgcYHwepkka7n8\ntLoMbgZ72noTvFFMBtPo6CsyXHj4dpwmYRsL3AHGfUw5KhUyQ1zjK/k93bi4B7RY\nEv9RjrNN35r5pACMazefXQq1RGLrkPABpwiJTKQJ6C0Mc4+noDc5eFzPvSYt7FFM\ngx5nbM7/H4VsXZF+HkyHxGPVpklP4wiTTdGQsXseicFj5maL9v1QKEJtJyBemb1i\nVlwtetG26LxRpIxU9ji1aR4n6qf3n2ztTUXEOxl+rxurzr4oiGHH72bDiznXLmt7\n9O7kAXGULPIM8rm9Jh31ORFW0cIqYeBFtUf5pVQdYaJ4ojF1B44Bb6K56z7E1iTr\nNG5bToXwVsUIaOIHGMXPW3i7nifD/kDZO6xREitbYT5KMZVNNMhY7NO984kM87tJ\nXLZN9B4hRejkQ91Zljw64zVbNFuxBarNxu4bJnyQM2Vy7/ijZxYBMCBMxqZCwIn7\nE2aiVRnetCeGQmTHWmSdjHDPOwYxY920/AieGi6GtT0dOTM8BP5suaf8oSIkKcQT\nX6kqT1UGfV49swA4F9fcJp1sPBbRegKaAxdprXiQRaR4U0RbY0q9KA43riZsNsaA\nZiRLHVdBDGpeqnfb/vIZKnxZ8i8N8zxHCdDAqnscMFv+XeS+zCrdHiFZ0cg/d+/r\nT3G9n5ZoAMTd8eyK\n=BsYC\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfd388f5a2a14e76677cc66f7a3ed00256981d1c",
+          "sha": "bfd388f5a2a14e76677cc66f7a3ed00256981d1c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfd388f5a2a14e76677cc66f7a3ed00256981d1c"
+        }
+      ],
+      "message": "fullagg: Add docs",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-26T16:01:45Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2025-09-12T16:11:34Z"
+      },
+      "sha": "13a34e4921bb123d74fa4974327ba2ee33654118"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 19947531432,
+      "node_id": "HRFPE_lADOAP4Jqs7N83t7zwAAAASk9yyo",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/19947531432",
+      "actor": {
+        "login": "fjahr",
+        "id": 1322187,
+        "node_id": "MDQ6VXNlcjEzMjIxODc=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1322187?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fjahr",
+        "html_url": "https://github.com/fjahr",
+        "followers_url": "https://api.github.com/users/fjahr/followers",
+        "following_url": "https://api.github.com/users/fjahr/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fjahr/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fjahr/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fjahr/subscriptions",
+        "organizations_url": "https://api.github.com/users/fjahr/orgs",
+        "repos_url": "https://api.github.com/users/fjahr/repos",
+        "events_url": "https://api.github.com/users/fjahr/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fjahr/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": "13a34e4921bb123d74fa4974327ba2ee33654118",
+      "commit_url": "https://api.github.com/repos/fjahr/secp256k1/commits/13a34e4921bb123d74fa4974327ba2ee33654118",
+      "created_at": "2025-09-26T16:02:49Z"
     }
   ],
   "comments": []
