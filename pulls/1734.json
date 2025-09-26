@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-25T23:15:00Z",
+    "updated_at": "2025-09-26T00:26:24Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -348,7 +348,7 @@
     "deletions": 238,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 76,
+    "review_comments": 78,
     "comments": 22
   },
   "events": [
@@ -3778,9 +3778,9 @@
       "commit_id": "0ddcd093def9ac371bff3d4665096c0a10a7d94d",
       "commit_url": null,
       "created_at": null,
-      "updated_at": "2025-09-25T23:15:00Z",
+      "updated_at": "2025-09-26T00:13:23Z",
       "author_association": "MEMBER",
-      "body": "Tested 0ddcd093def9ac371bff3d4665096c0a10a7d94d on Ubuntu 12.04.5 LTS using GCC 4.6.3. It works as expected, apart from the previously [mentioned](https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2377414417) minor issue.",
+      "body": "Tested 0ddcd093def9ac371bff3d4665096c0a10a7d94d on Ubuntu 12.04.5 LTS using GCC 4.6.3. It works as expected, apart from the previously [mentioned](https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2377414417) minor issue.\r\n\r\nUPD. (1) Tested on Windows 11.\r\n\r\n(2) Cross-compiled for Windows and tested on Windows 11.\r\n\r\nIn both cases everything is OK. \"Parallel execution not supported on your system. Running sequentially..\"",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -3804,6 +3804,43 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#pullrequestreview-3269695435",
       "submitted_at": "2025-09-25T23:15:00Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+    },
+    {
+      "event": "reviewed",
+      "id": 3269777304,
+      "node_id": "PRR_kwDOAP4Jqs7C5NeY",
+      "url": null,
+      "actor": null,
+      "commit_id": "0ddcd093def9ac371bff3d4665096c0a10a7d94d",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-09-26T00:14:31Z",
+      "author_association": "MEMBER",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#pullrequestreview-3269777304",
+      "submitted_at": "2025-09-26T00:14:31Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
     }
@@ -7835,6 +7872,112 @@
       "start_side": null,
       "line": 32,
       "original_line": 30,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2380574895",
+      "pull_request_review_id": 3269777304,
+      "id": 2380574895,
+      "node_id": "PRRC_kwDOAP4Jqs6N5LCv",
+      "diff_hunk": "@@ -0,0 +1,458 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+#define UNUSED(x) (void)(x)\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_target(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf);\n+\n+/* Mapping table: key → handler */\n+typedef int (*ArgHandler)(const char* key, const char* value, struct TestFramework* tf);\n+struct ArgMap {\n+    const char* key;\n+    ArgHandler handler;\n+};\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   Developers should extend this map whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in 'tf->args' struct.\n+ */\n+static struct ArgMap arg_map[] = {\n+    { \"j\", parse_jobs_count }, { \"jobs\", parse_jobs_count },\n+    { \"i\", parse_iterations }, { \"iterations\", parse_iterations },\n+    { \"seed\", parse_seed },\n+    { \"t\", parse_target }, { \"target\", parse_target },\n+    { \"log\", parse_logging },\n+    { NULL, NULL } /* sentinel */\n+};\n+\n+/* Display options that are not printed elsewhere */\n+static void print_args(const struct Args* args) {\n+    printf(\"iterations = %d\\n\", COUNT);\n+    printf(\"jobs = %d\\n\", args->num_processes);\n+}\n+\n+/* Main entry point for reading environment variables */\n+static int read_env(struct TestFramework* tf) {\n+    const char* env_iter = getenv(\"SECP256K1_TEST_ITERS\");\n+    if (env_iter && strlen(env_iter) > 0) {\n+        return parse_iterations(\"i\", env_iter, tf);\n+    }\n+    return 0;\n+}\n+\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    int i;\n+    for (i = 0; arg_map[i].key != NULL; i++) {\n+        if (strcmp(key, arg_map[i].key) == 0) {\n+            return arg_map[i].handler(key, value, tf);\n+        }\n+    }\n+    /* Unknown key: report just so typos don’t silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static void help(void) {\n+    printf(\"Usage: ./tests [options]\\n\\n\");\n+    printf(\"Run the test suite for the project with optional configuration.\\n\\n\");\n+    printf(\"Options:\\n\");\n+    printf(\"    --help, -h                           Show this help message\\n\");\n+    printf(\"    --print_tests                        Display list of all available tests and modules\\n\");\n+    printf(\"    --jobs=<num>, -j=<num>               Number of parallel worker processes (default: 0 = sequential)\\n\");\n+    printf(\"    --iterations=<num>, -i=<num>         Number of iterations for each test (default: 16)\\n\");\n+    printf(\"    --seed=<hex>                         Set a specific RNG seed (default: random)\\n\");\n+    printf(\"    --target=<test name>, -t=<name>      Run a specific test (can be provided multiple times)\\n\");\n+    printf(\"    --target=<module name>, -t=<module>  Run all tests within a specific module (can be provided multiple times)\\n\");\n+    printf(\"    --log=<0|1>                          Enable or disable test execution logging (default: 0 = disabled)\\n\");\n+    printf(\"\\n\");\n+    printf(\"Notes:\\n\");\n+    printf(\"    - All arguments must be provided in the form '--key=value', '-key=value' or '-k=value'.\\n\");\n+    printf(\"    - Single or double dashes are allowed for multi character options.\\n\");\n+    printf(\"    - Unknown arguments are reported but ignored.\\n\");\n+    printf(\"    - Sequential execution occurs if -jobs=0 or unspecified.\\n\");\n+    printf(\"    - The first two positional arguments (iterations and seed) are also supported for backward compatibility.\\n\");\n+}\n+\n+/* Print all tests in registry */\n+static void print_test_list(struct TestFramework* tf) {\n+    int m, t, total = 0;\n+    printf(\"\\nAvailable tests (%d modules):\\n\", tf->num_modules);\n+    printf(\"========================================\\n\");\n+    for (m = 0; m < tf->num_modules; m++) {\n+        const struct TestModule* mod = &tf->registry_modules[m];\n+        printf(\"Module: %s (%d tests)\\n\", mod->name, mod->size);\n+        for (t = 0; t < mod->size; t++) {\n+            printf(\"\\t[%3d] %s\\n\", total + 1, mod->data[t].name);\n+            total++;\n+        }\n+        printf(\"----------------------------------------\\n\");\n+    }\n+    printf(\"\\nRun specific module: ./tests -t=<module_name>\\n\");\n+    printf(\"Run specific test: ./tests -t=<test_name>\\n\\n\");\n+}\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf) {\n+    char* ptr_val;\n+    long val = strtol(value, &ptr_val, 10); /* base 10 */\n+    if (*ptr_val != '\\0') {\n+        fprintf(stderr, \"Invalid number for -%s=%s\\n\", key, value);\n+        return -1;\n+    }\n+    if (val < 0 || val > MAX_SUBPROCESSES) {\n+        fprintf(stderr, \"Arg '-%s' out of range: '%ld'. Range: 0..%d\\n\", key, val, MAX_SUBPROCESSES);\n+        return -1;\n+    }\n+    tf->args.num_processes = (int) val;\n+    return 0;\n+}\n+\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key); UNUSED(tf);\n+    if (!value) return 0;\n+    COUNT = (int) strtol(value, NULL, 0);\n+    if (COUNT <= 0) {\n+        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n+        return -1;\n+    }\n+    return 0;\n+}\n+\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+    return 0;\n+}\n+\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.logging = value && strcmp(value, \"1\") == 0;\n+    return 0;\n+}\n+\n+/* Strip up to two leading dashes */\n+static const char* normalize_key(const char* arg, int* is_long) {\n+    if (!arg || arg[0] != '-') return NULL;\n+    /* Single-dash → could be short or long */\n+    if (arg[1] != '-') { *is_long = 0; return arg + 1; }\n+    /* No more than two dashes allowed */\n+    if (arg[2] == '-') return NULL;\n+    /* Double-dash → long option */\n+    *is_long = 1;\n+    return arg + 2;\n+}\n+\n+static int parse_target(const char* key, const char* value, struct TestFramework* tf) {\n+    TestRef i = {/*idx_module=*/0, /*idx_test=*/0};\n+    UNUSED(key);\n+    /* Find test index in the registry */\n+    for (i.group = 0; i.group < tf->num_modules; i.group++) {\n+        const struct TestModule* module = &tf->registry_modules[i.group];\n+        int add_all = strcmp(value, module->name) == 0; /* select all from module */\n+        for (i.idx = 0; i.idx < module->size; i.idx++) {\n+            if (add_all || strcmp(value, module->data[i.idx].name) == 0) {\n+                if (tf->args.targets.size >= MAX_ARGS) {\n+                    fprintf(stderr, \"Too many -target args (max: %d)\\n\", MAX_ARGS);\n+                    return -1;\n+                }\n+                tf->args.targets.slots[tf->args.targets.size++] = i;\n+                /* Matched a single test, we're done */\n+                if (!add_all) return 0;\n+            }\n+        }\n+        /* If add_all was true, we added all tests in the module, so return */\n+        if (add_all) return 0;\n+    }\n+    fprintf(stderr, \"Error: target '%s' not found (missing or module disabled).\\n\"\n+                    \"Run program with -print_tests option to display available tests and modules.\\n\", value);\n+    return -1;\n+}\n+\n+/* Read args: all must be in the form -key=value, --key=value or -key=value */\n+static int read_args(int argc, char** argv, int start, struct TestFramework* tf) {\n+    int i;\n+    const char* key;\n+    const char* value;\n+    int is_long;\n+    char* eq;\n+    for (i = start; i < argc; i++) {\n+        char* raw_arg = argv[i];\n+        if (!raw_arg || raw_arg[0] != '-') {\n+            fprintf(stderr, \"Invalid arg '%s': must start with '-'\\n\", raw_arg ? raw_arg : \"(null)\");\n+            return -1;\n+        }\n+\n+        eq = strchr(raw_arg, '=');\n+        if (!eq || eq == raw_arg + 1) { /* key is empty */\n+            fprintf(stderr, \"Invalid arg '%s': must be -k=value or --key=value\\n\", raw_arg);\n+            return -1;\n+        }\n+\n+        value = eq + 1;\n+        if (!value || *value == '\\0') { /* value is empty */\n+            fprintf(stderr, \"Invalid arg '%s': value cannot be empty\\n\", raw_arg);\n+            return -1;\n+        }\n+\n+        *eq = '\\0'; /* split key and value */\n+        key = normalize_key(raw_arg, &is_long);\n+        if (!key || *key == '\\0') {\n+            fprintf(stderr, \"Invalid key: '%s'\\n\", raw_arg);\n+            return -1;\n+        }\n+\n+        /* forbid --x (double-dash with single-char key) */\n+        if (is_long && key[1] == '\\0') {\n+            fprintf(stderr, \"Invalid key: short option '%s' cannot use double dash\\n\", raw_arg);\n+            return -1;\n+        }\n+\n+        if (parse_arg(key, value, tf) != 0) return -1;\n+    }\n+    return 0;\n+}\n+\n+static void run_test_log(const struct TestEntry* t) {\n+    int64_t start_time = gettime_i64();\n+    printf(\"Running %s..\\n\", t->name);\n+    t->func();\n+    printf(\"Test %s PASSED (%.3f sec)\\n\", t->name, (double)(gettime_i64() - start_time) / 1000000);\n+}\n+\n+static void run_test(const struct TestEntry* t) { t->func(); }\n+\n+/* Process tests in sequential order */\n+static int run_sequential(struct TestFramework* tf) {\n+    int it;\n+    for (it = 0; it < tf->args.targets.size; it++) {\n+        TestRef* index = &tf->args.targets.slots[it];\n+        tf->fn_run_test(&tf->registry_modules[index->group].data[index->idx]);\n+    }\n+    return EXIT_SUCCESS;\n+}\n+\n+#if SUPPORTS_CONCURRENCY\n+/* Process tests in parallel */\n+static int run_concurrent(struct TestFramework* tf) {\n+    /* Sub-processes info */\n+    pid_t workers[MAX_SUBPROCESSES];\n+    int pipes[MAX_SUBPROCESSES][2];\n+    /* Next worker to send work */\n+    int worker_idx;\n+    /* Parent process exit status */\n+    int status = EXIT_SUCCESS;\n+    /* Loop iterator */\n+    int it;\n+    /* Loop ref */\n+    TestRef* ref;\n+    /* Launch worker processes */\n+    for (it = 0; it < tf->args.num_processes; it++) {\n+        pid_t pid;\n+        if (pipe(pipes[it]) != 0) {\n+            perror(\"Error during pipe setup\");\n+            return EXIT_FAILURE;\n+        }\n+\n+        pid = fork();\n+        if (pid < 0) {\n+            perror(\"Error during process fork\");\n+            return EXIT_FAILURE;\n+        }\n+\n+        if (pid == 0) {\n+            /* Child worker: run tests assigned via pipe */\n+            TestRef tref;\n+            close(pipes[it][1]); /* Close write end */\n+            while (read(pipes[it][0], &tref, sizeof(tref)) == sizeof(tref)) {\n+                tf->fn_run_test(&tf->registry_modules[tref.group].data[tref.idx]);\n+            }\n+            _exit(EXIT_SUCCESS); /* finish child process */\n+        } else {\n+            /* Parent: save worker pid */\n+            close(pipes[it][0]); /* Close read end */\n+            workers[it] = pid;\n+        }\n+    }\n+\n+    /* Now that we have all sub-processes, distribute workload in round-robin */\n+    worker_idx = 0;\n+    for (it = 0; it < tf->args.targets.size; it++) {\n+        ref = &tf->args.targets.slots[it];\n+        if (write(pipes[worker_idx][1], ref, sizeof(*ref)) == -1) {\n+            perror(\"Error during workload distribution\");\n+            return EXIT_FAILURE;\n+        }\n+        if (++worker_idx >= tf->args.num_processes) worker_idx = 0;\n+    }\n+\n+    /* Close all pipes to signal workers to exit */\n+    for (it = 0; it < tf->args.num_processes; it++) close(pipes[it][1]);\n+    /* Wait for all workers */\n+    for (it = 0; it < tf->args.num_processes; it++) {\n+        int ret = 0;\n+        if (waitpid(workers[it], &ret, 0) == -1 || ret != 0) {\n+            status = EXIT_FAILURE;\n+        }\n+    }\n+\n+    return status;\n+}\n+#endif\n+\n+static int tf_init(struct TestFramework* tf, int argc, char** argv)\n+{\n+    /* Caller must set the registry and its size before calling tf_init */\n+    if (tf->registry_modules == NULL || tf->num_modules <= 0) {\n+        fprintf(stderr, \"Error: tests registry not provided or empty\\n\");\n+        return EXIT_FAILURE;\n+    }\n+\n+    /* Initialize command-line options */\n+    tf->args.num_processes = 0;\n+    tf->args.custom_seed = NULL;\n+    tf->args.targets.size = 0;\n+    tf->args.logging = 0;\n+\n+    /* Disable buffering for stdout to improve reliability of getting\n+     * diagnostic information. Happens right at the start of main because\n+     * setbuf must be used before any other operation on the stream. */\n+    setbuf(stdout, NULL);\n+    /* Also disable buffering for stderr because it's not guaranteed that it's\n+     * unbuffered on all systems. */\n+    setbuf(stderr, NULL);\n+\n+    /* Parse env args */\n+    if (read_env(tf) != 0) return EXIT_FAILURE;\n+\n+    /* Parse command-line args */\n+    if (argc > 1) {\n+        int named_arg_start = 1; /* index to begin processing named arguments */\n+        if (argc - 1 > MAX_ARGS) { /* first arg is always the binary path */\n+            fprintf(stderr, \"Too many command-line arguments (max: %d)\\n\", MAX_ARGS);\n+            return EXIT_FAILURE;\n+        }\n+\n+        /* Check if we need to print help */\n+        if (argv[1] && (strcmp(argv[1], \"-help\") == 0 || strcmp(argv[1], \"-h\") == 0)) {\n+            help();\n+            exit(EXIT_SUCCESS);\n+        }\n+\n+        /* Check if we need to print the available tests */\n+        if (argv[1] && strcmp(argv[1], \"-print_tests\") == 0) {\n+            print_test_list(tf);\n+            exit(EXIT_SUCCESS);\n+        }\n+\n+        /* Compatibility Note: The first two args were the number of iterations and the seed. */\n+        /* If provided, parse them and adjust the starting index for named arguments accordingly. */\n+        if (argv[1] && argv[1][0] != '-') {\n+            int has_seed = argc > 2 && argv[2] && argv[2][0] != '-';\n+            if (parse_iterations(\"i\", argv[1], tf) != 0) return EXIT_FAILURE;\n+            if (has_seed) parse_seed(\"seed\", argv[2], tf);\n+            named_arg_start = has_seed ? 3 : 2;\n+        }\n+        if (read_args(argc, argv, named_arg_start, tf) != 0) {\n+            return EXIT_FAILURE;\n+        }\n+    }\n+\n+    tf->fn_run_test = tf->args.logging ? run_test_log : run_test;\n+    return EXIT_SUCCESS;\n+}\n+\n+static int tf_run(struct TestFramework* tf) {\n+    /* Process exit status */\n+    int status;\n+    /* Whether to run all tests */\n+    int run_all;\n+    /* Loop iterator */\n+    int it;\n+    /* Initial test time */\n+    int64_t start_time = gettime_i64(); /* maybe move this after the slots set */\n+    /* Verify 'tf_init' has been called */\n+    if (!tf->fn_run_test) {\n+        fprintf(stderr, \"Error: No test runner set. You must call 'tf_init' first to initialize the framework \"\n+                        \"or manually assign 'fn_run_test' before calling 'tf_run'.\\n\");\n+        return EXIT_FAILURE;\n+    }\n+\n+    /* Populate targets with all tests if none were explicitly specified */\n+    run_all = tf->args.targets.size == 0;\n+    if (run_all) {\n+        TestRef ref;\n+        for (ref.group = 0; ref.group < tf->num_modules; ref.group++) {\n+            const struct TestModule* group = &tf->registry_modules[ref.group];\n+            for (ref.idx = 0; ref.idx < group->size; ref.idx++) {\n+                if (tf->args.targets.size >= MAX_ARGS) {\n+                    fprintf(stderr, \"Internal Error: Number of tests (%d) exceeds MAX_ARGS (%d). \"\n+                                    \"Increase MAX_ARGS to accommodate all tests.\\n\", tf->args.targets.size, MAX_ARGS);\n+                    return EXIT_FAILURE;\n+                }\n+                tf->args.targets.slots[tf->args.targets.size++] = ref;\n+            }\n+        }\n+    }\n+\n+    if (!tf->args.logging) printf(\"Tests running silently. Use '-log=1' to enable detailed logging\\n\");\n+\n+    /* Log configuration */\n+    print_args(&tf->args);\n+\n+    /* Run test RNG tests (must run before we really initialize the test RNG) */\n+    /* Note: currently, these tests are executed sequentially because there */\n+    /* is really only one test. */\n+    for (it = 0; tf->registry_no_rng && it < tf->registry_no_rng->size; it++) {\n+        if (run_all) { /* future: support filtering */\n+            tf->fn_run_test(&tf->registry_no_rng->data[it]);\n+        }\n+    }\n+\n+    /* Initialize test RNG and library contexts */\n+    testrand_init(tf->args.custom_seed);\n+    if (tf->fn_setup && tf->fn_setup() != 0) return EXIT_FAILURE;\n+\n+    /* Check whether to process tests sequentially or concurrently */\n+    if (tf->args.num_processes <= 1) {\n+        status = run_sequential(tf);\n+    } else {\n+#if SUPPORTS_CONCURRENCY\n+        status = run_concurrent(tf);\n+#else\n+        fputs(\"Parallel execution not supported on your system. Running sequentially..\\n\", stderr);",
+      "path": "src/unit_test.c",
+      "position": 448,
+      "original_position": 448,
+      "commit_id": "0ddcd093def9ac371bff3d4665096c0a10a7d94d",
+      "original_commit_id": "0ddcd093def9ac371bff3d4665096c0a10a7d94d",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "nit:\r\n```suggestion\r\n        fputs(\"Parallel execution not supported on your system. Running sequentially...\\n\", stderr);\r\n```",
+      "created_at": "2025-09-26T00:14:30Z",
+      "updated_at": "2025-09-26T00:14:31Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2380574895",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2380574895"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 448,
+      "original_line": 448,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2380585931",
+      "pull_request_review_id": 3269791448,
+      "id": 2380585931,
+      "node_id": "PRRC_kwDOAP4Jqs6N5NvL",
+      "diff_hunk": "@@ -0,0 +1,332 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if defined(SUPPORTS_CONCURRENCY) && SUPPORTS_CONCURRENCY",
+      "path": "src/unit_test.c",
+      "position": 1,
+      "original_position": 11,
+      "commit_id": "fce3e66c9a5fcfc01010366c5fe043a255a3fdca",
+      "original_commit_id": "c39b3df84ed3083bcff37e4eeb9b18e76765aa8e",
+      "in_reply_to_id": 2374737863,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "If I've grepped the codebase correctly, this will be the only external definition used as `#if DEFINITION`.\r\n\r\n> The standard mandates that undefined macros evaluate to 0 in an `#if`.\r\n\r\nNevertheless, this approach has proven fragile. I would kindly ask to reconsider the design and use `#if defined(DEFINITION)` instead, which would also require slight adjustment in both build systems.\r\n\r\n\r\n",
+      "created_at": "2025-09-26T00:26:24Z",
+      "updated_at": "2025-09-26T00:26:24Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2380585931",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2380585931"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 11,
       "side": "RIGHT"
     }
   ]
