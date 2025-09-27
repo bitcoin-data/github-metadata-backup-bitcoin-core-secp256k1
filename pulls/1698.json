@@ -89,7 +89,7 @@
       "due_on": "2025-10-17T07:00:00Z"
     },
     "created_at": "2025-07-10T08:53:21Z",
-    "updated_at": "2025-09-26T14:55:42Z",
+    "updated_at": "2025-09-27T09:19:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -377,7 +377,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 309,
+    "review_comments": 310,
     "comments": 40
   },
   "events": [
@@ -23763,6 +23763,59 @@
       "start_side": null,
       "line": 688,
       "original_line": 688,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2384013129",
+      "pull_request_review_id": 3274756716,
+      "id": 2384013129,
+      "node_id": "PRRC_kwDOAP4Jqs6OGSdJ",
+      "diff_hunk": "@@ -0,0 +1,443 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include <stdint.h>\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/** This module provides an implementation for Silent Payments, as specified in\n+ *  BIP352. This particularly involves the creation of input tweak data by\n+ *  summing up secret or public keys and the derivation of a shared secret using\n+ *  Elliptic Curve Diffie-Hellman. Combined are either:\n+ *    - spender's secret keys and recipient's public key (a * B, sender side)\n+ *    - spender's public keys and recipient's secret key (A * b, recipient side)\n+ *  With this result, the necessary key material for ultimately creating/scanning\n+ *  or spending Silent Payment outputs can be determined.\n+ *\n+ *  Note that this module is _not_ a full implementation of BIP352, as it\n+ *  inherently doesn't deal with higher-level concepts like addresses, output\n+ *  script types or transactions. The intent is to provide a module for\n+ *  abstracting away the elliptic-curve operations required for the protocol. For\n+ *  any wallet software already using libsecp256k1, this API should provide all\n+ *  the functions needed for a Silent Payments implementation without requiring\n+ *  any further elliptic-curve operations from the wallet.\n+ */\n+\n+static const unsigned char secp256k1_silentpayments_prevouts_summary_magic[4] = { 0xa7, 0x1c, 0xd3, 0x5e };\n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public must\n+ *  be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payment outputs for recipient(s).\n+ *\n+ *  Given a list of n secret keys a_1...a_n (one for each silent payment\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs. Inputs with conditional branches or multiple\n+ *  public keys are excluded from silent payments eligible inputs; see BIP352\n+ *  for more information.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both silent payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment. Determining the smallest outpoint from the list of transaction\n+ *  inputs is the responsibility of the caller. It is strongly recommended\n+ *  that implementations ensure they are doing this correctly by using the\n+ *  test vectors from BIP352.\n+ *\n+ *  When creating more than one generated output, all of the generated outputs\n+ *  MUST be included in the final transaction. Dropping any of the generated\n+ *  outputs from the final transaction may make all or some of the outputs\n+ *  unfindable by the recipient.\n+ *\n+ *  Returns: 1 if creation of outputs was successful.\n+ *           0 if the input private keys sum to zero, if the input private key\n+ *             sum is the negation of the spend secret key, or input_hash or\n+ *             hash(shared_secret || k) are invalid scalars.\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static).\n+ *  Out:   generated_outputs: pointer to an array of pointers to xonly public keys,\n+ *                            one per recipient.\n+ *                            The outputs are ordered to match the original\n+ *                            ordering of the recipient objects, i.e.,\n+ *                            `generated_outputs[0]` is the generated output\n+ *                            for the `_silentpayments_recipient` object with\n+ *                            index = 0.\n+ *  In:           recipients: pointer to an array of pointers to silent payment\n+ *                            recipients, where each recipient is a scan public\n+ *                            key, a spend public key, and an index indicating\n+ *                            its position in the original ordering. The\n+ *                            recipient array will be grouped by scan public key\n+ *                            in place (as specified in BIP0352), but generated\n+ *                            outputs are saved in the `generated_outputs` array\n+ *                            to match the original ordering (using the index\n+ *                            field). This ensures the caller is able to match\n+ *                            the generated outputs to the correct silent\n+ *                            payment addresses. The same recipient can be\n+ *                            passed multiple times to create multiple outputs\n+ *                            for the same recipient.\n+ *              n_recipients: the number of recipients. This is equal to the\n+ *                            total number of outputs to be generated as each\n+ *                            recipient may passed multiple times to generate\n+ *                            multiple outputs for the same recipient\n+ *       outpoint_smallest36: serialized (36-byte) smallest outpoint\n+ *                            (lexicographically) from the transaction inputs\n+ *           taproot_seckeys: pointer to an array of pointers to taproot\n+ *                            keypair inputs (can be NULL if no secret keys\n+ *                            of taproot inputs are used)\n+ *         n_taproot_seckeys: the number of sender's taproot input secret keys\n+ *             plain_seckeys: pointer to an array of pointers to 32-byte\n+ *                            secret keys of non-taproot inputs (can be NULL\n+ *                            if no secret keys of non-taproot inputs are\n+ *                            used)\n+ *           n_plain_seckeys: the number of sender's non-taproot input secret\n+ *                            keys\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_sender_create_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_xonly_pubkey **generated_outputs,\n+    const secp256k1_silentpayments_recipient **recipients,\n+    size_t n_recipients,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_keypair * const *taproot_seckeys,\n+    size_t n_taproot_seckeys,\n+    const unsigned char * const *plain_seckeys,\n+    size_t n_plain_seckeys\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);\n+\n+/** Create Silent Payment label tweak and label.\n+ *\n+ *  Given a recipient's 32 byte scan key and a label integer m, calculate the\n+ *  corresponding label tweak and label:\n+ *\n+ *      label_tweak = hash(scan_key || m)\n+ *            label = label_tweak * G\n+ *\n+ *  Returns: 1 if label tweak and label creation was successful.\n+ *           0 if label_tweak32 is an invalid scalar.\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static)\n+ *  Out:               label: pointer to the resulting label public key\n+ *             label_tweak32: pointer to the 32 byte label tweak\n+ *  In:           scan_key32: pointer to the recipient's 32 byte scan key\n+ *                         m: label integer (0 is used for change outputs)",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 149,
+      "original_position": 145,
+      "commit_id": "c4942d3646a58bb9fd8a51e60defe1571f8ee595",
+      "original_commit_id": "ac4a726a2ad77e3b6c9330f983a92058ffc84196",
+      "in_reply_to_id": 2378923408,
+      "user": {
+        "login": "nymius",
+        "id": 155548262,
+        "node_id": "U_kgDOCUV6Zg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/155548262?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/nymius",
+        "html_url": "https://github.com/nymius",
+        "followers_url": "https://api.github.com/users/nymius/followers",
+        "following_url": "https://api.github.com/users/nymius/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/nymius/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/nymius/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/nymius/subscriptions",
+        "organizations_url": "https://api.github.com/users/nymius/orgs",
+        "repos_url": "https://api.github.com/users/nymius/repos",
+        "events_url": "https://api.github.com/users/nymius/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/nymius/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "I wouldn't use `representing` here, because it's hiding the fact that the `integer` is being used to produce the label.",
+      "created_at": "2025-09-27T09:19:10Z",
+      "updated_at": "2025-09-27T09:19:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2384013129",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2384013129"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1698"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 149,
+      "original_line": 149,
       "side": "RIGHT"
     }
   ]
