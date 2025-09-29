@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-29T08:13:28Z",
+    "updated_at": "2025-09-29T13:58:04Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -348,7 +348,7 @@
     "deletions": 238,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 108,
+    "review_comments": 109,
     "comments": 23
   },
   "events": [
@@ -9834,6 +9834,59 @@
       "start_side": null,
       "line": null,
       "original_line": 11,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388094118",
+      "pull_request_review_id": 3280002482,
+      "id": 2388094118,
+      "node_id": "PRRC_kwDOAP4Jqs6OV2ym",
+      "diff_hunk": "@@ -0,0 +1,142 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_UNIT_TEST_H\n+#define SECP256K1_UNIT_TEST_H\n+\n+/* --------------------------------------------------------- */\n+/* Configurable constants                                    */\n+/* --------------------------------------------------------- */\n+\n+/* Maximum number of command-line arguments.\n+ * Must be at least as large as the total number of tests\n+ * to allow specifying all tests individually. */\n+#define MAX_ARGS 150\n+/* Maximum number of parallel jobs */\n+#define MAX_SUBPROCESSES 16\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework Registry Macros                            */\n+/* --------------------------------------------------------- */\n+\n+#define CASE(name) { #name, run_##name }\n+#define CASE1(name) { #name, name }\n+\n+#define MAKE_TEST_MODULE(name) {\\\n+    #name, \\\n+    tests_##name, \\\n+    sizeof(tests_##name) / sizeof(tests_##name[0]) \\\n+}\n+\n+/* Macro to wrap a test internal function with a COUNT loop (iterations number) */\n+#define REPEAT_TEST(fn) REPEAT_TEST_MULT(fn, 1)\n+#define REPEAT_TEST_MULT(fn, multiplier)            \\\n+    static void fn(void) {                          \\\n+        int i;                                      \\\n+        int repeat = COUNT * (multiplier);          \\\n+        for (i = 0; i < repeat; i++)                \\\n+            fn##_internal();                        \\\n+    }\n+\n+\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework API                                        */\n+/* --------------------------------------------------------- */\n+\n+typedef void (*test_fn)(void);\n+\n+struct TestEntry {\n+    const char* name;\n+    test_fn func;\n+};\n+\n+struct TestModule {\n+    const char* name;\n+    struct TestEntry* data;\n+    int size;\n+};\n+\n+typedef int (*setup_ctx_fn)(void);\n+typedef int (*teardown_fn)(void);\n+typedef void (*run_test_fn)(const struct TestEntry*);\n+\n+/* Reference to a test in the registry. Group index and test index */\n+typedef struct {\n+    int group;\n+    int idx;\n+} TestRef;\n+\n+struct Targets {\n+    /* Target tests indexes */\n+    TestRef slots[MAX_ARGS];\n+    /* Next available slot */\n+    int size;\n+};\n+\n+/* --- Command-line args --- */\n+struct Args {\n+    /* 0 => sequential; 1..MAX_SUBPROCESSES => parallel workers */\n+    int num_processes;\n+    /* Specific RNG seed */\n+    const char* custom_seed;\n+    /* Whether to print the help msg */\n+    int help;\n+    /* Whether to print the tests list msg */\n+    int print_tests;\n+    /* Target tests indexes */\n+    struct Targets targets;\n+    /* Enable test execution logging */\n+    int logging;\n+};\n+\n+struct TestFramework {\n+    /* Command-line args */\n+    struct Args args;\n+    /* Test modules registry */\n+    const struct TestModule* registry_modules;\n+    /* Num of modules */\n+    int num_modules;\n+    /* Registry for tests that require no RNG init */\n+    const struct TestModule* registry_no_rng;\n+    /* Specific context setup and teardown functions */\n+    setup_ctx_fn fn_setup;\n+    teardown_fn fn_teardown;\n+    /* Test runner function (can be customized) */\n+    run_test_fn fn_run_test;\n+};\n+\n+/* --------------------------------------------------------- */\n+/* Public API                                                */\n+/* --------------------------------------------------------- */\n+\n+/*\n+ * Initialize the test framework.\n+ *\n+ * Must be called before tf_run() and as early as possible in the program.",
+      "path": "src/unit_test.h",
+      "position": 119,
+      "original_position": 119,
+      "commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "original_commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "in_reply_to_id": 2386926707,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> \"as early as possible in the program.\"\r\n> \r\n> That seems imprecise. What's the reason for this requirement?\r\n\r\nIt disables stdout and stderr buffering (the `setbuf()` calls).",
+      "created_at": "2025-09-29T13:58:04Z",
+      "updated_at": "2025-09-29T13:58:04Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2388094118",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388094118"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 119,
+      "original_line": 119,
       "side": "RIGHT"
     }
   ]
