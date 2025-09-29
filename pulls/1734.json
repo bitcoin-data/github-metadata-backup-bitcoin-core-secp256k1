@@ -39,7 +39,7 @@
       "site_admin": false,
       "patch_url": null
     },
-    "body": "Early Note:\r\nDon’t be scared by the PR’s line changes count — most of it’s just doc or part of the test framework API.\r\n\r\nContext:\r\nCurrently, all tests run single-threaded sequentially and the library lacks the ability to specify which test (or group of tests) you would like to run. This is not only inconvenient as more tests are added but also time consuming during development and affects downstream projects that may want to parallelize the workload (such as Bitcoin-Core CI).\r\n\r\nPR Goal:\r\nIntroduce a lightweight, extensible C89 unit test framework with no dynamic memory allocations, providing a structured way to register, execute, and report tests. The framework supports named command-line arguments in `-key=value` form, parallel test execution across multiple worker processes, granular test selection (selecting tests either by name or by module name), and time accumulation reports.\r\n\r\nThe introduced framework supports:\r\n* `-help` or `-h`: display list of available commands along with their descriptions.\r\n* `-jobs=<num>`: distribute tests across multiple worker processes (default: sequential if 0).\r\n* `-target=<name>` or `-t=<name>`: run only specific tests by name; can be repeated to select multiple tests.\r\n*  `-target=<module name>`, `-t=<module>`  Run all tests within a specific module (can be provided multiple times)\r\n* `-seed=<hex>`: set a specific RNG seed (defaults to random if unspecified).\r\n* `-iter=<n>`: specify the number of iterations.\r\n* `-print_tests`:   display list of available tests and modules you can run.\r\n* `-log=<0|1>`: enable or disable test execution logging (default: 0 = disabled).\r\n\r\nBeyond these features, the idea is to also make future developments smoother, as adding new tests require only a single entry in the central test registry, and new command-line options can be introduced easily by extending the framework’s `parse_arg()` function.\r\n\r\nCompatibility Note:\r\nThe framework continues accepting the two positional arguments previously supported (iterations and seed), ensuring existing workflows remain intact.\r\n\r\nTesting Notes:\r\nHave fun. You can quickly try it through `./tests -j=<workers_num>` for parallel execution  or `./tests -t=<test_name>` to run a specific test (call `./tests -print_tests` to display all available tests and modules).\r\n\r\nExtra Note:\r\nI haven't checked the exhaustive tests file so far, but I will soon. For now, this only runs all tests declared in the `tests` binary.\r\n\r\nTesting Results: (Current master branch vs PR in seconds)\r\n\r\n* Raspberry Pi 5: master \\~100 s → PR \\~38 s (5 jobs)\r\n* MacBook Pro M1: master \\~30 s → PR \\~10 s (6 jobs)\r\n",
+    "body": "Early Note:\r\nDon’t be scared by the PR’s line changes count — most of it’s just doc or part of the test framework API.\r\n\r\nContext:\r\nCurrently, all tests run single-threaded sequentially and the library lacks the ability to specify which test (or group of tests) you would like to run. This is not only inconvenient as more tests are added but also time consuming during development and affects downstream projects that may want to parallelize the workload (such as Bitcoin-Core CI).\r\n\r\nPR Goal:\r\nIntroduce a lightweight, extensible C89 unit test framework with no dynamic memory allocations, providing a structured way to register, execute, and report tests. The framework supports named command-line arguments in `-key=value` form, parallel test execution across multiple worker processes, granular test selection (selecting tests either by name or by module name), and time accumulation reports.\r\n\r\nThe introduced framework supports:\r\n* `-help` or `-h`: display list of available commands along with their descriptions.\r\n* `-jobs=<num>`: distribute tests across multiple worker processes (default: sequential if 0).\r\n* `-target=<name>` or `-t=<name>`: run only specific tests by name; can be repeated to select multiple tests.\r\n*  `-target=<module name>`, `-t=<module>`  Run all tests within a specific module (can be provided multiple times)\r\n* `-seed=<hex>`: set a specific RNG seed (defaults to random if unspecified).\r\n* `-iterations=<n>`: specify the number of iterations.\r\n* `-print_tests`:   display list of available tests and modules you can run.\r\n* `-log=<0|1>`: enable or disable test execution logging (default: 0 = disabled).\r\n\r\nBeyond these features, the idea is to also make future developments smoother, as adding new tests require only a single entry in the central test registry, and new command-line options can be introduced easily by extending the framework’s `parse_arg()` function.\r\n\r\nCompatibility Note:\r\nThe framework continues accepting the two positional arguments previously supported (iterations and seed), ensuring existing workflows remain intact.\r\n\r\nTesting Notes:\r\nHave fun. You can quickly try it through `./tests -j=<workers_num>` for parallel execution  or `./tests -t=<test_name>` to run a specific test (call `./tests -print_tests` to display all available tests and modules).\r\n\r\nExtra Note:\r\nI haven't checked the exhaustive tests file so far, but I will soon. For now, this only runs all tests declared in the `tests` binary.\r\n\r\nTesting Results: (Current master branch vs PR in seconds)\r\n\r\n* Raspberry Pi 5: master \\~100 s → PR \\~38 s (5 jobs)\r\n* MacBook Pro M1: master \\~30 s → PR \\~10 s (6 jobs)\r\n",
     "labels": [
       {
         "id": 165017692,
@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-09-29T13:58:04Z",
+    "updated_at": "2025-09-29T14:57:53Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -348,7 +348,7 @@
     "deletions": 238,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 109,
+    "review_comments": 112,
     "comments": 23
   },
   "events": [
@@ -9887,6 +9887,165 @@
       "start_side": null,
       "line": 119,
       "original_line": 119,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388151044",
+      "pull_request_review_id": 3280090258,
+      "id": 2388151044,
+      "node_id": "PRRC_kwDOAP4Jqs6OWEsE",
+      "diff_hunk": "@@ -0,0 +1,142 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_UNIT_TEST_H\n+#define SECP256K1_UNIT_TEST_H\n+\n+/* --------------------------------------------------------- */\n+/* Configurable constants                                    */\n+/* --------------------------------------------------------- */\n+\n+/* Maximum number of command-line arguments.\n+ * Must be at least as large as the total number of tests\n+ * to allow specifying all tests individually. */\n+#define MAX_ARGS 150\n+/* Maximum number of parallel jobs */\n+#define MAX_SUBPROCESSES 16\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework Registry Macros                            */\n+/* --------------------------------------------------------- */\n+\n+#define CASE(name) { #name, run_##name }\n+#define CASE1(name) { #name, name }\n+\n+#define MAKE_TEST_MODULE(name) {\\\n+    #name, \\\n+    tests_##name, \\\n+    sizeof(tests_##name) / sizeof(tests_##name[0]) \\\n+}\n+\n+/* Macro to wrap a test internal function with a COUNT loop (iterations number) */\n+#define REPEAT_TEST(fn) REPEAT_TEST_MULT(fn, 1)\n+#define REPEAT_TEST_MULT(fn, multiplier)            \\\n+    static void fn(void) {                          \\\n+        int i;                                      \\\n+        int repeat = COUNT * (multiplier);          \\\n+        for (i = 0; i < repeat; i++)                \\\n+            fn##_internal();                        \\\n+    }\n+\n+\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework API                                        */\n+/* --------------------------------------------------------- */\n+\n+typedef void (*test_fn)(void);\n+\n+struct TestEntry {\n+    const char* name;\n+    test_fn func;\n+};\n+\n+struct TestModule {\n+    const char* name;\n+    struct TestEntry* data;\n+    int size;\n+};\n+\n+typedef int (*setup_ctx_fn)(void);\n+typedef int (*teardown_fn)(void);\n+typedef void (*run_test_fn)(const struct TestEntry*);\n+\n+/* Reference to a test in the registry. Group index and test index */\n+typedef struct {\n+    int group;\n+    int idx;\n+} TestRef;\n+\n+struct Targets {",
+      "path": "src/unit_test.h",
+      "position": 73,
+      "original_position": 73,
+      "commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "original_commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "in_reply_to_id": 2386930749,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> style nit: These struct names should be lowercase and snake_case for consistency with the rest of the code base.\r\n\r\nMy concern with that is that it’s easy for struct names to clash with variable names using that style.\r\nIn the rest of the codebase, this isn’t a problem because we prefix structs with `secp256k1`, but here that would mean more boilerplate without much gain?.\r\nI could add the prefix + change them to lowercase if you feel strongly about it. I'm just thinking out loud before entering a large rebase.",
+      "created_at": "2025-09-29T14:13:15Z",
+      "updated_at": "2025-09-29T14:27:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2388151044",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388151044"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 73,
+      "original_line": 73,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388184816",
+      "pull_request_review_id": 3280140682,
+      "id": 2388184816,
+      "node_id": "PRRC_kwDOAP4Jqs6OWM7w",
+      "diff_hunk": "@@ -0,0 +1,142 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_UNIT_TEST_H\n+#define SECP256K1_UNIT_TEST_H\n+\n+/* --------------------------------------------------------- */\n+/* Configurable constants                                    */\n+/* --------------------------------------------------------- */\n+\n+/* Maximum number of command-line arguments.\n+ * Must be at least as large as the total number of tests\n+ * to allow specifying all tests individually. */\n+#define MAX_ARGS 150\n+/* Maximum number of parallel jobs */\n+#define MAX_SUBPROCESSES 16\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework Registry Macros                            */\n+/* --------------------------------------------------------- */\n+\n+#define CASE(name) { #name, run_##name }\n+#define CASE1(name) { #name, name }\n+\n+#define MAKE_TEST_MODULE(name) {\\\n+    #name, \\\n+    tests_##name, \\\n+    sizeof(tests_##name) / sizeof(tests_##name[0]) \\\n+}\n+\n+/* Macro to wrap a test internal function with a COUNT loop (iterations number) */\n+#define REPEAT_TEST(fn) REPEAT_TEST_MULT(fn, 1)\n+#define REPEAT_TEST_MULT(fn, multiplier)            \\\n+    static void fn(void) {                          \\\n+        int i;                                      \\\n+        int repeat = COUNT * (multiplier);          \\\n+        for (i = 0; i < repeat; i++)                \\\n+            fn##_internal();                        \\\n+    }\n+\n+\n+\n+/* --------------------------------------------------------- */\n+/* Test Framework API                                        */\n+/* --------------------------------------------------------- */\n+\n+typedef void (*test_fn)(void);\n+\n+struct TestEntry {\n+    const char* name;\n+    test_fn func;\n+};\n+\n+struct TestModule {\n+    const char* name;\n+    struct TestEntry* data;\n+    int size;\n+};\n+\n+typedef int (*setup_ctx_fn)(void);\n+typedef int (*teardown_fn)(void);\n+typedef void (*run_test_fn)(const struct TestEntry*);\n+\n+/* Reference to a test in the registry. Group index and test index */\n+typedef struct {\n+    int group;\n+    int idx;\n+} TestRef;\n+\n+struct Targets {\n+    /* Target tests indexes */\n+    TestRef slots[MAX_ARGS];\n+    /* Next available slot */\n+    int size;\n+};\n+\n+/* --- Command-line args --- */\n+struct Args {\n+    /* 0 => sequential; 1..MAX_SUBPROCESSES => parallel workers */\n+    int num_processes;\n+    /* Specific RNG seed */\n+    const char* custom_seed;\n+    /* Whether to print the help msg */\n+    int help;\n+    /* Whether to print the tests list msg */\n+    int print_tests;\n+    /* Target tests indexes */\n+    struct Targets targets;\n+    /* Enable test execution logging */\n+    int logging;\n+};\n+\n+struct TestFramework {",
+      "path": "src/unit_test.h",
+      "position": 96,
+      "original_position": 96,
+      "commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "original_commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "in_reply_to_id": 2386934169,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> nit: This is above the \"Public API\" sectioning comment, but this struct seems to be part of the public API,\r\n\r\nThat’s because I was initially thinking of adding a factory function that returns an initialized `TestFramework`, but it ended up feeling like extra boilerplate with no real benefit. Will move it.",
+      "created_at": "2025-09-29T14:23:23Z",
+      "updated_at": "2025-09-29T14:23:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2388184816",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388184816"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 96,
+      "original_line": 96,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388298712",
+      "pull_request_review_id": 3280327044,
+      "id": 2388298712,
+      "node_id": "PRRC_kwDOAP4Jqs6OWovY",
+      "diff_hunk": "@@ -0,0 +1,471 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+#define UNUSED(x) (void)(x)\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_target(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf);\n+\n+/* Mapping table: key -> handler */\n+typedef int (*ArgHandler)(const char* key, const char* value, struct TestFramework* tf);\n+struct ArgMap {\n+    const char* key;\n+    ArgHandler handler;\n+};\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   Developers should extend this map whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in 'tf->args' struct.\n+ */\n+static struct ArgMap arg_map[] = {\n+    { \"t\", parse_target }, { \"target\", parse_target },\n+    { \"j\", parse_jobs_count }, { \"jobs\", parse_jobs_count },\n+    { \"i\", parse_iterations }, { \"iterations\", parse_iterations },\n+    { \"seed\", parse_seed },\n+    { \"log\", parse_logging },\n+    { NULL, NULL } /* sentinel */\n+};\n+\n+/* Display options that are not printed elsewhere */\n+static void print_args(const struct Args* args) {\n+    printf(\"iterations = %d\\n\", COUNT);\n+    printf(\"jobs = %d\\n\", args->num_processes);\n+}\n+\n+/* Main entry point for reading environment variables */\n+static int read_env(struct TestFramework* tf) {\n+    const char* env_iter = getenv(\"SECP256K1_TEST_ITERS\");\n+    if (env_iter && strlen(env_iter) > 0) {\n+        return parse_iterations(\"i\", env_iter, tf);\n+    }\n+    return 0;\n+}\n+\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    int i;\n+    for (i = 0; arg_map[i].key != NULL; i++) {\n+        if (strcmp(key, arg_map[i].key) == 0) {\n+            return arg_map[i].handler(key, value, tf);\n+        }\n+    }\n+    /* Unknown key: report just so typos don't silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static void help(void) {\n+    printf(\"Usage: ./tests [options]\\n\\n\");\n+    printf(\"Run the test suite for the project with optional configuration.\\n\\n\");\n+    printf(\"Options:\\n\");\n+    printf(\"    --help, -h                           Show this help message\\n\");\n+    printf(\"    --print_tests                        Display list of all available tests and modules\\n\");\n+    printf(\"    --jobs=<num>, -j=<num>               Number of parallel worker processes (default: 0 = sequential)\\n\");\n+    printf(\"    --iterations=<num>, -i=<num>         Number of iterations for each test (default: 16)\\n\");\n+    printf(\"    --seed=<hex>                         Set a specific RNG seed (default: random)\\n\");\n+    printf(\"    --target=<test name>, -t=<name>      Run a specific test (can be provided multiple times)\\n\");\n+    printf(\"    --target=<module name>, -t=<module>  Run all tests within a specific module (can be provided multiple times)\\n\");\n+    printf(\"    --log=<0|1>                          Enable or disable test execution logging (default: 0 = disabled)\\n\");\n+    printf(\"\\n\");\n+    printf(\"Notes:\\n\");\n+    printf(\"    - All arguments must be provided in the form '--key=value', '-key=value' or '-k=value'.\\n\");\n+    printf(\"    - Single or double dashes are allowed for multi character options.\\n\");\n+    printf(\"    - Unknown arguments are reported but ignored.\\n\");\n+    printf(\"    - Sequential execution occurs if -jobs=0 or unspecified.\\n\");\n+    printf(\"    - The first two positional arguments (iterations and seed) are also supported for backward compatibility.\\n\");\n+}\n+\n+/* Print all tests in registry */\n+static void print_test_list(struct TestFramework* tf) {\n+    int m, t, total = 0;\n+    printf(\"\\nAvailable tests (%d modules):\\n\", tf->num_modules);\n+    printf(\"========================================\\n\");\n+    for (m = 0; m < tf->num_modules; m++) {\n+        const struct TestModule* mod = &tf->registry_modules[m];\n+        printf(\"Module: %s (%d tests)\\n\", mod->name, mod->size);\n+        for (t = 0; t < mod->size; t++) {\n+            printf(\"\\t[%3d] %s\\n\", total + 1, mod->data[t].name);\n+            total++;\n+        }\n+        printf(\"----------------------------------------\\n\");\n+    }\n+    printf(\"\\nRun specific module: ./tests -t=<module_name>\\n\");\n+    printf(\"Run specific test: ./tests -t=<test_name>\\n\\n\");\n+}\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf) {\n+    char* ptr_val;\n+    long val = strtol(value, &ptr_val, 10); /* base 10 */\n+    if (*ptr_val != '\\0') {\n+        fprintf(stderr, \"Invalid number for -%s=%s\\n\", key, value);\n+        return -1;\n+    }\n+    if (val < 0 || val > MAX_SUBPROCESSES) {\n+        fprintf(stderr, \"Arg '-%s' out of range: '%ld'. Range: 0..%d\\n\", key, val, MAX_SUBPROCESSES);\n+        return -1;\n+    }\n+    tf->args.num_processes = (int) val;\n+    return 0;\n+}\n+\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key); UNUSED(tf);\n+    if (!value) return 0;\n+    COUNT = (int) strtol(value, NULL, 0);\n+    if (COUNT <= 0) {\n+        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n+        return -1;\n+    }\n+    return 0;\n+}\n+\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+    return 0;\n+}\n+\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.logging = value && strcmp(value, \"1\") == 0;\n+    return 0;\n+}\n+\n+/* Strip up to two leading dashes */\n+static const char* normalize_key(const char* arg, const char** err_msg) {\n+    const char* key;\n+    if (!arg || arg[0] != '-') {\n+        *err_msg = \"missing initial dash\";\n+        return NULL;\n+    }\n+    /* single-dash short option */\n+    if (arg[1] != '-') return arg + 1;\n+    if (arg[2] == '-') {\n+        *err_msg = \"too many leading dashes\";\n+        return NULL;\n+    }\n+\n+    key = arg + 2; /* double-dash long option */\n+    if (key[1] == '\\0') {",
+      "path": "src/unit_test.c",
+      "position": 174,
+      "original_position": 174,
+      "commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "original_commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "in_reply_to_id": 2387022920,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> If I pass -- as arg to this function, then key[1] == arg[3] and this is beyond the end of the string, so this is UB.\r\n\r\nNice catch. Fixed.\r\n\r\n> (On my machine, I get \"unknown error\" as the error message. I think having this as a fallback is not good. It simply hides coding errors, and it would be better to assert that err_msg is set when an error is indicated via the return value.)\r\n\r\nYou know, I actually avoided using runtime assertions because I didn’t find any throughout the library.",
+      "created_at": "2025-09-29T14:57:53Z",
+      "updated_at": "2025-09-29T14:57:53Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2388298712",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2388298712"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": 173,
+      "original_start_line": 173,
+      "start_side": "RIGHT",
+      "line": 174,
+      "original_line": 174,
       "side": "RIGHT"
     }
   ]
