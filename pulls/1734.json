@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-10-01T14:39:31Z",
+    "updated_at": "2025-10-02T07:40:17Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -170,7 +170,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12810,
+        "size": 12817,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -302,8 +302,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1092,
-        "stargazers_count": 2309,
-        "watchers_count": 2309,
+        "stargazers_count": 2310,
+        "watchers_count": 2310,
         "size": 12690,
         "default_branch": "master",
         "open_issues_count": 155,
@@ -319,7 +319,7 @@
         "visibility": "public",
         "pushed_at": "2025-09-24T18:49:48Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-09-29T18:46:52Z",
+        "updated_at": "2025-10-01T17:55:56Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -349,7 +349,7 @@
     "deletions": 239,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 157,
+    "review_comments": 158,
     "comments": 27
   },
   "events": [
@@ -13027,9 +13027,9 @@
         "site_admin": false,
         "patch_url": null
       },
-      "body": "> Following the overkill rationale; If we go with a more granular approach, we would have to check for every relevant symbol?. E.g. `pid_t`, `write`, `read`, and `close` too. \r\n\r\nI think a pragmatic middle ground is to check for macros where we know that some common platforms don't have them, e.g., `fork` on Windows. Something like `pid_t` never needs to be checked because it's in the signature of `fork`.",
+      "body": "> Following the overkill rationale; If we go with a more granular approach, we would have to check for every relevant symbol?. E.g. `pid_t`, `write`, `read`, and `close` too. \r\n\r\nI think a pragmatic middle ground is to check for symbols where we know that some common platforms don't have them, e.g., `fork` on Windows. Something like `pid_t` never needs to be checked because it's in the signature of `fork`.",
       "created_at": "2025-10-01T10:31:49Z",
-      "updated_at": "2025-10-01T10:31:50Z",
+      "updated_at": "2025-10-02T07:41:42Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2394119612",
       "author_association": "CONTRIBUTOR",
       "_links": {
@@ -13151,6 +13151,59 @@
       "start_side": null,
       "line": 328,
       "original_line": 328,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2397513098",
+      "pull_request_review_id": 3293022881,
+      "id": 2397513098,
+      "node_id": "PRRC_kwDOAP4Jqs6O5yWK",
+      "diff_hunk": "@@ -0,0 +1,471 @@\n+/***********************************************************************\n+ * Copyright (c) 2025  Matias Furszyfer (furszy)                       *\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#if SUPPORTS_CONCURRENCY\n+#include <sys/types.h>\n+#include <sys/wait.h>\n+#include <unistd.h>\n+#endif\n+\n+#include \"unit_test.h\"\n+#include \"testrand.h\"\n+#include \"tests_common.h\"\n+\n+#define UNUSED(x) (void)(x)\n+\n+/* Number of times certain tests will run */\n+int COUNT = 16;\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_target(const char* key, const char* value, struct TestFramework* tf);\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf);\n+\n+/* Mapping table: key -> handler */\n+typedef int (*ArgHandler)(const char* key, const char* value, struct TestFramework* tf);\n+struct ArgMap {\n+    const char* key;\n+    ArgHandler handler;\n+};\n+\n+/*\n+ *   Main entry point for handling command-line arguments.\n+ *\n+ *   Developers should extend this map whenever new command-line\n+ *   options are introduced. Each new argument should be validated,\n+ *   converted to the appropriate type, and stored in 'tf->args' struct.\n+ */\n+static struct ArgMap arg_map[] = {\n+    { \"t\", parse_target }, { \"target\", parse_target },\n+    { \"j\", parse_jobs_count }, { \"jobs\", parse_jobs_count },\n+    { \"i\", parse_iterations }, { \"iterations\", parse_iterations },\n+    { \"seed\", parse_seed },\n+    { \"log\", parse_logging },\n+    { NULL, NULL } /* sentinel */\n+};\n+\n+/* Display options that are not printed elsewhere */\n+static void print_args(const struct Args* args) {\n+    printf(\"iterations = %d\\n\", COUNT);\n+    printf(\"jobs = %d\\n\", args->num_processes);\n+}\n+\n+/* Main entry point for reading environment variables */\n+static int read_env(struct TestFramework* tf) {\n+    const char* env_iter = getenv(\"SECP256K1_TEST_ITERS\");\n+    if (env_iter && strlen(env_iter) > 0) {\n+        return parse_iterations(\"i\", env_iter, tf);\n+    }\n+    return 0;\n+}\n+\n+static int parse_arg(const char* key, const char* value, struct TestFramework* tf) {\n+    int i;\n+    for (i = 0; arg_map[i].key != NULL; i++) {\n+        if (strcmp(key, arg_map[i].key) == 0) {\n+            return arg_map[i].handler(key, value, tf);\n+        }\n+    }\n+    /* Unknown key: report just so typos don't silently pass. */\n+    printf(\"Unknown argument '-%s=%s'\\n\", key, value);\n+    return 0;\n+}\n+\n+static void help(void) {\n+    printf(\"Usage: ./tests [options]\\n\\n\");\n+    printf(\"Run the test suite for the project with optional configuration.\\n\\n\");\n+    printf(\"Options:\\n\");\n+    printf(\"    --help, -h                           Show this help message\\n\");\n+    printf(\"    --print_tests                        Display list of all available tests and modules\\n\");\n+    printf(\"    --jobs=<num>, -j=<num>               Number of parallel worker processes (default: 0 = sequential)\\n\");\n+    printf(\"    --iterations=<num>, -i=<num>         Number of iterations for each test (default: 16)\\n\");\n+    printf(\"    --seed=<hex>                         Set a specific RNG seed (default: random)\\n\");\n+    printf(\"    --target=<test name>, -t=<name>      Run a specific test (can be provided multiple times)\\n\");\n+    printf(\"    --target=<module name>, -t=<module>  Run all tests within a specific module (can be provided multiple times)\\n\");\n+    printf(\"    --log=<0|1>                          Enable or disable test execution logging (default: 0 = disabled)\\n\");\n+    printf(\"\\n\");\n+    printf(\"Notes:\\n\");\n+    printf(\"    - All arguments must be provided in the form '--key=value', '-key=value' or '-k=value'.\\n\");\n+    printf(\"    - Single or double dashes are allowed for multi character options.\\n\");\n+    printf(\"    - Unknown arguments are reported but ignored.\\n\");\n+    printf(\"    - Sequential execution occurs if -jobs=0 or unspecified.\\n\");\n+    printf(\"    - The first two positional arguments (iterations and seed) are also supported for backward compatibility.\\n\");\n+}\n+\n+/* Print all tests in registry */\n+static void print_test_list(struct TestFramework* tf) {\n+    int m, t, total = 0;\n+    printf(\"\\nAvailable tests (%d modules):\\n\", tf->num_modules);\n+    printf(\"========================================\\n\");\n+    for (m = 0; m < tf->num_modules; m++) {\n+        const struct TestModule* mod = &tf->registry_modules[m];\n+        printf(\"Module: %s (%d tests)\\n\", mod->name, mod->size);\n+        for (t = 0; t < mod->size; t++) {\n+            printf(\"\\t[%3d] %s\\n\", total + 1, mod->data[t].name);\n+            total++;\n+        }\n+        printf(\"----------------------------------------\\n\");\n+    }\n+    printf(\"\\nRun specific module: ./tests -t=<module_name>\\n\");\n+    printf(\"Run specific test: ./tests -t=<test_name>\\n\\n\");\n+}\n+\n+static int parse_jobs_count(const char* key, const char* value, struct TestFramework* tf) {\n+    char* ptr_val;\n+    long val = strtol(value, &ptr_val, 10); /* base 10 */\n+    if (*ptr_val != '\\0') {\n+        fprintf(stderr, \"Invalid number for -%s=%s\\n\", key, value);\n+        return -1;\n+    }\n+    if (val < 0 || val > MAX_SUBPROCESSES) {\n+        fprintf(stderr, \"Arg '-%s' out of range: '%ld'. Range: 0..%d\\n\", key, val, MAX_SUBPROCESSES);\n+        return -1;\n+    }\n+    tf->args.num_processes = (int) val;\n+    return 0;\n+}\n+\n+static int parse_iterations(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key); UNUSED(tf);\n+    if (!value) return 0;\n+    COUNT = (int) strtol(value, NULL, 0);\n+    if (COUNT <= 0) {\n+        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n+        return -1;\n+    }\n+    return 0;\n+}\n+\n+static int parse_seed(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.custom_seed = (!value || strcmp(value, \"NULL\") == 0) ? NULL : value;\n+    return 0;\n+}\n+\n+static int parse_logging(const char* key, const char* value, struct TestFramework* tf) {\n+    UNUSED(key);\n+    tf->args.logging = value && strcmp(value, \"1\") == 0;\n+    return 0;\n+}\n+\n+/* Strip up to two leading dashes */\n+static const char* normalize_key(const char* arg, const char** err_msg) {\n+    const char* key;\n+    if (!arg || arg[0] != '-') {\n+        *err_msg = \"missing initial dash\";\n+        return NULL;\n+    }\n+    /* single-dash short option */\n+    if (arg[1] != '-') return arg + 1;\n+    if (arg[2] == '-') {\n+        *err_msg = \"too many leading dashes\";\n+        return NULL;\n+    }\n+\n+    key = arg + 2; /* double-dash long option */\n+    if (key[1] == '\\0') {\n+        *err_msg = \"short option cannot use double dash\";\n+        return NULL;\n+    }\n+    return key;\n+}\n+\n+static int parse_target(const char* key, const char* value, struct TestFramework* tf) {\n+    TestRef i = {/*group=*/0, /*idx=*/0};\n+    UNUSED(key);\n+    /* Find test index in the registry */\n+    for (i.group = 0; i.group < tf->num_modules; i.group++) {\n+        const struct TestModule* module = &tf->registry_modules[i.group];\n+        int add_all = strcmp(value, module->name) == 0; /* select all from module */\n+        for (i.idx = 0; i.idx < module->size; i.idx++) {\n+            if (add_all || strcmp(value, module->data[i.idx].name) == 0) {\n+                if (tf->args.targets.size >= MAX_ARGS) {\n+                    fprintf(stderr, \"Too many -target args (max: %d)\\n\", MAX_ARGS);\n+                    return -1;\n+                }\n+                tf->args.targets.slots[tf->args.targets.size++] = i;\n+                /* Matched a single test, we're done */\n+                if (!add_all) return 0;\n+            }\n+        }\n+        /* If add_all was true, we added all tests in the module, so return */\n+        if (add_all) return 0;\n+    }\n+    fprintf(stderr, \"Error: target '%s' not found (missing or module disabled).\\n\"\n+                    \"Run program with -print_tests option to display available tests and modules.\\n\", value);\n+    return -1;\n+}\n+\n+/* Read args: all must be in the form -key=value, --key=value or -key=value */\n+static int read_args(int argc, char** argv, int start, struct TestFramework* tf) {\n+    int i;\n+    const char* key;\n+    const char* value;\n+    char* eq;\n+    const char* err_msg = \"unknown error\";\n+    for (i = start; i < argc; i++) {\n+        char* raw_arg = argv[i];\n+        if (!raw_arg || raw_arg[0] != '-') {\n+            fprintf(stderr, \"Invalid arg '%s': must start with '-'\\n\", raw_arg ? raw_arg : \"(null)\");\n+            return -1;\n+        }\n+\n+        key = normalize_key(raw_arg, &err_msg);\n+        if (!key || *key == '\\0') {\n+            fprintf(stderr, \"Invalid arg '%s': %s. Must be -k=value or --key=value\\n\", raw_arg, err_msg);\n+            return -1;\n+        }\n+\n+        eq = strchr(raw_arg, '=');\n+        if (!eq || eq == raw_arg + 1) {\n+            /* Allowed options without value */\n+            if (strcmp(key, \"h\") == 0 || strcmp(key, \"help\") == 0) {\n+                tf->args.help = 1;\n+                return 0;\n+            }\n+            if (strcmp(key, \"print_tests\") == 0) {",
+      "path": "src/unit_test.c",
+      "position": 1,
+      "original_position": 234,
+      "commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "original_commit_id": "10eee5d1f797e8beb79ae0b69db6bbd78126007f",
+      "in_reply_to_id": 2386957311,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "\r\n> The change is not really big but have thought about this for a while, and I’d rather keep `-` reserved only for introducing new command-line options. Mainly because allowing dashes inside names blurs that boundary and makes syntax less clear.\r\n\r\nAgreed, let's avoid everything that makes parsing more complicated. ",
+      "created_at": "2025-10-02T07:40:17Z",
+      "updated_at": "2025-10-02T07:40:17Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2397513098",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2397513098"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 234,
       "side": "RIGHT"
     }
   ]
