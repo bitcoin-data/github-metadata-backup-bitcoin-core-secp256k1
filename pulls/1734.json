@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-09-04T17:12:36Z",
-    "updated_at": "2025-10-03T07:09:03Z",
+    "updated_at": "2025-10-10T14:01:44Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -170,7 +170,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12817,
+        "size": 12779,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -183,7 +183,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-10-01T14:20:34Z",
+        "pushed_at": "2025-10-07T13:49:32Z",
         "created_at": "2025-09-03T15:10:42Z",
         "updated_at": "2025-09-30T14:04:27Z",
         "allow_forking": true,
@@ -302,11 +302,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1092,
-        "stargazers_count": 2310,
-        "watchers_count": 2310,
+        "stargazers_count": 2318,
+        "watchers_count": 2318,
         "size": 12690,
         "default_branch": "master",
-        "open_issues_count": 155,
+        "open_issues_count": 157,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -319,7 +319,7 @@
         "visibility": "public",
         "pushed_at": "2025-09-24T18:49:48Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-10-01T17:55:56Z",
+        "updated_at": "2025-10-10T10:48:19Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -349,7 +349,7 @@
     "deletions": 239,
     "changed_files": 14,
     "commits": 7,
-    "review_comments": 162,
+    "review_comments": 163,
     "comments": 27
   },
   "events": [
@@ -13454,6 +13454,59 @@
       "start_side": null,
       "line": null,
       "original_line": 237,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2420393351",
+      "pull_request_review_id": 3323763774,
+      "id": 2420393351,
+      "node_id": "PRRC_kwDOAP4Jqs6QREWH",
+      "diff_hunk": "@@ -7666,179 +7679,215 @@ static void run_cmov_tests(void) {\n     ge_storage_cmov_test();\n }\n \n-int main(int argc, char **argv) {\n-    /* Disable buffering for stdout to improve reliability of getting\n-     * diagnostic information. Happens right at the start of main because\n-     * setbuf must be used before any other operation on the stream. */\n-    setbuf(stdout, NULL);\n-    /* Also disable buffering for stderr because it's not guaranteed that it's\n-     * unbuffered on all systems. */\n-    setbuf(stderr, NULL);\n-\n-    /* find iteration count */\n-    if (argc > 1) {\n-        COUNT = strtol(argv[1], NULL, 0);\n-    } else {\n-        const char* env = getenv(\"SECP256K1_TEST_ITERS\");\n-        if (env && strlen(env) > 0) {\n-            COUNT = strtol(env, NULL, 0);\n-        }\n-    }\n-    if (COUNT <= 0) {\n-        fputs(\"An iteration count of 0 or less is not allowed.\\n\", stderr);\n-        return EXIT_FAILURE;\n-    }\n-    printf(\"test count = %i\\n\", COUNT);\n-\n-    /* run test RNG tests (must run before we really initialize the test RNG) */\n-    run_xoshiro256pp_tests();\n+/* --------------------------------------------------------- */\n+/* Test Registry                                             */\n+/* --------------------------------------------------------- */\n \n-    /* find random seed */\n-    testrand_init(argc > 2 ? argv[2] : NULL);\n+/* --- Special test cases that must run before RNG initialization --- */\n+static struct tf_test_entry tests_no_rng[] = {\n+    CASE(xoshiro256pp_tests),\n+};\n+static const struct tf_test_module registry_modules_no_rng = MAKE_TEST_MODULE(no_rng);\n+\n+/* --- Standard test cases start here --- */\n+static struct tf_test_entry tests_general[] = {\n+    CASE(selftest_tests),\n+    CASE(all_proper_context_tests),\n+    CASE(all_static_context_tests),\n+    CASE(deprecated_context_flags_test),\n+    CASE(scratch_tests),\n+};\n \n-    /*** Setup test environment ***/\n+static struct tf_test_entry tests_integer[] = {\n+#ifdef SECP256K1_WIDEMUL_INT128\n+    CASE(int128_tests),\n+#endif\n+    CASE(ctz_tests),\n+    CASE(modinv_tests),\n+    CASE(inverse_tests),\n+};\n \n-    /* Create a global context available to all tests */\n-    CTX = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n-    /* Randomize the context only with probability 15/16\n-       to make sure we test without context randomization from time to time.\n-       TODO Reconsider this when recalibrating the tests. */\n-    if (testrand_bits(4)) {\n-        unsigned char rand32[32];\n-        testrand256(rand32);\n-        CHECK(secp256k1_context_randomize(CTX, rand32));\n-    }\n-    /* Make a writable copy of secp256k1_context_static in order to test the effect of API functions\n-       that write to the context. The API does not support cloning the static context, so we use\n-       memcpy instead. The user is not supposed to copy a context but we should still ensure that\n-       the API functions handle copies of the static context gracefully. */\n-    STATIC_CTX = malloc(sizeof(*secp256k1_context_static));\n-    CHECK(STATIC_CTX != NULL);\n-    memcpy(STATIC_CTX, secp256k1_context_static, sizeof(secp256k1_context));\n-    CHECK(!secp256k1_context_is_proper(STATIC_CTX));\n+static struct tf_test_entry tests_hash[] = {\n+    CASE(sha256_known_output_tests),\n+    CASE(sha256_counter_tests),\n+    CASE(hmac_sha256_tests),\n+    CASE(rfc6979_hmac_sha256_tests),\n+    CASE(tagged_sha256_tests),\n+};\n \n-    /*** Run actual tests ***/\n+static struct tf_test_entry tests_scalar[] = {\n+    CASE(scalar_tests),\n+};\n \n-    /* selftest tests */\n-    run_selftest_tests();\n+static struct tf_test_entry tests_field[] = {\n+    CASE(field_half),\n+    CASE(field_misc),\n+    CASE(field_convert),\n+    CASE(field_be32_overflow),\n+    CASE(fe_mul),\n+    CASE(sqr),\n+    CASE(sqrt),\n+};\n \n-    /* context tests */\n-    run_proper_context_tests(0); run_proper_context_tests(1);\n-    run_static_context_tests(0); run_static_context_tests(1);\n-    run_deprecated_context_flags_test();\n+static struct tf_test_entry tests_group[] = {\n+    CASE(ge),\n+    CASE(gej),\n+    CASE(group_decompress),\n+};\n \n-    /* scratch tests */\n-    run_scratch_tests();\n+static struct tf_test_entry tests_ecmult[] = {\n+    CASE(ecmult_pre_g),\n+    CASE(wnaf),\n+    CASE(point_times_order),\n+    CASE(ecmult_near_split_bound),\n+    CASE(ecmult_chain),\n+    CASE(ecmult_constants),\n+    CASE(ecmult_gen_blind),\n+    CASE(ecmult_const_tests),\n+    CASE(ecmult_multi_tests),\n+    CASE(ec_combine),\n+};\n \n-    /* integer arithmetic tests */\n-#ifdef SECP256K1_WIDEMUL_INT128\n-    run_int128_tests();\n-#endif\n-    run_ctz_tests();\n-    run_modinv_tests();\n-    run_inverse_tests();\n-\n-    /* sorting tests */\n-    run_hsort_tests();\n-\n-    /* hash tests */\n-    run_sha256_known_output_tests();\n-    run_sha256_counter_tests();\n-    run_hmac_sha256_tests();\n-    run_rfc6979_hmac_sha256_tests();\n-    run_tagged_sha256_tests();\n-\n-    /* scalar tests */\n-    run_scalar_tests();\n-\n-    /* field tests */\n-    run_field_half();\n-    run_field_misc();\n-    run_field_convert();\n-    run_field_be32_overflow();\n-    run_fe_mul();\n-    run_sqr();\n-    run_sqrt();\n-\n-    /* group tests */\n-    run_ge();\n-    run_gej();\n-    run_group_decompress();\n-\n-    /* ecmult tests */\n-    run_ecmult_pre_g();\n-    run_wnaf();\n-    run_point_times_order();\n-    run_ecmult_near_split_bound();\n-    run_ecmult_chain();\n-    run_ecmult_constants();\n-    run_ecmult_gen_blind();\n-    run_ecmult_const_tests();\n-    run_ecmult_multi_tests();\n-    run_ec_combine();\n-\n-    /* endomorphism tests */\n-    run_endomorphism_tests();\n-\n-    /* EC point parser test */\n-    run_ec_pubkey_parse_test();\n-\n-    /* EC key edge cases */\n-    run_eckey_edge_case_test();\n-\n-    /* EC key arithmetic test */\n-    run_eckey_negate_test();\n+static struct tf_test_entry tests_ec[] = {\n+    CASE(endomorphism_tests),\n+    CASE(ec_pubkey_parse_test),\n+    CASE(eckey_edge_case_test),\n+    CASE(eckey_negate_test),\n+};\n \n #ifdef ENABLE_MODULE_ECDH\n-    /* ecdh tests */\n-    run_ecdh_tests();\n+static struct tf_test_entry tests_ecdh[] = {\n+    CASE(ecdh_tests),\n+};\n #endif\n \n-    /* ecdsa tests */\n-    run_ec_illegal_argument_tests();\n-    run_pubkey_comparison();\n-    run_pubkey_sort();\n-    run_random_pubkeys();\n-    run_ecdsa_der_parse();\n-    run_ecdsa_sign_verify();\n-    run_ecdsa_end_to_end();\n-    run_ecdsa_edge_cases();\n-    run_ecdsa_wycheproof();\n+static struct tf_test_entry tests_ecdsa[] = {\n+    CASE(ec_illegal_argument_tests),\n+    CASE(pubkey_comparison),\n+    CASE(pubkey_sort),\n+    CASE(random_pubkeys),\n+    CASE(ecdsa_der_parse),\n+    CASE(ecdsa_sign_verify),\n+    CASE(ecdsa_end_to_end),\n+    CASE(ecdsa_edge_cases),\n+    CASE(ecdsa_wycheproof),\n+};\n \n #ifdef ENABLE_MODULE_RECOVERY\n+static struct tf_test_entry tests_recovery[] = {\n     /* ECDSA pubkey recovery tests */\n-    run_recovery_tests();\n+    CASE(recovery_tests),\n+};\n #endif\n \n #ifdef ENABLE_MODULE_EXTRAKEYS\n-    run_extrakeys_tests();\n+static struct tf_test_entry tests_extrakeys[] = {\n+    CASE(extrakeys_tests),\n+};\n #endif\n \n #ifdef ENABLE_MODULE_SCHNORRSIG\n-    run_schnorrsig_tests();\n+static struct tf_test_entry tests_schnorrsig[] = {\n+    CASE(schnorrsig_tests),\n+};\n #endif\n \n #ifdef ENABLE_MODULE_MUSIG\n-    run_musig_tests();\n+static struct tf_test_entry tests_musig[] = {\n+    CASE(musig_tests),\n+};\n #endif\n \n #ifdef ENABLE_MODULE_ELLSWIFT\n-    run_ellswift_tests();\n+static struct tf_test_entry tests_ellswift[] = {\n+    CASE(ellswift_tests),\n+};\n #endif\n \n-    /* util tests */\n-    run_secp256k1_memczero_test();\n-    run_secp256k1_is_zero_array_test();\n-    run_secp256k1_byteorder_tests();\n+static struct tf_test_entry tests_utils[] = {\n+    CASE(hsort_tests),\n+    CASE(secp256k1_memczero_test),\n+    CASE(secp256k1_is_zero_array_test),\n+    CASE(secp256k1_byteorder_tests),\n+    CASE(cmov_tests),\n+};\n \n-    run_cmov_tests();\n+/* Register test modules */\n+static const struct tf_test_module registry_modules[] = {\n+    MAKE_TEST_MODULE(general),\n+    MAKE_TEST_MODULE(integer),\n+    MAKE_TEST_MODULE(hash),\n+    MAKE_TEST_MODULE(scalar),\n+    MAKE_TEST_MODULE(field),\n+    MAKE_TEST_MODULE(group),\n+    MAKE_TEST_MODULE(ecmult),\n+    MAKE_TEST_MODULE(ec),\n+#ifdef ENABLE_MODULE_ECDH\n+    MAKE_TEST_MODULE(ecdh),\n+#endif\n+    MAKE_TEST_MODULE(ecdsa),\n+#ifdef ENABLE_MODULE_RECOVERY\n+    MAKE_TEST_MODULE(recovery),\n+#endif\n+#ifdef ENABLE_MODULE_EXTRAKEYS\n+    MAKE_TEST_MODULE(extrakeys),\n+#endif\n+#ifdef ENABLE_MODULE_SCHNORRSIG\n+    MAKE_TEST_MODULE(schnorrsig),\n+#endif\n+#ifdef ENABLE_MODULE_MUSIG\n+    MAKE_TEST_MODULE(musig),\n+#endif\n+#ifdef ENABLE_MODULE_ELLSWIFT\n+    MAKE_TEST_MODULE(ellswift),\n+#endif\n+    MAKE_TEST_MODULE(utils),\n+};\n \n-    /*** Tear down test environment ***/\n+/* Setup test environment */\n+static int setup(void) {\n+    /* Create a global context available to all tests */\n+    CTX = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    /* Randomize the context only with probability 15/16\n+       to make sure we test without context randomization from time to time.\n+       TODO Reconsider this when recalibrating the tests. */\n+    if (testrand_bits(4)) {\n+        unsigned char rand32[32];\n+        testrand256(rand32);\n+        CHECK(secp256k1_context_randomize(CTX, rand32));\n+    }\n+    /* Make a writable copy of secp256k1_context_static in order to test the effect of API functions\n+       that write to the context. The API does not support cloning the static context, so we use\n+       memcpy instead. The user is not supposed to copy a context but we should still ensure that\n+       the API functions handle copies of the static context gracefully. */\n+    STATIC_CTX = malloc(sizeof(*secp256k1_context_static));\n+    CHECK(STATIC_CTX != NULL);\n+    memcpy(STATIC_CTX, secp256k1_context_static, sizeof(secp256k1_context));\n+    CHECK(!secp256k1_context_is_proper(STATIC_CTX));\n+    return 0;\n+}\n+\n+/* Shutdown test environment */\n+static int teardown(void) {\n     free(STATIC_CTX);\n     secp256k1_context_destroy(CTX);\n \n     testrand_finish();",
+      "path": "src/tests.c",
+      "position": 1,
+      "original_position": 377,
+      "commit_id": "eed1390205c5315af46be4b2326cb2d0e084a536",
+      "original_commit_id": "b2e4749d8bf223205ed958bc797a48a9223dd26f",
+      "in_reply_to_id": 2391750362,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> But this reminds me of the purpose of outputting the initial seed, namely reproducibility. With that in mind, the output should also contain the target parameter. I think seed, target, and jobs together should make it possible to reproduce the run exactly. Perhaps it's nicer to simply output an entire command line like To reproduce, run ./tests --jobs ... --target ... --seed ...  or something like that.\r\n\r\nYeah sure. Will do if have to re-touch or in a tiny follow-up to not invalidate the current reviews.",
+      "created_at": "2025-10-10T14:01:44Z",
+      "updated_at": "2025-10-10T14:01:45Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1734#discussion_r2420393351",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2420393351"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1734"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 7839,
       "side": "RIGHT"
     }
   ]
