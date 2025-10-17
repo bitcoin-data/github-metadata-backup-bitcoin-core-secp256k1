@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-10-16T14:24:57Z",
-    "updated_at": "2025-10-17T07:02:34Z",
+    "updated_at": "2025-10-17T13:06:50Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -170,7 +170,7 @@
         "forks_count": 0,
         "stargazers_count": 2,
         "watchers_count": 2,
-        "size": 13753,
+        "size": 13756,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -183,9 +183,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-10-16T17:30:10Z",
+        "pushed_at": "2025-10-17T11:29:15Z",
         "created_at": "2021-12-03T12:27:02Z",
-        "updated_at": "2025-10-15T07:20:50Z",
+        "updated_at": "2025-10-17T11:26:24Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -304,7 +304,7 @@
         "forks_count": 1093,
         "stargazers_count": 2321,
         "watchers_count": 2321,
-        "size": 12728,
+        "size": 12733,
         "default_branch": "master",
         "open_issues_count": 152,
         "is_template": false,
@@ -350,7 +350,7 @@
     "changed_files": 2,
     "commits": 3,
     "review_comments": 0,
-    "comments": 1
+    "comments": 2
   },
   "events": [
     {
@@ -596,6 +596,62 @@
         "name": "tweak/refactor",
         "color": "FBCA04"
       }
+    },
+    {
+      "event": "commented",
+      "id": 3415547381,
+      "node_id": "IC_kwDOAP4Jqs7LlR31",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3415547381",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-10-17T13:06:50Z",
+      "updated_at": "2025-10-17T13:06:50Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> The output is nice for sure, but wouldn't it be much simpler to just invoke the test binaries with -j?\r\n\r\nI don't think that's desirable, because it lacks the ability to share the granularity with other test targets.\r\n\r\nSpecifically, I'm thinking in the context of the Bitcoin Core build, which has tons of test cases of its own. The ideal scenario is that you have a *single* process pool (controlled by the `-j` argument to `cmake`), and it is used to run both the Bitcoin Core and libsecp256k1 (and other) tests. This will generally result in all processes making progress throughout the entire run, until `cmake` runs out of test tasks to schedule.\r\n\r\nIn contrast, if you push the task scheduling down to libsecp256k1's own test binary, you at best end up with a situation where you first run all Bitcoin Core tests, wait for those to complete (temporarily running out of tasks in the process), and then run libsecp256k1's tests with `-j`. I don't know if that's actually possible to do in `cmake`'s supported generators, and more likely you'll end up in a situation where the entire libsecp256k1 test run (`-j` and all) is seen as a single process from the perspective of the build system - meaning it'd simultaneously run N-1 Bitcoin Core tests, *plus* 1 libsecp256k1 test (which itself runs in N processes), temporarily raising the parallellism to 2N-1.",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1760#issuecomment-3415547381",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1760"
     }
   ],
   "comments": []
