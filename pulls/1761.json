@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-10-17T14:28:28Z",
-    "updated_at": "2025-10-27T08:10:33Z",
+    "updated_at": "2025-10-27T16:58:52Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -306,7 +306,7 @@
         "watchers_count": 2327,
         "size": 12733,
         "default_branch": "master",
-        "open_issues_count": 153,
+        "open_issues_count": 154,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -349,7 +349,7 @@
     "deletions": 4,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 1,
+    "review_comments": 2,
     "comments": 1
   },
   "events": [
@@ -553,6 +553,44 @@
       "submitted_at": "2025-10-27T08:10:33Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
+    },
+    {
+      "event": "reviewed",
+      "id": 3384494557,
+      "node_id": "PRR_kwDOAP4Jqs7Ju0nd",
+      "url": null,
+      "actor": null,
+      "commit_id": "26166c4f5fd5688c31e488449ee2325eb8f2fb36",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-10-27T16:47:56Z",
+      "author_association": "MEMBER",
+      "body": "Concept ACK.",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1761#pullrequestreview-3384494557",
+      "submitted_at": "2025-10-27T16:47:56Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
     }
   ],
   "comments": [
@@ -597,6 +635,59 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2464748216"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 239,
+      "original_line": 239,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466415546",
+      "pull_request_review_id": 3384553081,
+      "id": 2466415546,
+      "node_id": "PRRC_kwDOAP4Jqs6TAoO6",
+      "diff_hunk": "@@ -220,9 +220,24 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a,\n     return last_set_bit + 1;\n }\n \n+/* Same as secp256k1_ecmult_wnaf, but stores to int8_t array. Requires w <= 8. */\n+static int secp256k1_ecmult_wnaf_small(int8_t *wnaf, int len, const secp256k1_scalar *a, int w) {\n+    int wnaf_tmp[256];\n+    int ret, i;\n+\n+    VERIFY_CHECK(2 <= w && w <= 8);\n+    ret = secp256k1_ecmult_wnaf(wnaf_tmp, len, a, w);\n+\n+    for (i = 0; i < len; i++) {\n+        wnaf[i] = (int8_t)wnaf_tmp[i];\n+    }\n+\n+    return ret;\n+}\n+\n struct secp256k1_strauss_point_state {\n-    int wnaf_na_1[129];\n-    int wnaf_na_lam[129];\n+    int8_t wnaf_na_1[129];",
+      "path": "src/ecmult_impl.h",
+      "position": 22,
+      "original_position": 22,
+      "commit_id": "26166c4f5fd5688c31e488449ee2325eb8f2fb36",
+      "original_commit_id": "26166c4f5fd5688c31e488449ee2325eb8f2fb36",
+      "in_reply_to_id": 2464748216,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> This is technically better to retain support for platforms that don't offer `int8_t`.\r\n\r\n`int8_t` is already used in `src/assumptions.h`.",
+      "created_at": "2025-10-27T16:58:51Z",
+      "updated_at": "2025-10-27T16:58:52Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1761#discussion_r2466415546",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466415546"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
