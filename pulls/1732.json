@@ -52,7 +52,7 @@
       }
     ],
     "created_at": "2025-09-02T14:58:38Z",
-    "updated_at": "2025-10-27T15:54:12Z",
+    "updated_at": "2025-10-27T17:55:15Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -383,8 +383,8 @@
     "deletions": 28,
     "changed_files": 9,
     "commits": 4,
-    "review_comments": 54,
-    "comments": 47
+    "review_comments": 56,
+    "comments": 48
   },
   "events": [
     {
@@ -6250,6 +6250,62 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1732#issuecomment-3452036624",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1732"
+    },
+    {
+      "event": "commented",
+      "id": 3452543599,
+      "node_id": "IC_kwDOAP4Jqs7NyaJv",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3452543599",
+      "actor": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-10-27T17:38:20Z",
+      "updated_at": "2025-10-27T17:38:20Z",
+      "author_association": "MEMBER",
+      "body": "> > Have you considered `GetProcessTimes` or `GetThreadTimes`\r\n> \r\n> I have, but they lack precision.\r\n\r\nThat's interesting. What do you think about the semantical difference between the Windows and POSIX approaches?\r\nIt seems to me that we should at least mention in the docs that results aren't comparable across platforms.",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1732#issuecomment-3452543599",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1732"
     }
   ],
   "comments": [
@@ -8997,6 +9053,112 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466209871"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1732"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 30,
+      "original_line": 30,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466565168",
+      "pull_request_review_id": 3384757084,
+      "id": 2466565168,
+      "node_id": "PRRC_kwDOAP4Jqs6TBMww",
+      "diff_hunk": "@@ -17,25 +17,38 @@\n \n #include <stdint.h>\n \n-#if (defined(_MSC_VER) && _MSC_VER >= 1900)\n-#  include <time.h>\n-#else\n-#  include <sys/time.h>\n+#if defined(_WIN32)\n+# include <windows.h>\n+#else /* POSIX */\n+# include <time.h>\n #endif\n \n-static int64_t gettime_i64(void) {\n-#if (defined(_MSC_VER) && _MSC_VER >= 1900)\n-    /* C11 way to get wallclock time */\n-    struct timespec tv;\n-    if (!timespec_get(&tv, TIME_UTC)) {\n-        fputs(\"timespec_get failed!\", stderr);\n-        exit(EXIT_FAILURE);\n-    }\n-    return (int64_t)tv.tv_nsec / 1000 + (int64_t)tv.tv_sec * 1000000LL;\n-#else\n-    struct timeval tv;\n-    gettimeofday(&tv, NULL);\n-    return (int64_t)tv.tv_usec + (int64_t)tv.tv_sec * 1000000LL;\n+static int64_t gettime_us(void) {\n+#if defined(_WIN32)\n+\n+    LARGE_INTEGER freq, counter;\n+    QueryPerformanceFrequency(&freq);",
+      "path": "src/tests_common.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "e14981e28e1c1e4b2fb6321cd94342d0b2849be7",
+      "original_commit_id": "a1ea09a1dd039bdc7e9e4b4e08d9831d9de5f7ad",
+      "in_reply_to_id": 2466140050,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "I see. Using an `init_time(void)` function could work in that case, but it would require every binary to call this method early in every program’s execution. All good anyway.\r\n\r\nAnother nit; `QueryPerformanceFrequency` returns 0 if the call fails, so it would be good to handle that as well.",
+      "created_at": "2025-10-27T17:52:22Z",
+      "updated_at": "2025-10-27T17:52:37Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1732#discussion_r2466565168",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466565168"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1732"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 30,
+      "original_line": 30,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466572449",
+      "pull_request_review_id": 3384766427,
+      "id": 2466572449,
+      "node_id": "PRRC_kwDOAP4Jqs6TBOih",
+      "diff_hunk": "@@ -17,25 +17,38 @@\n \n #include <stdint.h>\n \n-#if (defined(_MSC_VER) && _MSC_VER >= 1900)\n-#  include <time.h>\n-#else\n-#  include <sys/time.h>\n+#if defined(_WIN32)\n+# include <windows.h>\n+#else /* POSIX */\n+# include <time.h>\n #endif\n \n-static int64_t gettime_i64(void) {\n-#if (defined(_MSC_VER) && _MSC_VER >= 1900)\n-    /* C11 way to get wallclock time */\n-    struct timespec tv;\n-    if (!timespec_get(&tv, TIME_UTC)) {\n-        fputs(\"timespec_get failed!\", stderr);\n-        exit(EXIT_FAILURE);\n-    }\n-    return (int64_t)tv.tv_nsec / 1000 + (int64_t)tv.tv_sec * 1000000LL;\n-#else\n-    struct timeval tv;\n-    gettimeofday(&tv, NULL);\n-    return (int64_t)tv.tv_usec + (int64_t)tv.tv_sec * 1000000LL;\n+static int64_t gettime_us(void) {\n+#if defined(_WIN32)\n+\n+    LARGE_INTEGER freq, counter;\n+    QueryPerformanceFrequency(&freq);",
+      "path": "src/tests_common.h",
+      "position": 31,
+      "original_position": 31,
+      "commit_id": "e14981e28e1c1e4b2fb6321cd94342d0b2849be7",
+      "original_commit_id": "a1ea09a1dd039bdc7e9e4b4e08d9831d9de5f7ad",
+      "in_reply_to_id": 2466140050,
+      "user": {
+        "login": "Raimo33",
+        "id": 104778891,
+        "node_id": "U_kgDOBj7Miw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/104778891?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Raimo33",
+        "html_url": "https://github.com/Raimo33",
+        "followers_url": "https://api.github.com/users/Raimo33/followers",
+        "following_url": "https://api.github.com/users/Raimo33/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Raimo33/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Raimo33/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Raimo33/subscriptions",
+        "organizations_url": "https://api.github.com/users/Raimo33/orgs",
+        "repos_url": "https://api.github.com/users/Raimo33/repos",
+        "events_url": "https://api.github.com/users/Raimo33/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Raimo33/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "> Another nit; `QueryPerformanceFrequency` returns 0 if the call fails, so it would be good to handle that as well.\n\nmy reasoning Is the same here. It would be one extra branch. and a failure in the clock is not a huge deal.\n",
+      "created_at": "2025-10-27T17:55:15Z",
+      "updated_at": "2025-10-27T17:55:15Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1732#discussion_r2466572449",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2466572449"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1732"
