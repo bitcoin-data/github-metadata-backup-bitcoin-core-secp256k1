@@ -61,7 +61,7 @@
       }
     ],
     "created_at": "2025-10-16T14:24:57Z",
-    "updated_at": "2025-10-30T13:58:17Z",
+    "updated_at": "2025-10-30T14:21:35Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -349,7 +349,7 @@
     "deletions": 11,
     "changed_files": 2,
     "commits": 3,
-    "review_comments": 6,
+    "review_comments": 8,
     "comments": 6
   },
   "events": [
@@ -1100,6 +1100,43 @@
       "submitted_at": "2025-10-22T10:00:51Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
+    },
+    {
+      "event": "reviewed",
+      "id": 3399891815,
+      "node_id": "PRR_kwDOAP4Jqs7Kpjtn",
+      "url": null,
+      "actor": null,
+      "commit_id": "2d8da558168c5d82460074068867e126a7103fe9",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-10-30T14:19:11Z",
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "purpleKarrot",
+        "id": 185240,
+        "node_id": "MDQ6VXNlcjE4NTI0MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/185240?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/purpleKarrot",
+        "html_url": "https://github.com/purpleKarrot",
+        "followers_url": "https://api.github.com/users/purpleKarrot/followers",
+        "following_url": "https://api.github.com/users/purpleKarrot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/purpleKarrot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/purpleKarrot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/purpleKarrot/subscriptions",
+        "organizations_url": "https://api.github.com/users/purpleKarrot/orgs",
+        "repos_url": "https://api.github.com/users/purpleKarrot/repos",
+        "events_url": "https://api.github.com/users/purpleKarrot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/purpleKarrot/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1760#pullrequestreview-3399891815",
+      "submitted_at": "2025-10-30T14:19:11Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
     }
   ],
   "comments": [
@@ -1409,6 +1446,112 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2478230190"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
+        }
+      },
+      "start_line": 154,
+      "original_start_line": 154,
+      "start_side": "RIGHT",
+      "line": 157,
+      "original_line": 157,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2478298859",
+      "pull_request_review_id": 3399891815,
+      "id": 2478298859,
+      "node_id": "PRRC_kwDOAP4Jqs6Tt9br",
+      "diff_hunk": "@@ -144,15 +144,43 @@ if(SECP256K1_BUILD_TESTS)\n     list(APPEND TEST_DEFINITIONS SUPPORTS_CONCURRENCY=1)\n   endif()\n \n-  add_executable(noverify_tests tests.c)\n-  target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)\n-  target_compile_definitions(noverify_tests PRIVATE ${TEST_DEFINITIONS})\n-  add_test(NAME secp256k1_noverify_tests COMMAND noverify_tests)\n+  set(test_targets \"\")\n+  set(test_names \"\")\n+  # Start with the longest-running tests.\n+  list(APPEND test_targets ellswift)\n+  list(APPEND test_names   ellswift)\n+  list(APPEND test_targets ecmult_constants)\n+  list(APPEND test_names   ecmult_constants)\n+  list(APPEND test_targets \"ecmult_pre_g wnaf point_times_order ecmult_near_split_bound ecmult_chain ecmult_gen_blind ecmult_const_tests ecmult_multi_tests ec_combine\")\n+  list(APPEND test_names   ecmult)\n+  # Continue with the remaining tests.\n+  list(APPEND test_targets integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)\n+  list(APPEND test_names   integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)\n+  # Combine short, trivial tests for log brevity.\n+  list(APPEND test_targets \"general hash utils\")\n+  list(APPEND test_names   \"general,hash,utils\")\n+\n+  function(add_executable_and_tests exe_name verify_definition label)\n+    add_executable(${exe_name} tests.c)\n+    target_link_libraries(${exe_name} secp256k1_precomputed secp256k1_asm)\n+    target_compile_definitions(${exe_name} PRIVATE ${verify_definition} ${TEST_DEFINITIONS})\n+    foreach(test_target test_name IN ZIP_LISTS test_targets test_names)\n+      string(REPLACE \" \" \";\" test_target \"${test_target}\")\n+      list(TRANSFORM test_target PREPEND \"--target=\")\n+      add_test(NAME ${label}::${test_name}\n+        COMMAND ${exe_name} ${test_target} --log=1\n+        COMMAND_EXPAND_LISTS\n+      )\n+      set_tests_properties(${label}::${test_name} PROPERTIES\n+        LABELS ${label}\n+        SKIP_REGULAR_EXPRESSION \"module disabled\"\n+      )\n+    endforeach()\n+  endfunction()\n+\n+  add_executable_and_tests(noverify_tests \"\" secp256k1_noverify)\n   if(NOT CMAKE_BUILD_TYPE STREQUAL \"Coverage\")\n-    add_executable(tests tests.c)\n-    target_compile_definitions(tests PRIVATE VERIFY ${TEST_DEFINITIONS})\n-    target_link_libraries(tests secp256k1_precomputed secp256k1_asm)\n-    add_test(NAME secp256k1_tests COMMAND tests)\n+    add_executable_and_tests(tests VERIFY secp256k1_verify)",
+      "path": "src/CMakeLists.txt",
+      "position": 48,
+      "original_position": 48,
+      "commit_id": "2d8da558168c5d82460074068867e126a7103fe9",
+      "original_commit_id": "2d8da558168c5d82460074068867e126a7103fe9",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "purpleKarrot",
+        "id": 185240,
+        "node_id": "MDQ6VXNlcjE4NTI0MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/185240?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/purpleKarrot",
+        "html_url": "https://github.com/purpleKarrot",
+        "followers_url": "https://api.github.com/users/purpleKarrot/followers",
+        "following_url": "https://api.github.com/users/purpleKarrot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/purpleKarrot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/purpleKarrot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/purpleKarrot/subscriptions",
+        "organizations_url": "https://api.github.com/users/purpleKarrot/orgs",
+        "repos_url": "https://api.github.com/users/purpleKarrot/repos",
+        "events_url": "https://api.github.com/users/purpleKarrot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/purpleKarrot/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "The target name `tests` is very generic and likely to cause clashes when the project is used as a subproject. This is orthogonal to the PR, but should be kept in mind for a follow up.",
+      "created_at": "2025-10-30T14:19:11Z",
+      "updated_at": "2025-10-30T14:19:11Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1760#discussion_r2478298859",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2478298859"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 183,
+      "original_line": 183,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2478306826",
+      "pull_request_review_id": 3399902624,
+      "id": 2478306826,
+      "node_id": "PRRC_kwDOAP4Jqs6Tt_YK",
+      "diff_hunk": "@@ -144,16 +144,42 @@ if(SECP256K1_BUILD_TESTS)\n     list(APPEND TEST_DEFINITIONS SUPPORTS_CONCURRENCY=1)\n   endif()\n \n-  function(add_executable_and_tests exe_name verify_definition)\n+  set(test_targets \"\")\n+  set(test_names \"\")\n+  # Start with the longest-running tests.\n+  list(APPEND test_targets ellswift)\n+  list(APPEND test_names   ellswift)\n+  list(APPEND test_targets ecmult_constants)\n+  list(APPEND test_names   ecmult_constants)\n+  list(APPEND test_targets \"ecmult_pre_g wnaf point_times_order ecmult_near_split_bound ecmult_chain ecmult_gen_blind ecmult_const_tests ecmult_multi_tests ec_combine\")\n+  list(APPEND test_names   ecmult)\n+  # Continue with the remaining tests.\n+  list(APPEND test_targets integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)",
+      "path": "src/CMakeLists.txt",
+      "position": 18,
+      "original_position": 15,
+      "commit_id": "2d8da558168c5d82460074068867e126a7103fe9",
+      "original_commit_id": "7600f5f5fb973bb1859cd63f96d357cf98b72267",
+      "in_reply_to_id": 2451364878,
+      "user": {
+        "login": "purpleKarrot",
+        "id": 185240,
+        "node_id": "MDQ6VXNlcjE4NTI0MA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/185240?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/purpleKarrot",
+        "html_url": "https://github.com/purpleKarrot",
+        "followers_url": "https://api.github.com/users/purpleKarrot/followers",
+        "following_url": "https://api.github.com/users/purpleKarrot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/purpleKarrot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/purpleKarrot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/purpleKarrot/subscriptions",
+        "organizations_url": "https://api.github.com/users/purpleKarrot/orgs",
+        "repos_url": "https://api.github.com/users/purpleKarrot/repos",
+        "events_url": "https://api.github.com/users/purpleKarrot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/purpleKarrot/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "body": "If we switch to automated test discovery in a follow-up, we will no longer have the ability to combine test cases. Maybe we should keep them separated so that the follow-up will not change the number of tests again?",
+      "created_at": "2025-10-30T14:21:35Z",
+      "updated_at": "2025-10-30T14:21:35Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1760#discussion_r2478306826",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2478306826"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
