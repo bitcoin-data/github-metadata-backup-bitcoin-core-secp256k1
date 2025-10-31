@@ -1,0 +1,779 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765",
+    "id": 2966544424,
+    "node_id": "PR_kwDOAP4Jqs6w0eAo",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1765.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1765.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/c11d30c25f75776920797b017a568ea0cfc28882",
+    "number": 1765,
+    "state": "open",
+    "locked": false,
+    "maintainer_can_modify": true,
+    "title": "Add \"silentpayments\" module implementing BIP352 (take 4, limited to full-node scanning)",
+    "user": {
+      "login": "theStack",
+      "id": 91535,
+      "node_id": "MDQ6VXNlcjkxNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/theStack",
+      "html_url": "https://github.com/theStack",
+      "followers_url": "https://api.github.com/users/theStack/followers",
+      "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+      "organizations_url": "https://api.github.com/users/theStack/orgs",
+      "repos_url": "https://api.github.com/users/theStack/repos",
+      "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/theStack/received_events",
+      "type": "User",
+      "site_admin": false,
+      "patch_url": null
+    },
+    "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 5 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_recipient_create_label`: given a scan secret key and label integer, calculate the corresponding label_tweak and label public key\r\n* `secp256k1_recipient_create_labeled_spend_pubkey`: given a spend public key and a label public key, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\nRecent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.",
+    "labels": [],
+    "created_at": "2025-10-31T12:06:04Z",
+    "updated_at": "2025-10-31T12:06:04Z",
+    "mergeable": true,
+    "mergeable_state": "unstable",
+    "merged": false,
+    "merge_commit_sha": "e69024c24fdbaf18e3348c76ca77fb8fae43b9d3",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "rebaseable": true,
+    "head": {
+      "label": "theStack:silentpayments_module_fullnode_only",
+      "ref": "silentpayments_module_fullnode_only",
+      "sha": "c11d30c25f75776920797b017a568ea0cfc28882",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 452762907,
+        "node_id": "R_kgDOGvydGw",
+        "name": "secp256k1",
+        "full_name": "theStack/secp256k1",
+        "owner": {
+          "login": "theStack",
+          "id": 91535,
+          "node_id": "MDQ6VXNlcjkxNTM1",
+          "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/theStack",
+          "html_url": "https://github.com/theStack",
+          "followers_url": "https://api.github.com/users/theStack/followers",
+          "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+          "organizations_url": "https://api.github.com/users/theStack/orgs",
+          "repos_url": "https://api.github.com/users/theStack/repos",
+          "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/theStack/received_events",
+          "type": "User",
+          "site_admin": false,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/theStack/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/theStack/secp256k1",
+        "archive_url": "https://api.github.com/repos/theStack/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/theStack/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/theStack/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/theStack/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/theStack/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/theStack/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/theStack/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/theStack/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/theStack/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/theStack/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/theStack/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/theStack/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/theStack/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/theStack/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/theStack/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/theStack/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/theStack/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/theStack/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/theStack/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/theStack/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/theStack/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/theStack/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/theStack/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/theStack/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/theStack/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/theStack/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/theStack/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/theStack/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/theStack/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:theStack/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/theStack/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/theStack/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/theStack/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/theStack/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/theStack/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/theStack/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/theStack/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/theStack/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/theStack/secp256k1/hooks",
+        "svn_url": "https://github.com/theStack/secp256k1",
+        "language": "C",
+        "forks_count": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "size": 12976,
+        "default_branch": "master",
+        "open_issues_count": 0,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-10-31T11:15:10Z",
+        "created_at": "2022-01-27T16:42:12Z",
+        "updated_at": "2025-09-14T19:27:22Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "7a2fff85e8729719f384a094123b965f45ae94db",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 1097,
+        "stargazers_count": 2330,
+        "watchers_count": 2330,
+        "size": 12733,
+        "default_branch": "master",
+        "open_issues_count": 156,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-10-17T07:09:52Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2025-10-31T04:33:12Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+      }
+    },
+    "author_association": "CONTRIBUTOR",
+    "draft": false,
+    "additions": 7928,
+    "deletions": 35,
+    "changed_files": 23,
+    "commits": 11,
+    "review_comments": 0,
+    "comments": 0
+  },
+  "events": [
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBkYjIyYjk0NGNmMTBhM2ZiMmZlNTA0Zjg5ZDVhNGRhYzk3NDFmNzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0db22b944cf10a3fb2fe504f89d5a4dac9741f72",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0db22b944cf10a3fb2fe504f89d5a4dac9741f72",
+      "tree": {
+        "sha": "b2b2c55ac6f6424a66a3580d029e7816eea9eac7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b2b2c55ac6f6424a66a3580d029e7816eea9eac7"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7a2fff85e8729719f384a094123b965f45ae94db",
+          "sha": "7a2fff85e8729719f384a094123b965f45ae94db",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7a2fff85e8729719f384a094123b965f45ae94db"
+        }
+      ],
+      "message": "build: add skeleton for new silentpayments (BIP352) module",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T00:34:58Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2023-09-27T15:22:14Z"
+      },
+      "sha": "0db22b944cf10a3fb2fe504f89d5a4dac9741f72"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDVhYWYzYmU3NjZhNGY0MWYyNmQwZDQzZWZhZWZmOWQ1NGI3NzUyNGY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5aaf3be766a4f41f26d0d43efaeff9d54b77524f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5aaf3be766a4f41f26d0d43efaeff9d54b77524f",
+      "tree": {
+        "sha": "70b023d6b335ea9f27a101a1ae25edc45000621e",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/70b023d6b335ea9f27a101a1ae25edc45000621e"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0db22b944cf10a3fb2fe504f89d5a4dac9741f72",
+          "sha": "0db22b944cf10a3fb2fe504f89d5a4dac9741f72",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0db22b944cf10a3fb2fe504f89d5a4dac9741f72"
+        }
+      ],
+      "message": "silentpayments: sending\n\nAdd a routine for the entire sending flow which takes a set of private keys,\nthe smallest outpoint, and list of recipients and returns a list of\nx-only public keys by performing the following steps:\n\n1. Sum up the private keys\n2. Calculate the input_hash\n3. For each recipient group:\n    3a. Calculate a shared secret\n    3b. Create the requested number of outputs\n\nThis function assumes a single sender context in that it requires the\nsender to have access to all of the private keys. In the future, this\nAPI may be expanded to allow for a multiple senders or for a single\nsender who does not have access to all private keys at any given time,\nbut for now these modes are considered out of scope / unsafe.\n\nInternal to the library, add:\n\n1. A function for creating shared secrets (i.e., a*B or b*A)\n2. A function for generating the \"SharedSecret\" tagged hash\n3. A function for creating a single output public key",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T10:47:25Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-03-25T16:23:37Z"
+      },
+      "sha": "5aaf3be766a4f41f26d0d43efaeff9d54b77524f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGRmMGExZmUxNmNkZDM5NmE1NzQzZTM2MjgxODg0YTEyNDIzMDY0ZDI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/df0a1fe16cdd396a5743e36281884a12423064d2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/df0a1fe16cdd396a5743e36281884a12423064d2",
+      "tree": {
+        "sha": "5dc6ea97373657c7286fc65a513a15d088141d04",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5dc6ea97373657c7286fc65a513a15d088141d04"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5aaf3be766a4f41f26d0d43efaeff9d54b77524f",
+          "sha": "5aaf3be766a4f41f26d0d43efaeff9d54b77524f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5aaf3be766a4f41f26d0d43efaeff9d54b77524f"
+        }
+      ],
+      "message": "silentpayments: recipient label support\n\nAdd function for creating a label tweak. This requires a tagged hash\nfunction for labels. This function is used by the receiver for creating\nlabels to be used for a) creating labeled addresses and b) to populate\na labels cache when scanning.\n\nAdd function for creating a labeled spend pubkey. This involves taking\na label tweak, turning it into a public key and adding it to the spend\npublic key. This function is used by the receiver to create a labeled\nsilent payment address.\n\nAdd tests for the label API.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T10:47:28Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-01-22T17:56:05Z"
+      },
+      "sha": "df0a1fe16cdd396a5743e36281884a12423064d2"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDRjMzhiYWZhNjUzZWNmMjU5OTdjOGZjZmM2ZmQ0ZThmMjY0YjFlMzk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39",
+      "tree": {
+        "sha": "40ffad1ee88b942cf6d5959330e04fec5ad11987",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/40ffad1ee88b942cf6d5959330e04fec5ad11987"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/df0a1fe16cdd396a5743e36281884a12423064d2",
+          "sha": "df0a1fe16cdd396a5743e36281884a12423064d2",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/df0a1fe16cdd396a5743e36281884a12423064d2"
+        }
+      ],
+      "message": "silentpayments: receiving\n\nAdd routine for scanning a transaction and returning the necessary\nspending data for any found outputs. This function works with labels via\na lookup callback and requires access to the transaction outputs.\nRequiring access to the transaction outputs is not suitable for light\nclients, but light client support is enabled in the next commit.\n\nAdd an opaque data type for passing around the prevout public key sum\nand the input hash tweak (input_hash). This data is passed to the scanner\nbefore the ECDH step as two separate elements so that the scanner can\nmultiply the scan_key * input_hash before doing ECDH.\n\nFinally, add test coverage for the receiving API.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:49Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2025-10-02T14:18:13Z"
+      },
+      "sha": "4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGNlYWRlNGVhNjk4ZmQyY2U0YjQ2YzRlODkzNWEzMGQ3ZjE5OGU2N2Q",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ceade4ea698fd2ce4b46c4e8935a30d7f198e67d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ceade4ea698fd2ce4b46c4e8935a30d7f198e67d",
+      "tree": {
+        "sha": "46ba4476611088aa12ba6e6df6d59c7e6b27d65d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/46ba4476611088aa12ba6e6df6d59c7e6b27d65d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39",
+          "sha": "4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4c38bafa653ecf25997c8fcfc6fd4e8f264b1e39"
+        }
+      ],
+      "message": "silentpayments: add examples/silentpayments.c\n\nDemonstrate sending and scanning on full nodes.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-04-15T17:36:29Z"
+      },
+      "sha": "ceade4ea698fd2ce4b46c4e8935a30d7f198e67d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDMwZWYwYzVmZTRlNThkZjg4OGRjOTBmODAyZDFlNmRhYmM5OTYxNmY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/30ef0c5fe4e58df888dc90f802d1e6dabc99616f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/30ef0c5fe4e58df888dc90f802d1e6dabc99616f",
+      "tree": {
+        "sha": "c122cbfe61e5b2470e972aa3dbdc111582e39df5",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c122cbfe61e5b2470e972aa3dbdc111582e39df5"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ceade4ea698fd2ce4b46c4e8935a30d7f198e67d",
+          "sha": "ceade4ea698fd2ce4b46c4e8935a30d7f198e67d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ceade4ea698fd2ce4b46c4e8935a30d7f198e67d"
+        }
+      ],
+      "message": "silentpayments: add benchmarks for scanning\n\nAdd a benchmark for a full transaction scan.\nOnly benchmarks for scanning are added as this is the most\nperformance critical portion of the protocol.\n\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-04-25T17:33:35Z"
+      },
+      "sha": "30ef0c5fe4e58df888dc90f802d1e6dabc99616f"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc2Y2E2NmQ2YjQ3NTMzMjg3YzRmNWQzOGUyNGU0NWRlYTgyNTRiYmU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/76ca66d6b47533287c4f5d38e24e45dea8254bbe",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/76ca66d6b47533287c4f5d38e24e45dea8254bbe",
+      "tree": {
+        "sha": "c91225e5fe75b1f7cd14f6b62f97319a255da41a",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c91225e5fe75b1f7cd14f6b62f97319a255da41a"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/30ef0c5fe4e58df888dc90f802d1e6dabc99616f",
+          "sha": "30ef0c5fe4e58df888dc90f802d1e6dabc99616f",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/30ef0c5fe4e58df888dc90f802d1e6dabc99616f"
+        }
+      ],
+      "message": "tests: add BIP-352 test vectors\n\nAdd the BIP-352 test vectors. The vectors are generated with a Python script\nthat converts the .json file from the BIP to C code:\n\n$ ./tools/tests_silentpayments_generate.py test_vectors.json > ./src/modules/silentpayments/vectors.h\n\nCo-authored-by: Ron <4712150+macgyver13@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>\nCo-authored-by: Tim Ruffing <1071625+real-or-random@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-07-02T17:45:43Z"
+      },
+      "sha": "76ca66d6b47533287c4f5d38e24e45dea8254bbe"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDZjZjIyOGRhYTZhZDljMTE4YjljNDFjODUwYjYyN2Q2NTdkMGRiYWQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6cf228daa6ad9c118b9c41c850b627d657d0dbad",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6cf228daa6ad9c118b9c41c850b627d657d0dbad",
+      "tree": {
+        "sha": "5b6acdbc8dc0de9e7332cdbadb71f05a7cb97172",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5b6acdbc8dc0de9e7332cdbadb71f05a7cb97172"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/76ca66d6b47533287c4f5d38e24e45dea8254bbe",
+          "sha": "76ca66d6b47533287c4f5d38e24e45dea8254bbe",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/76ca66d6b47533287c4f5d38e24e45dea8254bbe"
+        }
+      ],
+      "message": "tests: add constant time tests\n\nCo-authored-by: Jonas Nick <2582071+jonasnick@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-11-07T12:18:59Z"
+      },
+      "sha": "6cf228daa6ad9c118b9c41c850b627d657d0dbad"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDE3OTc1OWVjZmExMjI3ODg3NjI4NGJiNzc1MDkzZDgyODMzMGQzYzc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/179759ecfa12278876284bb775093d828330d3c7",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/179759ecfa12278876284bb775093d828330d3c7",
+      "tree": {
+        "sha": "390bd729c7e99368c61f69a2646a9b331037cfbf",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/390bd729c7e99368c61f69a2646a9b331037cfbf"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6cf228daa6ad9c118b9c41c850b627d657d0dbad",
+          "sha": "6cf228daa6ad9c118b9c41c850b627d657d0dbad",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6cf228daa6ad9c118b9c41c850b627d657d0dbad"
+        }
+      ],
+      "message": "tests: add sha256 tag test\n\nTest midstate tags used in silent payments.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2025-08-15T08:46:46Z"
+      },
+      "sha": "179759ecfa12278876284bb775093d828330d3c7"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDRjMTZhZTA0YTc5YjZhMzY4ZWFjODVkYWIxNjIzYzAxNTBjNTM5OGU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4c16ae04a79b6a368eac85dab1623c0150c5398e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4c16ae04a79b6a368eac85dab1623c0150c5398e",
+      "tree": {
+        "sha": "8e4b69e4b4f6b493f29a83dcb69796ef4d06aa77",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8e4b69e4b4f6b493f29a83dcb69796ef4d06aa77"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/179759ecfa12278876284bb775093d828330d3c7",
+          "sha": "179759ecfa12278876284bb775093d828330d3c7",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/179759ecfa12278876284bb775093d828330d3c7"
+        }
+      ],
+      "message": "ci: enable silentpayments module",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-22T23:25:41Z"
+      },
+      "sha": "4c16ae04a79b6a368eac85dab1623c0150c5398e"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGMxMWQzMGMyNWY3NTc3NjkyMDc5N2IwMTdhNTY4ZWEwY2ZjMjg4ODI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c11d30c25f75776920797b017a568ea0cfc28882",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c11d30c25f75776920797b017a568ea0cfc28882",
+      "tree": {
+        "sha": "477ac985a86a80f7c7ce01eeb2c2948886c0cc2e",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/477ac985a86a80f7c7ce01eeb2c2948886c0cc2e"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4c16ae04a79b6a368eac85dab1623c0150c5398e",
+          "sha": "4c16ae04a79b6a368eac85dab1623c0150c5398e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4c16ae04a79b6a368eac85dab1623c0150c5398e"
+        }
+      ],
+      "message": "docs: update README",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2025-10-31T11:14:53Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-07-12T12:57:54Z"
+      },
+      "sha": "c11d30c25f75776920797b017a568ea0cfc28882"
+    }
+  ],
+  "comments": []
+}
