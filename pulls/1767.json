@@ -1,0 +1,749 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1767",
+    "id": 2985197755,
+    "node_id": "PR_kwDOAP4Jqs6x7oC7",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1767",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1767.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1767.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1767",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1767/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1767/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1767/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9cfba13041266a28043ee83b0a8e26d9f7cfa1ad",
+    "number": 1767,
+    "state": "open",
+    "locked": false,
+    "maintainer_can_modify": true,
+    "title": "[WIP, Please benchmark] Use homogeneous coordinates in pippenger",
+    "user": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
+    "body": "This adds a new representation `geh` of group elements, namely in [homogeneous (also called projective) coordinates](https://hyperelliptic.org/EFD/g1p/auto-shortw-projective.html). This is supposed to be faster for unmixed (i.e., the second summand is not `ge`) addition in terms of field operations, namely 12M+0S+25etc vs. 12M+4S+11etc for [Jacobian coordinates](https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html).\r\n\r\nThe addition and doubling formulas are due to [Renes, Costello, and Batina 2016](https://eprint.iacr.org/2015/1060), Algorithms 7 and 9. The formulas are complete, i.e., they have no special cases. However, this implementation still keeps track of infinity in a dedicated boolean flag for performance reasons. Since the buckets in Pippenger's algorithm are initialized with infinity (=zero), we'll have many additions involving infinity, and going through the entire formula for each of those hurts performance (and the entire point of this PR is performance).\r\n\r\nThe formulas were implemented by giving GPT-5 mini screenshots of the algorithms in the paper and the `field.h`. The result was not awesome but I could clean it up manually. \r\n\r\nThe new representation is used in Pippenger's ecmult_multi for accumulating the buckets after every window iteration.  Buckets are still constructed as `gej` (because it has faster mixed addition) and only converted to `geh` before accumulation. This is still supposed to be faster even if the conversion is accounted for. The conversion costs 2M+1S but we then do two `geh` additions in a row, saving 8S. This PR has three different variants of how `geh` could be used:\r\n\r\n1. https://github.com/bitcoin-core/secp256k1/commit/2ccc5e02776b8ae3483adf342b741abd99e48931 Only the inner accumulation loop is done in `geh`.\r\n2. https://github.com/bitcoin-core/secp256k1/commit/867fe34dd4f642fb966d5ee652e0d77a9adafa41 All of the accumulation is done in `geh`.\r\n3. https://github.com/bitcoin-core/secp256k1/commit/0fc73f397bc6a10b723b89d6f2a0dc52e7621748 Like the previous, but we switch back to `gej` for rows of doublings.   \r\n\r\nUnfortunately, none of these turns out to be really faster in `ecmult_bench pippenger_wnaf` on my x86_64 system with gcc 15.2.1 or clang 21.1.4. The best variant (2) beats master by just 0.21%; the other variants are slower than master.  :/ If I compile in 32-bit mode, all three variants beat master consistently, but only by 1.2%. But this latter result gives at least some hope that this PR could pay off on some platform. I'm not even sure how much we care about 32-bit platforms. Maybe we care about hardware wallets in general, but probably not when it comes to `ecmult_multi`. Plus this would need real benchmarks; I didn't even run this on a native 32-bit CPU). \r\n\r\n**But we'd certainly care about ARM64 which I couldn't test on. Anyone with an ARM Mac willing to benchmark this?**\r\n\r\nThe exact benchmark command was `SECP256K1_BENCH_ITERS=100000 bench_ecmult pippenger_wnaf` (or `20000` iters for 32-bit). Don't forget the `pippenger_wnaf` argument to make sure you don't benchmark Strauss' algorithm instead, at least below the threshold where we switch to Pippenger automatically. I did this on a 12th Gen Intel(R) Core(TM) i7-1260P, pinned to a P-core, and with TurboBoost disabled. See the attached spreadsheet: for details. [benchmark-gcc.ods](https://github.com/user-attachments/files/23396505/benchmark-gcc.ods)\r\n\r\nIf you want to benchmark this, I think it makes sense to get four runs per setup: one for the baseline (https://github.com/bitcoin-core/secp256k1/commit/d0f3123c0c2d4643a0191af6e7c5e18032666605, just disabling low point counts in `bench_ecmult` for quicker benchmarking) and the three \"step\" commits as mentioned above. You could just extend the spreadsheet with your results.\r\n\r\nAlso, if you have any ideas on how to improve this further, I'd be happy to hear them. I tried various micro-optimizations, but none of them turned out to be significant on my machine. In fact, most of them made the code slower in practice. In theory, this PR should make it possible to increase the window size a bit, but playing around with the window size didn't make a difference either in practice. \r\n\r\nedit: Don't care about CI. It fails on some platforms because I forgot to mark functions `static`. This should compile locally without issues. ",
+    "labels": [
+      {
+        "id": 4975389731,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
+        "name": "performance",
+        "description": "",
+        "color": "DE3CCC",
+        "default": false
+      }
+    ],
+    "created_at": "2025-11-06T15:47:38Z",
+    "updated_at": "2025-11-06T15:52:47Z",
+    "mergeable": true,
+    "mergeable_state": "unstable",
+    "merged": false,
+    "merge_commit_sha": "b8410685aa5bc1dc07dd27d9ffc06a7394e390d2",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "rebaseable": true,
+    "head": {
+      "label": "real-or-random:202511-geh-pippenger",
+      "ref": "202511-geh-pippenger",
+      "sha": "9cfba13041266a28043ee83b0a8e26d9f7cfa1ad",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 93596674,
+        "node_id": "MDEwOlJlcG9zaXRvcnk5MzU5NjY3NA==",
+        "name": "secp256k1",
+        "full_name": "real-or-random/secp256k1",
+        "owner": {
+          "login": "real-or-random",
+          "id": 1071625,
+          "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+          "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/real-or-random",
+          "html_url": "https://github.com/real-or-random",
+          "followers_url": "https://api.github.com/users/real-or-random/followers",
+          "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+          "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+          "repos_url": "https://api.github.com/users/real-or-random/repos",
+          "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+          "type": "User",
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/real-or-random/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/real-or-random/secp256k1",
+        "archive_url": "https://api.github.com/repos/real-or-random/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/real-or-random/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/real-or-random/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/real-or-random/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/real-or-random/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/real-or-random/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/real-or-random/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/real-or-random/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/real-or-random/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/real-or-random/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/real-or-random/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/real-or-random/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/real-or-random/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/real-or-random/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/real-or-random/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/real-or-random/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/real-or-random/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/real-or-random/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/real-or-random/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/real-or-random/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/real-or-random/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/real-or-random/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/real-or-random/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/real-or-random/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/real-or-random/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/real-or-random/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/real-or-random/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/real-or-random/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/real-or-random/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:real-or-random/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/real-or-random/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/real-or-random/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/real-or-random/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/real-or-random/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/real-or-random/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/real-or-random/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/real-or-random/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/real-or-random/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/real-or-random/secp256k1/hooks",
+        "svn_url": "https://github.com/real-or-random/secp256k1",
+        "language": "C",
+        "forks_count": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "size": 16579,
+        "default_branch": "master",
+        "open_issues_count": 1,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-11-06T15:41:28Z",
+        "created_at": "2017-06-07T05:39:43Z",
+        "updated_at": "2025-03-10T14:14:26Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "7a2fff85e8729719f384a094123b965f45ae94db",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 1100,
+        "stargazers_count": 2337,
+        "watchers_count": 2337,
+        "size": 12733,
+        "default_branch": "master",
+        "open_issues_count": 158,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": true,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2025-10-17T07:09:52Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2025-11-06T01:50:50Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1767"
+      }
+    },
+    "author_association": "CONTRIBUTOR",
+    "draft": true,
+    "additions": 499,
+    "deletions": 19,
+    "changed_files": 7,
+    "commits": 9,
+    "review_comments": 0,
+    "comments": 0
+  },
+  "events": [
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQwZjMxMjNjMGMyZDQ2NDNhMDE5MWFmNmU3YzVlMTgwMzI2NjY2MDU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d0f3123c0c2d4643a0191af6e7c5e18032666605",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d0f3123c0c2d4643a0191af6e7c5e18032666605",
+      "tree": {
+        "sha": "982de328e622c4722ddff8c64044d13c6397f467",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/982de328e622c4722ddff8c64044d13c6397f467"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7a2fff85e8729719f384a094123b965f45ae94db",
+          "sha": "7a2fff85e8729719f384a094123b965f45ae94db",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7a2fff85e8729719f384a094123b965f45ae94db"
+        }
+      ],
+      "message": "HACK: Don't run unrelevant stuff in bench_ecmult",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:52:55Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-27T20:59:46Z"
+      },
+      "sha": "d0f3123c0c2d4643a0191af6e7c5e18032666605"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDhlY2E3ZjY1MjQwMGMwZWUxYjBhOTU0NzY3MDkxMDVhOGRiNWNiZjU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8eca7f652400c0ee1b0a95476709105a8db5cbf5",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8eca7f652400c0ee1b0a95476709105a8db5cbf5",
+      "tree": {
+        "sha": "d609a3def4953bdba15818ed426649210e468932",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d609a3def4953bdba15818ed426649210e468932"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d0f3123c0c2d4643a0191af6e7c5e18032666605",
+          "sha": "d0f3123c0c2d4643a0191af6e7c5e18032666605",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d0f3123c0c2d4643a0191af6e7c5e18032666605"
+        }
+      ],
+      "message": "group/geh: Add homogeneous group representation\n\nEven though the formulas are complete, infinity is special cased for\nperformance.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:52:55Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-27T13:38:59Z"
+      },
+      "sha": "8eca7f652400c0ee1b0a95476709105a8db5cbf5"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc1ZDBlNjY5NTg0NjViODEwMDgyM2M0NGNjYWNlMjFjYWI1ODBmZjg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/75d0e66958465b8100823c44ccace21cab580ff8",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/75d0e66958465b8100823c44ccace21cab580ff8",
+      "tree": {
+        "sha": "e419a2ea9b539827b4c09650764ed96c54a601d3",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e419a2ea9b539827b4c09650764ed96c54a601d3"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8eca7f652400c0ee1b0a95476709105a8db5cbf5",
+          "sha": "8eca7f652400c0ee1b0a95476709105a8db5cbf5",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8eca7f652400c0ee1b0a95476709105a8db5cbf5"
+        }
+      ],
+      "message": "geh: Add testutil functions (TODO: unused)",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:52:55Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:25:42Z"
+      },
+      "sha": "75d0e66958465b8100823c44ccace21cab580ff8"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGE5OTVjMGU2M2ZjYTBiMWUzY2NmNjJjZjc0NDc1NjkyNmRjYmNmMTU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a995c0e63fca0b1e3ccf62cf744756926dcbcf15",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a995c0e63fca0b1e3ccf62cf744756926dcbcf15",
+      "tree": {
+        "sha": "052cbb806586e5b5071e38b9391d61098dc7a286",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/052cbb806586e5b5071e38b9391d61098dc7a286"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/75d0e66958465b8100823c44ccace21cab580ff8",
+          "sha": "75d0e66958465b8100823c44ccace21cab580ff8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/75d0e66958465b8100823c44ccace21cab580ff8"
+        }
+      ],
+      "message": "geh: Add some tests",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:52:55Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T08:32:57Z"
+      },
+      "sha": "a995c0e63fca0b1e3ccf62cf744756926dcbcf15"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBmMjEwMTk4ZjRkNmM5NTYzMDdlNTVmYjAzMWIzZjg3YzMwNWE2NWU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0f210198f4d6c956307e55fb031b3f87c305a65e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f210198f4d6c956307e55fb031b3f87c305a65e",
+      "tree": {
+        "sha": "bdaf5d8d0091728885e0ca45e57aad9473e1f236",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/bdaf5d8d0091728885e0ca45e57aad9473e1f236"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a995c0e63fca0b1e3ccf62cf744756926dcbcf15",
+          "sha": "a995c0e63fca0b1e3ccf62cf744756926dcbcf15",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a995c0e63fca0b1e3ccf62cf744756926dcbcf15"
+        }
+      ],
+      "message": "geh: Add internal benchmarks (TODO naming)",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T10:57:39Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-27T14:55:17Z"
+      },
+      "sha": "0f210198f4d6c956307e55fb031b3f87c305a65e"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDJjY2M1ZTAyNzc2YjhhZTM0ODNhZGYzNDJiNzQxYWJkOTllNDg5MzE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2ccc5e02776b8ae3483adf342b741abd99e48931",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2ccc5e02776b8ae3483adf342b741abd99e48931",
+      "tree": {
+        "sha": "8bb8794d22dc01ad41f9f9b45e858f93ea0dc7dd",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8bb8794d22dc01ad41f9f9b45e858f93ea0dc7dd"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0f210198f4d6c956307e55fb031b3f87c305a65e",
+          "sha": "0f210198f4d6c956307e55fb031b3f87c305a65e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f210198f4d6c956307e55fb031b3f87c305a65e"
+        }
+      ],
+      "message": "pippenger/geh step 1: Use geh in accumulation loop",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T10:57:39Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-27T13:39:07Z"
+      },
+      "sha": "2ccc5e02776b8ae3483adf342b741abd99e48931"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDg2N2ZlMzRkZDRmNjQyZmI5NjZkNWVlNjUyZTBkNzdhOWFkYWZhNDE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/867fe34dd4f642fb966d5ee652e0d77a9adafa41",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/867fe34dd4f642fb966d5ee652e0d77a9adafa41",
+      "tree": {
+        "sha": "278ae2b1fc396c37cfcfd4841bc345ff5fa30439",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/278ae2b1fc396c37cfcfd4841bc345ff5fa30439"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2ccc5e02776b8ae3483adf342b741abd99e48931",
+          "sha": "2ccc5e02776b8ae3483adf342b741abd99e48931",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2ccc5e02776b8ae3483adf342b741abd99e48931"
+        }
+      ],
+      "message": "pippenger/geh step 2: Use geh in entire accumulation",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T10:57:39Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-27T18:49:06Z"
+      },
+      "sha": "867fe34dd4f642fb966d5ee652e0d77a9adafa41"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBmYzczZjM5N2JjNmExMGI3MjNiODlkNmYyYTBkYzUyZTc2MjE3NDg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0fc73f397bc6a10b723b89d6f2a0dc52e7621748",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0fc73f397bc6a10b723b89d6f2a0dc52e7621748",
+      "tree": {
+        "sha": "c96b8de6b95c5dd4ff6822745747e517d39934e0",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c96b8de6b95c5dd4ff6822745747e517d39934e0"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/867fe34dd4f642fb966d5ee652e0d77a9adafa41",
+          "sha": "867fe34dd4f642fb966d5ee652e0d77a9adafa41",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/867fe34dd4f642fb966d5ee652e0d77a9adafa41"
+        }
+      ],
+      "message": "pippenger/geh step 3: Go back to gej for doublings",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-04T10:57:39Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-10-28T12:23:39Z"
+      },
+      "sha": "0fc73f397bc6a10b723b89d6f2a0dc52e7621748"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDljZmJhMTMwNDEyNjZhMjgwNDNlZTgzYjBhOGUyNmQ5ZjdjZmExYWQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9cfba13041266a28043ee83b0a8e26d9f7cfa1ad",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9cfba13041266a28043ee83b0a8e26d9f7cfa1ad",
+      "tree": {
+        "sha": "9e167783c64614489b3a6d215ca64393c6a93c02",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9e167783c64614489b3a6d215ca64393c6a93c02"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0fc73f397bc6a10b723b89d6f2a0dc52e7621748",
+          "sha": "0fc73f397bc6a10b723b89d6f2a0dc52e7621748",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0fc73f397bc6a10b723b89d6f2a0dc52e7621748"
+        }
+      ],
+      "message": "fixups",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-06T15:41:21Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2025-11-06T15:41:21Z"
+      },
+      "sha": "9cfba13041266a28043ee83b0a8e26d9f7cfa1ad"
+    },
+    {
+      "event": "labeled",
+      "id": 20763735079,
+      "node_id": "LE_lADOAP4Jqs7WXOALzwAAAATVnXQn",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/20763735079",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-11-06T15:47:39Z",
+      "label": {
+        "name": "performance",
+        "color": "DE3CCC"
+      }
+    }
+  ],
+  "comments": []
+}
