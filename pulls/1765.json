@@ -41,13 +41,23 @@
       "patch_url": null
     },
     "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 5 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_recipient_create_label`: given a scan secret key and label integer, calculate the corresponding label_tweak and label public key\r\n* `secp256k1_recipient_create_labeled_spend_pubkey`: given a spend public key and a label public key, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\n* Recent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.\r\n* Not providing `prevouts_summary` (de)serialization functionality yet in the API poses the risk that users try to do it anyway by treating the opaque object as \"serialized\". How to cope with that? Is adding a \"don't do this\" comment in API header sufficient?",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975353639,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+        "name": "feature",
+        "description": "",
+        "color": "731E95",
+        "default": false
+      }
+    ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-11-04T12:25:41Z",
+    "updated_at": "2025-11-06T16:09:29Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "e69024c24fdbaf18e3348c76ca77fb8fae43b9d3",
+    "merge_commit_sha": "65f0ce41ea8ca37f0ac2f62ecaef4bafe093c1cb",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -287,12 +297,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1099,
-        "stargazers_count": 2336,
-        "watchers_count": 2336,
+        "forks_count": 1100,
+        "stargazers_count": 2337,
+        "watchers_count": 2337,
         "size": 12733,
         "default_branch": "master",
-        "open_issues_count": 157,
+        "open_issues_count": 156,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -303,9 +313,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-10-17T07:09:52Z",
+        "pushed_at": "2025-11-06T16:55:37Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-11-03T20:44:54Z",
+        "updated_at": "2025-11-06T16:55:41Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -778,6 +788,41 @@
         "date": "2024-07-12T12:57:54Z"
       },
       "sha": "c11d30c25f75776920797b017a568ea0cfc28882"
+    },
+    {
+      "event": "labeled",
+      "id": 20764376070,
+      "node_id": "LE_lADOAP4Jqs7VEWwNzwAAAATVpzwG",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/20764376070",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-11-06T16:09:29Z",
+      "label": {
+        "name": "feature",
+        "color": "731E95"
+      }
     }
   ],
   "comments": []
