@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 5 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_recipient_create_label`: given a scan secret key and label integer, calculate the corresponding label_tweak and label public key\r\n* `secp256k1_recipient_create_labeled_spend_pubkey`: given a spend public key and a label public key, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\n* Recent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.\r\n* Not providing `prevouts_summary` (de)serialization functionality yet in the API poses the risk that users try to do it anyway by treating the opaque object as \"serialized\". How to cope with that? Is adding a \"don't do this\" comment in API header sufficient?",
+    "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 5 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_recipient_create_label`: given a scan secret key and label integer, calculate the corresponding label_tweak and label public key\r\n* `secp256k1_recipient_create_labeled_spend_pubkey`: given a spend public key and a label public key, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\nFor a higher-level overview on what these functions exactly do, it's suggested to look at a corresponding [Python implementation](https://github.com/theStack/secp256k1lab/blob/add_bip352_module_review_helper/src/secp256k1lab/bip352.py) that was created based on the secp256k1lab project (it passes the test vectors, so this \"executable pseudo-code\" should be correct).\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\n* Recent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.\r\n* Not providing `prevouts_summary` (de)serialization functionality yet in the API poses the risk that users try to do it anyway by treating the opaque object as \"serialized\". How to cope with that? Is adding a \"don't do this\" comment in API header sufficient?",
     "labels": [
       {
         "id": 4975353639,
@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-11-06T21:27:50Z",
+    "updated_at": "2025-11-07T01:58:22Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 23,
     "commits": 11,
     "review_comments": 0,
-    "comments": 1
+    "comments": 2
   },
   "events": [
     {
@@ -880,6 +880,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3499455867",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
+    },
+    {
+      "event": "commented",
+      "id": 3500144381,
+      "node_id": "IC_kwDOAP4Jqs7Qn_b9",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3500144381",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-11-07T01:58:22Z",
+      "updated_at": "2025-11-07T01:58:22Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Small supplementary update: I've created a corresponding Python implementation of the provided API functions based on secp256k1lab (https://github.com/theStack/secp256k1lab/blob/add_bip352_module_review_helper/src/secp256k1lab/bip352.py) (also linked in the PR description). The hope is that this makes reviewing this PR a bit easier by having a less noisy, \"executable pseudo-code\"-like description on what happens under the hood. The code passes the BIP352 test vectors and hence should be correct.\r\n\r\n> Added the optimized version on top of this PR: [w0xlt@8d16914](https://github.com/w0xlt/secp256k1/commit/8d16914cad57ba07da09d104f0c605ae6284462f)\r\n> \r\n> For more context: [#1698 (comment)](https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3462891318)\r\n\r\nThanks for rebasing on top of this PR, much appreciated! I will take a closer look within the next days.\r\n",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3500144381",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
