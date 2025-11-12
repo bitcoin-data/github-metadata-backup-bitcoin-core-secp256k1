@@ -62,11 +62,11 @@
       }
     ],
     "created_at": "2025-10-17T14:28:28Z",
-    "updated_at": "2025-11-07T10:17:40Z",
+    "updated_at": "2025-11-12T14:56:39Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "99c93f0c9a16998befaaa41b9ccd2fec3d859c82",
+    "merge_commit_sha": "1e3bfec61f6d4419c2c002aa6cd44cfc5be4fdd2",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -306,12 +306,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1100,
-        "stargazers_count": 2337,
-        "watchers_count": 2337,
-        "size": 12748,
+        "forks_count": 1101,
+        "stargazers_count": 2343,
+        "watchers_count": 2343,
+        "size": 14069,
         "default_branch": "master",
-        "open_issues_count": 159,
+        "open_issues_count": 157,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -322,9 +322,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-11-06T16:55:37Z",
+        "pushed_at": "2025-11-11T10:16:58Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-11-06T16:55:41Z",
+        "updated_at": "2025-11-12T12:08:22Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -354,7 +354,7 @@
     "deletions": 4,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 3,
+    "review_comments": 4,
     "comments": 4
   },
   "events": [
@@ -1107,6 +1107,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2502381495"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 228,
+      "original_line": 228,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2518643963",
+      "pull_request_review_id": 3453887701,
+      "id": 2518643963,
+      "node_id": "PRRC_kwDOAP4Jqs6WH3T7",
+      "diff_hunk": "@@ -220,9 +220,24 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a,\n     return last_set_bit + 1;\n }\n \n+/* Same as secp256k1_ecmult_wnaf, but stores to int8_t array. Requires w <= 8. */\n+static int secp256k1_ecmult_wnaf_small(int8_t *wnaf, int len, const secp256k1_scalar *a, int w) {\n+    int wnaf_tmp[256];\n+    int ret, i;\n+\n+    VERIFY_CHECK(2 <= w && w <= 8);",
+      "path": "src/ecmult_impl.h",
+      "position": 9,
+      "original_position": 9,
+      "commit_id": "26166c4f5fd5688c31e488449ee2325eb8f2fb36",
+      "original_commit_id": "26166c4f5fd5688c31e488449ee2325eb8f2fb36",
+      "in_reply_to_id": 2502381495,
+      "user": {
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I don't see why `w = 8` wouldn't work. The documentation of wnaf says\r\n```\r\n *  - each wnaf[i] is either 0, or an odd integer between -(1<<(w-1) - 1) and (1<<(w-1) - 1)\r\n```\r\nSo for `w = 8`, wnaf[i] is in `[-127, 127]` which fits in an `int8_t`. ",
+      "created_at": "2025-11-12T14:56:39Z",
+      "updated_at": "2025-11-12T14:56:40Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1761#discussion_r2518643963",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2518643963"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1761"
