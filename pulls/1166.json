@@ -36,15 +36,18 @@
       "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/real-or-random/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
-    "body": "On top of #1126.\r\n\r\nThis prototypes one possible approach to solve #1095 by implementing the approach described in https://github.com/bitcoin-core/secp256k1/issues/1095#issuecomment-1303537678:\r\n\r\n> [...] reorganize headers such that most functions are in some header like `secp256k1_main.h`, which is then included from `secp256k1.h` (with only malloc functions like `secp256k1_context_create()`) and `secp256k1_preallocated.h` (with their prealloc counterparts). Then the user could easily choose between the two interfaces by including either `secp256k1.h` or `secp256k1_preallocated.h`\r\n\r\nNow that I've been working on this, I don't like this approach for various reasons:\r\n - The functions and docs are really cluttered in multiple files.\r\n     - In particular, the context stuff: Creation, cloning, destruction is in `secp256k1_(preallocated).h`, whereas the static context, flags, randomization, and callbacks are in `secp256k1_main.h`. This is hard to grasp for new users and also add confusion for users who don't need the preallocated interface.\r\n     - In general, there's no canonical \"primary\" header anymore. Where do you put general docs that belong to the library as a whole (e.g., the comment that explains the rules of thumb for the order of arguments in API calls)? \r\n  - We need to remove the `#include \"secp256k1.h\"` from the module headers such as `secp256k1_ecdh.h` (because otherwise you couldn't include the module header if you want only the prealloc interface). This means that\r\n     -  this PR is not perfectly backwards-compatible: it will break compilation for  users who include currently only `secp256k1_ecdh.h` and not `secp256k1_ecdh.h`.\r\n     - the dependencies between the header files are not naturally expressed by the #includes\r\n     - you need to include the header files in the right order, i.e., first `secp256k1_(preallocated).h` and then `secp256k1_ecdh.h` because the latter needs the declaration of `secp256k1_context` (and we couldn't even repeat that declaration somewhere to workaround this problem: Compiler tells us `warning: redefinition of typedef 'secp256k1_context' is a C11 feature`...)\r\n\r\nSo I think this PR would indeed make it possible to use only the prealloc interface, but it makes the life harder for everyone, in particular for normal users who have malloc and don't even care about prealloc. I think we should switch to an approach with a macro like `PREALLOC_INTERFACE_ONLY` that you need to set before including `secp256k1.h` (and when compiling the library itself) and that will remove all the functions that depend on malloc.  But please tell me if you disagree. \r\n",
+    "body": "On top of #1126.\r\n\r\nThis prototypes one possible approach to solve #1095 by implementing the approach described in https://github.com/bitcoin-core/secp256k1/issues/1095#issuecomment-1303537678:\r\n\r\n> [...] reorganize headers such that most functions are in some header like `secp256k1_main.h`, which is then included from `secp256k1.h` (with only malloc functions like `secp256k1_context_create()`) and `secp256k1_preallocated.h` (with their prealloc counterparts). Then the user could easily choose between the two interfaces by including either `secp256k1.h` or `secp256k1_preallocated.h`\r\n\r\nNow that I've been working on this, I don't like this approach for various reasons:\r\n - The functions and docs are really cluttered in multiple files.\r\n     - In particular, the context stuff: Creation, cloning, destruction is in `secp256k1_(preallocated).h`, whereas the static context, flags, randomization, and callbacks are in `secp256k1_main.h`. This is hard to grasp for new users and also add confusion for users who don't need the preallocated interface.\r\n     - In general, there's no canonical \"primary\" header anymore. Where do you put general docs that belong to the library as a whole (e.g., the comment that explains the rules of thumb for the order of arguments in API calls)? \r\n  - We need to remove the `#include \"secp256k1.h\"` from the module headers such as `secp256k1_ecdh.h` (because otherwise you couldn't include the module header if you want only the prealloc interface). This means that\r\n     -  this PR is not perfectly backwards-compatible: it will break compilation for  users who include currently only `secp256k1_ecdh.h` and not `secp256k1.h`.\r\n     - the dependencies between the header files are not naturally expressed by the #includes\r\n     - you need to include the header files in the right order, i.e., first `secp256k1_(preallocated).h` and then `secp256k1_ecdh.h` because the latter needs the declaration of `secp256k1_context` (and we couldn't even repeat that declaration somewhere to workaround this problem: Compiler tells us `warning: redefinition of typedef 'secp256k1_context' is a C11 feature`...)\r\n\r\nSo I think this PR would indeed make it possible to use only the prealloc interface, but it makes the life harder for everyone, in particular for normal users who have malloc and don't even care about prealloc. I think we should switch to an approach with a macro like `PREALLOC_INTERFACE_ONLY` that you need to set before including `secp256k1.h` (and when compiling the library itself) and that will remove all the functions that depend on malloc.  But please tell me if you disagree. \r\n",
     "labels": [],
     "created_at": "2022-12-01T19:02:28Z",
-    "updated_at": "2023-09-20T16:10:10Z",
+    "updated_at": "2025-11-18T09:07:01Z",
     "closed_at": "2023-09-20T16:09:09Z",
     "mergeable": false,
     "mergeable_state": "dirty",
+    "merged": false,
     "merge_commit_sha": "ca975e31b5ec43f59b8fcab9b89ee39f1053062c",
     "assignees": [],
     "requested_reviewers": [],
@@ -72,7 +75,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 93596674,
@@ -97,7 +102,9 @@
           "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/real-or-random/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/real-or-random/secp256k1",
@@ -148,7 +155,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 14192,
+        "size": 16687,
         "default_branch": "master",
         "open_issues_count": 1,
         "is_template": false,
@@ -161,9 +168,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-09-05T12:53:32Z",
+        "pushed_at": "2025-11-07T09:36:33Z",
         "created_at": "2017-06-07T05:39:43Z",
-        "updated_at": "2023-03-08T17:07:47Z",
+        "updated_at": "2025-03-10T14:14:26Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -203,7 +211,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -228,7 +238,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -276,12 +288,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1007,
-        "stargazers_count": 1839,
-        "watchers_count": 1839,
-        "size": 10633,
+        "forks_count": 1100,
+        "stargazers_count": 2346,
+        "watchers_count": 2346,
+        "size": 13981,
         "default_branch": "master",
-        "open_issues_count": 137,
+        "open_issues_count": 158,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +304,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-09-20T15:12:46Z",
+        "pushed_at": "2025-11-18T08:36:51Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-09-17T22:52:15Z",
+        "updated_at": "2025-11-18T08:36:56Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -910,132 +923,13 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "4340f89a7ddfbedc8037a09107a72d7b65a8efa0",
+      "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/4340f89a7ddfbedc8037a09107a72d7b65a8efa0",
       "created_at": "2022-12-02T10:59:07Z"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2023-03-26T09:44:02Z",
-      "updated_at": "2023-03-26T09:44:02Z",
-      "source": {
-        "issue": {
-          "id": 1183565953,
-          "node_id": "I_kwDOAP4Jqs5Gi8iB",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1095",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1095/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1095/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1095/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1095",
-          "number": 1095,
-          "state": "open",
-          "state_reason": null,
-          "title": "Don't #include standard library headers unconditionally",
-          "body": "We currently include <stdio.h> for `fprintf` used in the a) tests and b) in the default error callbacks ... We should not include the header unconditionally. \r\n \r\nhttps://github.com/bitcoin-core/secp256k1/blob/912b7ccc4473b5c969b01d027b8d5dc515435eb5/src/util.h#L16\r\n\r\nThis is a problem downstream in https://github.com/rust-bitcoin/rust-secp256k1/pull/421 .\r\n\r\nedit:\r\nWe have a similar issue for `stdlib.h` but it is a little bit more complicated. It has `abort`, and `malloc`/`free`. The story for `abort` is the same as for `fprintf`. Strictly speaking one doesn't need `malloc`/`free` if one uses the prealloc interface but we don't provide consistent include headers for this. (You'll need the normal plus the prealloc header...) So people need to patch our sources which is anything but elegant. https://github.com/rust-bitcoin/rust-secp256k1/blob/master/secp256k1-sys/depend/secp256k1.c.patch\r\n\r\n",
-          "user": {
-            "login": "real-or-random",
-            "id": 1071625,
-            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/real-or-random",
-            "html_url": "https://github.com/real-or-random",
-            "followers_url": "https://api.github.com/users/real-or-random/followers",
-            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-            "repos_url": "https://api.github.com/users/real-or-random/repos",
-            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [
-            {
-              "id": 5492448291,
-              "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
-              "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/refactor/smell",
-              "name": "refactor/smell",
-              "description": "",
-              "color": "FBCA04",
-              "default": false
-            }
-          ],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "milestone": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/5",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/milestone/5",
-            "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/5/labels",
-            "id": 9880835,
-            "node_id": "MI_kwDOAP4Jqs4AlsUD",
-            "number": 5,
-            "state": "open",
-            "title": "0.4.1 or 0.5.0",
-            "description": "",
-            "creator": {
-              "login": "jonasnick",
-              "id": 2582071,
-              "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-              "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-              "gravatar_id": "",
-              "url": "https://api.github.com/users/jonasnick",
-              "html_url": "https://github.com/jonasnick",
-              "followers_url": "https://api.github.com/users/jonasnick/followers",
-              "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-              "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-              "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-              "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-              "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-              "repos_url": "https://api.github.com/users/jonasnick/repos",
-              "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-              "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-              "type": "User",
-              "site_admin": false
-            },
-            "open_issues": 3,
-            "closed_issues": 0,
-            "created_at": "2023-09-04T14:30:28Z",
-            "updated_at": "2023-09-20T16:09:18Z",
-            "due_on": "2023-12-01T08:00:00Z"
-          },
-          "locked": false,
-          "comments": 6,
-          "created_at": "2022-03-28T14:55:42Z",
-          "updated_at": "2023-09-20T12:59:54Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "milestoned",
@@ -1060,7 +954,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1092,7 +988,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1121,7 +1019,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1153,7 +1053,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1179,7 +1081,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1166#issuecomment-1728045734",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1166"
@@ -1207,7 +1111,9 @@
         "events_url": "https://api.github.com/users/romanz/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/romanz/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
