@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-11-17T18:57:21Z",
-    "updated_at": "2025-11-18T19:17:15Z",
+    "updated_at": "2025-11-18T22:10:18Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 75,
     "changed_files": 7,
     "commits": 4,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 0
   },
   "events": [
@@ -691,7 +691,101 @@
       "submitted_at": "2025-11-18T19:17:15Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1774"
+    },
+    {
+      "event": "reviewed",
+      "id": 3479818047,
+      "node_id": "PRR_kwDOAP4Jqs7Pac8_",
+      "url": null,
+      "actor": null,
+      "commit_id": "f5e815f4306ea1763d27d83646b4f06e3d2f0b94",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-11-18T22:10:18Z",
+      "author_association": "MEMBER",
+      "body": "Looks good, just left a minor nit. No need to tackle it.",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1774#pullrequestreview-3479818047",
+      "submitted_at": "2025-11-18T22:10:18Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1774"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2539737079",
+      "pull_request_review_id": 3479818047,
+      "id": 2539737079,
+      "node_id": "PRRC_kwDOAP4Jqs6XYU_3",
+      "diff_hunk": "@@ -280,10 +280,14 @@ int secp256k1_ec_pubkey_serialize(const secp256k1_context* ctx, unsigned char *o\n     ARG_CHECK(pubkey != NULL);\n     ARG_CHECK((flags & SECP256K1_FLAGS_TYPE_MASK) == SECP256K1_FLAGS_TYPE_COMPRESSION);\n     if (secp256k1_pubkey_load(ctx, &Q, pubkey)) {\n-        ret = secp256k1_eckey_pubkey_serialize(&Q, output, &len, !!(flags & SECP256K1_FLAGS_BIT_COMPRESSION));\n-        if (ret) {\n-            *outputlen = len;\n+        if (flags & SECP256K1_FLAGS_BIT_COMPRESSION) {\n+            secp256k1_eckey_pubkey_serialize33(&Q, output);\n+            *outputlen = 33;\n+        } else {\n+            secp256k1_eckey_pubkey_serialize65(&Q, output);\n+            *outputlen = 65;\n         }\n+        ret = 1;\n     }\n     return ret;",
+      "path": "src/secp256k1.c",
+      "position": 16,
+      "original_position": 16,
+      "commit_id": "f5e815f4306ea1763d27d83646b4f06e3d2f0b94",
+      "original_commit_id": "adb76f82eadadf4f9df4cd958f7c266b551b50c6",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "In adb76f82eadadf4f9df4cd958f7c266b551b50c6:\r\n\r\nnit: could remove `ret` if you write it as:\r\n```c\r\nif (!secp256k1_pubkey_load(ctx, &Q, pubkey)) return 0;\r\n\r\nif (flags & SECP256K1_FLAGS_BIT_COMPRESSION) {\r\n    secp256k1_eckey_pubkey_serialize33(&Q, output);\r\n    *outputlen = 33;\r\n} else {\r\n    secp256k1_eckey_pubkey_serialize65(&Q, output);\r\n    *outputlen = 65;\r\n}\r\nreturn 1;\r\n```",
+      "created_at": "2025-11-18T21:52:11Z",
+      "updated_at": "2025-11-18T22:10:18Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1774#discussion_r2539737079",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2539737079"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1774"
+        }
+      },
+      "start_line": 282,
+      "original_start_line": 282,
+      "start_side": "RIGHT",
+      "line": 292,
+      "original_line": 292,
+      "side": "RIGHT"
+    }
+  ]
 }
