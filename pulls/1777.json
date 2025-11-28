@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1777/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/16cd02b83cc829c09b668ed6358286a52c7922b5",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7fefa9c851d36214a4a03aeae36b59aee9d08263",
     "number": 1777,
     "state": "open",
     "locked": false,
@@ -43,11 +43,11 @@
     "body": "Tackling the long-standing request #702.\r\n\r\nRight now we ship our own SHA256 implementation, a standard baseline version that does not take advantage of any hardware-optimized instruction, and it cannot be accessed by the embedding application - it is for internal usage only.\r\n\r\nThis means embedding applications often have to implement or include a different version for their use cases, wasting space on constrained environments, and in performance-sensitive setups it forces them to use a slower path than what the platform provides. Many projects already rely on tuned SHA-NI / ARMv8 / or other hardware-optimized code, so always using the baseline implementation we ship within the library is not ideal.\r\n\r\nThis PR gives our users a way to bring their own SHA256 compression, either at build time or at runtime, while keeping the default behavior untouched for everyone else.\r\n\r\n#### Compile-time: External SHA256 module\r\n\r\nThe built-in transform is moved out of `hash_impl.h`into a small sha module with its own public header (`secp256k1_sha.h`). The idea is to stop treating the compression step as a private, hidden detail, and instead make it part of a public interface that users can swap out if they want to.\r\nBoth build systems gain optional support for pointing libsecp to an external implementation:\r\n* Autotools: `--with-external-sha256=<path>`\r\n* CMake: `SECP256K1_EXTERNAL_SHA256_PATH`\r\n\r\nNote:\r\nDue to our current limitation of disabling C++ builds (see [this](https://github.com/bitcoin-core/secp256k1/blob/b6c2a3cd7752085d46434921238401766c964c01/src/secp256k1.c#L15)), the provided external implementation must be written in C.\r\n\r\n#### Runtime: Context callback\r\n\r\nFor setups where we detect the available SHA256 compression function at runtime and cannot re-compile the sources, or when the function is not written in bare C89, there’s a new API:\r\n```C89\r\nsecp256k1_context_set_sha256_transform_callback(ctx, fn_transform)\r\n```\r\n\r\nThis lets users plug-in their hardware-optimized implementation into the `secp256k1_context`, which is required in all functions that compute sha256 hashes.\r\nDuring the initial setting, as a sanity check, this mechanism verifies that the provided compression function is equivalent to the default one.\r\n\r\nAs a quick example, the changes required to implement this in Bitcoin-Core at runtime are very straightforward: https://github.com/furszy/bitcoin-core/commit/f68bef06d95a589859f98fc898dd80ab2e35eb39\r\n\r\nImplementing this at compile time in Bitcoin Core is possible, but it would require changing the C version we build against (which is not recommended). For example, we cannot link the SHA-NI implementation we have in Core (even if rewritten in C89) because it depends on the `arm_neon` library, which requires C99.",
     "labels": [],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2025-11-27T23:19:34Z",
+    "updated_at": "2025-11-28T15:54:47Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "3db833e0191b62dc8e432bb837a2c5b67a4c3d7f",
+    "merge_commit_sha": "8cc499c1c2e5d4d39cd06966bcec7b2d96061d0f",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "furszy:2025_pluggable_sha256_transform",
       "ref": "2025_pluggable_sha256_transform",
-      "sha": "16cd02b83cc829c09b668ed6358286a52c7922b5",
+      "sha": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
       "user": {
         "login": "furszy",
         "id": 5377650,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-11-27T22:53:42Z",
+        "pushed_at": "2025-11-28T15:54:46Z",
         "created_at": "2025-09-03T15:10:42Z",
         "updated_at": "2025-10-17T13:32:08Z",
         "allow_forking": true,
@@ -331,7 +331,7 @@
     },
     "author_association": "MEMBER",
     "draft": false,
-    "additions": 598,
+    "additions": 606,
     "deletions": 313,
     "changed_files": 33,
     "commits": 2,
@@ -342,22 +342,22 @@
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDk3ZmI0MWViNTU1M2FkYzFlNWIyZGE5NDI2YmEwMTJlZDFmMTc4MWU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/97fb41eb5553adc1e5b2da9426ba012ed1f1781e",
+      "node_id": "C_kwDOAP4JqtoAKDc1Y2NmOTlhMDc1MWQ4NGUwOThhYWI3YzRhMTMxNzBlODI1YzA0OTY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/75ccf99a0751d84e098aab7c4a13170e825c0496",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/97fb41eb5553adc1e5b2da9426ba012ed1f1781e",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/75ccf99a0751d84e098aab7c4a13170e825c0496",
       "tree": {
-        "sha": "57f438990eaa93cf555730d520bae8c52980853a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/57f438990eaa93cf555730d520bae8c52980853a"
+        "sha": "4369e67768fe8938529f460e6a17d0d32b11dc4c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4369e67768fe8938529f460e6a17d0d32b11dc4c"
       },
       "verification": {
         "verified": true,
         "reason": "valid",
-        "payload": "tree 57f438990eaa93cf555730d520bae8c52980853a\nparent e7f7083b530a55c83ce9089a7244d2d9d67ac8b2\nauthor furszy <matiasfurszyfer@protonmail.com> 1764017863 -0500\ncommitter furszy <matiasfurszyfer@protonmail.com> 1764284014 -0500\n\nAdd ability to provide SHA256 compression at compile-time\n\nIntroduces a new `sha` module that exposes the SHA256\ncompression function and allows users to provide their\nown implementation.\n\nThis moves the built-in transform logic out of `hash_impl.h`\ninto a dedicated module (`src/modules/sha`), adds the\ncorresponding public header (`secp256k1_sha.h`), and wires\nthe module through Autotools and CMake via:\n`--with-external-sha256` / SECP256K1_EXTERNAL_SHA256_PATH.\n\nExisting behavior is unchanged; the library compiles and\nlinks the default transform function by default.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEA++0fqwRHQpmlZfQXdI8zGhqpiMFAmko1m8ACgkQXdI8zGhq\npiMY0A//a3qyRof1W4reRtNOorMw+ndAIt/IM6muepOWt3RonokuhHz2mb2C5DCl\nNwDKxHR1poX/uA/0ZZtlmbDursV1ZALkSBXzM5fP/ULRSsgH1r/Zx9XjW32Eb+kb\nVjEvtPHmS1f0HyzBWC4NIWW0IMBKXMjOMrYSt4C9lhujl8vhTjZpvi4zqF/aAGXb\nDsemz1uMT5/mo8fMgawLRphYtqOLlRE9mPl6AZta1jLl9/i6Veqfjsn0BvK+aghE\nopk9V0IwAnKE652oExETmzFP6hYJ3232Mb8ShVodWFr4ABW7D7L2XCtuW6jYWkO+\nICBx/P59tZb7qT+EfVs9VD9ssZgisEzhNx6QMCC6Ql9Z6NSDLeYDz7FG36B1+GnE\n7cwNl7P56dor4z10hJPgS6S/bg/TJDIsZIPxHpotSF5qo6UZ0dAhnv6OkK8hIYwW\ntvgxQp6pe2bQD1TJgxs8uqEvPPl8uFFei8aOHqklMkJke76GGMSMHRMQJ8or9fAF\nZxYQ4OJz1jyp58yQmIlRlUZxMdCFj/RB1GRp/2wYiuc3ctX4QBX9Nfe6lPTbmQzY\nxR4/ZoHub1wPB52AEyvt2HFpz/94PZ/MgfNov/cJ18707qoiS8tuHobE/juN80ud\nXSpBP788tJPlmK14u8QVIH+7TVPnpcOcsooWoDwxbVnx/9G+UbY=\n=B19G\n-----END PGP SIGNATURE-----"
+        "payload": "tree 4369e67768fe8938529f460e6a17d0d32b11dc4c\nparent e7f7083b530a55c83ce9089a7244d2d9d67ac8b2\nauthor furszy <matiasfurszyfer@protonmail.com> 1764017863 -0500\ncommitter furszy <matiasfurszyfer@protonmail.com> 1764345232 -0500\n\nAdd ability to provide SHA256 compression at compile-time\n\nIntroduces a new `sha` module that exposes the SHA256\ncompression function and allows users to provide their\nown implementation.\n\nThis moves the built-in transform logic out of `hash_impl.h`\ninto a dedicated module (`src/modules/sha`), adds the\ncorresponding public header (`secp256k1_sha.h`), and wires\nthe module through Autotools and CMake via:\n`--with-external-sha256` / SECP256K1_EXTERNAL_SHA256_PATH.\n\nExisting behavior is unchanged; the library compiles and\nlinks the default transform function by default.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEA++0fqwRHQpmlZfQXdI8zGhqpiMFAmkpxZAACgkQXdI8zGhq\npiOA1hAAnY7CCJxHW2PZINWr5e1oaqsFxWq/pslfVNhVuiNQ8OpSCmUmUT4gEjRp\nJDD9PGj2N0Kaa7xxVvU+a5zYf9FY9ly6u637nnjAhXxDNTLEFyDn4PZZo46coccQ\nefMqaley9OrkhTe7PMUYxrk5XOPbrGGpX6ZXoHElH2wnUoFI0c/U09kL5/r/FDnM\n9TPqXnx5mTsAFq2zq4FCVf66vtosxoiw1sMb4XJ3aVVg++b/1zj4gGUOZOsWQBID\ngMEKTuedDbcZURLzwz7jonMDIw6M/gayJEIzn7bpi5dv38FPZwKyT4iB25kRasZ6\nRtpS2m5kR+h3mljd7ITH0fFhhtu4pEXct5AGHIrK+kc7qy7kjURv7ymBFSnDvJ/5\nAwoQcWEQmfx4O3CIsTQZ3KckcTjNtpiDaSn3ozp1HceCbdO6LZoBeYh+sxSltcf9\n2qc3/A3fNF38TVoKBX5t1q/gQN0iV+3sBK4kOZ/c75vD+xWX/qEdmgt7Jqu05aKS\nCCGdXi0vf+YC5K+M6EdXwEB2KpCkoC45aTIIs9Y/mOApBGrllsoSENkbR1VVAvH/\nCq2nhPMKL4bWURfEMacKazDUeQoMls3QeT3B7OxsM9znYAXzCbKHF45uv9bybts8\nvXPHXu7NFkEFN8NHdWnAGrY/sqhIIDhQXJyc6U4buSb6GhAo9cs=\n=upsF\n-----END PGP SIGNATURE-----"
       },
       "parents": [
         {
@@ -370,54 +370,85 @@
       "committer": {
         "name": "furszy",
         "email": "matiasfurszyfer@protonmail.com",
-        "date": "2025-11-27T22:53:34Z"
+        "date": "2025-11-28T15:53:52Z"
       },
       "author": {
         "name": "furszy",
         "email": "matiasfurszyfer@protonmail.com",
         "date": "2025-11-24T20:57:43Z"
       },
-      "sha": "97fb41eb5553adc1e5b2da9426ba012ed1f1781e"
+      "sha": "75ccf99a0751d84e098aab7c4a13170e825c0496"
     },
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDE2Y2QwMmI4M2NjODI5YzA5YjY2OGVkNjM1ODI4NmE1MmM3OTIyYjU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/16cd02b83cc829c09b668ed6358286a52c7922b5",
+      "node_id": "C_kwDOAP4JqtoAKDdmZWZhOWM4NTFkMzYyMTRhNGEwM2FlYWUzNmI1OWFlZTlkMDgyNjM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fefa9c851d36214a4a03aeae36b59aee9d08263",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/16cd02b83cc829c09b668ed6358286a52c7922b5",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fefa9c851d36214a4a03aeae36b59aee9d08263",
       "tree": {
-        "sha": "0b8affb06950ace6b45702be7154772f1adb7bf5",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/0b8affb06950ace6b45702be7154772f1adb7bf5"
+        "sha": "1081e61b0df63c4158b797c7e23cc0d6469a9e5b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/1081e61b0df63c4158b797c7e23cc0d6469a9e5b"
       },
       "verification": {
         "verified": true,
         "reason": "valid",
-        "payload": "tree 0b8affb06950ace6b45702be7154772f1adb7bf5\nparent 97fb41eb5553adc1e5b2da9426ba012ed1f1781e\nauthor furszy <matiasfurszyfer@protonmail.com> 1764012838 -0500\ncommitter furszy <matiasfurszyfer@protonmail.com> 1764284015 -0500\n\nAdd API to override SHA256 transform at runtime\n\nThis introduces `secp256k1_context_set_sha256_transform_callback()`,\nwhich allows users to provide their own SHA256 block-compression\nfunction at runtime.\n\nThis is useful in setups where the optimal implementation is detected\ndynamically, where rebuilding the library is not possible, or when\nthe compression function is not written in bare C89.\n\nThe callback is installed on the `secp256k1_context` and is then used\nby all operations that compute SHA256 hashes. As part of the setup,\nthe library performs sanity checks to ensure that the supplied\nfunction is equivalent to the default transform.\n\nPassing NULL to the callback setter restores the built-in\nimplementation.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEA++0fqwRHQpmlZfQXdI8zGhqpiMFAmko1m8ACgkQXdI8zGhq\npiO4kQ/+MPR83akppWoIy42f1sPp96HCznNPCznHBJZ3hHcCtQxmqWBU0p0ecSCw\nO9hHwPaJZ9oZqTm8xjiX718cx2ahrCUTTKtZlQvpz6KQAgG71NcYN4J3DXrird4v\nsLhuT+z2vPE/2c90rjUj1UirhsJ2nfwa6OjjTFv1hqsqpnVaBxBMhJiyIUeRVKKd\nQTDKrTcKGgLYdJe2b20OnBYXSdkeXcrbgIC/HP1IsID+RbN8eVwTV2ZrPLSh7m9m\nbvG5AxwVqOvFtYcEI41bCYnQy6PUAjof86XhsDCkj1n5EPlzl1cRFo9VbqIa5AgX\nBtWMW2+oQ0/3sHBHPMpy/+3VwiNNfl2CgPJEc024ouSFD54erUED/XwZnGWfWdlM\nL5hzCTL3/pbiH3QsYgthLRv7MjlI86exirztsflyY4VlwOMWCLcprah5cekO8H6v\nlx6kAhBzl8x0pvAEl3gFBnoHzfHMl9EqHxbKzDNzbD/Bynfa0vlPegWXvqxlug+d\nR905q9Sb0WjZwnlFqtqvecM6NRF2w/TVHhhjI5jCBnArPCY6eeWIcVfP+o4jCJli\n+aouNR4ngNK9D8r+RP20lfE7C7pCCRS1CiKbvbC3KVt4y5RTP1oGix4Oruqe4KaK\nzx+Xr7yKfXrf9OcaUsZdY65A967tqdJfIEnyMXVm93MW7ZwKVyc=\n=TOcA\n-----END PGP SIGNATURE-----"
+        "payload": "tree 1081e61b0df63c4158b797c7e23cc0d6469a9e5b\nparent 75ccf99a0751d84e098aab7c4a13170e825c0496\nauthor furszy <matiasfurszyfer@protonmail.com> 1764012838 -0500\ncommitter furszy <matiasfurszyfer@protonmail.com> 1764345232 -0500\n\nAdd API to override SHA256 transform at runtime\n\nThis introduces `secp256k1_context_set_sha256_transform_callback()`,\nwhich allows users to provide their own SHA256 block-compression\nfunction at runtime.\n\nThis is useful in setups where the optimal implementation is detected\ndynamically, where rebuilding the library is not possible, or when\nthe compression function is not written in bare C89.\n\nThe callback is installed on the `secp256k1_context` and is then used\nby all operations that compute SHA256 hashes. As part of the setup,\nthe library performs sanity checks to ensure that the supplied\nfunction is equivalent to the default transform.\n\nPassing NULL to the callback setter restores the built-in\nimplementation.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEA++0fqwRHQpmlZfQXdI8zGhqpiMFAmkpxZAACgkQXdI8zGhq\npiM6jxAAlsxSoFa3ReINj/mntg6edQ+FiqeNgrTJwlPYnTLwso2AkO/61Ym4t0m/\nrUeHSFoiQiffJ/wzZXBGk5LOQ1LhvaSQp9pM5tHEutTptXaArWMCuV3CPYhpWWAK\nKJwqaCVIclpkzWe1YuQEfeZj8uHyjLiQQDQrAI8qinm6/5+RIs7cwD8D8YTZdYqS\nqjCEt/hKxZsiQk7/2h5motVV55le/BtgkocYFm6GSPO1vOKN0wD0SbkDH/TlZhzb\nJwI/zX8WTGhI1jVW+Fi2/jm4hOWkAb9wCWEqnxY+mdSF5n7VZo17MV3w98kHxhPK\nW6Y504GcGFesgUXuUI858fUr5rcQgWmzVjpHBrjH20wbMsKKCZuM0yeolamIQF6X\nPBUDRC/W8z6DIXxVwsQQkx9sN9HZwYy3VrsCEbIhnfErtpkFrqFlUECnrjcn6+St\nO3d+veAGga088Nr16raExpOw7iS5P4gXXWlg6/bU1+I8V1IVwVEzDMF/L75Jq7sC\nJ3SDfzXURQvjYyI5O86Vz7JYvSOeCEY3QDjimyDMdkeUBxHAtLNtV5lHZaDByHMr\nQ9a8lRxI/Yo54fqWfaKHmjRBVk8Zh8ndh4tt7ISMKMvVg/VBhPIFtBAcylDAj8zd\nh7J3M7c3Zsowma2idos/dumLHFlWqGY290IUjMw7BTFqz6s7X9A=\n=JVHp\n-----END PGP SIGNATURE-----"
       },
       "parents": [
         {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/97fb41eb5553adc1e5b2da9426ba012ed1f1781e",
-          "sha": "97fb41eb5553adc1e5b2da9426ba012ed1f1781e",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/97fb41eb5553adc1e5b2da9426ba012ed1f1781e"
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/75ccf99a0751d84e098aab7c4a13170e825c0496",
+          "sha": "75ccf99a0751d84e098aab7c4a13170e825c0496",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/75ccf99a0751d84e098aab7c4a13170e825c0496"
         }
       ],
       "message": "Add API to override SHA256 transform at runtime\n\nThis introduces `secp256k1_context_set_sha256_transform_callback()`,\nwhich allows users to provide their own SHA256 block-compression\nfunction at runtime.\n\nThis is useful in setups where the optimal implementation is detected\ndynamically, where rebuilding the library is not possible, or when\nthe compression function is not written in bare C89.\n\nThe callback is installed on the `secp256k1_context` and is then used\nby all operations that compute SHA256 hashes. As part of the setup,\nthe library performs sanity checks to ensure that the supplied\nfunction is equivalent to the default transform.\n\nPassing NULL to the callback setter restores the built-in\nimplementation.",
       "committer": {
         "name": "furszy",
         "email": "matiasfurszyfer@protonmail.com",
-        "date": "2025-11-27T22:53:35Z"
+        "date": "2025-11-28T15:53:52Z"
       },
       "author": {
         "name": "furszy",
         "email": "matiasfurszyfer@protonmail.com",
         "date": "2025-11-24T19:33:58Z"
       },
-      "sha": "16cd02b83cc829c09b668ed6358286a52c7922b5"
+      "sha": "7fefa9c851d36214a4a03aeae36b59aee9d08263"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 21245030602,
+      "node_id": "HRFPE_lADOAP4Jqs7a8JDRzwAAAATyTXDK",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21245030602",
+      "actor": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "commit_url": "https://api.github.com/repos/furszy/secp256k1/commits/7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "created_at": "2025-11-28T15:54:47Z"
     }
   ],
   "comments": []
