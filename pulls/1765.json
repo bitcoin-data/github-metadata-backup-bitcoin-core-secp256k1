@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-02T17:03:54Z",
+    "updated_at": "2025-12-02T22:04:41Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 23,
     "commits": 11,
     "review_comments": 1,
-    "comments": 22
+    "comments": 23
   },
   "events": [
     {
@@ -3890,6 +3890,64 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-12-02T17:03:56Z"
+    },
+    {
+      "event": "commented",
+      "id": 3604154693,
+      "node_id": "IC_kwDOAP4Jqs7W0wlF",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3604154693",
+      "actor": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-02T22:04:41Z",
+      "updated_at": "2025-12-02T22:04:41Z",
+      "author_association": "NONE",
+      "body": "> Not really sure how to deal with that and what to prioritize. (Provide two scanning implementations and let the user pick? 😬 )\r\n\r\nSome (very) rough ideas on the trade-off…\r\n\r\nIf we can define a general rule that determines when it’s better to use the label-set scan versus the BIP-based scan, we could do something like:\r\n\r\n```c\r\n/* Choose algorithm based on this transaction's characteristics */\r\nif (n_labels > 2 * n_tx_outputs) {\r\n    /* BIP approach: iterate over outputs, add, and look up in label callback */\r\n    use_bip_scan();\r\n} else {\r\n    /* Label-set approach: iterate over labels, add, and search in output index */\r\n    use_labelset_scan();\r\n}\r\n```\r\n\r\nThe heuristic above is just a rough estimate. The BIP version performs roughly ~2N point additions, where *N* is the number of outputs, while the label-set version performs about ~L additions, where *L* is the number of configured labels.\r\n\r\nBut to build a reliable decision rule, we’d need more benchmark data across a range of (N, L) combinations.",
+      "user": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3604154693",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
   "comments": [
