@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-06T03:39:29Z",
+    "updated_at": "2025-12-06T16:42:39Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 10,
+    "review_comments": 11,
     "comments": 26
   },
   "events": [
@@ -4826,6 +4826,60 @@
       "start_side": "RIGHT",
       "line": 273,
       "original_line": 270,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2595102919",
+      "pull_request_review_id": 3547827183,
+      "id": 2595102919,
+      "node_id": "PRRC_kwDOAP4Jqs6ariDH",
+      "diff_hunk": "@@ -25,6 +26,106 @@ extern \"C\" {\n  *  any further elliptic-curve operations from the wallet.\n  */\n \n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public must\n+ *  be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 48,
+      "original_position": 31,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": 2593365138,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Admittedly with your proposed change an user would have the necessary information to do the mapping themselves, but it seems odd to e.g. pass in two recipients (r1, r2), get the result back in a different order (r2, r1) and then having to find out again at what position each recipient has moved, in order to get the corresponding generated output each.\r\n\r\nIf you have all the information, does the initial ordering matter?\r\n\r\n================================================================================\r\n\r\nAlso, I woke up creative.. another idea to remove the `index` field could be to store the initial ordering inside the `generated_outputs` array. We basically have a `n_recipients` size array with elements that are essentially buffers :).\r\nSo.. we could do something like:\r\n\r\n```diff\r\ndiff --git a/src/modules/silentpayments/main_impl.h b/src/modules/silentpayments/main_impl.h\r\n--- a/src/modules/silentpayments/main_impl.h\t(revision ffffd7ff98368b29759cd3d9933896fb9fa69b1f)\r\n+++ b/src/modules/silentpayments/main_impl.h\t(date 1765038514517)\r\n@@ -185,13 +185,14 @@\r\n     const unsigned char * const *plain_seckeys,\r\n     size_t n_plain_seckeys\r\n ) {\r\n-    size_t i, k;\r\n+    size_t i, k, j;\r\n     secp256k1_scalar seckey_sum_scalar, addend, input_hash_scalar;\r\n     secp256k1_ge prevouts_pubkey_sum_ge;\r\n     secp256k1_gej prevouts_pubkey_sum_gej;\r\n     unsigned char shared_secret[33];\r\n     secp256k1_pubkey current_scan_pubkey;\r\n     int ret, sum_is_zero;\r\n+    secp256k1_xonly_pubkey *output = NULL;\r\n \r\n     /* Sanity check inputs. */\r\n     VERIFY_CHECK(ctx != NULL);\r\n@@ -211,9 +212,6 @@\r\n     } else {\r\n         ARG_CHECK(n_plain_seckeys == 0);\r\n     }\r\n-    for (i = 0; i < n_recipients; i++) {\r\n-        ARG_CHECK(recipients[i]->index == i);\r\n-    }\r\n \r\n     seckey_sum_scalar = secp256k1_scalar_zero;\r\n     for (i = 0; i < n_plain_seckeys; i++) {\r\n@@ -268,6 +266,13 @@\r\n         return 0;\r\n     }\r\n     secp256k1_scalar_mul(&seckey_sum_scalar, &seckey_sum_scalar, &input_hash_scalar);\r\n+\r\n+    /* Store recipients ordering prior to sorting the array */\r\n+    for (i = 0; i < n_recipients; i++) {\r\n+        /* Use the output struct as a buffer for storing the pointer of the recipient */\r\n+        memcpy(generated_outputs[i]->data, &recipients[i], sizeof(secp256k1_silentpayments_recipient*));\r\n+    }\r\n+\r\n     /* _recipient_sort sorts the array of recipients in place by their scan public keys (lexicographically).\r\n      * This ensures that all recipients with the same scan public key are grouped together, as specified in BIP0352.\r\n      *\r\n@@ -294,7 +299,17 @@\r\n             secp256k1_silentpayments_create_shared_secret(ctx, shared_secret, &pk, &seckey_sum_scalar);\r\n             k = 0;\r\n         }\r\n-        if (!secp256k1_silentpayments_create_output_pubkey(ctx, generated_outputs[recipients[i]->index], shared_secret, &recipients[i]->spend_pubkey, k)) {\r\n+\r\n+        /* Look-up for the correct output to initialize based on the initial ordering */\r\n+        for (j = 0; j < n_recipients; j++) {\r\n+            secp256k1_silentpayments_recipient *ptr = NULL;\r\n+            memcpy(&ptr, generated_outputs[j]->data, sizeof(secp256k1_silentpayments_recipient*));\r\n+            if (ptr == recipients[i]) {\r\n+                output = generated_outputs[j];\r\n+            }\r\n+        }\r\n+\r\n+        if (!secp256k1_silentpayments_create_output_pubkey(ctx, output, shared_secret, &recipients[i]->spend_pubkey, k)) {\r\n             secp256k1_scalar_clear(&seckey_sum_scalar);\r\n             secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\r\n             return 0;\r\n\r\n===================================================================\r\ndiff --git a/include/secp256k1_silentpayments.h b/include/secp256k1_silentpayments.h\r\n--- a/include/secp256k1_silentpayments.h\t(revision ffffd7ff98368b29759cd3d9933896fb9fa69b1f)\r\n+++ b/include/secp256k1_silentpayments.h\t(date 1765038119367)\r\n@@ -45,7 +45,6 @@\r\n typedef struct secp256k1_silentpayments_recipient {\r\n     secp256k1_pubkey scan_pubkey;\r\n     secp256k1_pubkey spend_pubkey;\r\n-    size_t index;\r\n } secp256k1_silentpayments_recipient;\r\n \r\n /** Create Silent Payments outputs for recipient(s).\r\n\r\n\r\n===================================================================\r\ndiff --git a/src/modules/silentpayments/tests_impl.h b/src/modules/silentpayments/tests_impl.h\r\n--- a/src/modules/silentpayments/tests_impl.h\t(revision ffffd7ff98368b29759cd3d9933896fb9fa69b1f)\r\n+++ b/src/modules/silentpayments/tests_impl.h\t(date 1765038518151)\r\n@@ -98,7 +98,6 @@\r\n     for (i = 0; i < 3; i++) {\r\n         CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].scan_pubkey, (*sp_addresses[i])[0], 33));\r\n         CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].spend_pubkey,(*sp_addresses[i])[1], 33));\r\n-        recipients[i].index = i;\r\n         recipient_ptrs[i] = &recipients[i];\r\n         generated_output_ptrs[i] = &generated_outputs[i];\r\n     }\r\n@@ -174,7 +173,6 @@\r\n         CHECK(secp256k1_ec_pubkey_parse(CTX, &r[i].scan_pubkey, (*sp_addresses[i])[0], 33));\r\n         CHECK(secp256k1_ec_pubkey_parse(CTX, &r[i].spend_pubkey,(*sp_addresses[i])[1], 33));\r\n         /* Set the index value incorrectly */\r\n-        r[i].index = 0;\r\n         rp[i] = &r[i];\r\n         op[i] = &o[i];\r\n     }\r\n@@ -183,13 +181,6 @@\r\n     t[0] = &taproot;\r\n     p[0] = ALICE_SECKEY;\r\n \r\n-    /* Fails if the index is set incorrectly */\r\n-    CHECK_ILLEGAL(CTX, secp256k1_silentpayments_sender_create_outputs(CTX, op, rp, 2, SMALLEST_OUTPOINT, NULL, 0, p, 1));\r\n-\r\n-    /* Set the index correctly for the next tests */\r\n-    for (i = 0; i < 2; i++) {\r\n-        r[i].index = i;\r\n-    }\r\n     CHECK(secp256k1_silentpayments_sender_create_outputs(CTX, op, rp, 2, SMALLEST_OUTPOINT, NULL, 0, p, 1));\r\n \r\n     /* Check that null arguments are handled */\r\n@@ -257,7 +248,6 @@\r\n         CHECK(secp256k1_ec_pubkey_negate(CTX, &neg_spend_pubkey));\r\n         r[0].spend_pubkey = neg_spend_pubkey;\r\n         for (i = 0; i < 2; i++) {\r\n-            r[i].index = i;\r\n             rp[i] = &r[i];\r\n         }\r\n         CHECK(secp256k1_silentpayments_sender_create_outputs(CTX, op, rp, 2, SMALLEST_OUTPOINT, NULL, 0, p, 1) == 0);\r\n```\r\n\r\n----------------------\r\n\r\nThat being said, this improves the public API at the cost of making the internal code a bit more complex. So I’m not strong on it — I just had some fun thinking about different ways to remove the ugly `index` field. So no need to take it.",
+      "created_at": "2025-12-06T16:36:29Z",
+      "updated_at": "2025-12-06T16:42:39Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2595102919",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2595102919"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 45,
+      "original_start_line": 45,
+      "start_side": "RIGHT",
+      "line": 48,
+      "original_line": 48,
       "side": "RIGHT"
     }
   ]

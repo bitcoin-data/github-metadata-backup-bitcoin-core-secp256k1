@@ -43,7 +43,7 @@
     "body": "We currently have five public API functions that take an \"array of pointers\" as input parameter:\r\n* `secp256k1_ec_pubkey_combine` (`ins`: array of pointers to public keys to add)\r\n* `secp256k1_ec_pubkey_sort` (`pubkeys`: array of pointers to public keys to sort)\r\n* `secp256k1_musig_pubkey_agg` (`pubkeys`: array of pointers to public keys to aggregate)\r\n* `secp256k1_musig_nonce_agg` (`pubnonces`: array of pointers to public nonces to aggregate)\r\n* `secp256k1_musig_partial_sig_agg` (`partial_sigs`: array of pointers to partial signatures to aggregate)\r\n\r\nOut of these, only `_ec_pubkey_combine` verifies that the individual pointer elements in the array are non-NULL each:\r\nhttps://github.com/bitcoin-core/secp256k1/blob/e7f7083b530a55c83ce9089a7244d2d9d67ac8b2/src/secp256k1.c#L774-L775\r\n\r\nThis PR adds corresponding `ARG_CHECKS` for the other API functions as well, in order to avoid running into potential UB due to NULL pointer dereference. It seems to me that the tiny run-time overhead is worth it doing this for consistency and to help users in case the arrays are set up incorrectly (I'm thinking e.g. of language binding writers where getting this right might be a bit more involved).\r\n\r\nLooking into this was motivated by a [review of furszy](https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2590644412) (thanks!), who pointed out that the non-NULL checks are missing in at least one API function in the silentpayments module PR as well. Happy to add some `CHECK_ILLEGAL` tests if there is conceptual support for this PR.",
     "labels": [],
     "created_at": "2025-12-06T01:05:38Z",
-    "updated_at": "2025-12-06T01:35:27Z",
+    "updated_at": "2025-12-06T16:50:25Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -336,7 +336,7 @@
     "changed_files": 3,
     "commits": 1,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -378,6 +378,64 @@
         "date": "2025-12-06T00:04:18Z"
       },
       "sha": "5a08c1bcdc958f264450e771d7923922526f74f1"
+    },
+    {
+      "event": "commented",
+      "id": 3620689043,
+      "node_id": "IC_kwDOAP4Jqs7Xz1ST",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3620689043",
+      "actor": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-06T16:50:25Z",
+      "updated_at": "2025-12-06T16:50:25Z",
+      "author_association": "MEMBER",
+      "body": "Cool, the review paid off so fast :). Would be good to add test coverage for it.",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1779#issuecomment-3620689043",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1779"
     }
   ],
   "comments": []
