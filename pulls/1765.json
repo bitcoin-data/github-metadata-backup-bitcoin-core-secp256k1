@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-06T16:42:39Z",
+    "updated_at": "2025-12-07T01:49:55Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -298,8 +298,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1103,
-        "stargazers_count": 2351,
-        "watchers_count": 2351,
+        "stargazers_count": 2352,
+        "watchers_count": 2352,
         "size": 13986,
         "default_branch": "master",
         "open_issues_count": 160,
@@ -315,7 +315,7 @@
         "visibility": "public",
         "pushed_at": "2025-11-27T16:27:17Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-12-04T07:12:01Z",
+        "updated_at": "2025-12-06T18:03:11Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 11,
+    "review_comments": 12,
     "comments": 26
   },
   "events": [
@@ -4285,6 +4285,44 @@
       "submitted_at": "2025-12-05T19:33:42Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+    },
+    {
+      "event": "reviewed",
+      "id": 3548663278,
+      "node_id": "PRR_kwDOAP4Jqs7ThE3u",
+      "url": null,
+      "actor": null,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-12-07T01:49:55Z",
+      "author_association": "MEMBER",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#pullrequestreview-3548663278",
+      "submitted_at": "2025-12-07T01:49:55Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
     }
   ],
   "comments": [
@@ -4880,6 +4918,60 @@
       "start_side": "RIGHT",
       "line": 48,
       "original_line": 48,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2595796731",
+      "pull_request_review_id": 3548663278,
+      "id": 2595796731,
+      "node_id": "PRRC_kwDOAP4Jqs6auLb7",
+      "diff_hunk": "@@ -0,0 +1,273 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_SILENTPAYMENTS_TESTS_H\n+#define SECP256K1_MODULE_SILENTPAYMENTS_TESTS_H\n+\n+#include \"../../../include/secp256k1_silentpayments.h\"\n+#include \"../../unit_test.h\"\n+\n+/** Constants\n+ *\n+ *   Malformed Seckey: a seckey that is all zeros\n+ *          Addresses: scan and spend public keys for Bob and Carol\n+ *            Outputs: generated outputs from Alice's secret key and Bob/Carol's\n+ *                     scan public keys\n+ *  Smallest Outpoint: smallest outpoint lexicographically from the transaction\n+ *             Seckey: secret key for Alice\n+ *\n+ *  The values themselves are not important.\n+ */\n+static unsigned char MALFORMED_SECKEY[32] = { 0x00 };\n+static unsigned char BOB_ADDRESS[2][33] = {\n+    {\n+        0x02, 0x15, 0x40, 0xae, 0xa8, 0x97, 0x54, 0x7a,\n+        0xd4, 0x39, 0xb4, 0xe0, 0xf6, 0x09, 0xe5, 0xf0,\n+        0xfa, 0x63, 0xde, 0x89, 0xab, 0x11, 0xed, 0xe3,\n+        0x1e, 0x8c, 0xde, 0x4b, 0xe2, 0x19, 0x42, 0x5f,\n+        0x23\n+    },\n+    {\n+        0x02, 0x3e, 0xff, 0xf8, 0x18, 0x51, 0x65, 0xea,\n+        0x63, 0xa9, 0x92, 0xb3, 0x9f, 0x31, 0xd8, 0xfd,\n+        0x8e, 0x0e, 0x64, 0xae, 0xf9, 0xd3, 0x88, 0x07,\n+        0x34, 0x97, 0x37, 0x14, 0xa5, 0x3d, 0x83, 0x11,\n+        0x8d\n+    }\n+};\n+static unsigned char CAROL_ADDRESS[2][33] = {\n+    {\n+        0x03, 0xbb, 0xc6, 0x3f, 0x12, 0x74, 0x5d, 0x3b,\n+        0x9e, 0x9d, 0x24, 0xc6, 0xcd, 0x7a, 0x1e, 0xfe,\n+        0xba, 0xd0, 0xa7, 0xf4, 0x69, 0x23, 0x2f, 0xbe,\n+        0xcf, 0x31, 0xfb, 0xa7, 0xb4, 0xf7, 0xdd, 0xed,\n+        0xa8\n+    },\n+    {\n+        0x03, 0x81, 0xeb, 0x9a, 0x9a, 0x9e, 0xc7, 0x39,\n+        0xd5, 0x27, 0xc1, 0x63, 0x1b, 0x31, 0xb4, 0x21,\n+        0x56, 0x6f, 0x5c, 0x2a, 0x47, 0xb4, 0xab, 0x5b,\n+        0x1f, 0x6a, 0x68, 0x6d, 0xfb, 0x68, 0xea, 0xb7,\n+        0x16\n+    }\n+};\n+static unsigned char BOB_OUTPUT[32] = {\n+    0x46, 0x0d, 0x68, 0x08, 0x65, 0x64, 0x45, 0xee,\n+    0x4d, 0x4e, 0xc0, 0x8e, 0xba, 0x8a, 0x66, 0xea,\n+    0x66, 0x8e, 0x4e, 0x12, 0x98, 0x9a, 0x0e, 0x60,\n+    0x4b, 0x5c, 0x36, 0x0e, 0x43, 0xf5, 0x5a, 0xfa\n+};\n+static unsigned char CAROL_OUTPUT_ONE[32] = {\n+    0xb7, 0xf3, 0xc6, 0x79, 0x30, 0x4a, 0xef, 0x8c,\n+    0xc0, 0xc7, 0x61, 0xf1, 0x00, 0x99, 0xdd, 0x7b,\n+    0x20, 0x65, 0x20, 0xd7, 0x11, 0x6f, 0xb7, 0x91,\n+    0xee, 0x74, 0x54, 0xa2, 0xfc, 0x22, 0x79, 0xf4\n+};\n+static unsigned char CAROL_OUTPUT_TWO[32] = {\n+    0x4b, 0x81, 0x34, 0x5d, 0x53, 0x89, 0xba, 0xa3,\n+    0xd8, 0x93, 0xe2, 0xfb, 0xe7, 0x08, 0xdd, 0x6d,\n+    0x82, 0xdc, 0xd8, 0x49, 0xab, 0x03, 0xc1, 0xdb,\n+    0x68, 0xbe, 0xc7, 0xe9, 0x2a, 0x45, 0xfa, 0xc5\n+};\n+static unsigned char SMALLEST_OUTPOINT[36] = {\n+    0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+    0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+    0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+    0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00\n+};\n+static unsigned char ALICE_SECKEY[32] = {\n+    0xea, 0xdc, 0x78, 0x16, 0x5f, 0xf1, 0xf8, 0xea,\n+    0x94, 0xad, 0x7c, 0xfd, 0xc5, 0x49, 0x90, 0x73,\n+    0x8a, 0x4c, 0x53, 0xf6, 0xe0, 0x50, 0x7b, 0x42,\n+    0x15, 0x42, 0x01, 0xb8, 0xe5, 0xdf, 0xf3, 0xb1\n+};\n+\n+static void test_recipient_sort_helper(unsigned char (*sp_addresses[3])[2][33], unsigned char (*sp_outputs[3])[32]) {\n+    unsigned char const *seckey_ptrs[1];\n+    secp256k1_silentpayments_recipient recipients[3];\n+    const secp256k1_silentpayments_recipient *recipient_ptrs[3];\n+    secp256k1_xonly_pubkey generated_outputs[3];\n+    secp256k1_xonly_pubkey *generated_output_ptrs[3];\n+    unsigned char xonly_ser[32];\n+    size_t i;\n+    int ret;\n+\n+    seckey_ptrs[0] = ALICE_SECKEY;\n+    for (i = 0; i < 3; i++) {\n+        CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].scan_pubkey, (*sp_addresses[i])[0], 33));\n+        CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[i].spend_pubkey,(*sp_addresses[i])[1], 33));\n+        recipients[i].index = i;\n+        recipient_ptrs[i] = &recipients[i];\n+        generated_output_ptrs[i] = &generated_outputs[i];\n+    }\n+    ret = secp256k1_silentpayments_sender_create_outputs(CTX,\n+        generated_output_ptrs,\n+        recipient_ptrs, 3,\n+        SMALLEST_OUTPOINT,\n+        NULL, 0,\n+        seckey_ptrs, 1\n+    );\n+    CHECK(ret == 1);\n+    for (i = 0; i < 3; i++) {\n+        secp256k1_xonly_pubkey_serialize(CTX, xonly_ser, &generated_outputs[i]);\n+        CHECK(secp256k1_memcmp_var(xonly_ser, (*sp_outputs[i]), 32) == 0);\n+    }\n+}\n+\n+static void test_recipient_sort(void) {\n+    unsigned char (*sp_addresses[3])[2][33];\n+    unsigned char (*sp_outputs[3])[32];\n+\n+    /* With a fixed set of addresses and a fixed set of inputs,\n+     * test that we always get the same outputs, regardless of the ordering\n+     * of the recipients\n+     */\n+    sp_addresses[0] = &CAROL_ADDRESS;\n+    sp_addresses[1] = &BOB_ADDRESS;\n+    sp_addresses[2] = &CAROL_ADDRESS;\n+\n+    sp_outputs[0] = &CAROL_OUTPUT_ONE;\n+    sp_outputs[1] = &BOB_OUTPUT;\n+    sp_outputs[2] = &CAROL_OUTPUT_TWO;\n+    test_recipient_sort_helper(sp_addresses, sp_outputs);\n+\n+    sp_addresses[0] = &CAROL_ADDRESS;\n+    sp_addresses[1] = &CAROL_ADDRESS;\n+    sp_addresses[2] = &BOB_ADDRESS;\n+\n+    sp_outputs[0] = &CAROL_OUTPUT_ONE;\n+    sp_outputs[1] = &CAROL_OUTPUT_TWO;\n+    sp_outputs[2] = &BOB_OUTPUT;\n+    test_recipient_sort_helper(sp_addresses, sp_outputs);\n+\n+    sp_addresses[0] = &BOB_ADDRESS;\n+    sp_addresses[1] = &CAROL_ADDRESS;\n+    sp_addresses[2] = &CAROL_ADDRESS;\n+\n+    /* Note: in this case, the second output for Carol comes before the first.\n+     * This is because heapsort is an unstable sorting algorithm, i.e., the ordering\n+     * of identical elements is not guaranteed to be preserved\n+     */\n+    sp_outputs[0] = &BOB_OUTPUT;\n+    sp_outputs[1] = &CAROL_OUTPUT_TWO;\n+    sp_outputs[2] = &CAROL_OUTPUT_ONE;\n+    test_recipient_sort_helper(sp_addresses, sp_outputs);\n+}",
+      "path": "src/modules/silentpayments/tests_impl.h",
+      "position": 197,
+      "original_position": 157,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "In ffffd7ff98368b29759cd3d9933896fb9fa69b1f:\r\n\r\nThe heapsort comment was a bit misleading to me. It only matters because we’re hardcoding the expected outputs, but it's not something we actually care about.\r\n\r\nThe goal of the test is to make sure that shuffling the inputted recipients never changes which outputs are produced, and that each expected output appears exactly once.\r\n\r\nSo we don’t need to rely on any final ordering assumptions at all; they depend on heapsort’s stability, which (per comment) is unstable. Take the following if you like it:\r\n\r\n```C\r\nstatic void shuffle(unsigned char (*sp_addresses[])[2][33], size_t size) {\r\n    size_t i, j;\r\n    for (i = size - 1; i > 0; i--) {\r\n        unsigned char (*tmp)[2][33] = sp_addresses[i];\r\n        j = testrand_bits(8) % (i + 1);\r\n        sp_addresses[i] = sp_addresses[j];\r\n        sp_addresses[j] = tmp;\r\n    }\r\n}\r\n\r\n/* Ensure that shuffling the inputted recipients never changes\r\n * which outputs are produced, and that each expected output\r\n * appears exactly once */\r\nstatic void test_recipient_sort(void) {\r\n    int i, j;\r\n    unsigned char (*sp_addresses[3])[2][33] = { &CAROL_ADDRESS, &CAROL_ADDRESS, &BOB_ADDRESS };\r\n    unsigned char const *seckey_ptrs[1] = { ALICE_SECKEY };\r\n    unsigned char xonly_ser[32];\r\n\r\n    secp256k1_silentpayments_recipient recipients[3];\r\n    const secp256k1_silentpayments_recipient *recipient_ptrs[3];\r\n    secp256k1_xonly_pubkey generated_outputs[3];\r\n    secp256k1_xonly_pubkey *generated_output_ptrs[3];\r\n\r\n    for (i = 0; i < 6; i++) {\r\n        int pos_bob = -1, pos_carol_one = -1, pos_carol_two = -1;\r\n\r\n        /* Randomize array */\r\n        shuffle(sp_addresses, 3);\r\n\r\n        for (j = 0; j < 3; j++) {\r\n            CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[j].scan_pubkey, (*sp_addresses[j])[0], 33));\r\n            CHECK(secp256k1_ec_pubkey_parse(CTX, &recipients[j].spend_pubkey,(*sp_addresses[j])[1], 33));\r\n            recipients[j].index = j;\r\n            recipient_ptrs[j] = &recipients[j];\r\n            generated_output_ptrs[j] = &generated_outputs[j];\r\n        }\r\n        CHECK(secp256k1_silentpayments_sender_create_outputs(CTX, generated_output_ptrs,\r\n                                                             recipient_ptrs, 3,\r\n                                                             SMALLEST_OUTPOINT,\r\n                                                             NULL, 0,\r\n                                                             seckey_ptrs, 1) == 1);\r\n\r\n        /* Verify output correctness and they all appear once */\r\n        for (j = 0; j < 3; j++) {\r\n            int* pos = NULL;\r\n            CHECK(secp256k1_xonly_pubkey_serialize(CTX, xonly_ser, &generated_outputs[j]));\r\n            if (secp256k1_memcmp_var(xonly_ser, BOB_OUTPUT, 32) == 0) {\r\n                pos = &pos_bob;\r\n            } else if (secp256k1_memcmp_var(xonly_ser, CAROL_OUTPUT_ONE, 32) == 0) {\r\n                pos = &pos_carol_one;\r\n            } else if (secp256k1_memcmp_var(xonly_ser, CAROL_OUTPUT_TWO, 32) == 0) {\r\n                pos = &pos_carol_two;\r\n            } else {\r\n                TEST_FAILURE(\"Error: unknown generated output\");\r\n            }\r\n            CHECK(*pos == -1); /* enforce uniqueness */\r\n            *pos = j;\r\n        }\r\n    }\r\n}\r\n```",
+      "created_at": "2025-12-07T01:35:49Z",
+      "updated_at": "2025-12-07T01:49:55Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2595796731",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2595796731"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 127,
+      "original_start_line": 87,
+      "start_side": "RIGHT",
+      "line": 197,
+      "original_line": 157,
       "side": "RIGHT"
     }
   ]
