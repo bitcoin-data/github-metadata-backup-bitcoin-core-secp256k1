@@ -41,9 +41,46 @@
       "patch_url": null
     },
     "body": "Tackling the long-standing request #702.\r\n\r\nRight now we ship our own SHA256 implementation, a standard baseline version that does not take advantage of any hardware-optimized instruction, and it cannot be accessed by the embedding application - it is for internal usage only.\r\n\r\nThis means embedding applications often have to implement or include a different version for their use cases, wasting space on constrained environments, and in performance-sensitive setups it forces them to use a slower path than what the platform provides. Many projects already rely on tuned SHA-NI / ARMv8 / or other hardware-optimized code, so always using the baseline implementation we ship within the library is not ideal.\r\n\r\nThis PR gives our users a way to bring their own SHA256 compression, either at build time or at runtime, while keeping the default behavior untouched for everyone else.\r\n\r\n#### Compile-time: External SHA256 module\r\n\r\nThe built-in transform is moved out of `hash_impl.h`into a small sha module with its own public header (`secp256k1_sha.h`). The idea is to stop treating the compression step as a private, hidden detail, and instead make it part of a public interface that users can swap out if they want to.\r\nBoth build systems gain optional support for pointing libsecp to an external implementation:\r\n* Autotools: `--with-external-sha256=<path>`\r\n* CMake: `SECP256K1_EXTERNAL_SHA256_PATH`\r\n\r\nNote:\r\nDue to our current limitation of disabling C++ builds (see [this](https://github.com/bitcoin-core/secp256k1/blob/b6c2a3cd7752085d46434921238401766c964c01/src/secp256k1.c#L15)), the provided external implementation must be written in C. (A way to overcome this would be to compile and link this externally instead of doing it within the library).\r\n\r\n#### Runtime: Context callback\r\n\r\nFor setups where we detect the available SHA256 compression function at runtime and cannot re-compile the sources, or when the function is not written in bare C89, there’s a new API:\r\n```C89\r\nsecp256k1_context_set_sha256_transform_callback(ctx, fn_transform)\r\n```\r\n\r\nThis lets users plug-in their hardware-optimized implementation into the `secp256k1_context`, which is required in all functions that compute sha256 hashes.\r\nDuring the initial setting, as a sanity check, this mechanism verifies that the provided compression function is equivalent to the default one.\r\n\r\nAs a quick example, the changes required to implement this in Bitcoin-Core at runtime are very straightforward: https://github.com/furszy/bitcoin-core/commit/f68bef06d95a589859f98fc898dd80ab2e35eb39\r\n\r\nImplementing this at compile time in Bitcoin Core is possible, but it would require changing the C version we build against (which is not recommended). For example, we cannot link the SHA-NI implementation we have in Core (even if rewritten in C89) because it depends on the `arm_neon` library, which requires C99.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975353639,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+        "name": "feature",
+        "description": "",
+        "color": "731E95",
+        "default": false
+      },
+      {
+        "id": 4975362431,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI4Bfw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/build",
+        "name": "build",
+        "description": "",
+        "color": "2F66C4",
+        "default": false
+      },
+      {
+        "id": 4975389731,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
+        "name": "performance",
+        "description": "",
+        "color": "DE3CCC",
+        "default": false
+      },
+      {
+        "id": 5492210333,
+        "node_id": "LA_kwDOAP4Jqs8AAAABR1x6nQ",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/needs-changelog",
+        "name": "needs-changelog",
+        "description": "",
+        "color": "DBD8F4",
+        "default": false
+      }
+    ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2025-12-08T09:42:32Z",
+    "updated_at": "2025-12-08T10:45:09Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -335,7 +372,7 @@
     "deletions": 313,
     "changed_files": 33,
     "commits": 2,
-    "review_comments": 9,
+    "review_comments": 11,
     "comments": 2
   },
   "events": [
@@ -717,6 +754,185 @@
       "submitted_at": "2025-12-08T09:42:32Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+    },
+    {
+      "event": "reviewed",
+      "id": 3551364928,
+      "node_id": "PRR_kwDOAP4Jqs7TrYdA",
+      "url": null,
+      "actor": null,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-12-08T10:44:27Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Concept ACK, great to see a PR for this!",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#pullrequestreview-3551364928",
+      "submitted_at": "2025-12-08T10:44:27Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+    },
+    {
+      "event": "labeled",
+      "id": 21423282080,
+      "node_id": "LE_lADOAP4Jqs7a8JDRzwAAAAT87Veg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21423282080",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-08T10:45:09Z",
+      "label": {
+        "name": "feature",
+        "color": "731E95"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 21423282096,
+      "node_id": "LE_lADOAP4Jqs7a8JDRzwAAAAT87Vew",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21423282096",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-08T10:45:09Z",
+      "label": {
+        "name": "build",
+        "color": "2F66C4"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 21423282108,
+      "node_id": "LE_lADOAP4Jqs7a8JDRzwAAAAT87Ve8",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21423282108",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-08T10:45:09Z",
+      "label": {
+        "name": "performance",
+        "color": "DE3CCC"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 21423282123,
+      "node_id": "LE_lADOAP4Jqs7a8JDRzwAAAAT87VfL",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21423282123",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-08T10:45:09Z",
+      "label": {
+        "name": "needs-changelog",
+        "color": "DBD8F4"
+      }
     }
   ],
   "comments": [
@@ -1204,6 +1420,114 @@
       "start_side": null,
       "line": 232,
       "original_line": 232,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2598064155",
+      "pull_request_review_id": 3551364928,
+      "id": 2598064155,
+      "node_id": "PRRC_kwDOAP4Jqs6a21Ab",
+      "diff_hunk": "@@ -134,6 +134,12 @@ SECP_TRY_APPEND_DEFAULT_CFLAGS(SECP_CFLAGS)\n ### Define config arguments\n ###\n \n+AC_ARG_WITH([external-sha256],\n+  AS_HELP_STRING([--with-external-sha256=PATH], [use external SHA256 compression implementation]),\n+  [external_sha256_path=\"$withval\"],\n+  [external_sha256_path=\"\"]\n+)",
+      "path": "configure.ac",
+      "position": 8,
+      "original_position": 8,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Regarding the build stuff for the build-time override: We already have the possibility to have build-time overrides for the error callbacks, e.g., see `AC_ARG_ENABLE(external_default_callbacks,` below.\n\nWhen it comes to the implementation of how the new override is configured and performed, I think it's similar to the existing overrides for the callback. (Except that these don't allow configuring the header to be included, which makes them rather useless... https://github.com/bitcoin-core/secp256k1/pull/1461)\n\nSo this will need a rework anyway [1]. This belongs to a different PR, of course, but I think the SHA override here is a good opportunity to think about a better design of a compile-time override, so we may want to iterate on this a bit more than expected. No matter how it's designed, I think we should, in the long run, have only one (non-deprecated) mechanism for a build-time override of a function. \n\n[1] I don't think what I did for the error callbacks great, and I guess it would be okay to change it (I doubt that many users rely on this). Or even better, we could deprecate it and simply provide ways to provide build-time overrides for standard library symbols like `printf`, `stderr`, and `abort`.  See for example the approach taken by mbedTLS (in the past ?) which is built with embedded systems in mind: https://github.com/Mbed-TLS/mbedtls/blob/550a18d4d6b29e62b6824201d8a49b8224e61c97/tf-psa-crypto%2Fdrivers%2Fbuiltin%2Finclude%2Fmbedtls%2Fplatform.h They provide macros for overriding standard library functions. So you have full flexibility as a user: if you've implemented a function that aborts, but it's not called `abort()` (perhaps because that is a reserved name) then you can link it to the library also with a different name. ",
+      "created_at": "2025-12-08T10:43:14Z",
+      "updated_at": "2025-12-08T10:44:27Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2598064155",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2598064155"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 137,
+      "original_start_line": 137,
+      "start_side": "RIGHT",
+      "line": 141,
+      "original_line": 141,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2598066046",
+      "pull_request_review_id": 3551364928,
+      "id": 2598066046,
+      "node_id": "PRRC_kwDOAP4Jqs6a21d-",
+      "diff_hunk": "@@ -134,6 +134,12 @@ SECP_TRY_APPEND_DEFAULT_CFLAGS(SECP_CFLAGS)\n ### Define config arguments\n ###\n \n+AC_ARG_WITH([external-sha256],",
+      "path": "configure.ac",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: I think this one should also be an `enable`-style configure option instead of a `with`-style configure options; `with` is for compiling with external *packages* e.g., `with-libxyz`. And what the user provides here is not a package. ",
+      "created_at": "2025-12-08T10:43:53Z",
+      "updated_at": "2025-12-08T10:44:27Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2598066046",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2598066046"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 137,
+      "original_line": 137,
       "side": "RIGHT"
     }
   ]
