@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-11T08:18:55Z",
+    "updated_at": "2025-12-11T09:29:29Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 18,
+    "review_comments": 19,
     "comments": 27
   },
   "events": [
@@ -5485,6 +5485,60 @@
       "start_side": "RIGHT",
       "line": 314,
       "original_line": 311,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2609841176",
+      "pull_request_review_id": 3566518130,
+      "id": 2609841176,
+      "node_id": "PRRC_kwDOAP4Jqs6bjwQY",
+      "diff_hunk": "@@ -25,6 +26,106 @@ extern \"C\" {\n  *  any further elliptic-curve operations from the wallet.\n  */\n \n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public must\n+ *  be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 48,
+      "original_position": 31,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": 2593365138,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> That's a neat and indeed very creative idea 😃. (Ab)using a pubkey object's underlying memory for temporarily storing a pointer value feels very hacky though, so not sure if we want to introduce these kind of tricks in general. On the other hand, simplifying the API would be indeed a win, so I'm not fully opposed either. Curious what others think about this.\r\n\r\nMy thinking is that I'm slightly in favor. This is not as crazy as it may look. The `data` member of the pubkey is even `unsigned char`, so this should be perfectly legal in C. (If people have doubts, we could even convert to `intptr_t` first and then read out the individual chars from an actual integer type.)\r\n\r\nI have thought of getting rid of `index`, including hacky ways, but somehow I didn't see this way. ",
+      "created_at": "2025-12-11T09:29:29Z",
+      "updated_at": "2025-12-11T09:29:56Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2609841176",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2609841176"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 45,
+      "original_start_line": 45,
+      "start_side": "RIGHT",
+      "line": 48,
+      "original_line": 48,
       "side": "RIGHT"
     }
   ]
