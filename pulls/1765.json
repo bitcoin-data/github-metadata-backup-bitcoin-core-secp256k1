@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-11T10:32:53Z",
+    "updated_at": "2025-12-11T13:11:07Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -302,7 +302,7 @@
         "watchers_count": 2356,
         "size": 13992,
         "default_branch": "master",
-        "open_issues_count": 161,
+        "open_issues_count": 162,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 21,
+    "review_comments": 22,
     "comments": 27
   },
   "events": [
@@ -5685,6 +5685,60 @@
       "start_side": "RIGHT",
       "line": 98,
       "original_line": 98,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610534331",
+      "pull_request_review_id": 3567377187,
+      "id": 2610534331,
+      "node_id": "PRRC_kwDOAP4Jqs6bmZe7",
+      "diff_hunk": "@@ -126,6 +126,60 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_sender_c\n     size_t n_plain_seckeys\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);\n \n+/** Create Silent Payments label tweak and label.\n+ *\n+ *  Given a recipient's 32 byte scan key and a label integer m, calculate the\n+ *  corresponding label tweak and label:\n+ *\n+ *      label_tweak = hash(scan_key || m)\n+ *            label = label_tweak * G\n+ *\n+ *  Returns: 1 if label tweak and label creation was successful.\n+ *           0 if hash output label_tweak32 is not valid scalar (negligible\n+ *             probability per hash evaluation).\n+ *\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static)\n+ *  Out:               label: pointer to the resulting label public key\n+ *             label_tweak32: pointer to the 32 byte label tweak\n+ *  In:           scan_key32: pointer to the recipient's 32 byte scan key\n+ *                         m: integer for the m-th label (0 is used for change outputs)\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_create_label(\n+    const secp256k1_context *ctx,\n+    secp256k1_pubkey *label,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 150,
+      "original_position": 25,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "913fdee7e17b0f69a8e70b9876be47c6a887ff32",
+      "in_reply_to_id": 2599453964,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I think that is a great point. My current thinking is that we should make an entirely new type including serialization functions.\n\nThe pubkey type is a bit stretched sometimes. If we could redesign the entire library from scratch, I'd seriously consider having entirely separate pubkey types for all schemes. You can (ab)use an ECDSA pubkey to perform ECDH, but neither ECDH nor ECDSA have been designed to do this. *Usually* these things are okay, but they create plenty of headaches in theory, and maybe a careful API should, at least, ask its users to convert their keys explicitly. The only real separation we currently have is that for Schnorr sigs but this is because they use x-only keys.\n\nBut even if we try to be in line with the existing code base, a label is indeed a bit far from a pubkey, or even a key: there is not even a corresponding secret key (or secret label). Sure, the underlying group element has some discrete logarithm, but what I want to say is that it doesn't have a meaning in the API of the scheme. ",
+      "created_at": "2025-12-11T13:11:07Z",
+      "updated_at": "2025-12-11T13:11:26Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2610534331",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610534331"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 148,
+      "original_start_line": 148,
+      "start_side": "RIGHT",
+      "line": 150,
+      "original_line": 150,
       "side": "RIGHT"
     }
   ]
