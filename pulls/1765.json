@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-11T09:29:29Z",
+    "updated_at": "2025-12-11T10:32:53Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 19,
+    "review_comments": 21,
     "comments": 27
   },
   "events": [
@@ -4512,6 +4512,44 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2025-12-11T07:15:46Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 3566774354,
+      "node_id": "PRR_kwDOAP4Jqs7UmKhS",
+      "url": null,
+      "actor": null,
+      "commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-12-11T10:32:53Z",
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#pullrequestreview-3566774354",
+      "submitted_at": "2025-12-11T10:32:53Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
     }
   ],
   "comments": [
@@ -5521,9 +5559,9 @@
         "name": null,
         "patch_url": null
       },
-      "body": "> That's a neat and indeed very creative idea 😃. (Ab)using a pubkey object's underlying memory for temporarily storing a pointer value feels very hacky though, so not sure if we want to introduce these kind of tricks in general. On the other hand, simplifying the API would be indeed a win, so I'm not fully opposed either. Curious what others think about this.\r\n\r\nMy thinking is that I'm slightly in favor. This is not as crazy as it may look. The `data` member of the pubkey is even `unsigned char`, so this should be perfectly legal in C. (If people have doubts, we could even convert to `intptr_t` first and then read out the individual chars from an actual integer type.)\r\n\r\nI have thought of getting rid of `index`, including hacky ways, but somehow I didn't see this way. ",
+      "body": "> That's a neat and indeed very creative idea 😃. (Ab)using a pubkey object's underlying memory for temporarily storing a pointer value feels very hacky though, so not sure if we want to introduce these kind of tricks in general. On the other hand, simplifying the API would be indeed a win, so I'm not fully opposed either. Curious what others think about this.\r\n\r\nMy thinking is that I'm slightly in favor. This is not as crazy as it may look. The `data` member of the pubkey is even `unsigned char`, so this should be perfectly legal in C. (If people have doubts, we could even convert to `intptr_t` first and then read out the individual chars from an actual integer type.)\r\n\r\nI have thought of getting rid of `index`, including hacky ways, but somehow I didn't see this way. \r\n\r\nedit: But it will be nice to hear other people's opinions. There was a lot of discussion about the thing already. I can imagine that others had found this approach but rejected it for various reasons.",
       "created_at": "2025-12-11T09:29:29Z",
-      "updated_at": "2025-12-11T09:29:56Z",
+      "updated_at": "2025-12-11T10:34:18Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2609841176",
       "author_association": "CONTRIBUTOR",
       "_links": {
@@ -5539,6 +5577,114 @@
       "start_side": "RIGHT",
       "line": 48,
       "original_line": 48,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610038006",
+      "pull_request_review_id": 3566752113,
+      "id": 2610038006,
+      "node_id": "PRRC_kwDOAP4Jqs6bkgT2",
+      "diff_hunk": "@@ -7,10 +7,313 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../ecmult_const.h\"\n+#include \"../../ecmult_gen.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../hsort.h\"\n \n-/* TODO: implement functions for receiver side. */\n+/** Sort an array of Silent Payments recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient.\n+ *\n+ *  Note: secp256k1_silentpayments_recipient_sort uses heap sort, which is unstable.\n+ *  Developers cannot and should not rely on deterministic sorting of _recipient objects.\n+ */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+/** Callers must ensure that pubkey_sum is not the point at infinity before calling this function. */\n+static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar *input_hash_scalar, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    unsigned char input_hash[32];\n+    int overflow;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    secp256k1_eckey_pubkey_serialize33(pubkey_sum, pubkey_sum_ser);\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+    /* Convert input_hash to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero or greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(input_hash_scalar, input_hash, &overflow);\n+    return (!secp256k1_scalar_is_zero(input_hash_scalar)) & (!overflow);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_ge *public_component, const secp256k1_scalar *secret_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* We declassify the shared secret group element because serializing a group element is a non-constant time operation. */\n+    secp256k1_declassify(ctx, &ss, sizeof(ss));\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point considering we have already validated the public key and\n+     * the secret key.\n+     */\n+    secp256k1_eckey_pubkey_serialize33(&ss, shared_secret33);\n+\n+    /* Leaking these values would break indistinguishability of the transaction, so clear them. */\n+    secp256k1_ge_clear(&ss);\n+    secp256k1_gej_clear(&ss_j);\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/SharedSecret\". */\n+static void secp256k1_silentpayments_sha256_init_sharedsecret(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0x88831537ul;\n+    hash->s[1] = 0x5127079bul;\n+    hash->s[2] = 0x69c2137bul;\n+    hash->s[3] = 0xab0303e6ul;\n+    hash->s[4] = 0x98fa21faul;\n+    hash->s[5] = 0x4a888523ul;\n+    hash->s[6] = 0xbd99daabul;\n+    hash->s[7] = 0xf25e5e0aul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static int secp256k1_silentpayments_create_output_tweak(secp256k1_scalar *output_tweak_scalar, const unsigned char *shared_secret33, uint32_t k) {\n+    secp256k1_sha256 hash;\n+    unsigned char hash_ser[32];\n+    unsigned char k_serialized[4];\n+    int ret, overflow;\n+\n+    /* Compute hash(shared_secret || ser_32(k))  [sha256 with tag \"BIP0352/SharedSecret\"] */\n+    secp256k1_silentpayments_sha256_init_sharedsecret(&hash);\n+    secp256k1_sha256_write(&hash, shared_secret33, 33);\n+    secp256k1_write_be32(k_serialized, k);\n+    secp256k1_sha256_write(&hash, k_serialized, sizeof(k_serialized));\n+    secp256k1_sha256_finalize(&hash, hash_ser);\n+    /* Convert output_tweak to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(output_tweak_scalar, hash_ser, &overflow);\n+    ret = !secp256k1_scalar_is_zero(output_tweak_scalar);\n+    /* Leaking this value would break indistinguishability of the transaction, so clear it. */\n+    secp256k1_memclear_explicit(hash_ser, sizeof(hash_ser));\n+    secp256k1_sha256_clear(&hash);\n+    return ret & !overflow;\n+}\n+\n+static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context *ctx, secp256k1_xonly_pubkey *output_xonly, const unsigned char *shared_secret33, const secp256k1_pubkey *spend_pubkey, uint32_t k) {\n+    secp256k1_ge output_ge;\n+    secp256k1_scalar output_tweak_scalar;\n+    /* Calculate the output_tweak and convert it to a scalar.\n+     *\n+     * Note: _create_output_tweak can only fail if the output of the hash function is greater than or equal to the curve order, which is statistically improbable.\n+     * Returning an error here results in an untestable branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_create_output_tweak(&output_tweak_scalar, shared_secret33, k)) {\n+        return 0;\n+    }\n+    if (!secp256k1_pubkey_load(ctx, &output_ge, spend_pubkey)) {\n+        secp256k1_scalar_clear(&output_tweak_scalar);\n+        return 0;\n+    }\n+    /* `tweak_add` only fails if output_tweak_scalar*G = -spend_pubkey. Considering output_tweak is the output of a hash function,\n+     * this will happen only with negligible probability for honestly created spend_pubkey, but we handle this\n+     * error anyway to protect against this function being called with a malicious inputs, i.e., spend_pubkey = -(_create_output_tweak(shared_secret33, k))*G\n+     */\n+    if (!secp256k1_eckey_pubkey_tweak_add(&output_ge, &output_tweak_scalar)) {\n+        secp256k1_scalar_clear(&output_tweak_scalar);\n+        return 0;\n+    };\n+    secp256k1_xonly_pubkey_save(output_xonly, &output_ge);\n+\n+    /* Leaking this value would break indistinguishability of the transaction, so clear it. */\n+    secp256k1_scalar_clear(&output_tweak_scalar);\n+    return 1;\n+}\n+\n+int secp256k1_silentpayments_sender_create_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_xonly_pubkey **generated_outputs,\n+    const secp256k1_silentpayments_recipient **recipients,\n+    size_t n_recipients,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_keypair * const *taproot_seckeys,\n+    size_t n_taproot_seckeys,\n+    const unsigned char * const *plain_seckeys,\n+    size_t n_plain_seckeys\n+) {\n+    size_t i, k;\n+    secp256k1_scalar seckey_sum_scalar, addend, input_hash_scalar;\n+    secp256k1_ge prevouts_pubkey_sum_ge;\n+    secp256k1_gej prevouts_pubkey_sum_gej;\n+    unsigned char shared_secret[33];\n+    secp256k1_pubkey current_scan_pubkey;\n+    int ret, sum_is_zero;\n+\n+    /* Sanity check inputs. */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));\n+    ARG_CHECK(generated_outputs != NULL);\n+    ARG_CHECK(recipients != NULL);\n+    ARG_CHECK(n_recipients > 0);\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    ARG_CHECK((plain_seckeys != NULL) || (taproot_seckeys != NULL));\n+    if (taproot_seckeys != NULL) {\n+        ARG_CHECK(n_taproot_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_taproot_seckeys == 0);\n+    }\n+    if (plain_seckeys != NULL) {\n+        ARG_CHECK(n_plain_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_plain_seckeys == 0);\n+    }\n+    for (i = 0; i < n_recipients; i++) {\n+        ARG_CHECK(recipients[i]->index == i);\n+    }\n+\n+    seckey_sum_scalar = secp256k1_scalar_zero;\n+    for (i = 0; i < n_plain_seckeys; i++) {\n+        ret = secp256k1_scalar_set_b32_seckey(&addend, plain_seckeys[i]);\n+        secp256k1_declassify(ctx, &ret, sizeof(ret));\n+        if (!ret) {\n+            secp256k1_scalar_clear(&addend);\n+            secp256k1_scalar_clear(&seckey_sum_scalar);\n+            return 0;\n+        }\n+        secp256k1_scalar_add(&seckey_sum_scalar, &seckey_sum_scalar, &addend);\n+    }\n+    /* Secret keys used for taproot outputs have to be negated if they result in an odd point. This is to ensure\n+     * the sender and recipient can arrive at the same shared secret when using x-only public keys. */\n+    for (i = 0; i < n_taproot_seckeys; i++) {\n+        secp256k1_ge addend_point;\n+        ret = secp256k1_keypair_load(ctx, &addend, &addend_point, taproot_seckeys[i]);\n+        secp256k1_declassify(ctx, &ret, sizeof(ret));\n+        if (!ret) {\n+            secp256k1_scalar_clear(&addend);\n+            secp256k1_scalar_clear(&seckey_sum_scalar);\n+            return 0;\n+        }\n+        if (secp256k1_fe_is_odd(&addend_point.y)) {\n+            secp256k1_scalar_negate(&addend, &addend);\n+        }\n+        secp256k1_scalar_add(&seckey_sum_scalar, &seckey_sum_scalar, &addend);\n+    }\n+    /* If there are any failures in loading/summing up the secret keys, fail early. */\n+    sum_is_zero = secp256k1_scalar_is_zero(&seckey_sum_scalar);\n+    secp256k1_declassify(ctx, &sum_is_zero, sizeof(sum_is_zero));\n+    secp256k1_scalar_clear(&addend);\n+    if (sum_is_zero) {\n+        secp256k1_scalar_clear(&seckey_sum_scalar);\n+        return 0;\n+    }\n+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &prevouts_pubkey_sum_gej, &seckey_sum_scalar);\n+    secp256k1_ge_set_gej(&prevouts_pubkey_sum_ge, &prevouts_pubkey_sum_gej);\n+    /* We declassify the pubkey sum because serializing a group element (done in the\n+     * `_calculate_input_hash_scalar` call following) is not a constant-time operation.\n+     */\n+    secp256k1_declassify(ctx, &prevouts_pubkey_sum_ge, sizeof(prevouts_pubkey_sum_ge));\n+\n+    /* Calculate the input_hash and convert it to a scalar so that it can be multiplied with the summed up private keys, i.e., a_sum = a_sum * input_hash.\n+     * By multiplying the scalars together first, we can save an elliptic curve multiplication.\n+     *\n+     * Note: _input_hash_scalar can only fail if the output of the hash function is greater than or equal to the curve order, which is statistically improbable.\n+     * Returning an error here results in an untestable branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_calculate_input_hash_scalar(&input_hash_scalar, outpoint_smallest36, &prevouts_pubkey_sum_ge)) {\n+        secp256k1_scalar_clear(&seckey_sum_scalar);\n+        return 0;\n+    }\n+    secp256k1_scalar_mul(&seckey_sum_scalar, &seckey_sum_scalar, &input_hash_scalar);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 273,
+      "original_position": 266,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": 2593673524,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "\r\n\r\n\r\n> In [ffffd7f](https://github.com/bitcoin-core/secp256k1/commit/ffffd7ff98368b29759cd3d9933896fb9fa69b1f):\r\n> \r\n> This is not realistically possible but.. should also check that the input hash scalar is not the inverse of the aggr sk (aka the result is not 1).\r\n\r\nHm, what should go wrong? 1 is a valid secret key for ECDH.\r\n\r\n> I'm trying to wrap my head around on what the exact implications would be if that indeed happened. If $a * inputhash = 1$,the shared secret would then be equal to the recipient spend public key $B_{scan}$. That sounds problematic, I suppose it's a loss of privacy as the output tweaks are revealed, but the funds are still safe?\r\n(Wouldn't any other small-ish value also be problematic, as guessing $2* B_{scan}, 3*B_{scan}$ etc. is trivial as well?).\r\n\r\nNo, I think this is a (common) misconception. With this argument, *any* value would be bad. If the secret key was `1784a975e6545c8cdb932dd228de6d6c`, wouldn't this be bad. If the attacker guessed that value, then privacy would be lost? \r\n\r\n<details>\r\n<summary>Some background</summary>\r\n\r\nSmall values will be easier to guess for attackers that start guessing at 0 (or 1). But there's no point in assuming a specific attacker. What matters here to the sender is just that it will be sufficiently unpredictable (because the raw shared secret goes into a hash), i.e., it has sufficient entropy from the attacker's perspective.\r\n\r\nI think what adds to this misconception is that the situation is more complex for \"human-chosen\" random, e.g., passwords. It's bad to use \"hamster\" as a password because it's an actual word, and so humans are more likely to pick it. Real attackers make use of that fact. So even if the space of allowed passwords is huge, letting a person pick one may yield enough entropy (depending on the person). The point here is that the process of generating a password is not clearly specified and depends on the person.  \r\n\r\nBut cryptography is usually simpler. We know the exact process of generating a secret key, and so we know the exact distribution of secret keys. Typically, secret keys are just chosen uniformly at random (and we'll often want this stronger requirement instead of just \"sufficient entropy\", e.g., in a one-time pad). Ruling out values such as 1 only removes entropy (though ruling out one value makes only a negligible difference, of course.) \r\n\r\nA valid reason to rule out specific values would not be that the attacker can guess them but to avoid creating problems in further computations. Sometimes that's the case. For example, we typically rule out 0 as a secret key because we'd like to avoid the special casing in (de)serializing the point at infinity (and other corner cases). Sometimes corner values can make the protocol. But I don't see a problem with a 1 here. (But maybe we're overlooking something, and @furszy sees a valid problem.)\r\n\r\nIn this specific case, we're dealing with a derived value and not with one chosen uniformly at random. But as I said above, it can be argued that it has sufficient entropy: assuming that the individual summed-up keys are independent, if one of the individual summed-up keys is uniformly random, then the sum is. Then we multiply with a hash, so the product is also uniformly random. (So even if 0 or 1 are problematic values, they would occur only with negligible probability.)\r\n\r\nIf you want to be fully formal, you'd need to take into account that the hash value depends on this sum (the sum pubkey goes into the hash and the attacker can even know this pubkey sum). So in theory, you could, for example, have a hash function that always maps to the inverse. This won't happen for SHA256 obviously, and if you assume the ROM, you can make that formal. \r\n\r\nIn fact, even a malicious sender could not force 0 or 1. This is like a Fiat-Shamir construction. The sender will need to pick the pubkey sum (and thus the seckey sum) before getting the hash value, so it's not feasible to pick the seckey sum depending on the hash value. \r\n\r\n</details>\r\n",
+      "created_at": "2025-12-11T10:27:08Z",
+      "updated_at": "2025-12-11T10:27:09Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2610038006",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610038006"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 269,
+      "original_start_line": 266,
+      "start_side": "RIGHT",
+      "line": 273,
+      "original_line": 270,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610056690",
+      "pull_request_review_id": 3566774354,
+      "id": 2610056690,
+      "node_id": "PRRC_kwDOAP4Jqs6bkk3y",
+      "diff_hunk": "@@ -7,10 +7,313 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../ecmult_const.h\"\n+#include \"../../ecmult_gen.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../hsort.h\"\n \n-/* TODO: implement functions for receiver side. */\n+/** Sort an array of Silent Payments recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient.\n+ *\n+ *  Note: secp256k1_silentpayments_recipient_sort uses heap sort, which is unstable.\n+ *  Developers cannot and should not rely on deterministic sorting of _recipient objects.\n+ */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+/** Callers must ensure that pubkey_sum is not the point at infinity before calling this function. */\n+static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar *input_hash_scalar, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    unsigned char input_hash[32];\n+    int overflow;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    secp256k1_eckey_pubkey_serialize33(pubkey_sum, pubkey_sum_ser);\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+    /* Convert input_hash to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero or greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(input_hash_scalar, input_hash, &overflow);\n+    return (!secp256k1_scalar_is_zero(input_hash_scalar)) & (!overflow);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_ge *public_component, const secp256k1_scalar *secret_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* We declassify the shared secret group element because serializing a group element is a non-constant time operation. */\n+    secp256k1_declassify(ctx, &ss, sizeof(ss));\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point considering we have already validated the public key and\n+     * the secret key.\n+     */\n+    secp256k1_eckey_pubkey_serialize33(&ss, shared_secret33);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 94,
+      "original_position": 94,
+      "commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Now that I wrote this other long comment above, I'm not sure if this argument is confusing here. The shared secret could, in theory, be the point at infinity, no? I mean, it will happen only with negligible probability even for malicious senders, so I don't see how it would be a problem. But the comment here says that we have validated the public key and secret key. This is true. We have validated the sum secret key to be not 0, but this validation happened before we multiply a hash, and the hash could be zero. Okay, it seems that we also check that the hash is not zero in `secp256k1_silentpayments_calculate_input_hash_scalar` Okay, I guess the code is perfectly fine, but the comment could be made more precise. ",
+      "created_at": "2025-12-11T10:32:53Z",
+      "updated_at": "2025-12-11T10:32:53Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2610056690",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2610056690"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 92,
+      "original_start_line": 92,
+      "start_side": "RIGHT",
+      "line": 98,
+      "original_line": 98,
       "side": "RIGHT"
     }
   ]
