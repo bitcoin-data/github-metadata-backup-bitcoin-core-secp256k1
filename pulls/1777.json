@@ -80,7 +80,7 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2025-12-17T19:45:30Z",
+    "updated_at": "2025-12-17T20:39:12Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -204,7 +204,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-12-17T16:48:53Z",
+        "pushed_at": "2025-12-17T20:49:22Z",
         "created_at": "2025-09-03T15:10:42Z",
         "updated_at": "2025-12-14T16:04:59Z",
         "allow_forking": true,
@@ -372,7 +372,7 @@
     "deletions": 368,
     "changed_files": 29,
     "commits": 3,
-    "review_comments": 24,
+    "review_comments": 28,
     "comments": 3
   },
   "events": [
@@ -2437,6 +2437,222 @@
       "start_side": null,
       "line": null,
       "original_line": 428,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628521300",
+      "pull_request_review_id": 3589502788,
+      "id": 2628521300,
+      "node_id": "PRRC_kwDOAP4Jqs6crA1U",
+      "diff_hunk": "@@ -134,6 +134,12 @@ SECP_TRY_APPEND_DEFAULT_CFLAGS(SECP_CFLAGS)\n ### Define config arguments\n ###\n \n+AC_ARG_WITH([external-sha256],\n+  AS_HELP_STRING([--with-external-sha256=PATH], [use external SHA256 compression implementation]),\n+  [external_sha256_path=\"$withval\"],\n+  [external_sha256_path=\"\"]\n+)",
+      "path": "configure.ac",
+      "position": 8,
+      "original_position": 8,
+      "commit_id": "3683e07ef4b6a062eec1776220eeeec0c30bc2ec",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2598064155,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> We can keep this PR focused on the runtime feature and handle the build-time override design separately\r\n\r\nRight, I hadn't considered this option. That's a good idea. (And I see that sipa suggested the same below.)",
+      "created_at": "2025-12-17T20:23:33Z",
+      "updated_at": "2025-12-17T20:23:34Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628521300",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628521300"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 137,
+      "original_start_line": 137,
+      "start_side": "RIGHT",
+      "line": 141,
+      "original_line": 141,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628529481",
+      "pull_request_review_id": 3589514196,
+      "id": 2628529481,
+      "node_id": "PRRC_kwDOAP4Jqs6crC1J",
+      "diff_hunk": "@@ -403,6 +405,29 @@ SECP256K1_API void secp256k1_context_set_error_callback(\n     const void *data\n ) SECP256K1_ARG_NONNULL(1);\n \n+/**\n+ * Set a callback function to override the internal SHA-256 transform.\n+ *\n+ * This installs a function to replace the built-in block-compression\n+ * step used by the library's internal SHA-256 implementation.\n+ * The provided callback must be functionally identical (bit-for-bit)\n+ * to the default transform. Any deviation  will cause incorrect results\n+ * and undefined behaviour.\n+ *\n+ * This API exists to support environments that wish to route the\n+ * SHA-256 compression step through a hardware-accelerated or otherwise\n+ * specialized implementation. It is not meant for modifying the\n+ * semantics of SHA-256.\n+ *\n+ * Args: ctx:    pointer to a context object.\n+ * In: callback: pointer to a function implementing the transform step.\n+ *               (passing NULL restores the default implementation)\n+ */\n+SECP256K1_API void secp256k1_context_set_sha256_transform_callback(\n+        secp256k1_context *ctx,\n+        void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds)",
+      "path": "include/secp256k1.h",
+      "position": 1,
+      "original_position": 40,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597615324,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> But this seems to be a low-level primitive file that shouldn't receive the context.\r\n\r\nHm, I don't think there is (or should be) a rule that says low-level primitives shouldn't receive the error callback. It doesn't need to be the full context.\r\n\r\nBut let me just resolve this conversation. As I already wrote above, I doubt that my suggestion was useful in the first place.",
+      "created_at": "2025-12-17T20:26:39Z",
+      "updated_at": "2025-12-17T20:26:39Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628529481",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628529481"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 428,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628554409",
+      "pull_request_review_id": 3589544017,
+      "id": 2628554409,
+      "node_id": "PRRC_kwDOAP4Jqs6crI6p",
+      "diff_hunk": "@@ -10,13 +10,20 @@\n #include <stdlib.h>\n #include <stdint.h>\n \n+typedef void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds);\n+\n+/* Validate user-supplied SHA-256 transform by comparing its output against\n+ * the library's linked implementation */\n+static int secp256k1_sha256_check_transform(sha256_transform_callback fn_transform);\n+\n typedef struct {\n     uint32_t s[8];\n     unsigned char buf[64];\n     uint64_t bytes;\n+    sha256_transform_callback fn_transform;\n } secp256k1_sha256;\n \n-static void secp256k1_sha256_initialize(secp256k1_sha256 *hash);\n+static void secp256k1_sha256_initialize(secp256k1_sha256 *hash, sha256_transform_callback fn_transform);\n static void secp256k1_sha256_write(secp256k1_sha256 *hash, const unsigned char *data, size_t size);\n static void secp256k1_sha256_finalize(secp256k1_sha256 *hash, unsigned char *out32);",
+      "path": "src/hash.h",
+      "position": 1,
+      "original_position": 20,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597556267,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Also, exposing an in-use sha256 object across API boundaries is something we should simply never do right?. That feels really ugly.\r\n\r\nIt doesn't feel ugly to me. Of course, we wouldn't share it standalone but inside some other object. For example, like we expose an `secp256k1_scalar` inside an opaque `secp256k1_musig_keyagg_cache`. \r\n\r\nAnd I don't think the use case would be unrealistic. Having a \"hash builder\" is common, and it could very well be part of a high-level function. Just imagine an advanced schnorrsig signing object that lets you append to the message multiple times before finalizing the signatures (e.g., for cases in which you want to sign a long message whose parts you receive step by step).\r\n",
+      "created_at": "2025-12-17T20:35:52Z",
+      "updated_at": "2025-12-17T20:35:52Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628554409",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628554409"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 25,
+      "original_start_line": 25,
+      "start_side": "RIGHT",
+      "line": 28,
+      "original_line": 28,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628563203",
+      "pull_request_review_id": 3589555773,
+      "id": 2628563203,
+      "node_id": "PRRC_kwDOAP4Jqs6crLED",
+      "diff_hunk": "@@ -10,13 +10,20 @@\n #include <stdlib.h>\n #include <stdint.h>\n \n+typedef void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds);\n+\n+/* Validate user-supplied SHA-256 transform by comparing its output against\n+ * the library's linked implementation */\n+static int secp256k1_sha256_check_transform(sha256_transform_callback fn_transform);\n+\n typedef struct {\n     uint32_t s[8];\n     unsigned char buf[64];\n     uint64_t bytes;\n+    sha256_transform_callback fn_transform;\n } secp256k1_sha256;\n \n-static void secp256k1_sha256_initialize(secp256k1_sha256 *hash);\n+static void secp256k1_sha256_initialize(secp256k1_sha256 *hash, sha256_transform_callback fn_transform);\n static void secp256k1_sha256_write(secp256k1_sha256 *hash, const unsigned char *data, size_t size);\n static void secp256k1_sha256_finalize(secp256k1_sha256 *hash, unsigned char *out32);",
+      "path": "src/hash.h",
+      "position": 1,
+      "original_position": 20,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597556267,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Maybe I should give the \"pass the function to every `write` call\" patch-set another try and compare the resulting changes. I did it early on so maybe it is not as bad as I remember it. Let me see..\r\n\r\nYes, I see that passing the function down is annoying and that it has a non-zero readability and maintenance cost.  But I imagine it's not too bad. (I tend to agree with sipa here: reviewing many obvious diff lines is not an issue.) Seeing the resulting diff would certainly help to see how bad it is. ",
+      "created_at": "2025-12-17T20:39:12Z",
+      "updated_at": "2025-12-17T20:39:12Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628563203",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628563203"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 25,
+      "original_start_line": 25,
+      "start_side": "RIGHT",
+      "line": 28,
+      "original_line": 28,
       "side": "RIGHT"
     }
   ]
