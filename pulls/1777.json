@@ -80,7 +80,7 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2025-12-17T16:21:52Z",
+    "updated_at": "2025-12-17T19:45:30Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -191,7 +191,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12991,
+        "size": 12994,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -372,8 +372,8 @@
     "deletions": 368,
     "changed_files": 29,
     "commits": 3,
-    "review_comments": 22,
-    "comments": 2
+    "review_comments": 24,
+    "comments": 3
   },
   "events": [
     {
@@ -1082,6 +1082,64 @@
       "submitted_at": "2025-12-16T21:48:22Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+    },
+    {
+      "event": "commented",
+      "id": 3666883503,
+      "node_id": "IC_kwDOAP4Jqs7akDOv",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3666883503",
+      "actor": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2025-12-17T19:44:17Z",
+      "updated_at": "2025-12-17T19:45:30Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "A few high-level comments:\r\n* I don't think we should do link-time plugging in the same PR as runtime plugging, and when we do, I don't think it should be done through the \"module\" abstractions. We use modules for exporting functionality from the library, not for offering replacement of internal dependencies (I find it strange to have base functionality depend on a module!).\r\n* \"round\" is a term of art in cipher design, and SHA-256 has exactly 64 rounds. Using the same term with another meaning is confusing.\r\n* I would try hard to avoid storing the transformation function pointer inside the `secp256k1_sha256` struct. Reviewing many lines that just add an extra parameter being pass through is not hard.",
+      "user": {
+        "login": "sipa",
+        "id": 548488,
+        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/sipa",
+        "html_url": "https://github.com/sipa",
+        "followers_url": "https://api.github.com/users/sipa/followers",
+        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
+        "organizations_url": "https://api.github.com/users/sipa/orgs",
+        "repos_url": "https://api.github.com/users/sipa/repos",
+        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/sipa/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#issuecomment-3666883503",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1777"
     }
   ],
   "comments": [
@@ -1821,9 +1879,9 @@
         "name": null,
         "patch_url": null
       },
-      "body": "> My suggestion is just passing the context object to every internal function that needs the SHA256 callback.\r\n\r\nI did started there, but didn’t really like where it was leading me. Mainly because going down that path will be significantly more invasive than the current changes: It requires changing every `secp256k1_sha256_write` call to receive the function arg, every hmac, tagged hash etc.\r\nIt also includes changing `secp256k1_sha256_finalize`! which will also require the function arg because we call write during finalization too.\r\nOverall, I think the end result would be quite ugly for what we gain here (see below for more rationale).\r\n\r\n> A potential problem with storing the callback in the `secp256k1_sha256` struct is that you could have this series of events:\r\n> \r\n> * User sets callback to `cb1`.\r\n> * User calls API function that calls `secp256k1_sha256_initialize`, which outputs some opaque object that contains the `secp256k1_sha256` struct.\r\n> * User sets callback go `cb2`.\r\n> * Users passes the opaque object to another API function, which calls `secp256k1_sha256_write`, which calls `cb1`. UB.\r\n> \r\n> (I believe) this cannot happen in the current code because there's no pair of API functions that behaves in this way, but it's a potential footgun for the future.\r\n\r\nI'm not fully convinced it's a realistic scenario. Changing the sha256 transform callback in the middle of an ongoing procedure doesn’t really make sense in any intended usage. If someone does that, they should already be well outside the model we expect the API to be used under.\r\nTo me, this is similar to deleting the callback function from another thread while a libsecp operation is executing.\r\n\r\nAlso, exposing an in-use sha256 object across API boundaries is something we should simply never do right?. That feels really ugly. These structs are only valid under the assumption that they were initialized via `secp256k1_sha256_initialize`; otherwise, the internal fields would already be invalid, independently of the callback pointer. And we cannot ensure that the struct has been initialized properly (or not corrupted) if we share it externally.\r\nI mean, if we ever want to share an existing sha256, I would say we should share the state and buffer directly as bytes and then re-initialize the struct on the receiving side.\r\n\r\nSo overall, I think it worth documenting the expectation clearly for sure: like sha256 structs must not be shared externally, and the provided sha256 callback, must be provided during app's init, and must remain active for the entire app lifecycle once provided (because it doesn't make sense to change it). But I'm not sure this is a problem we need to design around. It would add other complications without a clear benefit. But let me know what you think.",
+      "body": "> My suggestion is just passing the context object to every internal function that needs the SHA256 callback.\r\n\r\nI did started there, but didn’t really like where it was leading me. Mainly because going down that path will be significantly more invasive than the current changes: It requires changing every `secp256k1_sha256_write` call to receive the function arg, every hmac, tagged hash etc.\r\nIt also includes changing `secp256k1_sha256_finalize`! which will also require the function arg because we call write during finalization too.\r\nOverall, I think the end result would be quite ugly for what we gain here (see below for more rationale).\r\n\r\n> A potential problem with storing the callback in the `secp256k1_sha256` struct is that you could have this series of events:\r\n> \r\n> * User sets callback to `cb1`.\r\n> * User calls API function that calls `secp256k1_sha256_initialize`, which outputs some opaque object that contains the `secp256k1_sha256` struct.\r\n> * User sets callback go `cb2`.\r\n> * Users passes the opaque object to another API function, which calls `secp256k1_sha256_write`, which calls `cb1`. UB.\r\n> \r\n> (I believe) this cannot happen in the current code because there's no pair of API functions that behaves in this way, but it's a potential footgun for the future.\r\n\r\nI'm not fully convinced it's a realistic scenario. Changing the sha256 transform callback in the middle of an ongoing procedure doesn’t really make sense in any intended usage. If someone does that, they should already be well outside the model we expect the API to be used under.\r\nTo me, this is similar to deleting the callback function from another thread while a libsecp operation is executing.\r\n\r\nAlso, exposing an in-use sha256 object across API boundaries is something we should simply never do right?. That feels really ugly. These structs are only valid under the assumption that they were initialized via `secp256k1_sha256_initialize`; otherwise, the internal fields would already be invalid, independently of the transform callback. And we cannot ensure that the struct has been initialized properly (or not corrupted) if we share it externally.\r\nI mean, if we ever want to share an existing sha256, I would say we should share the state and buffer directly as bytes and then re-initialize the struct on the receiving side.\r\n\r\nSo overall, I think it worth documenting the expectation clearly for sure: like sha256 structs must not be shared externally, and the provided sha256 callback, must be provided during app's init, and must remain active for the entire app lifecycle once provided (because it doesn't make sense to change it). But I'm not sure this is a problem we need to design around. It would add other complications without a clear benefit. But let me know what you think.",
       "created_at": "2025-12-16T21:05:43Z",
-      "updated_at": "2025-12-16T21:48:22Z",
+      "updated_at": "2025-12-17T18:35:07Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2624739553",
       "author_association": "MEMBER",
       "_links": {
@@ -2271,6 +2329,114 @@
       "start_side": "RIGHT",
       "line": 141,
       "original_line": 141,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628299244",
+      "pull_request_review_id": 3589239735,
+      "id": 2628299244,
+      "node_id": "PRRC_kwDOAP4Jqs6cqKns",
+      "diff_hunk": "@@ -10,13 +10,20 @@\n #include <stdlib.h>\n #include <stdint.h>\n \n+typedef void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds);\n+\n+/* Validate user-supplied SHA-256 transform by comparing its output against\n+ * the library's linked implementation */\n+static int secp256k1_sha256_check_transform(sha256_transform_callback fn_transform);\n+\n typedef struct {\n     uint32_t s[8];\n     unsigned char buf[64];\n     uint64_t bytes;\n+    sha256_transform_callback fn_transform;\n } secp256k1_sha256;\n \n-static void secp256k1_sha256_initialize(secp256k1_sha256 *hash);\n+static void secp256k1_sha256_initialize(secp256k1_sha256 *hash, sha256_transform_callback fn_transform);\n static void secp256k1_sha256_write(secp256k1_sha256 *hash, const unsigned char *data, size_t size);\n static void secp256k1_sha256_finalize(secp256k1_sha256 *hash, unsigned char *out32);",
+      "path": "src/hash.h",
+      "position": 1,
+      "original_position": 20,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597556267,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Maybe I should give the \"pass the function to every `write` call\" patch-set another try and compare the resulting changes. I did it early on so maybe it is not as bad as I remember it. Let me see..",
+      "created_at": "2025-12-17T19:04:32Z",
+      "updated_at": "2025-12-17T19:04:32Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628299244",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628299244"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 25,
+      "original_start_line": 25,
+      "start_side": "RIGHT",
+      "line": 28,
+      "original_line": 28,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628385281",
+      "pull_request_review_id": 3589344182,
+      "id": 2628385281,
+      "node_id": "PRRC_kwDOAP4Jqs6cqfoB",
+      "diff_hunk": "@@ -403,6 +405,29 @@ SECP256K1_API void secp256k1_context_set_error_callback(\n     const void *data\n ) SECP256K1_ARG_NONNULL(1);\n \n+/**\n+ * Set a callback function to override the internal SHA-256 transform.\n+ *\n+ * This installs a function to replace the built-in block-compression\n+ * step used by the library's internal SHA-256 implementation.\n+ * The provided callback must be functionally identical (bit-for-bit)\n+ * to the default transform. Any deviation  will cause incorrect results\n+ * and undefined behaviour.\n+ *\n+ * This API exists to support environments that wish to route the\n+ * SHA-256 compression step through a hardware-accelerated or otherwise\n+ * specialized implementation. It is not meant for modifying the\n+ * semantics of SHA-256.\n+ *\n+ * Args: ctx:    pointer to a context object.\n+ * In: callback: pointer to a function implementing the transform step.\n+ *               (passing NULL restores the default implementation)\n+ */\n+SECP256K1_API void secp256k1_context_set_sha256_transform_callback(\n+        secp256k1_context *ctx,\n+        void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds)",
+      "path": "include/secp256k1.h",
+      "position": 1,
+      "original_position": 40,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597615324,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> I was wondering whether it makes sense to allow for a real return value here to make it possible for the callback to indicate some kind of failure (e.g., couldn't access external hardware, or malloc failed). We could then fall back to our implementation or simply call the error callback in order to crash.\r\n\r\nhmm, how would we actually call the error callback from inside `hash_impl.h`? That would require passing the context all the way down into the sha256 `sha_write` and `sha_finalize` functions (hmac, tagged hashes, etc), which would introduce a `hash_impl.h` dependency on `secp256k1.h` (unless we move the context definition elsewhere). But this seems to be a low-level primitive file that shouldn't receive the context.",
+      "created_at": "2025-12-17T19:33:11Z",
+      "updated_at": "2025-12-17T19:33:11Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2628385281",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628385281"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 428,
       "side": "RIGHT"
     }
   ]
