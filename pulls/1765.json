@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-16T19:08:22Z",
+    "updated_at": "2025-12-17T07:26:53Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -298,8 +298,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1106,
-        "stargazers_count": 2359,
-        "watchers_count": 2359,
+        "stargazers_count": 2361,
+        "watchers_count": 2361,
         "size": 14022,
         "default_branch": "master",
         "open_issues_count": 162,
@@ -315,7 +315,7 @@
         "visibility": "public",
         "pushed_at": "2025-12-15T19:44:03Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-12-15T19:44:07Z",
+        "updated_at": "2025-12-17T06:15:02Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 30,
+    "review_comments": 31,
     "comments": 30
   },
   "events": [
@@ -6531,6 +6531,60 @@
       "start_side": "RIGHT",
       "line": 290,
       "original_line": 290,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2625904064",
+      "pull_request_review_id": 3586366458,
+      "id": 2625904064,
+      "node_id": "PRRC_kwDOAP4Jqs6chB3A",
+      "diff_hunk": "@@ -7,10 +7,313 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../ecmult_const.h\"\n+#include \"../../ecmult_gen.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../hsort.h\"\n \n-/* TODO: implement functions for receiver side. */\n+/** Sort an array of Silent Payments recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient.\n+ *\n+ *  Note: secp256k1_silentpayments_recipient_sort uses heap sort, which is unstable.\n+ *  Developers cannot and should not rely on deterministic sorting of _recipient objects.\n+ */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+/** Callers must ensure that pubkey_sum is not the point at infinity before calling this function. */\n+static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar *input_hash_scalar, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    unsigned char input_hash[32];\n+    int overflow;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    secp256k1_eckey_pubkey_serialize33(pubkey_sum, pubkey_sum_ser);\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+    /* Convert input_hash to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero or greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(input_hash_scalar, input_hash, &overflow);\n+    return (!secp256k1_scalar_is_zero(input_hash_scalar)) & (!overflow);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_ge *public_component, const secp256k1_scalar *secret_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* We declassify the shared secret group element because serializing a group element is a non-constant time operation. */\n+    secp256k1_declassify(ctx, &ss, sizeof(ss));\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point considering we have already validated the public key and\n+     * the secret key.\n+     */\n+    secp256k1_eckey_pubkey_serialize33(&ss, shared_secret33);\n+\n+    /* Leaking these values would break indistinguishability of the transaction, so clear them. */\n+    secp256k1_ge_clear(&ss);\n+    secp256k1_gej_clear(&ss_j);\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/SharedSecret\". */\n+static void secp256k1_silentpayments_sha256_init_sharedsecret(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0x88831537ul;\n+    hash->s[1] = 0x5127079bul;\n+    hash->s[2] = 0x69c2137bul;\n+    hash->s[3] = 0xab0303e6ul;\n+    hash->s[4] = 0x98fa21faul;\n+    hash->s[5] = 0x4a888523ul;\n+    hash->s[6] = 0xbd99daabul;\n+    hash->s[7] = 0xf25e5e0aul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static int secp256k1_silentpayments_create_output_tweak(secp256k1_scalar *output_tweak_scalar, const unsigned char *shared_secret33, uint32_t k) {\n+    secp256k1_sha256 hash;\n+    unsigned char hash_ser[32];\n+    unsigned char k_serialized[4];\n+    int ret, overflow;\n+\n+    /* Compute hash(shared_secret || ser_32(k))  [sha256 with tag \"BIP0352/SharedSecret\"] */\n+    secp256k1_silentpayments_sha256_init_sharedsecret(&hash);\n+    secp256k1_sha256_write(&hash, shared_secret33, 33);\n+    secp256k1_write_be32(k_serialized, k);\n+    secp256k1_sha256_write(&hash, k_serialized, sizeof(k_serialized));\n+    secp256k1_sha256_finalize(&hash, hash_ser);\n+    /* Convert output_tweak to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(output_tweak_scalar, hash_ser, &overflow);\n+    ret = !secp256k1_scalar_is_zero(output_tweak_scalar);\n+    /* Leaking this value would break indistinguishability of the transaction, so clear it. */\n+    secp256k1_memclear_explicit(hash_ser, sizeof(hash_ser));\n+    secp256k1_sha256_clear(&hash);\n+    return ret & !overflow;\n+}\n+\n+static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context *ctx, secp256k1_xonly_pubkey *output_xonly, const unsigned char *shared_secret33, const secp256k1_pubkey *spend_pubkey, uint32_t k) {\n+    secp256k1_ge output_ge;\n+    secp256k1_scalar output_tweak_scalar;\n+    /* Calculate the output_tweak and convert it to a scalar.\n+     *\n+     * Note: _create_output_tweak can only fail if the output of the hash function is greater than or equal to the curve order, which is statistically improbable.\n+     * Returning an error here results in an untestable branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_create_output_tweak(&output_tweak_scalar, shared_secret33, k)) {\n+        return 0;\n+    }\n+    if (!secp256k1_pubkey_load(ctx, &output_ge, spend_pubkey)) {\n+        secp256k1_scalar_clear(&output_tweak_scalar);\n+        return 0;\n+    }\n+    /* `tweak_add` only fails if output_tweak_scalar*G = -spend_pubkey. Considering output_tweak is the output of a hash function,\n+     * this will happen only with negligible probability for honestly created spend_pubkey, but we handle this\n+     * error anyway to protect against this function being called with a malicious inputs, i.e., spend_pubkey = -(_create_output_tweak(shared_secret33, k))*G\n+     */\n+    if (!secp256k1_eckey_pubkey_tweak_add(&output_ge, &output_tweak_scalar)) {\n+        secp256k1_scalar_clear(&output_tweak_scalar);\n+        return 0;\n+    };\n+    secp256k1_xonly_pubkey_save(output_xonly, &output_ge);\n+\n+    /* Leaking this value would break indistinguishability of the transaction, so clear it. */\n+    secp256k1_scalar_clear(&output_tweak_scalar);\n+    return 1;\n+}\n+\n+int secp256k1_silentpayments_sender_create_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_xonly_pubkey **generated_outputs,\n+    const secp256k1_silentpayments_recipient **recipients,\n+    size_t n_recipients,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_keypair * const *taproot_seckeys,\n+    size_t n_taproot_seckeys,\n+    const unsigned char * const *plain_seckeys,\n+    size_t n_plain_seckeys\n+) {\n+    size_t i, k;\n+    secp256k1_scalar seckey_sum_scalar, addend, input_hash_scalar;\n+    secp256k1_ge prevouts_pubkey_sum_ge;\n+    secp256k1_gej prevouts_pubkey_sum_gej;\n+    unsigned char shared_secret[33];\n+    secp256k1_pubkey current_scan_pubkey;\n+    int ret, sum_is_zero;\n+\n+    /* Sanity check inputs. */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(secp256k1_ecmult_gen_context_is_built(&ctx->ecmult_gen_ctx));\n+    ARG_CHECK(generated_outputs != NULL);\n+    ARG_CHECK(recipients != NULL);\n+    ARG_CHECK(n_recipients > 0);\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    ARG_CHECK((plain_seckeys != NULL) || (taproot_seckeys != NULL));\n+    if (taproot_seckeys != NULL) {\n+        ARG_CHECK(n_taproot_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_taproot_seckeys == 0);\n+    }\n+    if (plain_seckeys != NULL) {\n+        ARG_CHECK(n_plain_seckeys > 0);\n+    } else {\n+        ARG_CHECK(n_plain_seckeys == 0);\n+    }\n+    for (i = 0; i < n_recipients; i++) {\n+        ARG_CHECK(recipients[i]->index == i);\n+    }\n+\n+    seckey_sum_scalar = secp256k1_scalar_zero;\n+    for (i = 0; i < n_plain_seckeys; i++) {\n+        ret = secp256k1_scalar_set_b32_seckey(&addend, plain_seckeys[i]);\n+        secp256k1_declassify(ctx, &ret, sizeof(ret));\n+        if (!ret) {\n+            secp256k1_scalar_clear(&addend);\n+            secp256k1_scalar_clear(&seckey_sum_scalar);\n+            return 0;\n+        }\n+        secp256k1_scalar_add(&seckey_sum_scalar, &seckey_sum_scalar, &addend);\n+    }\n+    /* Secret keys used for taproot outputs have to be negated if they result in an odd point. This is to ensure\n+     * the sender and recipient can arrive at the same shared secret when using x-only public keys. */\n+    for (i = 0; i < n_taproot_seckeys; i++) {\n+        secp256k1_ge addend_point;\n+        ret = secp256k1_keypair_load(ctx, &addend, &addend_point, taproot_seckeys[i]);\n+        secp256k1_declassify(ctx, &ret, sizeof(ret));\n+        if (!ret) {\n+            secp256k1_scalar_clear(&addend);\n+            secp256k1_scalar_clear(&seckey_sum_scalar);\n+            return 0;\n+        }\n+        if (secp256k1_fe_is_odd(&addend_point.y)) {\n+            secp256k1_scalar_negate(&addend, &addend);\n+        }\n+        secp256k1_scalar_add(&seckey_sum_scalar, &seckey_sum_scalar, &addend);\n+    }\n+    /* If there are any failures in loading/summing up the secret keys, fail early. */\n+    sum_is_zero = secp256k1_scalar_is_zero(&seckey_sum_scalar);\n+    secp256k1_declassify(ctx, &sum_is_zero, sizeof(sum_is_zero));\n+    secp256k1_scalar_clear(&addend);\n+    if (sum_is_zero) {\n+        secp256k1_scalar_clear(&seckey_sum_scalar);\n+        return 0;\n+    }\n+    secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &prevouts_pubkey_sum_gej, &seckey_sum_scalar);\n+    secp256k1_ge_set_gej(&prevouts_pubkey_sum_ge, &prevouts_pubkey_sum_gej);\n+    /* We declassify the pubkey sum because serializing a group element (done in the\n+     * `_calculate_input_hash_scalar` call following) is not a constant-time operation.\n+     */\n+    secp256k1_declassify(ctx, &prevouts_pubkey_sum_ge, sizeof(prevouts_pubkey_sum_ge));\n+\n+    /* Calculate the input_hash and convert it to a scalar so that it can be multiplied with the summed up private keys, i.e., a_sum = a_sum * input_hash.\n+     * By multiplying the scalars together first, we can save an elliptic curve multiplication.\n+     *\n+     * Note: _input_hash_scalar can only fail if the output of the hash function is greater than or equal to the curve order, which is statistically improbable.\n+     * Returning an error here results in an untestable branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_calculate_input_hash_scalar(&input_hash_scalar, outpoint_smallest36, &prevouts_pubkey_sum_ge)) {\n+        secp256k1_scalar_clear(&seckey_sum_scalar);\n+        return 0;\n+    }\n+    secp256k1_scalar_mul(&seckey_sum_scalar, &seckey_sum_scalar, &input_hash_scalar);\n+    /* _recipient_sort sorts the array of recipients in place by their scan public keys (lexicographically).\n+     * This ensures that all recipients with the same scan public key are grouped together, as specified in BIP0352.\n+     *\n+     * More specifically, this ensures `k` is incremented from 0 to the number of requested outputs for each recipient group,\n+     * where a recipient group is all addresses with the same scan public key.\n+     */\n+    secp256k1_silentpayments_recipient_sort(ctx, recipients, n_recipients);\n+    current_scan_pubkey = recipients[0]->scan_pubkey;\n+    k = 0;  /* This is a dead store but clang will emit a false positive warning if we omit it. */\n+    for (i = 0; i < n_recipients; i++) {\n+        if ((i == 0) || (secp256k1_ec_pubkey_cmp(ctx, &current_scan_pubkey, &recipients[i]->scan_pubkey) != 0)) {\n+            /* If we are on a different scan pubkey, its time to recreate the shared secret and reset k to 0.\n+             * It's very unlikely the scan public key is invalid by this point, since this means the caller would\n+             * have created the _silentpayments_recipient object incorrectly, but just to be sure we still check that\n+             * the public key is valid.\n+             */\n+            secp256k1_ge pk;\n+            if (!secp256k1_pubkey_load(ctx, &pk, &recipients[i]->scan_pubkey)) {\n+                secp256k1_scalar_clear(&seckey_sum_scalar);\n+                /* Leaking this value would break indistinguishability of the transaction, so clear it. */\n+                secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+                return 0;\n+            }\n+            secp256k1_silentpayments_create_shared_secret(ctx, shared_secret, &pk, &seckey_sum_scalar);\n+            k = 0;\n+        }\n+        if (!secp256k1_silentpayments_create_output_pubkey(ctx, generated_outputs[recipients[i]->index], shared_secret, &recipients[i]->spend_pubkey, k)) {\n+            secp256k1_scalar_clear(&seckey_sum_scalar);\n+            secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+            return 0;\n+        }\n+        /* BIP0352 specifies that k is serialized as a 4 byte (32 bit) value, so we check to make\n+         * sure we are not exceeding the max value for a uint32 before incrementing k.\n+         * In practice, this should never happen as it would be impossible to create a transaction\n+         * with this many outputs.\n+         */\n+        if (k < UINT32_MAX) {\n+            k++;\n+        } else {\n+            return 0;\n+        }",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 1,
+      "original_position": 307,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": 2593243357,
+      "user": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> As `k` depends on `n_recipients`, wouldn't be simpler to ensure that `n_recipients < UINT32_MAX` early on the function?\r\n\r\n`k` doesn't depend on `n_recipients`. It is reset to `0` anytime the recipient `scan_pubkey` changes. You can have `2^64-1` recipients that have significantly less `scan_pubkeys`, and this will be fine if `k` does not exceed `UINT32_MAX`.",
+      "created_at": "2025-12-17T07:26:53Z",
+      "updated_at": "2025-12-17T07:28:43Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2625904064",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2625904064"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 302,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 311,
       "side": "RIGHT"
     }
   ]
