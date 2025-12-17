@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-17T07:26:53Z",
+    "updated_at": "2025-12-17T08:41:54Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 31,
+    "review_comments": 36,
     "comments": 30
   },
   "events": [
@@ -6585,6 +6585,114 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 311,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2626060851",
+      "pull_request_review_id": 3586549555,
+      "id": 2626060851,
+      "node_id": "PRRC_kwDOAP4Jqs6choIz",
+      "diff_hunk": "@@ -126,6 +126,60 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_sender_c\n     size_t n_plain_seckeys\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);\n \n+/** Create Silent Payments label tweak and label.\n+ *\n+ *  Given a recipient's 32 byte scan key and a label integer m, calculate the\n+ *  corresponding label tweak and label:\n+ *\n+ *      label_tweak = hash(scan_key || m)\n+ *            label = label_tweak * G\n+ *\n+ *  Returns: 1 if label tweak and label creation was successful.\n+ *           0 if hash output label_tweak32 is not valid scalar (negligible\n+ *             probability per hash evaluation).\n+ *\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static)\n+ *  Out:               label: pointer to the resulting label public key\n+ *             label_tweak32: pointer to the 32 byte label tweak\n+ *  In:           scan_key32: pointer to the recipient's 32 byte scan key\n+ *                         m: integer for the m-th label (0 is used for change outputs)\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_create_label(\n+    const secp256k1_context *ctx,\n+    secp256k1_pubkey *label,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 1,
+      "original_position": 25,
+      "commit_id": "f96f41f24f8a43384e57a04d1cb73798c579b59a",
+      "original_commit_id": "913fdee7e17b0f69a8e70b9876be47c6a887ff32",
+      "in_reply_to_id": 2599453964,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Unless I'm misinterpreting your comment, I think the discrete logarithm of a label's underlying group element is indeed quite important in the API:\r\n\r\nYes, sorry, I was wrong here. It plays a role in the API, but it's not meant to be \"secret\". But I think my main point still holds up: calling label stuff a \"key\" is misleading. There's no authorization or secrecy aspect to it.",
+      "created_at": "2025-12-17T08:26:24Z",
+      "updated_at": "2025-12-17T08:26:37Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2626060851",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2626060851"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 148,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 150,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2626107852",
+      "pull_request_review_id": 3586606543,
+      "id": 2626107852,
+      "node_id": "PRRC_kwDOAP4Jqs6chznM",
+      "diff_hunk": "@@ -7,10 +7,313 @@\n #define SECP256K1_MODULE_SILENTPAYMENTS_MAIN_H\n \n #include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_extrakeys.h\"\n #include \"../../../include/secp256k1_silentpayments.h\"\n \n-/* TODO: implement functions for sender side. */\n+#include \"../../eckey.h\"\n+#include \"../../ecmult.h\"\n+#include \"../../ecmult_const.h\"\n+#include \"../../ecmult_gen.h\"\n+#include \"../../group.h\"\n+#include \"../../hash.h\"\n+#include \"../../hsort.h\"\n \n-/* TODO: implement functions for receiver side. */\n+/** Sort an array of Silent Payments recipients. This is used to group recipients by scan pubkey to\n+ *  ensure the correct values of k are used when creating multiple outputs for a recipient.\n+ *\n+ *  Note: secp256k1_silentpayments_recipient_sort uses heap sort, which is unstable.\n+ *  Developers cannot and should not rely on deterministic sorting of _recipient objects.\n+ */\n+static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const void* pk2, void *ctx) {\n+    return secp256k1_ec_pubkey_cmp((secp256k1_context *)ctx,\n+        &(*(const secp256k1_silentpayments_recipient **)pk1)->scan_pubkey,\n+        &(*(const secp256k1_silentpayments_recipient **)pk2)->scan_pubkey\n+    );\n+}\n+\n+static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {\n+    /* Suppress wrong warning (fixed in MSVC 19.33) */\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(push)\n+    #pragma warning(disable: 4090)\n+    #endif\n+\n+    secp256k1_hsort(recipients, n_recipients, sizeof(*recipients), secp256k1_silentpayments_recipient_sort_cmp, (void *)ctx);\n+\n+    #if defined(_MSC_VER) && (_MSC_VER < 1933)\n+    #pragma warning(pop)\n+    #endif\n+}\n+\n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Inputs\". */\n+static void secp256k1_silentpayments_sha256_init_inputs(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0xd4143ffcul;\n+    hash->s[1] = 0x012ea4b5ul;\n+    hash->s[2] = 0x36e21c8ful;\n+    hash->s[3] = 0xf7ec7b54ul;\n+    hash->s[4] = 0x4dd4e2acul;\n+    hash->s[5] = 0x9bcaa0a4ul;\n+    hash->s[6] = 0xe244899bul;\n+    hash->s[7] = 0xcd06903eul;\n+\n+    hash->bytes = 64;\n+}\n+\n+/** Callers must ensure that pubkey_sum is not the point at infinity before calling this function. */\n+static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar *input_hash_scalar, const unsigned char *outpoint_smallest36, secp256k1_ge *pubkey_sum) {\n+    secp256k1_sha256 hash;\n+    unsigned char pubkey_sum_ser[33];\n+    unsigned char input_hash[32];\n+    int overflow;\n+\n+    secp256k1_silentpayments_sha256_init_inputs(&hash);\n+    secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\n+    secp256k1_eckey_pubkey_serialize33(pubkey_sum, pubkey_sum_ser);\n+    secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\n+    secp256k1_sha256_finalize(&hash, input_hash);\n+    /* Convert input_hash to a scalar.\n+     *\n+     * This can only fail if the output of the hash function is zero or greater than or equal to the curve order, which\n+     * happens with negligible probability. Normally, we would use VERIFY_CHECK as opposed to returning an error\n+     * since returning an error here would result in an untestable branch in the code. But in this case, we return\n+     * an error to ensure strict compliance with BIP0352.\n+     */\n+    secp256k1_scalar_set_b32(input_hash_scalar, input_hash, &overflow);\n+    return (!secp256k1_scalar_is_zero(input_hash_scalar)) & (!overflow);\n+}\n+\n+static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_ge *public_component, const secp256k1_scalar *secret_component) {\n+    secp256k1_gej ss_j;\n+    secp256k1_ge ss;\n+\n+    secp256k1_ecmult_const(&ss_j, public_component, secret_component);\n+    secp256k1_ge_set_gej(&ss, &ss_j);\n+    /* We declassify the shared secret group element because serializing a group element is a non-constant time operation. */\n+    secp256k1_declassify(ctx, &ss, sizeof(ss));\n+    /* This can only fail if the shared secret is the point at infinity, which should be\n+     * impossible at this point considering we have already validated the public key and\n+     * the secret key.\n+     */\n+    secp256k1_eckey_pubkey_serialize33(&ss, shared_secret33);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 108,
+      "original_position": 94,
+      "commit_id": "26e1e88f326bd73f1617481d2cf87b2cd2b19ba6",
+      "original_commit_id": "ffffd7ff98368b29759cd3d9933896fb9fa69b1f",
+      "in_reply_to_id": 2610056690,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> another option might be to `VERIFY_CHECK` both of the group element and the scalar inputs to be non-infinity/non-zero and have proper comments at each call-site.\r\n\r\nThat sounds very clean, yes.\r\n",
+      "created_at": "2025-12-17T08:41:54Z",
+      "updated_at": "2025-12-17T08:41:54Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2626107852",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2626107852"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 100,
+      "original_start_line": 92,
+      "start_side": "RIGHT",
+      "line": 108,
+      "original_line": 108,
       "side": "RIGHT"
     }
   ]
