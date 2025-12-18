@@ -80,7 +80,7 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2025-12-17T20:39:12Z",
+    "updated_at": "2025-12-18T18:41:21Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -191,7 +191,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12994,
+        "size": 13226,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -204,7 +204,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-12-17T20:49:22Z",
+        "pushed_at": "2025-12-18T16:25:30Z",
         "created_at": "2025-09-03T15:10:42Z",
         "updated_at": "2025-12-14T16:04:59Z",
         "allow_forking": true,
@@ -372,7 +372,7 @@
     "deletions": 368,
     "changed_files": 29,
     "commits": 3,
-    "review_comments": 28,
+    "review_comments": 29,
     "comments": 3
   },
   "events": [
@@ -1140,6 +1140,45 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#issuecomment-3666883503",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1777"
+    },
+    {
+      "event": "reviewed",
+      "id": 3594435763,
+      "node_id": "PRR_kwDOAP4Jqs7WPryz",
+      "url": null,
+      "actor": null,
+      "commit_id": "3683e07ef4b6a062eec1776220eeeec0c30bc2ec",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2025-12-18T18:31:46Z",
+      "author_association": "MEMBER",
+      "body": "Per feedback, this is how it would look if we pass the function everywhere https://github.com/furszy/secp256k1/commit/8149fc119071c532e9d2d6c3b633af7a37e5a0b8 vs how it looks when the function lives in the `sha256` struct (an updated version of what we currently have here): https://github.com/furszy/secp256k1/commit/eb570826371f42a5bd320f8e43800281b1f63b0a\r\n\r\nLet me know what you guys think.",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#pullrequestreview-3594435763",
+      "submitted_at": "2025-12-18T18:31:46Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
     }
   ],
   "comments": [
@@ -2643,6 +2682,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2628563203"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 25,
+      "original_start_line": 25,
+      "start_side": "RIGHT",
+      "line": 28,
+      "original_line": 28,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2632227231",
+      "pull_request_review_id": 3594501006,
+      "id": 2632227231,
+      "node_id": "PRRC_kwDOAP4Jqs6c5Jmf",
+      "diff_hunk": "@@ -10,13 +10,20 @@\n #include <stdlib.h>\n #include <stdint.h>\n \n+typedef void (*sha256_transform_callback)(uint32_t *state, const unsigned char *block, size_t rounds);\n+\n+/* Validate user-supplied SHA-256 transform by comparing its output against\n+ * the library's linked implementation */\n+static int secp256k1_sha256_check_transform(sha256_transform_callback fn_transform);\n+\n typedef struct {\n     uint32_t s[8];\n     unsigned char buf[64];\n     uint64_t bytes;\n+    sha256_transform_callback fn_transform;\n } secp256k1_sha256;\n \n-static void secp256k1_sha256_initialize(secp256k1_sha256 *hash);\n+static void secp256k1_sha256_initialize(secp256k1_sha256 *hash, sha256_transform_callback fn_transform);\n static void secp256k1_sha256_write(secp256k1_sha256 *hash, const unsigned char *data, size_t size);\n static void secp256k1_sha256_finalize(secp256k1_sha256 *hash, unsigned char *out32);",
+      "path": "src/hash.h",
+      "position": 1,
+      "original_position": 20,
+      "commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "original_commit_id": "7fefa9c851d36214a4a03aeae36b59aee9d08263",
+      "in_reply_to_id": 2597556267,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> > Maybe I should give the \"pass the function to every `write` call\" patch-set another try and compare the resulting changes. I did it early on so maybe it is not as bad as I remember it. Let me see..\r\n> \r\n> Yes, I see that passing the function down is annoying and that it has a non-zero readability and maintenance cost. But I imagine it's not too bad. (I tend to agree with sipa here: reviewing many obvious diff lines is not an issue.) Seeing the resulting diff would certainly help to see how bad it is.\r\n\r\nOk done, both options available https://github.com/bitcoin-core/secp256k1/pull/1777#pullrequestreview-3594435763 ",
+      "created_at": "2025-12-18T18:41:21Z",
+      "updated_at": "2025-12-18T18:41:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2632227231",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2632227231"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
