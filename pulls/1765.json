@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2025-12-29T04:57:28Z",
+    "updated_at": "2026-01-06T07:49:07Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -164,7 +164,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13170,
+        "size": 13171,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-12-28T02:38:09Z",
+        "pushed_at": "2026-01-01T16:04:20Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -298,11 +298,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1111,
-        "stargazers_count": 2365,
-        "watchers_count": 2365,
+        "stargazers_count": 2371,
+        "watchers_count": 2371,
         "size": 14021,
         "default_branch": "master",
-        "open_issues_count": 164,
+        "open_issues_count": 165,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -315,7 +315,7 @@
         "visibility": "public",
         "pushed_at": "2025-12-19T19:51:04Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-12-28T23:56:47Z",
+        "updated_at": "2026-01-05T21:20:48Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 46,
+    "review_comments": 47,
     "comments": 35
   },
   "events": [
@@ -8134,6 +8134,60 @@
       "start_side": "RIGHT",
       "line": 137,
       "original_line": 137,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2663979109",
+      "pull_request_review_id": 3629808600,
+      "id": 2663979109,
+      "node_id": "PRRC_kwDOAP4Jqs6eyRhl",
+      "diff_hunk": "@@ -324,4 +324,132 @@ int secp256k1_silentpayments_sender_create_outputs(\n     return 1;\n }\n \n+/** Set hash state to the BIP340 tagged hash midstate for \"BIP0352/Label\". */\n+static void secp256k1_silentpayments_sha256_init_label(secp256k1_sha256* hash) {\n+    secp256k1_sha256_initialize(hash);\n+    hash->s[0] = 0x26b95d63ul;\n+    hash->s[1] = 0x8bf1b740ul;\n+    hash->s[2] = 0x10a5986ful;\n+    hash->s[3] = 0x06a387a5ul;\n+    hash->s[4] = 0x2d1c1c30ul;\n+    hash->s[5] = 0xd035951aul;\n+    hash->s[6] = 0x2d7f0f96ul;\n+    hash->s[7] = 0x29e3e0dbul;\n+\n+    hash->bytes = 64;\n+}\n+\n+static const unsigned char secp256k1_silentpayments_label_magic[4] = { 0x27, 0x9d, 0x44, 0xba };\n+\n+/* Saves a group element into a label. Requires that the provided group element is not infinity. */\n+static void secp256k1_silentpayments_label_save(secp256k1_silentpayments_label* label, const secp256k1_ge* ge) {\n+    memcpy(&label->data[0], secp256k1_silentpayments_label_magic, 4);\n+    secp256k1_ge_to_bytes(label->data + 4, ge);\n+}\n+\n+/* Loads a group element from a label. Returns 1 unless the label wasn't properly initialized. */\n+static int secp256k1_silentpayments_label_load(const secp256k1_context* ctx, secp256k1_ge* ge, const secp256k1_silentpayments_label* label) {\n+    ARG_CHECK(secp256k1_memcmp_var(&label->data[0], secp256k1_silentpayments_label_magic, 4) == 0);\n+    secp256k1_ge_from_bytes(ge, label->data + 4);\n+    return 1;",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 357,
+      "original_position": 31,
+      "commit_id": "2ee7d879343a5dafc30ae8dc00844ce1614f6931",
+      "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
+      "in_reply_to_id": 2638145462,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> As I currently understand it, we generally assume that user-facing opaque data types are only created and modified by public API functions, and the only protection against manual tampering are the magic bytes. Once that `ARG_CHECK` is passed in a `_load` function, we just assume that the object must have been created with the corresponding `_save` counterpart.\r\n\r\nIndeed, and I don't think we want to make any guarantees about what happens if the caller passes a modified object. And the magic bytes are just a best-effort protection against the user passing an opaque object of the wrong type. ",
+      "created_at": "2026-01-06T07:49:06Z",
+      "updated_at": "2026-01-06T07:49:07Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2663979109",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2663979109"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 353,
+      "original_start_line": 350,
+      "start_side": "RIGHT",
+      "line": 357,
+      "original_line": 354,
       "side": "RIGHT"
     }
   ]
