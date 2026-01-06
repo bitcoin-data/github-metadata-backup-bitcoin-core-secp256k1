@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-01-06T07:49:07Z",
+    "updated_at": "2026-01-06T08:05:08Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -302,7 +302,7 @@
         "watchers_count": 2371,
         "size": 14021,
         "default_branch": "master",
-        "open_issues_count": 165,
+        "open_issues_count": 164,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -345,7 +345,7 @@
     "deletions": 35,
     "changed_files": 23,
     "commits": 11,
-    "review_comments": 47,
+    "review_comments": 48,
     "comments": 35
   },
   "events": [
@@ -8188,6 +8188,60 @@
       "start_side": "RIGHT",
       "line": 357,
       "original_line": 354,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2664024832",
+      "pull_request_review_id": 3629856752,
+      "id": 2664024832,
+      "node_id": "PRRC_kwDOAP4Jqs6eycsA",
+      "diff_hunk": "@@ -126,6 +126,96 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_sender_c\n     size_t n_plain_seckeys\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(5);\n \n+/** Opaque data structure that holds a Silent Payments label.\n+ *\n+ *  Guaranteed to be 68 bytes in size. Serialized and parsed with\n+ *  `secp256k1_silentpayments_recipient_label_serialize` and\n+ *  `secp256k1_silentpayments_recipient_label_parse`.\n+ */\n+typedef struct secp256k1_silentpayments_label {\n+    unsigned char data[68];\n+} secp256k1_silentpayments_label;\n+\n+/** Parse a Silent Payments label.\n+ *\n+ *  Returns: 1 when the label could be parsed, 0 otherwise.\n+ *  Args:    ctx: pointer to a context object\n+ *  Out:   label: pointer to a label object\n+ *  In:     in33: pointer to the 33-byte label to be parsed\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_label_parse(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_label *label,\n+    const unsigned char *in33\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Serialize a Silent Payments label\n+ *\n+ *  Returns: 1 always\n+ *  Args:    ctx: pointer to a context object\n+ *  Out:   out33: pointer to a 33-byte array to store the serialized label\n+ *  In:    label: pointer to the label\n+ */\n+SECP256K1_API int secp256k1_silentpayments_recipient_label_serialize(\n+    const secp256k1_context *ctx,\n+    unsigned char *out33,\n+    const secp256k1_silentpayments_label *label\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 163,
+      "original_position": 38,
+      "commit_id": "2ee7d879343a5dafc30ae8dc00844ce1614f6931",
+      "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
+      "in_reply_to_id": 2638157829,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> In any case it seems that label serialization should be specified somewhere, \r\n\r\nIt's not entirely clear in this case, but I agree that this is rather a protocol-level concern: interoperability could indeed matter if you want to use the same label DB with different scanning implementations. And in this case, size indeed matters, so I think we should not add the magic bytes.",
+      "created_at": "2026-01-06T08:05:07Z",
+      "updated_at": "2026-01-06T08:05:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2664024832",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2664024832"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 152,
+      "original_start_line": 152,
+      "start_side": "RIGHT",
+      "line": 163,
+      "original_line": 163,
       "side": "RIGHT"
     }
   ]

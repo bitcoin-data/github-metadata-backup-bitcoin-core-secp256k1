@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392",
     "number": 1392,
-    "state": "open",
-    "state_reason": "reopened",
+    "state": "closed",
+    "state_reason": "completed",
     "title": "ci: Future of CI after Cirrus pricing change ",
     "body": "Roadmap (keeping this up to date):\r\n\r\nI think the natural way forward for us is:\r\n - [x] Move native Windows tasks to GitHub Actions (#1389 and #1397)\r\n - [x] Move SageMath task to GitHub Actions (#1399)\r\n - [x] Move native macOS tasks to GitHub Actions, this will convert them to x86_64 unfortunately (#1394, #1404)\r\n - Move Linux tasks to the Bitcoin Core persistent workers or alternatively to GitHub Actions\r\n   - [x] wine/msvc tasks (converting them to native windows in #1401)\r\n   - [x] wine/mingw tasks (#1398)\r\n   - [x] actual normal Linux tasks (#1396)\r\n   - [x] special tasks like qemu/sanitizers (#1406, #1409)\r\n\r\nPossible follow-ups:\r\n - ~Consider using [artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts) to move the Docker image from the Docker build job to the actual CI job (for Linux tasks).~ (Not worth the hassle, the current approach seems to work well.)<details><summary>Details</summary>\r\n This should be a [cleaner solution](https://github.com/bitcoin-core/secp256k1/pull/1398#issuecomment-1677074743), but it adds some complexity. It's also worth checking if this avoids [network issues](https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1684108729). In terms of delay, [this adds about 12 min uploading time to the Docker build job, but avoids about 1 min delay in the actual CI jobs](https://github.com/bitcoin-core/secp256k1/pull/1396#issuecomment-1686387785) as compared to the current solution that relies purely on the GHA cache (#1398).  So this will speed up CI if we could avoid re-uploading existing artifacts, e.g., have another digest file that just stores the SHA256, and re-upload only if the SHA does not match. But all of this is probably not worth the complexity if the current approach with the cache turns out to be good enough.</details>\r\n - [x] Enable Valgrind on macOS again now that the macOS tasks run on x86_64 (#1151, #1412)\r\n - Bring back some ARM testing (see for details: https://github.com/bitcoin-core/secp256k1/pull/1394#issuecomment-1682321329)\r\n   - [x] Add a task for ctimetest on ARM64/Linux/Valgrind on Cirrus CI using free minutes or the self-hosted runner  (#1426)\r\n   - [x] Add more ARM64 tests on QEMU (#1414)\r\n   - [ ] Add ARM32 tests (https://github.com/bitcoin-core/secp256k1/pull/1426#issuecomment-1728543515) \r\n - [x] Consider moving the `git` safe directory stuff to `run-in-docker-action` (https://github.com/bitcoin-core/secp256k1/pull/1411)\r\n - [ ] After the migration, check if the build matrix still makes sense \r\n - [ ] cosmetics: Job names could need a rework\r\n - [ ] cosmetics: Printing of log files could be improved\r\n\r\n\r\nOther related PRs:\r\n - [x] https://github.com/bitcoin-core/secp256k1/pull/1403\r\n - [x] https://github.com/bitcoin-core/secp256k1/pull/1410\r\n\r\n----\r\n\r\nCorresponding Bitcoin Core issue: https://github.com/bitcoin/bitcoin/issues/28098\r\n\r\nCirrus CI will cap the community cluster, see [cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci](https://cirrus-ci.org/blog/2023/07/17/limiting-free-usage-of-cirrus-ci/). As with Core, the pricing model makes it totally unreasonable to pay for compute credits (multiple thousand USD / month).\r\n\r\nThe plan in Bitcoin Core is to move native Windows+macOS tasks to GitHub Actions, and move Linux tasks to persistent workers (=self-hosted). If I read the Bitcoin Core IRC [meeting notes](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-79) correctly, @MarcoFalke [said](https://bitcoin.jonasschnelli.ch/ircmeetings/logs/bitcoin-core-dev/2023/bitcoin-core-dev.2023-08-03-14.00.log.html#l-99) these workers will also be available for libsecp256k1.\r\n\r\nBut the devil is in the details: \r\n\r\nFor macOS, we need to take also #1153 into account. It seems that [GitHub-hosted macOS runners are on x86_64](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources). The good news is that Valgrind should work again then, but the (very) bad is that this will reduce our number of native ARM tasks to zero. We still have some QEMU tasks, but we can't even the run the Valgrind cttimetests on them (maybe this would now work with MSan?!) @MarcoFalke Are the self-hosted runners only x86_64? \r\n\r\nFor Linux tasks, the meeting notes say that the main reason for using persistent workers is that some tasks require a very specific environment (e.g., the [USDT ASan job](https://github.com/bitcoin/bitcoin/pull/28161)). I don't think we have such requirements, so I tend to think that moving everything to GitHub Actions is a bit cleaner for us. With a persistent worker, Cirrus CI anyway acts only as a \"coordination layer\" between the worker and GitHub. Yet another way is to the self-hosted runners with GitHub Actions, see my comment https://github.com/bitcoin/bitcoin/issues/28098#issuecomment-1665661274). ",
     "user": {
@@ -33,6 +33,7 @@
       "received_events_url": "https://api.github.com/users/real-or-random/received_events",
       "type": "User",
       "site_admin": false,
+      "name": null,
       "patch_url": null
     },
     "labels": [
@@ -49,7 +50,8 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 38,
+    "comments": 39,
+    "closed_at": "2026-01-06T08:56:52Z",
     "closed_by": {
       "login": "real-or-random",
       "id": 1071625,
@@ -69,10 +71,11 @@
       "received_events_url": "https://api.github.com/users/real-or-random/received_events",
       "type": "User",
       "site_admin": false,
+      "name": null,
       "patch_url": null
     },
     "created_at": "2023-08-04T14:03:09Z",
-    "updated_at": "2025-10-16T15:59:06Z"
+    "updated_at": "2026-01-06T08:56:52Z"
   },
   "events": [
     {
@@ -99,6 +102,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -133,6 +137,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -163,6 +168,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -193,6 +199,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -220,6 +227,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1665674233",
@@ -249,6 +257,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -276,6 +285,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1665677633",
@@ -305,6 +315,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -332,6 +343,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1665679976",
@@ -361,6 +373,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -388,6 +401,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1665717753",
@@ -417,6 +431,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -444,6 +459,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1666492837",
@@ -473,6 +489,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -500,6 +517,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1667296087",
@@ -529,6 +547,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -556,6 +575,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1668529447",
@@ -585,6 +605,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -612,6 +633,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1669176101",
@@ -641,6 +663,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -668,6 +691,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1669989910",
@@ -697,6 +721,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "96294c00fb8435e0a25ca541512e921f8ec80a20",
@@ -727,6 +752,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -754,6 +780,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1677401316",
@@ -783,6 +810,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -810,6 +838,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679306773",
@@ -839,6 +868,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -869,6 +899,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -899,6 +930,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -926,6 +958,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679314570",
@@ -955,6 +988,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -982,6 +1016,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1679332070",
@@ -1011,6 +1046,7 @@
         "received_events_url": "https://api.github.com/users/romanz/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1041,6 +1077,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "2e6cf9bae515975c914a0e3c7c01e50a01466c8b",
@@ -1071,6 +1108,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "6ee14550c8f56a72adbaf6a203b4b63fe08ca57f",
@@ -1101,6 +1139,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1128,6 +1167,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1692137135",
@@ -1157,6 +1197,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1184,6 +1225,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1692973796",
@@ -1213,6 +1255,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1240,6 +1283,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693003657",
@@ -1269,6 +1313,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1296,6 +1341,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693055096",
@@ -1325,6 +1371,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1352,6 +1399,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693060005",
@@ -1381,6 +1429,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1408,6 +1457,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693221129",
@@ -1437,6 +1487,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1464,6 +1515,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693474861",
@@ -1493,6 +1545,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1520,6 +1573,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693485620",
@@ -1549,6 +1603,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1576,6 +1631,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1693685610",
@@ -1605,6 +1661,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1632,6 +1689,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1694249692",
@@ -1661,6 +1719,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1688,6 +1747,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1694330514",
@@ -1717,6 +1777,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "65c79fe2d05d05258eb95a9c51a306841c8febf2",
@@ -1747,6 +1808,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "727bec5bc2536e6936f21b68d970588757df6e27",
@@ -1777,6 +1839,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1804,6 +1867,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1706604751",
@@ -1833,6 +1897,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1860,6 +1925,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1706620854",
@@ -1889,6 +1955,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1916,6 +1983,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1706799569",
@@ -1945,6 +2013,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1972,6 +2041,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1706814739",
@@ -2001,6 +2071,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2028,6 +2099,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1706833242",
@@ -2057,6 +2129,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2087,6 +2160,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2117,6 +2191,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2144,6 +2219,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1729211667",
@@ -2173,6 +2249,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2200,6 +2277,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1742696352",
@@ -2229,6 +2307,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2256,6 +2335,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1743622231",
@@ -2285,6 +2365,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2312,6 +2393,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1744446321",
@@ -2341,6 +2423,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2368,6 +2451,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1745604702",
@@ -2397,6 +2481,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2424,6 +2509,7 @@
         "received_events_url": "https://api.github.com/users/maflcko/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1745606971",
@@ -2453,6 +2539,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2480,6 +2567,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1745639958",
@@ -2509,6 +2597,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2539,6 +2628,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2569,6 +2659,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2596,6 +2687,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-1919228029",
@@ -2625,6 +2717,7 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -2652,10 +2745,100 @@
         "received_events_url": "https://api.github.com/users/hebasto/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-3411576055",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
+    },
+    {
+      "event": "commented",
+      "id": 3713771859,
+      "node_id": "IC_kwDOAP4Jqs7dW6lT",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3713771859",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-06T08:56:52Z",
+      "updated_at": "2026-01-06T08:56:52Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Let's just close this entirely. \n\nHappy to see PRs addressing these remaining items, but they're not crucial, and they're pretty obvious from the CI output itself, so there's no need to track them.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1392#issuecomment-3713771859",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1392"
+    },
+    {
+      "event": "closed",
+      "id": 21871473654,
+      "node_id": "CE_lADOAP4Jqs5te3ctzwAAAAUXpDP2",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21871473654",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-06T08:56:52Z"
     }
   ]
 }
