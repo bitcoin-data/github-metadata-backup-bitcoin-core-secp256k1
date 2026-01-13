@@ -80,7 +80,7 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2026-01-13T17:21:45Z",
+    "updated_at": "2026-01-13T19:48:21Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -325,8 +325,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1116,
-        "stargazers_count": 2375,
-        "watchers_count": 2375,
+        "stargazers_count": 2376,
+        "watchers_count": 2376,
         "size": 14003,
         "default_branch": "master",
         "open_issues_count": 168,
@@ -342,7 +342,7 @@
         "visibility": "public",
         "pushed_at": "2026-01-11T20:45:11Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-01-13T08:44:04Z",
+        "updated_at": "2026-01-13T19:33:09Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -372,7 +372,7 @@
     "deletions": 348,
     "changed_files": 23,
     "commits": 2,
-    "review_comments": 42,
+    "review_comments": 43,
     "comments": 6
   },
   "events": [
@@ -3784,6 +3784,60 @@
       "start_side": "RIGHT",
       "line": 412,
       "original_line": 412,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2687890597",
+      "pull_request_review_id": 3657651805,
+      "id": 2687890597,
+      "node_id": "PRRC_kwDOAP4Jqs6gNfSl",
+      "diff_hunk": "@@ -11,6 +11,14 @@\n #include \"testrand.h\"\n #include \"util.h\"\n \n+/* Helper for when we need to check that the custom sha256 transform was called */\n+#define DEFINE_SHA256_TRANSFORM_PROBE(name)                                     \\\n+    static int name##_called = 0;                                               \\\n+    static void name(uint32_t *s, const unsigned char *msg, size_t rounds) {    \\\n+        name##_called = 1;                                                      \\\n+        secp256k1_sha256_transform(s, msg, rounds);                             \\\n+    }",
+      "path": "src/testutil.h",
+      "position": 10,
+      "original_position": 10,
+      "commit_id": "041a6217fa709b17ae869a75ac2bba0d217f49db",
+      "original_commit_id": "041a6217fa709b17ae869a75ac2bba0d217f49db",
+      "in_reply_to_id": 2664978535,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "what you mean with \"custom hash function (not custom SHA256 transform)\"?\r\n\r\nThe idea of the test was to verify that:\r\n1) Default behavior remains unchanged when the ctx compression function is not set.\r\n2) Custom compression function is actually called when provided. And because such function is correct, the complete ECDH test passes.",
+      "created_at": "2026-01-13T19:48:20Z",
+      "updated_at": "2026-01-13T19:48:21Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2687890597",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2687890597"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": 14,
+      "original_start_line": 14,
+      "start_side": "RIGHT",
+      "line": 20,
+      "original_line": 20,
       "side": "RIGHT"
     }
   ]
