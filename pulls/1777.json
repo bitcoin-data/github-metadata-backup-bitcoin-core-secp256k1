@@ -80,7 +80,7 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2026-01-13T21:54:01Z",
+    "updated_at": "2026-01-14T13:46:13Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -324,12 +324,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1116,
+        "forks_count": 1117,
         "stargazers_count": 2376,
         "watchers_count": 2376,
         "size": 14003,
         "default_branch": "master",
-        "open_issues_count": 168,
+        "open_issues_count": 169,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -372,7 +372,7 @@
     "deletions": 348,
     "changed_files": 23,
     "commits": 2,
-    "review_comments": 59,
+    "review_comments": 60,
     "comments": 7
   },
   "events": [
@@ -4675,6 +4675,60 @@
       "start_side": null,
       "line": 144,
       "original_line": 144,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2690488778",
+      "pull_request_review_id": 3660812792,
+      "id": 2690488778,
+      "node_id": "PRRC_kwDOAP4Jqs6gXZnK",
+      "diff_hunk": "@@ -403,6 +404,47 @@ SECP256K1_API void secp256k1_context_set_error_callback(\n     const void *data\n ) SECP256K1_ARG_NONNULL(1);\n \n+/** A pointer to a function implementing SHA256's internal compression function.\n+ *\n+ * This function processes one or more contiguous 64-byte message blocks and\n+ * updates the internal SHA256 state accordingly. The function is not responsible\n+ * for counting consumed blocks or bytes, nor for performing padding.\n+ *\n+ * Out:     state:     pointer to eight 32-bit words representing the current internal state;\n+ *                     the state is updated in place.\n+ * In:      blocks64:  pointer to the first 64-byte block; additional blocks must\n+ *                     be contiguous in memory.\n+ *          n_blocks:  number of contiguous 64-byte blocks to process.\n+ */\n+typedef void (*secp256k1_sha256_compression_fn)(\n+    uint32_t* state,\n+    const unsigned char* blocks64,\n+    size_t n_blocks\n+);\n+\n+/**\n+ * Set a callback function to override the internal SHA256 compression function.\n+ *\n+ * This installs a function to replace the built-in block-compression\n+ * step used by the library's internal SHA256 implementation.\n+ * The provided callback must be functionally identical (bit-for-bit)\n+ * to the default compression function. Any deviation will cause incorrect\n+ * results and undefined behavior.\n+ *\n+ * This API exists to support environments that wish to route the\n+ * SHA256 compression step through a hardware-accelerated or otherwise\n+ * specialized implementation. It is not meant for modifying the\n+ * semantics of SHA256.",
+      "path": "include/secp256k1.h",
+      "position": 42,
+      "original_position": 42,
+      "commit_id": "fd7bf4950024dfcb835022b42a97ee9ec8c5d3ee",
+      "original_commit_id": "fd7bf4950024dfcb835022b42a97ee9ec8c5d3ee",
+      "in_reply_to_id": 2687991506,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Good point. A bit simpler even: \"It is not meant for replacing SHA-256 with a different hash function\".",
+      "created_at": "2026-01-14T13:46:13Z",
+      "updated_at": "2026-01-14T13:46:13Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2690488778",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2690488778"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 437,
+      "original_line": 437,
       "side": "RIGHT"
     }
   ]
