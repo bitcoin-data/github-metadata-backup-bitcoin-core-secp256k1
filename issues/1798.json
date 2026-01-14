@@ -40,9 +40,9 @@
     "assignees": [],
     "author_association": "NONE",
     "locked": false,
-    "comments": 1,
+    "comments": 2,
     "created_at": "2026-01-10T19:23:38Z",
-    "updated_at": "2026-01-13T14:08:40Z"
+    "updated_at": "2026-01-14T09:21:24Z"
   },
   "events": [
     {
@@ -101,6 +101,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1798#issuecomment-3744537019",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1798"
+    },
+    {
+      "event": "commented",
+      "id": 3748581078,
+      "node_id": "IC_kwDOAP4Jqs7fbs7W",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3748581078",
+      "actor": {
+        "login": "Justsomebuddy",
+        "id": 226256829,
+        "node_id": "U_kgDODXxnvQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/226256829?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Justsomebuddy",
+        "html_url": "https://github.com/Justsomebuddy",
+        "followers_url": "https://api.github.com/users/Justsomebuddy/followers",
+        "following_url": "https://api.github.com/users/Justsomebuddy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Justsomebuddy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Justsomebuddy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Justsomebuddy/subscriptions",
+        "organizations_url": "https://api.github.com/users/Justsomebuddy/orgs",
+        "repos_url": "https://api.github.com/users/Justsomebuddy/repos",
+        "events_url": "https://api.github.com/users/Justsomebuddy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Justsomebuddy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-14T09:21:24Z",
+      "updated_at": "2026-01-14T09:21:24Z",
+      "author_association": "NONE",
+      "body": "Re: practical value — I'd argue theory matters. First came the word, then the number, then cryptography. Gauss and Eisenstein didn't know their 1844 work on Z[ω] would end up in Bitcoin's scalar multiplication 180 years later. Documentation of such connections has educational value, even if it doesn't change the code behavior.\n\nThat said, your suggestion about `sage/gen_split_lambda_constants.sage` makes sense. Here's a standalone verification:\n\n```python\n#!/usr/bin/env sage\n\"\"\"\nEisenstein integer structure verification for secp256k1.\nDemonstrates that GLV constants arise from Z[ω] factorization of group order.\n\nReferences:\n- Gallant, Lambert, Vanstone (2001): \"Faster Point Multiplication on Elliptic Curves\"\n- Eisenstein (1844): \"Beweis der allgemeinsten Reciprocitätsgesetze\"\n\"\"\"\n\nn = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141\nLAMBDA = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72\n\n# Eisenstein factors (from Cornacchia or direct search)\na = 303414439467246543595250775667605759171\nb = 64502973549206556628585045361533709077\n\n# 1. Norm equation: n = a² + ab + b²\nassert a**2 + a*b + b**2 == n\n\n# 2. In Z[ω]: π = a - bω is an Eisenstein prime with N(π) = n  \nK.<omega> = NumberField(x^2 + x + 1)\npi = a - b*omega\nassert pi.norm() == n\n\n# 3. GLV eigenvalue: λ = b/a (mod n)\nassert (b * inverse_mod(a, n)) % n == LAMBDA\n\n# 4. Verify λ is primitive cube root of unity\nassert (LAMBDA**2 + LAMBDA + 1) % n == 0\n\nprint(\"All verified.\")\n```\n\nThe key insight: `λ = b/a mod n` where (a, b) are Eisenstein factors satisfying `n = a² + ab + b²`. This connects the \"magic constants\" in `scalar_impl.h` to 19th century algebraic number theory.\n\nRe: LLM — I use a custom software stack with agents for research. This is part of a personal philosophical investigation into Semaev's summation polynomials and j=0 curve structure. The math is independently verified in SageMath regardless of how it was explored.",
+      "user": {
+        "login": "Justsomebuddy",
+        "id": 226256829,
+        "node_id": "U_kgDODXxnvQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/226256829?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Justsomebuddy",
+        "html_url": "https://github.com/Justsomebuddy",
+        "followers_url": "https://api.github.com/users/Justsomebuddy/followers",
+        "following_url": "https://api.github.com/users/Justsomebuddy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Justsomebuddy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Justsomebuddy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Justsomebuddy/subscriptions",
+        "organizations_url": "https://api.github.com/users/Justsomebuddy/orgs",
+        "repos_url": "https://api.github.com/users/Justsomebuddy/repos",
+        "events_url": "https://api.github.com/users/Justsomebuddy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Justsomebuddy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1798#issuecomment-3748581078",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1798"
     }
   ]
