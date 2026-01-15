@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1651/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1651/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/ed1094896e359fdaa99595250cf1612e9a111c0d",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/c491f37c02ca56dc0c837187d9471caccbf789c5",
     "number": 1651,
     "state": "open",
     "locked": false,
@@ -37,6 +37,7 @@
       "received_events_url": "https://api.github.com/users/stratospher/received_events",
       "type": "User",
       "site_admin": false,
+      "name": null,
       "patch_url": null
     },
     "body": "built on top of c4942d36.\r\n\r\n> BIP352 requires senders to compute output scripts using ECDH shared secrets from the same secret keys used to sign the inputs. Generating an incorrect signature will produce an invalid transaction that will be rejected by consensus. An incorrectly generated output script can still be consensus-valid, meaning funds may be lost if it gets broadcast. By producing a DLEQ proof for the generated ECDH shared secrets, the signing entity can prove to other entities that the output scripts have been generated correctly without revealing the private keys.\r\n\r\n(from [BIP 374](https://github.com/bitcoin/bips/blob/master/bip-0374.mediawiki))\r\n\r\nThis PR:\r\n\r\n- adds support for DLEQ proof generation and verification using `secp256k1_dleq_prove`, `secp256k1_dleq_verify` based on implementation in [secp256k1-zkp](https://github.com/BlockstreamResearch/secp256k1-zkp/blob/master/src/modules/ecdsa_adaptor/dleq_impl.h)\r\n- introduces a new structure for storing proofs in silent payment module - `secp256k1_silentpayments_dleq_data` which stores the shared secret computed using ECDH, DLEQ proof and also the index of which recipient in the [original unsorted recipient array](https://github.com/bitcoin-core/secp256k1/blob/f42e0dde59943ad0c9247c61f7af521b70838e8f/include/secp256k1_silentpayments.h#L43)  the proof refers to.\r\n- adds 4 new APIs in silent payments module to create, verify, serialize and parse proof\r\n    1. sender can create proof using `secp256k1_silentpayments_sender_create_outputs_with_proof`\r\n        - in the existing `secp256k1_silentpayments_sender_create_outputs` API, output pubkey is created by iterating over all the recipients and computing ECDH for each unique recipient.\r\n        - since creating the proof also requites iterating over all recipients and computing ECDH for each unique recipient, compute both proof(s) and output pubkey(s) in a new function - `secp256k1_silentpayments_sender_create_outputs_with_proof`.\r\n        - `secp256k1_silentpayments_sender_create_outputs` can use `secp256k1_silentpayments_sender_create_outputs_with_proof`internally.\r\n    2.  both sender and receiver can verify proof using `secp256k1_silentpayments_verify_proof`\r\n    3. Serialisation function (`secp256k1_silentpayments_dleq_data_serialize`) serialises  `secp256k1_silentpayments_dleq_data` structure into bytes. `secp256k1_silentpayments_dleq_data_parse` parses the bytes back into `secp256k1_silentpayments_dleq_data` structure.\r\n        1. useful if proof creation is done on 1 sender side device (ex: hardware wallet) and proof verification is done on another sender side device (ex: software wallet). `secp256k1_silentpayments_dleq_data` structure can be serialised into bytes using `secp256k1_silentpayments_dleq_data_serialize` and then the bytes can be sent from 1 device to another.\r\n        2. `secp256k1_silentpayments_dleq_data_parse` can reconstruct the bytes back into `secp256k1_silentpayments_dleq_data` structure which can then be used for proof verification.\r\n\r\nopen questions:\r\n\r\n1. is the API design ok?\r\n    1. see `examples/silentpayments.c` for 2 scenarios in which proof verification could be useful. (Alice sends bitcoins to Bob and Carol in 1 silent payment transaction)\r\n        1. useful situation - On Alice’s side\r\n            1. Alice’s hardware wallet creates proof\r\n            2. Alice’s hardware wallet sends proof to Alice’s software wallet\r\n            3. Alice’s software wallet verifies proof and makes sure ECDH shared secrets for generating SP output is computed correctly. Alice can get additional safety guarantee about computed SP output before sending funds.\r\n        2. not sure if this situation is useful - On Bob’s/Carol’s side\r\n            1. Alice’s software wallet sends proof to Bob’s/Carol’s  software wallet\r\n            2. Bob’s/Carol’s software wallet verifies proof and makes sure ECDH shared secrets for generating SP output is computed correctly.\r\n2. should this be shipped with SP module or separately? only problem with separate release would be redundant APIs like `secp256k1_silentpayments_sender_create_outputs` and `secp256k1_silentpayments_sender_create_outputs_with_proof` for backward compatibility. \r\n\r\nHuge thanks to @ theStack for brainstorming and discussing this with me! ❤️",
@@ -52,7 +53,7 @@
       }
     ],
     "created_at": "2025-02-03T17:32:28Z",
-    "updated_at": "2025-10-22T08:49:43Z",
+    "updated_at": "2026-01-15T12:48:47Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -63,7 +64,7 @@
     "head": {
       "label": "stratospher:dleq-sp",
       "ref": "dleq-sp",
-      "sha": "ed1094896e359fdaa99595250cf1612e9a111c0d",
+      "sha": "c491f37c02ca56dc0c837187d9471caccbf789c5",
       "user": {
         "login": "stratospher",
         "id": 44024636,
@@ -83,6 +84,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "repo": {
@@ -109,6 +111,7 @@
           "received_events_url": "https://api.github.com/users/stratospher/received_events",
           "type": "User",
           "site_admin": false,
+          "name": null,
           "patch_url": null
         },
         "private": false,
@@ -162,7 +165,7 @@
         "watchers_count": 0,
         "size": 12811,
         "default_branch": "master",
-        "open_issues_count": 0,
+        "open_issues_count": 1,
         "is_template": false,
         "topics": [],
         "has_issues": false,
@@ -173,7 +176,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-09-29T13:57:20Z",
+        "pushed_at": "2026-01-15T12:41:16Z",
         "created_at": "2022-07-30T06:55:56Z",
         "updated_at": "2025-09-09T13:08:38Z",
         "allow_forking": true,
@@ -197,7 +200,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "baa265429fa8f1686138380e52a75c25b0344719",
+      "sha": "4721e077b4ac9a9ab80db3fd9a05d6dda207f5c1",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -217,6 +220,7 @@
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "repo": {
@@ -243,6 +247,7 @@
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
           "site_admin": false,
+          "name": null,
           "patch_url": null
         },
         "private": false,
@@ -291,12 +296,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1095,
-        "stargazers_count": 2325,
-        "watchers_count": 2325,
-        "size": 12733,
+        "forks_count": 1117,
+        "stargazers_count": 2376,
+        "watchers_count": 2376,
+        "size": 14003,
         "default_branch": "master",
-        "open_issues_count": 153,
+        "open_issues_count": 171,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -307,9 +312,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-10-17T07:09:52Z",
+        "pushed_at": "2026-01-11T20:45:11Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-10-21T10:57:36Z",
+        "updated_at": "2026-01-13T19:33:09Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -335,12 +340,12 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": true,
-    "additions": 9380,
+    "additions": 9387,
     "deletions": 35,
     "changed_files": 26,
     "commits": 18,
     "review_comments": 20,
-    "comments": 5
+    "comments": 6
   },
   "events": [
     {
@@ -374,6 +379,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#pullrequestreview-2604132450",
@@ -405,6 +411,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "44bf41dfb4bb59a0b38c6cb48ce6228c192bf195",
@@ -435,6 +442,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "41ee3e82881d741db9fa5378f6959e9888e18c5e",
@@ -465,6 +473,7 @@
         "received_events_url": "https://api.github.com/users/jonatack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -492,6 +501,7 @@
         "received_events_url": "https://api.github.com/users/jonatack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-2688913408",
@@ -521,6 +531,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -555,6 +566,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -582,6 +594,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-2721922904",
@@ -611,6 +624,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -641,6 +655,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -671,6 +686,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -698,6 +714,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-2750779615",
@@ -727,6 +744,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -757,6 +775,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -787,6 +806,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -814,6 +834,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-2765921325",
@@ -843,6 +864,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -873,6 +895,7 @@
         "received_events_url": "https://api.github.com/users/josibake/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -903,6 +926,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -933,6 +957,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1380,286 +1405,6 @@
       "sha": "c4942d3646a58bb9fd8a51e60defe1571f8ee595"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDkwNjMwZmIyODQ0N2UwMjBlZWUxMDE5ODQ3MDM0YmVjMDExOTI3M2Q",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/90630fb28447e020eee1019847034bec0119273d",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/90630fb28447e020eee1019847034bec0119273d",
-      "tree": {
-        "sha": "7c625e1de5c21a454aa4c62bc52825c9a7df22a9",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7c625e1de5c21a454aa4c62bc52825c9a7df22a9"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c4942d3646a58bb9fd8a51e60defe1571f8ee595",
-          "sha": "c4942d3646a58bb9fd8a51e60defe1571f8ee595",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c4942d3646a58bb9fd8a51e60defe1571f8ee595"
-        }
-      ],
-      "message": "add dleq implementation\n\n- modify secp256k1-zkp's dleq implementation to be consistent with\n  BIP 374.\n- use BIP374 notations.\n- add DLEQ tests",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-28T08:51:29Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2024-11-22T07:33:52Z"
-      },
-      "sha": "90630fb28447e020eee1019847034bec0119273d"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDUxOGM0NTlhNDFkNDNkNzhlYzk2NjVmNTliMDc0YTI4MDg0YTQzNWQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/518c459a41d43d78ec9665f59b074a28084a435d",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/518c459a41d43d78ec9665f59b074a28084a435d",
-      "tree": {
-        "sha": "62c30a80ac9164e0f9ae829e7512cd35abcc17bf",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/62c30a80ac9164e0f9ae829e7512cd35abcc17bf"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/90630fb28447e020eee1019847034bec0119273d",
-          "sha": "90630fb28447e020eee1019847034bec0119273d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/90630fb28447e020eee1019847034bec0119273d"
-        }
-      ],
-      "message": "add BIP374 test vectors\n\nAdd BIP374 test vectors. The vectors are generated with a Python script\nthat converts the 2 csv files from the BIP - test_vectors_generate_proof.csv\nand test_vectors_verify_proof.csv to C code:\n\n$ ./tools/test_vectors_dleq_generate.py bips/bip-0374 > ./src/modules/silentpayments/dleq_vectors.h",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-28T13:33:05Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-01-28T07:55:21Z"
-      },
-      "sha": "518c459a41d43d78ec9665f59b074a28084a435d"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDFmNDI3ODRjNTg5NzdmMDRhZDUzZTgwN2JmOGUzODY0YTU0ZGE2N2I",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1f42784c58977f04ad53e807bf8e3864a54da67b",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1f42784c58977f04ad53e807bf8e3864a54da67b",
-      "tree": {
-        "sha": "9b191507bf55e254c0308fb73ce3b6992f005d89",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9b191507bf55e254c0308fb73ce3b6992f005d89"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/518c459a41d43d78ec9665f59b074a28084a435d",
-          "sha": "518c459a41d43d78ec9665f59b074a28084a435d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/518c459a41d43d78ec9665f59b074a28084a435d"
-        }
-      ],
-      "message": "add secp256k1_silentpayments_create_shared_secret_with_proof\n\n- add new internal function which returns both DLEQ proof and\n  shared secret.\n- the existing secp256k1_silentpayments_create_shared_secret API\nis refactored to use\nsecp256k1_silentpayments_create_shared_secret_with_proof.",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-29T08:15:52Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2024-11-22T12:03:52Z"
-      },
-      "sha": "1f42784c58977f04ad53e807bf8e3864a54da67b"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGZiMWZkNGUwNjVhNmViMGMyZGU5ZDgxMGI0NDFkZGNhMjMyZGQxNGE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fb1fd4e065a6eb0c2de9d810b441ddca232dd14a",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fb1fd4e065a6eb0c2de9d810b441ddca232dd14a",
-      "tree": {
-        "sha": "2d77562a9b477050d05b58dc5c460923c62569d7",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2d77562a9b477050d05b58dc5c460923c62569d7"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1f42784c58977f04ad53e807bf8e3864a54da67b",
-          "sha": "1f42784c58977f04ad53e807bf8e3864a54da67b",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1f42784c58977f04ad53e807bf8e3864a54da67b"
-        }
-      ],
-      "message": "introduce struct to hold DLEQ proof related data for silent payments\n\n- structure contains 33-byte shared secret point + 64-byte DLEQ proof\n  + index of recipient in original unsorted array of silent payment\n    recipients\n- add functions to serialise and parse the structure to/from bytes",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-29T08:16:02Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-02-03T08:41:59Z"
-      },
-      "sha": "fb1fd4e065a6eb0c2de9d810b441ddca232dd14a"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGM1ZGI5MjIyYjM4YWEwZWMwN2VhNTJkNTdlNTZmY2E1N2EzZTBiYmU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe",
-      "tree": {
-        "sha": "3e8ea736ce0580f09651935731a45e597afd6e1f",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3e8ea736ce0580f09651935731a45e597afd6e1f"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fb1fd4e065a6eb0c2de9d810b441ddca232dd14a",
-          "sha": "fb1fd4e065a6eb0c2de9d810b441ddca232dd14a",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fb1fd4e065a6eb0c2de9d810b441ddca232dd14a"
-        }
-      ],
-      "message": "add secp256k1_silentpayments_sender_create_outputs_with_proof\n\n- add new API which returns DLEQ proofs along with outputs for recipients\n- the existing API secp256k1_silentpayments_sender_create_outputs simply\n  calls secp256k1_silentpayments_sender_create_outputs_with_proof\n  internally.",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-29T08:16:02Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2024-11-22T12:35:45Z"
-      },
-      "sha": "c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGM3MGQwZTVhMzg0Mjk4ZWI5YWJkZGRhNjk3MWE2ZjU1ZmFhNzYwZjA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c70d0e5a384298eb9abddda6971a6f55faa760f0",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c70d0e5a384298eb9abddda6971a6f55faa760f0",
-      "tree": {
-        "sha": "392c75da7aeb04d3904707fc9a39da4be7b62196",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/392c75da7aeb04d3904707fc9a39da4be7b62196"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe",
-          "sha": "c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c5db9222b38aa0ec07ea52d57e56fca57a3e0bbe"
-        }
-      ],
-      "message": "add secp256k1_silentpayments_verify_proof",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-29T08:16:02Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2024-11-22T12:46:01Z"
-      },
-      "sha": "c70d0e5a384298eb9abddda6971a6f55faa760f0"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGVkMTA5NDg5NmUzNTlmZGFhOTk1OTUyNTBjZjE2MTJlOWExMTFjMGQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ed1094896e359fdaa99595250cf1612e9a111c0d",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ed1094896e359fdaa99595250cf1612e9a111c0d",
-      "tree": {
-        "sha": "4f5e6db7f6fb58c5d45cfe6bcfcf2c11d2b9591f",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4f5e6db7f6fb58c5d45cfe6bcfcf2c11d2b9591f"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c70d0e5a384298eb9abddda6971a6f55faa760f0",
-          "sha": "c70d0e5a384298eb9abddda6971a6f55faa760f0",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c70d0e5a384298eb9abddda6971a6f55faa760f0"
-        }
-      ],
-      "message": "add tests for creating and verifying proofs\n\n- in examples/silentpayments.c\n    - sender now generates outputs with proof and verifies the proof\n    - proof can be serialised to bytes and sent to recipient\n    - bytes can be parsed back to proof by recipient as well\n    - recipient can verify proof\n- in tests_recipients_helper, run_silentpayments_test_vector_send\n    - along with output checks, generate DLEQ proofs and verify them",
-      "committer": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-09-29T08:16:02Z"
-      },
-      "author": {
-        "name": "stratospher",
-        "email": "44024636+stratospher@users.noreply.github.com",
-        "date": "2025-02-03T08:44:06Z"
-      },
-      "sha": "ed1094896e359fdaa99595250cf1612e9a111c0d"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 19985103309,
       "node_id": "HRFPE_lADOAP4Jqs6okbW9zwAAAASnNHnN",
@@ -1683,6 +1428,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
@@ -1719,6 +1465,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#pullrequestreview-3319710413",
@@ -1750,6 +1497,7 @@
         "received_events_url": "https://api.github.com/users/w0xlt/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1777,10 +1525,442 @@
         "received_events_url": "https://api.github.com/users/w0xlt/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-3431165964",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1651"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDdmYTg0YzM1MzM5ZWU3MTVlMTljODA2OTJlZWQyMTE3NGYwZTY4ZGM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fa84c35339ee715e19c80692eed21174f0e68dc",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fa84c35339ee715e19c80692eed21174f0e68dc",
+      "tree": {
+        "sha": "dae941ed43af56cca3da9ac940e437f5cb1706a7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/dae941ed43af56cca3da9ac940e437f5cb1706a7"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c4942d3646a58bb9fd8a51e60defe1571f8ee595",
+          "sha": "c4942d3646a58bb9fd8a51e60defe1571f8ee595",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c4942d3646a58bb9fd8a51e60defe1571f8ee595"
+        }
+      ],
+      "message": "add dleq implementation\n\n- modify secp256k1-zkp's dleq implementation to be consistent with\n  BIP 374.\n- use BIP374 notations.\n- add DLEQ tests",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:29Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2024-11-22T07:33:52Z"
+      },
+      "sha": "7fa84c35339ee715e19c80692eed21174f0e68dc"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGI4MWU0NTE2ZmFjM2JhZmM0NWU2ZGU1NWY0NjIyNTg4ODg2OTc0YzA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b81e4516fac3bafc45e6de55f4622588886974c0",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b81e4516fac3bafc45e6de55f4622588886974c0",
+      "tree": {
+        "sha": "50a04f452e0255e060c8da42893da0982c89938b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/50a04f452e0255e060c8da42893da0982c89938b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7fa84c35339ee715e19c80692eed21174f0e68dc",
+          "sha": "7fa84c35339ee715e19c80692eed21174f0e68dc",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7fa84c35339ee715e19c80692eed21174f0e68dc"
+        }
+      ],
+      "message": "add BIP374 test vectors\n\nAdd BIP374 test vectors. The vectors are generated with a Python script\nthat converts the 2 csv files from the BIP - test_vectors_generate_proof.csv\nand test_vectors_verify_proof.csv to C code:\n\n$ ./tools/test_vectors_dleq_generate.py bips/bip-0374 > ./src/modules/silentpayments/dleq_vectors.h",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:39Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2025-01-28T07:55:21Z"
+      },
+      "sha": "b81e4516fac3bafc45e6de55f4622588886974c0"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBhNmY1YjdmZGI0ZGMwMjg0OWEzYjMwODlkNTdkM2EzZjdkZjg3ZmM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc",
+      "tree": {
+        "sha": "494b7f62b9afea24b1654f54378671e61b471815",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/494b7f62b9afea24b1654f54378671e61b471815"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b81e4516fac3bafc45e6de55f4622588886974c0",
+          "sha": "b81e4516fac3bafc45e6de55f4622588886974c0",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b81e4516fac3bafc45e6de55f4622588886974c0"
+        }
+      ],
+      "message": "add secp256k1_silentpayments_create_shared_secret_with_proof\n\n- add new internal function which returns both DLEQ proof and\n  shared secret.\n- the existing secp256k1_silentpayments_create_shared_secret API\nis refactored to use\nsecp256k1_silentpayments_create_shared_secret_with_proof.",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:47Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2024-11-22T12:03:52Z"
+      },
+      "sha": "0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ2MTU1ZGMxNWFiNzMzMmY4YzE4YTgyMThiYWJhMGI3YjliNmE2MTM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d6155dc15ab7332f8c18a8218baba0b7b9b6a613",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d6155dc15ab7332f8c18a8218baba0b7b9b6a613",
+      "tree": {
+        "sha": "2063c0ad8d653f8f2e28572584496e5a4bb45880",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/2063c0ad8d653f8f2e28572584496e5a4bb45880"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc",
+          "sha": "0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0a6f5b7fdb4dc02849a3b3089d57d3a3f7df87fc"
+        }
+      ],
+      "message": "introduce struct to hold DLEQ proof related data for silent payments\n\n- structure contains 33-byte shared secret point + 64-byte DLEQ proof\n  + index of recipient in original unsorted array of silent payment\n    recipients\n- add functions to serialise and parse the structure to/from bytes",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:47Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2025-02-03T08:41:59Z"
+      },
+      "sha": "d6155dc15ab7332f8c18a8218baba0b7b9b6a613"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGFkYzVlM2UzZjQ0YmU2OGJhNWNkMmJhNjVlYTc0YzJkYmE1YjA5NmU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e",
+      "tree": {
+        "sha": "5d558f1fc7b8cbf0b23dc5f5ba4e03bb525648a7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5d558f1fc7b8cbf0b23dc5f5ba4e03bb525648a7"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d6155dc15ab7332f8c18a8218baba0b7b9b6a613",
+          "sha": "d6155dc15ab7332f8c18a8218baba0b7b9b6a613",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d6155dc15ab7332f8c18a8218baba0b7b9b6a613"
+        }
+      ],
+      "message": "add secp256k1_silentpayments_sender_create_outputs_with_proof\n\n- add new API which returns DLEQ proofs along with outputs for recipients\n- the existing API secp256k1_silentpayments_sender_create_outputs simply\n  calls secp256k1_silentpayments_sender_create_outputs_with_proof\n  internally.",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:56Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2024-11-22T12:35:45Z"
+      },
+      "sha": "adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDFkMDU1NGYxNjM0MjVlZjlmNzYzZWY5MjFmZTZlMDAyYzljNzBkODc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1d0554f163425ef9f763ef921fe6e002c9c70d87",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1d0554f163425ef9f763ef921fe6e002c9c70d87",
+      "tree": {
+        "sha": "d14b73c2b394669fec4f1cb420d0e0c22159a6be",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d14b73c2b394669fec4f1cb420d0e0c22159a6be"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e",
+          "sha": "adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/adc5e3e3f44be68ba5cd2ba65ea74c2dba5b096e"
+        }
+      ],
+      "message": "add secp256k1_silentpayments_verify_proof",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:56Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2024-11-22T12:46:01Z"
+      },
+      "sha": "1d0554f163425ef9f763ef921fe6e002c9c70d87"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGM0OTFmMzdjMDJjYTU2ZGMwYzgzNzE4N2Q5NDcxY2FjY2JmNzg5YzU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c491f37c02ca56dc0c837187d9471caccbf789c5",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c491f37c02ca56dc0c837187d9471caccbf789c5",
+      "tree": {
+        "sha": "ca917820a73dba70baa20e9eb6690589996d008f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ca917820a73dba70baa20e9eb6690589996d008f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1d0554f163425ef9f763ef921fe6e002c9c70d87",
+          "sha": "1d0554f163425ef9f763ef921fe6e002c9c70d87",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1d0554f163425ef9f763ef921fe6e002c9c70d87"
+        }
+      ],
+      "message": "add tests for creating and verifying proofs\n\n- in examples/silentpayments.c\n    - sender now generates outputs with proof and verifies the proof\n    - proof can be serialised to bytes and sent to recipient\n    - bytes can be parsed back to proof by recipient as well\n    - recipient can verify proof\n- in tests_recipients_helper, run_silentpayments_test_vector_send\n    - along with output checks, generate DLEQ proofs and verify them",
+      "committer": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2026-01-15T12:30:56Z"
+      },
+      "author": {
+        "name": "stratospher",
+        "email": "44024636+stratospher@users.noreply.github.com",
+        "date": "2025-02-03T08:44:06Z"
+      },
+      "sha": "c491f37c02ca56dc0c837187d9471caccbf789c5"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 22068721264,
+      "node_id": "HRFPE_lADOAP4Jqs6okbW9zwAAAAUjZfZw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/22068721264",
+      "actor": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "c491f37c02ca56dc0c837187d9471caccbf789c5",
+      "commit_url": "https://api.github.com/repos/stratospher/secp256k1/commits/c491f37c02ca56dc0c837187d9471caccbf789c5",
+      "created_at": "2026-01-15T12:41:18Z"
+    },
+    {
+      "event": "commented",
+      "id": 3754603104,
+      "node_id": "IC_kwDOAP4Jqs7fyrJg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3754603104",
+      "actor": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-15T12:48:47Z",
+      "updated_at": "2026-01-15T12:48:47Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "update: https://github.com/bitcoin-core/secp256k1/pull/1802 takes the first 2 commits from this PR and exposes the `dleq_prove` and `dleq_verify` API.\r\n\r\nthank you to @macgyver13 for taking this forward! it is being used in [Silent Payments with PSBT (BIP375)](https://github.com/bitcoin/bips/blob/master/bip-0375.mediawiki#computing-the-ecdh-shares-and-dleq-proofs) - https://github.com/macgyver13/rust-dleq\r\n\r\nI think the DLEQ functionality can be used in other contexts as well, so it makes sense for it to go in independently of the full Silent Payments implementation. I'm not actively addressing comments in this SP+DLEQ PR since it depends on SP and would like to look at it first.\r\n\r\n(sorry for the confusion! will review #1802!)",
+      "user": {
+        "login": "stratospher",
+        "id": 44024636,
+        "node_id": "MDQ6VXNlcjQ0MDI0NjM2",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44024636?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/stratospher",
+        "html_url": "https://github.com/stratospher",
+        "followers_url": "https://api.github.com/users/stratospher/followers",
+        "following_url": "https://api.github.com/users/stratospher/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/stratospher/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/stratospher/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/stratospher/subscriptions",
+        "organizations_url": "https://api.github.com/users/stratospher/orgs",
+        "repos_url": "https://api.github.com/users/stratospher/repos",
+        "events_url": "https://api.github.com/users/stratospher/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/stratospher/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-3754603104",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1651"
+    },
+    {
+      "event": "mentioned",
+      "id": 22068899665,
+      "node_id": "MEE_lADOAP4Jqs6okbW9zwAAAAUjaK9R",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/22068899665",
+      "actor": {
+        "login": "macgyver13",
+        "id": 4712150,
+        "node_id": "MDQ6VXNlcjQ3MTIxNTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/4712150?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/macgyver13",
+        "html_url": "https://github.com/macgyver13",
+        "followers_url": "https://api.github.com/users/macgyver13/followers",
+        "following_url": "https://api.github.com/users/macgyver13/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/macgyver13/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/macgyver13/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/macgyver13/subscriptions",
+        "organizations_url": "https://api.github.com/users/macgyver13/orgs",
+        "repos_url": "https://api.github.com/users/macgyver13/repos",
+        "events_url": "https://api.github.com/users/macgyver13/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/macgyver13/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-15T12:48:49Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 22068899727,
+      "node_id": "SE_lADOAP4Jqs6okbW9zwAAAAUjaK-P",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/22068899727",
+      "actor": {
+        "login": "macgyver13",
+        "id": 4712150,
+        "node_id": "MDQ6VXNlcjQ3MTIxNTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/4712150?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/macgyver13",
+        "html_url": "https://github.com/macgyver13",
+        "followers_url": "https://api.github.com/users/macgyver13/followers",
+        "following_url": "https://api.github.com/users/macgyver13/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/macgyver13/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/macgyver13/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/macgyver13/subscriptions",
+        "organizations_url": "https://api.github.com/users/macgyver13/orgs",
+        "repos_url": "https://api.github.com/users/macgyver13/repos",
+        "events_url": "https://api.github.com/users/macgyver13/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/macgyver13/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-15T12:48:49Z"
     }
   ],
   "comments": [
@@ -1815,6 +1995,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "could use `testutil_random_scalar_order` from `testutil.h` instead",
@@ -1868,6 +2049,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "could use `testutil_random_ge_test` from `testutil.h` instead",
@@ -1899,7 +2081,7 @@
       "path": "src/modules/silentpayments/dleq_impl.h",
       "position": 57,
       "original_position": 60,
-      "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
+      "commit_id": "c491f37c02ca56dc0c837187d9471caccbf789c5",
       "original_commit_id": "cec4d3553add5e8666a7055354d280c4297a8862",
       "in_reply_to_id": null,
       "user": {
@@ -1921,6 +2103,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "pubkey serialization should always succeed here (as it would only fail if `p` is point at inifinity), so could VERIFY_CHECK that instead, like e.g. https://github.com/bitcoin-core/secp256k1/blob/00774d0723af1974e2a113db4adc479bfc47e20f/src/modules/musig/keyagg_impl.h#L131-L138",
@@ -1974,6 +2157,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "is the `xonly_pk32` parameter actually needed or can it be dropped?",
@@ -2027,6 +2211,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "do we need to support creating nonces with other tags than \"BIP0374/nonce\"? currently the else-path is not reachable, as far as I can see",
@@ -2080,6 +2265,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "```suggestion\r\n    if (!noncefp(nonce, buf, 66, a32, NULL, dleq_algo, sizeof(dleq_algo), ndata)) {\r\n```",
@@ -2133,6 +2319,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "outdated parameters, at these positions are now `aux_rand32` and `m`",
@@ -2186,6 +2373,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "ideally, the test vector data is created from a script that is included as well (see e.g. https://github.com/bitcoin-core/secp256k1/blob/master/tools/test_vectors_musig2_generate.py for musig2)",
@@ -2217,7 +2405,7 @@
       "path": "src/modules/silentpayments/dleq_impl.h",
       "position": 57,
       "original_position": 60,
-      "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
+      "commit_id": "c491f37c02ca56dc0c837187d9471caccbf789c5",
       "original_commit_id": "cec4d3553add5e8666a7055354d280c4297a8862",
       "in_reply_to_id": 1948023074,
       "user": {
@@ -2239,6 +2427,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "hmm true. but since input to this function is `secp256k1_ge` and not `secp256k1_pubkey`, unsure if it makes sense to restrict possible values of `secp256k1_ge` here? (in the musig example, input to the function is `secp256k1_pubkey`)",
@@ -2292,6 +2481,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "ah good point. I've dropped it. was following the approach in schnorr module but it's not needed.",
@@ -2345,6 +2535,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "oh true, I've removed it.",
@@ -2398,6 +2589,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "removed it to call `secp256k1_nonce_function_dleq` directly.",
@@ -2451,6 +2643,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "updated.",
@@ -2504,6 +2697,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "oh nice! done.",
@@ -2557,6 +2751,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "done.",
@@ -2610,6 +2805,7 @@
         "received_events_url": "https://api.github.com/users/stratospher/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "good point! done in 208352b.",
@@ -2639,7 +2835,7 @@
       "node_id": "PRRC_kwDOAP4Jqs6QFRJ1",
       "diff_hunk": "@@ -0,0 +1,235 @@\n+#ifndef SECP256K1_DLEQ_IMPL_H\n+#define SECP256K1_DLEQ_IMPL_H\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/aux\")||SHA256(\"BIP0374/aux\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged_aux(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x48479343ul;\n+    sha->s[1] = 0xa9eb648cul;\n+    sha->s[2] = 0x58952fe4ul;\n+    sha->s[3] = 0x4772d3b2ul;\n+    sha->s[4] = 0x977ab0a0ul;\n+    sha->s[5] = 0xcb8e2740ul;\n+    sha->s[6] = 0x60bb4b81ul;\n+    sha->s[7] = 0x68a41b66ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/nonce\")||SHA256(\"BIP0374/nonce\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0xa810fc87ul;\n+    sha->s[1] = 0x3b4a4d2aul;\n+    sha->s[2] = 0xe302cfb4ul;\n+    sha->s[3] = 0x322df1a0ul;\n+    sha->s[4] = 0xd2e7fb82ul;\n+    sha->s[5] = 0x7808570dul;\n+    sha->s[6] = 0x9c33e0cdul;\n+    sha->s[7] = 0x2dfbf7f6ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/challenge\")||SHA256(\"BIP0374/challenge\"). */\n+static void secp256k1_dleq_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x24f1c9c7ul;\n+    sha->s[1] = 0xd1538c75ul;\n+    sha->s[2] = 0xc9874ae8ul;\n+    sha->s[3] = 0x6566de76ul;\n+    sha->s[4] = 0x487843c9ul;\n+    sha->s[5] = 0xc13d8026ul;\n+    sha->s[6] = 0x39a2f3eful;\n+    sha->s[7] = 0x2ad0fcb3ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+static int secp256k1_dleq_hash_point(secp256k1_sha256 *sha, secp256k1_ge *p) {\n+    unsigned char buf[33];\n+    size_t size = 33;\n+    if (!secp256k1_eckey_pubkey_serialize(p, buf, &size, 1)) {\n+        return 0;\n+    }\n+    secp256k1_sha256_write(sha, buf, size);\n+    return 1;\n+}\n+\n+static void secp256k1_nonce_function_dleq(unsigned char *nonce32, const unsigned char *msg, size_t msglen, const unsigned char *key32, const unsigned char *aux_rand32) {\n+    secp256k1_sha256 sha;\n+    unsigned char masked_key[32];\n+    int i;\n+\n+    if (aux_rand32 != NULL) {\n+        secp256k1_nonce_function_bip374_sha256_tagged_aux(&sha);\n+        secp256k1_sha256_write(&sha, aux_rand32, 32);\n+        secp256k1_sha256_finalize(&sha, masked_key);\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] ^= key32[i];\n+        }\n+    } else {\n+        /* Precomputed TaggedHash(\"BIP0374/aux\", 0x0000...00); */\n+        static const unsigned char ZERO_MASK[32] = {\n+            38, 255, 199, 133, 21, 94, 75, 99,\n+            18, 166, 0, 53, 197, 146, 253, 84,\n+            197, 228, 235, 145, 124, 59, 203, 21,\n+            66, 88, 250, 253, 207, 123, 43, 55\n+        };\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] = key32[i] ^ ZERO_MASK[i];\n+        }\n+    }\n+\n+    secp256k1_nonce_function_bip374_sha256_tagged(&sha);\n+    /* Hash masked-key||msg using the tagged hash as per the spec */\n+    secp256k1_sha256_write(&sha, masked_key, 32);\n+    secp256k1_sha256_write(&sha, msg, msglen);\n+    secp256k1_sha256_finalize(&sha, nonce32);\n+}\n+\n+/* Generates a nonce as defined in BIP0374 */\n+static int secp256k1_dleq_nonce(secp256k1_scalar *k, const unsigned char *a32, const unsigned char *A_33, const unsigned char *C_33, const unsigned char *aux_rand32) {\n+    unsigned char buf[66];\n+    unsigned char nonce[32];\n+\n+    memcpy(buf, A_33, 33);\n+    memcpy(buf + 33, C_33, 33);\n+    secp256k1_nonce_function_dleq(nonce, buf, 66, a32, aux_rand32);\n+\n+    secp256k1_scalar_set_b32(k, nonce, NULL);\n+    if (secp256k1_scalar_is_zero(k)) {\n+        return 0;\n+    }\n+\n+    return 1;\n+}\n+\n+/* Generates a challenge as defined in BIP0374 */\n+static void secp256k1_dleq_challenge(secp256k1_scalar *e, secp256k1_ge *B, secp256k1_ge *R1, secp256k1_ge *R2, secp256k1_ge *A, secp256k1_ge *C, const unsigned char *m) {\n+    unsigned char buf[32];\n+    secp256k1_sha256 sha;\n+    secp256k1_ge generator_point = secp256k1_ge_const_g;\n+\n+    secp256k1_dleq_sha256_tagged(&sha);\n+    secp256k1_dleq_hash_point(&sha, A);\n+    secp256k1_dleq_hash_point(&sha, B);\n+    secp256k1_dleq_hash_point(&sha, C);\n+    secp256k1_dleq_hash_point(&sha, &generator_point);\n+    secp256k1_dleq_hash_point(&sha, R1);\n+    secp256k1_dleq_hash_point(&sha, R2);\n+    if (m) secp256k1_sha256_write(&sha, m, 32);\n+    secp256k1_sha256_finalize(&sha, buf);\n+\n+    secp256k1_scalar_set_b32(e, buf, NULL);\n+}\n+\n+/* Generate points from scalar a such that A = a*G and C = a*B */\n+static void secp256k1_dleq_pair(const secp256k1_ecmult_gen_context *ecmult_gen_ctx, secp256k1_ge *A, secp256k1_ge *C, const secp256k1_scalar *a, const secp256k1_ge *B) {\n+    secp256k1_gej Aj, Cj;\n+\n+    secp256k1_ecmult_gen(ecmult_gen_ctx, &Aj, a);\n+    secp256k1_ge_set_gej(A, &Aj);\n+    secp256k1_ecmult_const(&Cj, B, a);\n+    secp256k1_ge_set_gej(C, &Cj);\n+}\n+\n+/* DLEQ Proof Generation\n+ *\n+ * For given elliptic curve points A, B, C, and G, the prover generates a proof to prove knowledge of a scalar a such\n+ * that A = a⋅G and C = a⋅B without revealing anything about a.\n+ *\n+ *  Returns: 1 if proof creation was successful. 0 if an error occurred.\n+ *  Out:       scalar e: part of proof = bytes(32, e) || bytes(32, s).\n+ *             scalar s: other part of proof = bytes(32, e) || bytes(32, s).\n+ *  In:     a : scalar a to be proven that both A and C were generated from\n+ *          B : point on the curve\n+ *          A : point on the curve(a⋅G) generated from a\n+ *          C : point on the curve(a⋅B) generated from a\n+ * aux_rand32 : pointer to 32-byte auxiliary randomness used to generate the nonce in secp256k1_nonce_function_dleq.\n+ *          m : an optional message\n+ * */\n+static int secp256k1_dleq_prove(const secp256k1_context *ctx, secp256k1_scalar *s, secp256k1_scalar *e, const secp256k1_scalar *a, secp256k1_ge *B, secp256k1_ge *A, secp256k1_ge *C, const unsigned char *aux_rand32, const unsigned char *m) {\n+    secp256k1_ge R1, R2;\n+    secp256k1_scalar k = { 0 };\n+    unsigned char a32[32];\n+    unsigned char A_33[33];\n+    unsigned char B_33[33];\n+    unsigned char C_33[33];\n+    int ret = 1;\n+    size_t pubkey_size = 33;\n+\n+    secp256k1_scalar_get_b32(a32, a);\n+    if (!secp256k1_eckey_pubkey_serialize(B, B_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    if (!secp256k1_eckey_pubkey_serialize(A, A_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    if (!secp256k1_eckey_pubkey_serialize(C, C_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    ret &= secp256k1_dleq_nonce(&k, a32, A_33, C_33, aux_rand32);",
       "path": "src/modules/silentpayments/dleq_impl.h",
-      "position": 175,
+      "position": 1,
       "original_position": 175,
       "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
       "original_commit_id": "90630fb28447e020eee1019847034bec0119273d",
@@ -2663,6 +2859,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "as per the latest version of the BIP (0.2.0), the nonce should also include the message, see https://github.com/bitcoin/bips/blob/3d0bab3cc211be9d40c0029f62c7e4eebd27ea21/bip-0374.mediawiki?plain=1#L77, I guess the test vectors are outdated and would fail if re-generated with the latest .csv file",
@@ -2681,7 +2878,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 175,
+      "line": null,
       "original_line": 175,
       "side": "RIGHT"
     },
@@ -2692,9 +2889,9 @@
       "node_id": "PRRC_kwDOAP4Jqs6QFTD9",
       "diff_hunk": "@@ -0,0 +1,235 @@\n+#ifndef SECP256K1_DLEQ_IMPL_H\n+#define SECP256K1_DLEQ_IMPL_H\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/aux\")||SHA256(\"BIP0374/aux\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged_aux(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x48479343ul;\n+    sha->s[1] = 0xa9eb648cul;\n+    sha->s[2] = 0x58952fe4ul;\n+    sha->s[3] = 0x4772d3b2ul;\n+    sha->s[4] = 0x977ab0a0ul;\n+    sha->s[5] = 0xcb8e2740ul;\n+    sha->s[6] = 0x60bb4b81ul;\n+    sha->s[7] = 0x68a41b66ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/nonce\")||SHA256(\"BIP0374/nonce\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0xa810fc87ul;\n+    sha->s[1] = 0x3b4a4d2aul;\n+    sha->s[2] = 0xe302cfb4ul;\n+    sha->s[3] = 0x322df1a0ul;\n+    sha->s[4] = 0xd2e7fb82ul;\n+    sha->s[5] = 0x7808570dul;\n+    sha->s[6] = 0x9c33e0cdul;\n+    sha->s[7] = 0x2dfbf7f6ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/challenge\")||SHA256(\"BIP0374/challenge\"). */\n+static void secp256k1_dleq_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x24f1c9c7ul;\n+    sha->s[1] = 0xd1538c75ul;\n+    sha->s[2] = 0xc9874ae8ul;\n+    sha->s[3] = 0x6566de76ul;\n+    sha->s[4] = 0x487843c9ul;\n+    sha->s[5] = 0xc13d8026ul;\n+    sha->s[6] = 0x39a2f3eful;\n+    sha->s[7] = 0x2ad0fcb3ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+static int secp256k1_dleq_hash_point(secp256k1_sha256 *sha, secp256k1_ge *p) {\n+    unsigned char buf[33];\n+    size_t size = 33;\n+    if (!secp256k1_eckey_pubkey_serialize(p, buf, &size, 1)) {\n+        return 0;\n+    }\n+    secp256k1_sha256_write(sha, buf, size);\n+    return 1;\n+}\n+\n+static void secp256k1_nonce_function_dleq(unsigned char *nonce32, const unsigned char *msg, size_t msglen, const unsigned char *key32, const unsigned char *aux_rand32) {\n+    secp256k1_sha256 sha;\n+    unsigned char masked_key[32];\n+    int i;\n+\n+    if (aux_rand32 != NULL) {\n+        secp256k1_nonce_function_bip374_sha256_tagged_aux(&sha);\n+        secp256k1_sha256_write(&sha, aux_rand32, 32);\n+        secp256k1_sha256_finalize(&sha, masked_key);\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] ^= key32[i];\n+        }\n+    } else {\n+        /* Precomputed TaggedHash(\"BIP0374/aux\", 0x0000...00); */\n+        static const unsigned char ZERO_MASK[32] = {\n+            38, 255, 199, 133, 21, 94, 75, 99,\n+            18, 166, 0, 53, 197, 146, 253, 84,\n+            197, 228, 235, 145, 124, 59, 203, 21,\n+            66, 88, 250, 253, 207, 123, 43, 55\n+        };\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] = key32[i] ^ ZERO_MASK[i];\n+        }\n+    }\n+\n+    secp256k1_nonce_function_bip374_sha256_tagged(&sha);\n+    /* Hash masked-key||msg using the tagged hash as per the spec */\n+    secp256k1_sha256_write(&sha, masked_key, 32);\n+    secp256k1_sha256_write(&sha, msg, msglen);\n+    secp256k1_sha256_finalize(&sha, nonce32);",
       "path": "src/modules/silentpayments/dleq_impl.h",
-      "position": 91,
+      "position": 94,
       "original_position": 91,
-      "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
+      "commit_id": "c491f37c02ca56dc0c837187d9471caccbf789c5",
       "original_commit_id": "90630fb28447e020eee1019847034bec0119273d",
       "in_reply_to_id": null,
       "user": {
@@ -2716,6 +2913,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "should memclear the `sha` and `masked_key` instances here (as also done in the [BIP340 nonce function](https://github.com/bitcoin-core/secp256k1/blob/baa265429fa8f1686138380e52a75c25b0344719/src/modules/schnorrsig/main_impl.h#L96))",
@@ -2734,8 +2932,8 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 91,
-      "original_line": 91,
+      "line": 94,
+      "original_line": 94,
       "side": "RIGHT"
     },
     {
@@ -2745,9 +2943,9 @@
       "node_id": "PRRC_kwDOAP4Jqs6QFTuf",
       "diff_hunk": "@@ -0,0 +1,235 @@\n+#ifndef SECP256K1_DLEQ_IMPL_H\n+#define SECP256K1_DLEQ_IMPL_H\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/aux\")||SHA256(\"BIP0374/aux\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged_aux(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x48479343ul;\n+    sha->s[1] = 0xa9eb648cul;\n+    sha->s[2] = 0x58952fe4ul;\n+    sha->s[3] = 0x4772d3b2ul;\n+    sha->s[4] = 0x977ab0a0ul;\n+    sha->s[5] = 0xcb8e2740ul;\n+    sha->s[6] = 0x60bb4b81ul;\n+    sha->s[7] = 0x68a41b66ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/nonce\")||SHA256(\"BIP0374/nonce\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0xa810fc87ul;\n+    sha->s[1] = 0x3b4a4d2aul;\n+    sha->s[2] = 0xe302cfb4ul;\n+    sha->s[3] = 0x322df1a0ul;\n+    sha->s[4] = 0xd2e7fb82ul;\n+    sha->s[5] = 0x7808570dul;\n+    sha->s[6] = 0x9c33e0cdul;\n+    sha->s[7] = 0x2dfbf7f6ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/challenge\")||SHA256(\"BIP0374/challenge\"). */\n+static void secp256k1_dleq_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x24f1c9c7ul;\n+    sha->s[1] = 0xd1538c75ul;\n+    sha->s[2] = 0xc9874ae8ul;\n+    sha->s[3] = 0x6566de76ul;\n+    sha->s[4] = 0x487843c9ul;\n+    sha->s[5] = 0xc13d8026ul;\n+    sha->s[6] = 0x39a2f3eful;\n+    sha->s[7] = 0x2ad0fcb3ul;\n+\n+    sha->bytes = 64;\n+}\n+\n+static int secp256k1_dleq_hash_point(secp256k1_sha256 *sha, secp256k1_ge *p) {\n+    unsigned char buf[33];\n+    size_t size = 33;\n+    if (!secp256k1_eckey_pubkey_serialize(p, buf, &size, 1)) {\n+        return 0;\n+    }\n+    secp256k1_sha256_write(sha, buf, size);\n+    return 1;\n+}\n+\n+static void secp256k1_nonce_function_dleq(unsigned char *nonce32, const unsigned char *msg, size_t msglen, const unsigned char *key32, const unsigned char *aux_rand32) {\n+    secp256k1_sha256 sha;\n+    unsigned char masked_key[32];\n+    int i;\n+\n+    if (aux_rand32 != NULL) {\n+        secp256k1_nonce_function_bip374_sha256_tagged_aux(&sha);\n+        secp256k1_sha256_write(&sha, aux_rand32, 32);\n+        secp256k1_sha256_finalize(&sha, masked_key);\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] ^= key32[i];\n+        }\n+    } else {\n+        /* Precomputed TaggedHash(\"BIP0374/aux\", 0x0000...00); */\n+        static const unsigned char ZERO_MASK[32] = {\n+            38, 255, 199, 133, 21, 94, 75, 99,\n+            18, 166, 0, 53, 197, 146, 253, 84,\n+            197, 228, 235, 145, 124, 59, 203, 21,\n+            66, 88, 250, 253, 207, 123, 43, 55\n+        };\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] = key32[i] ^ ZERO_MASK[i];\n+        }\n+    }\n+\n+    secp256k1_nonce_function_bip374_sha256_tagged(&sha);\n+    /* Hash masked-key||msg using the tagged hash as per the spec */\n+    secp256k1_sha256_write(&sha, masked_key, 32);\n+    secp256k1_sha256_write(&sha, msg, msglen);\n+    secp256k1_sha256_finalize(&sha, nonce32);\n+}\n+\n+/* Generates a nonce as defined in BIP0374 */\n+static int secp256k1_dleq_nonce(secp256k1_scalar *k, const unsigned char *a32, const unsigned char *A_33, const unsigned char *C_33, const unsigned char *aux_rand32) {\n+    unsigned char buf[66];\n+    unsigned char nonce[32];\n+\n+    memcpy(buf, A_33, 33);\n+    memcpy(buf + 33, C_33, 33);\n+    secp256k1_nonce_function_dleq(nonce, buf, 66, a32, aux_rand32);\n+\n+    secp256k1_scalar_set_b32(k, nonce, NULL);\n+    if (secp256k1_scalar_is_zero(k)) {\n+        return 0;\n+    }\n+\n+    return 1;\n+}\n+\n+/* Generates a challenge as defined in BIP0374 */\n+static void secp256k1_dleq_challenge(secp256k1_scalar *e, secp256k1_ge *B, secp256k1_ge *R1, secp256k1_ge *R2, secp256k1_ge *A, secp256k1_ge *C, const unsigned char *m) {\n+    unsigned char buf[32];\n+    secp256k1_sha256 sha;\n+    secp256k1_ge generator_point = secp256k1_ge_const_g;\n+\n+    secp256k1_dleq_sha256_tagged(&sha);\n+    secp256k1_dleq_hash_point(&sha, A);\n+    secp256k1_dleq_hash_point(&sha, B);\n+    secp256k1_dleq_hash_point(&sha, C);\n+    secp256k1_dleq_hash_point(&sha, &generator_point);\n+    secp256k1_dleq_hash_point(&sha, R1);\n+    secp256k1_dleq_hash_point(&sha, R2);\n+    if (m) secp256k1_sha256_write(&sha, m, 32);\n+    secp256k1_sha256_finalize(&sha, buf);\n+\n+    secp256k1_scalar_set_b32(e, buf, NULL);\n+}\n+\n+/* Generate points from scalar a such that A = a*G and C = a*B */\n+static void secp256k1_dleq_pair(const secp256k1_ecmult_gen_context *ecmult_gen_ctx, secp256k1_ge *A, secp256k1_ge *C, const secp256k1_scalar *a, const secp256k1_ge *B) {\n+    secp256k1_gej Aj, Cj;\n+\n+    secp256k1_ecmult_gen(ecmult_gen_ctx, &Aj, a);\n+    secp256k1_ge_set_gej(A, &Aj);\n+    secp256k1_ecmult_const(&Cj, B, a);\n+    secp256k1_ge_set_gej(C, &Cj);\n+}\n+\n+/* DLEQ Proof Generation\n+ *\n+ * For given elliptic curve points A, B, C, and G, the prover generates a proof to prove knowledge of a scalar a such\n+ * that A = a⋅G and C = a⋅B without revealing anything about a.\n+ *\n+ *  Returns: 1 if proof creation was successful. 0 if an error occurred.\n+ *  Out:       scalar e: part of proof = bytes(32, e) || bytes(32, s).\n+ *             scalar s: other part of proof = bytes(32, e) || bytes(32, s).\n+ *  In:     a : scalar a to be proven that both A and C were generated from\n+ *          B : point on the curve\n+ *          A : point on the curve(a⋅G) generated from a\n+ *          C : point on the curve(a⋅B) generated from a\n+ * aux_rand32 : pointer to 32-byte auxiliary randomness used to generate the nonce in secp256k1_nonce_function_dleq.\n+ *          m : an optional message\n+ * */\n+static int secp256k1_dleq_prove(const secp256k1_context *ctx, secp256k1_scalar *s, secp256k1_scalar *e, const secp256k1_scalar *a, secp256k1_ge *B, secp256k1_ge *A, secp256k1_ge *C, const unsigned char *aux_rand32, const unsigned char *m) {\n+    secp256k1_ge R1, R2;\n+    secp256k1_scalar k = { 0 };\n+    unsigned char a32[32];\n+    unsigned char A_33[33];\n+    unsigned char B_33[33];\n+    unsigned char C_33[33];\n+    int ret = 1;\n+    size_t pubkey_size = 33;\n+\n+    secp256k1_scalar_get_b32(a32, a);\n+    if (!secp256k1_eckey_pubkey_serialize(B, B_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    if (!secp256k1_eckey_pubkey_serialize(A, A_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    if (!secp256k1_eckey_pubkey_serialize(C, C_33, &pubkey_size, 1)) {\n+        return 0;\n+    }\n+    ret &= secp256k1_dleq_nonce(&k, a32, A_33, C_33, aux_rand32);\n+\n+    /* R1 = k*G, R2 = k*B */\n+    secp256k1_dleq_pair(&ctx->ecmult_gen_ctx, &R1, &R2, &k, B);\n+    /* We declassify the non-secret values R1 and R2 to allow using them as\n+     * branch points. */\n+    secp256k1_declassify(ctx, &R1, sizeof(R1));\n+    secp256k1_declassify(ctx, &R2, sizeof(R2));\n+\n+    /* e = tagged hash(A, B, C, R1, R2) */\n+    /* s = k + e * a */\n+    secp256k1_dleq_challenge(e, B, &R1, &R2, A, C, m);\n+    secp256k1_scalar_mul(s, e, a);\n+    secp256k1_scalar_add(s, s, &k);\n+\n+    secp256k1_scalar_clear(&k);",
       "path": "src/modules/silentpayments/dleq_impl.h",
-      "position": 190,
+      "position": 195,
       "original_position": 190,
-      "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
+      "commit_id": "c491f37c02ca56dc0c837187d9471caccbf789c5",
       "original_commit_id": "90630fb28447e020eee1019847034bec0119273d",
       "in_reply_to_id": null,
       "user": {
@@ -2769,6 +2967,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "should also clear out the secret key serialization `a32` here",
@@ -2787,8 +2986,8 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 190,
-      "original_line": 190,
+      "line": 195,
+      "original_line": 195,
       "side": "RIGHT"
     },
     {
@@ -2798,7 +2997,7 @@
       "node_id": "PRRC_kwDOAP4Jqs6QFV8I",
       "diff_hunk": "@@ -444,6 +457,30 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipien\n     const uint32_t k\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Serialize a secp256k1_silentpayments_dleq_data object into a 101-byte sequence.\n+ *  101-byte sequence = 33 bytes shared secret + 64 bytes proof + 4 bytes index\n+ *                      where index is position in an array of pointers to silent payment recipients\n+ *\n+ *  Out:       output: pointer to a 101-byte array to place the serialized `secp256k1_silentpayments_dleq_data` in\n+ *  In:    dleq_data: pointer to an initialized secp256k1_silentpayments_dleq_data object\n+ */\n+SECP256K1_API void secp256k1_silentpayments_dleq_data_serialize(\n+    unsigned char *output33,",
       "path": "include/secp256k1_silentpayments.h",
-      "position": 521,
+      "position": 1,
       "original_position": 32,
       "commit_id": "ed1094896e359fdaa99595250cf1612e9a111c0d",
       "original_commit_id": "fb1fd4e065a6eb0c2de9d810b441ddca232dd14a",
@@ -2822,6 +3021,7 @@
         "received_events_url": "https://api.github.com/users/theStack/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "body": "```suggestion\r\n    unsigned char *output101,\r\n```",
@@ -2840,7 +3040,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 521,
+      "line": null,
       "original_line": 468,
       "side": "RIGHT"
     }
