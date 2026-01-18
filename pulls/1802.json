@@ -43,7 +43,7 @@
     "body": "This PR adds a DLEQ (Discrete Logarithm Equality) proof module as specified in [BIP 374](https://github.com/bitcoin/bips/blob/master/bip-0374.mediawiki).\r\n\r\nBased on [PR #1651](https://github.com/bitcoin-core/secp256k1/pull/1651) by @stratospher and the [secp256k1-zkp implementation](https://github.com/BlockstreamResearch/secp256k1-zkp/blob/master/src/modules/ecdsa_adaptor/dleq_impl.h).\r\n## Public API\r\n\r\nExposes two functions for proof generation and verification:\r\n- `secp256k1_dleq_prove`\r\n- `secp256k1_dleq_verify`\r\n\r\nThese are designed to support rust FFI bindings and follow the API patterns established in similar modules.\r\n## Questions for Reviewers\r\n\r\n- Should this module be optional (current behavior) or enabled by default?\r\n- Are there additional changes needed to support existing Silent Payments PRs?\r\n- Feedback on API design, documentation, and test coverage?\r\n\r\n## Notes\r\n\r\nAddressed outstanding comments from [PR #1651](https://github.com/bitcoin-core/secp256k1/pull/1651#discussion_r2417300085):\r\n- BIP-374 v0.2.0 test vectors\r\n- Proper memory clearing with memclear",
     "labels": [],
     "created_at": "2026-01-15T01:39:55Z",
-    "updated_at": "2026-01-17T11:44:32Z",
+    "updated_at": "2026-01-18T10:06:53Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -304,7 +304,7 @@
         "visibility": "public",
         "pushed_at": "2026-01-11T20:45:11Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-01-17T06:40:31Z",
+        "updated_at": "2026-01-18T07:39:41Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -335,7 +335,7 @@
     "changed_files": 14,
     "commits": 5,
     "review_comments": 11,
-    "comments": 2
+    "comments": 3
   },
   "events": [
     {
@@ -971,6 +971,64 @@
       "submitted_at": "2026-01-17T11:44:32Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1802"
+    },
+    {
+      "event": "commented",
+      "id": 3765129220,
+      "node_id": "IC_kwDOAP4Jqs7ga1AE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3765129220",
+      "actor": {
+        "login": "qatkk",
+        "id": 43328710,
+        "node_id": "MDQ6VXNlcjQzMzI4NzEw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/43328710?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/qatkk",
+        "html_url": "https://github.com/qatkk",
+        "followers_url": "https://api.github.com/users/qatkk/followers",
+        "following_url": "https://api.github.com/users/qatkk/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/qatkk/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/qatkk/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/qatkk/subscriptions",
+        "organizations_url": "https://api.github.com/users/qatkk/orgs",
+        "repos_url": "https://api.github.com/users/qatkk/repos",
+        "events_url": "https://api.github.com/users/qatkk/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/qatkk/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-18T10:06:53Z",
+      "updated_at": "2026-01-18T10:06:53Z",
+      "author_association": "NONE",
+      "body": "I have a question regarding the choice of parameters passed to this API, and I may be missing some design context here — so I’d appreciate clarification. \r\nIs there a specific reason why the second generator `B` is provided directly as an input?\r\nIn the original proposal of DLEQ proofs by Chaum and Pedersen [1], the security of the protocol relies on the prover not knowing the discrete‑log relation between the two generators. Specifically, if the prover knows a scalar `b` such that `B=b⋅G`, then the prover can fabricate valid-looking but incorrect proofs by exploiting this trapdoor relationship.\r\nIn the context of silent payments (and the description provided in BIP 374) this makes sense, since `B` represents another user’s public key — a point for which the prover does not know the corresponding private key. However, as commented by stratospher https://github.com/bitcoin-core/secp256k1/pull/1651#issuecomment-3754603104 this PR is intended to support more general DLEQ use cases, I am concerned that allowing callers to supply an arbitrary `B` might introduce risks in scenarios where generator independence is not guaranteed.\r\n\r\nOther constructions with two generators on the same curve (e.g., Pedersen commitments, bulletproofs) typically derive the second generator using a hash‑to‑curve procedure, ensuring that no participant knows the discrete‑log ratio between `G` and `B`. I was wondering whether a similar approach might help avoid potential misuse here, or whether this falls outside the intended scope of this PR.\r\nI would be very interested to hear your thoughts on this.\r\n[1] D. Chaum and T. P. Pedersen, Wallet Databases with Observers, 1992. https://www.hsslb.ch/cryptopapers/other/Chaum_WalletDBswObservers.pdf\r\n",
+      "user": {
+        "login": "qatkk",
+        "id": 43328710,
+        "node_id": "MDQ6VXNlcjQzMzI4NzEw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/43328710?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/qatkk",
+        "html_url": "https://github.com/qatkk",
+        "followers_url": "https://api.github.com/users/qatkk/followers",
+        "following_url": "https://api.github.com/users/qatkk/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/qatkk/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/qatkk/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/qatkk/subscriptions",
+        "organizations_url": "https://api.github.com/users/qatkk/orgs",
+        "repos_url": "https://api.github.com/users/qatkk/repos",
+        "events_url": "https://api.github.com/users/qatkk/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/qatkk/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1802#issuecomment-3765129220",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1802"
     }
   ],
   "comments": [
