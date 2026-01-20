@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1760/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/54ffc2137004ea3085d3c5068c1562ca46a6faeb",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/8354618e02bcccf3893bcf0ec99639b6e520509f",
     "number": 1760,
     "state": "open",
     "locked": false,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "This PR implements the idea suggested in https://github.com/bitcoin-core/secp256k1/pull/1734#pullrequestreview-3284918572 and is based on the work from https://github.com/bitcoin/bitcoin/pull/33483.\r\n\r\nHere is an example of the `ctest` output:\r\n```\r\n$ ctest --test-dir build -j $(nproc)\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n        Start   1: secp256k1.noverify_tests.selftest_tests\r\n        Start   2: secp256k1.noverify_tests.all_proper_context_tests\r\n        Start   3: secp256k1.noverify_tests.all_static_context_tests\r\n        Start   4: secp256k1.noverify_tests.deprecated_context_flags_test\r\n<snip>\r\n193/196 Test  #31: secp256k1.noverify_tests.ecmult_constants .........................   Passed    5.32 sec\r\n194/196 Test #184: secp256k1.tests.ellswift_xdh_correctness_tests ....................   Passed    5.62 sec\r\n195/196 Test #191: secp256k1.exhaustive_tests ........................................   Passed    6.97 sec\r\n196/196 Test #126: secp256k1.tests.ecmult_constants ..................................   Passed    9.60 sec\r\n\r\n100% tests passed, 0 tests failed out of 196\r\n\r\nLabel Time Summary:\r\nsecp256k1_example           =   0.02 sec*proc (5 tests)\r\nsecp256k1_exhaustive        =   6.97 sec*proc (1 test)\r\nsecp256k1_noverify_tests    =  23.77 sec*proc (95 tests)\r\nsecp256k1_tests             =  43.67 sec*proc (95 tests)\r\n\r\nTotal Test time (real) =  10.21 sec\r\n```\r\n\r\nFor comparison, here is the output for the master branch on the same machine:\r\n```\r\n$ ctest --test-dir build -j $(nproc)\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 1: secp256k1_noverify_tests\r\n    Start 2: secp256k1_tests\r\n    Start 3: secp256k1_exhaustive_tests\r\n    Start 4: secp256k1_ecdsa_example\r\n    Start 5: secp256k1_ecdh_example\r\n    Start 6: secp256k1_schnorr_example\r\n    Start 7: secp256k1_ellswift_example\r\n    Start 8: secp256k1_musig_example\r\n1/8 Test #4: secp256k1_ecdsa_example ..........   Passed    0.00 sec\r\n2/8 Test #5: secp256k1_ecdh_example ...........   Passed    0.00 sec\r\n3/8 Test #6: secp256k1_schnorr_example ........   Passed    0.00 sec\r\n4/8 Test #7: secp256k1_ellswift_example .......   Passed    0.00 sec\r\n5/8 Test #8: secp256k1_musig_example ..........   Passed    0.00 sec\r\n6/8 Test #3: secp256k1_exhaustive_tests .......   Passed    6.26 sec\r\n7/8 Test #1: secp256k1_noverify_tests .........   Passed   14.31 sec\r\n8/8 Test #2: secp256k1_tests ..................   Passed   31.65 sec\r\n\r\n100% tests passed, 0 tests failed out of 8\r\n\r\nTotal Test time (real) =  31.65 sec\r\n```\r\n\r\n---\r\n\r\n**New Feature:** As the number of tests has grown, the labels have been introduced to simplify test management. Now, one can run:\r\n```\r\n$ ctest --test-dir build -j $(nproc) -L example\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 192: secp256k1.example.ecdsa\r\n    Start 193: secp256k1.example.ecdh\r\n    Start 194: secp256k1.example.schnorr\r\n    Start 195: secp256k1.example.ellswift\r\n    Start 196: secp256k1.example.musig\r\n1/5 Test #192: secp256k1.example.ecdsa ..........   Passed    0.00 sec\r\n2/5 Test #193: secp256k1.example.ecdh ...........   Passed    0.00 sec\r\n3/5 Test #194: secp256k1.example.schnorr ........   Passed    0.00 sec\r\n4/5 Test #195: secp256k1.example.ellswift .......   Passed    0.00 sec\r\n5/5 Test #196: secp256k1.example.musig ..........   Passed    0.00 sec\r\n\r\n100% tests passed, 0 tests failed out of 5\r\n\r\nLabel Time Summary:\r\nsecp256k1_example    =   0.01 sec*proc (5 tests)\r\n\r\nTotal Test time (real) =   0.01 sec\r\n```\r\nor\r\n```\r\n$ ctest --test-dir build -j $(nproc) -LE tests\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 192: secp256k1.example.ecdsa\r\n    Start 193: secp256k1.example.ecdh\r\n    Start 194: secp256k1.example.schnorr\r\n    Start 195: secp256k1.example.ellswift\r\n    Start 196: secp256k1.example.musig\r\n    Start 191: secp256k1.exhaustive_tests\r\n1/6 Test #192: secp256k1.example.ecdsa ..........   Passed    0.00 sec\r\n2/6 Test #193: secp256k1.example.ecdh ...........   Passed    0.00 sec\r\n3/6 Test #194: secp256k1.example.schnorr ........   Passed    0.00 sec\r\n4/6 Test #195: secp256k1.example.ellswift .......   Passed    0.00 sec\r\n5/6 Test #196: secp256k1.example.musig ..........   Passed    0.00 sec\r\n6/6 Test #191: secp256k1.exhaustive_tests .......   Passed    6.19 sec\r\n\r\n100% tests passed, 0 tests failed out of 6\r\n\r\nLabel Time Summary:\r\nsecp256k1_example       =   0.01 sec*proc (5 tests)\r\nsecp256k1_exhaustive    =   6.19 sec*proc (1 test)\r\n\r\nTotal Test time (real) =   6.20 sec\r\n```",
+    "body": "This PR implements the idea suggested in https://github.com/bitcoin-core/secp256k1/pull/1734#pullrequestreview-3284918572 and is based on the work from https://github.com/bitcoin/bitcoin/pull/33483.\r\n\r\nHere is an example of the `ctest` output:\r\n```\r\n$ ctest --test-dir build -j $(nproc)\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n        Start   1: secp256k1.noverify_tests.selftest_tests\r\n        Start   2: secp256k1.noverify_tests.all_proper_context_tests\r\n        Start   3: secp256k1.noverify_tests.all_static_context_tests\r\n        Start   4: secp256k1.noverify_tests.deprecated_context_flags_test\r\n<snip>\r\n193/196 Test  #31: secp256k1.noverify_tests.ecmult_constants .........................   Passed    5.32 sec\r\n194/196 Test #184: secp256k1.tests.ellswift_xdh_correctness_tests ....................   Passed    5.62 sec\r\n195/196 Test #191: secp256k1.exhaustive_tests ........................................   Passed    6.97 sec\r\n196/196 Test #126: secp256k1.tests.ecmult_constants ..................................   Passed    9.60 sec\r\n\r\n100% tests passed, 0 tests failed out of 196\r\n\r\nLabel Time Summary:\r\nsecp256k1_example           =   0.02 sec*proc (5 tests)\r\nsecp256k1_exhaustive        =   6.97 sec*proc (1 test)\r\nsecp256k1_noverify_tests    =  23.77 sec*proc (95 tests)\r\nsecp256k1_tests             =  43.67 sec*proc (95 tests)\r\n\r\nTotal Test time (real) =  10.21 sec\r\n```\r\n\r\nFor comparison, here is the output for the master branch on the same machine:\r\n```\r\n$ ctest --test-dir build -j $(nproc)\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 1: secp256k1_noverify_tests\r\n    Start 2: secp256k1_tests\r\n    Start 3: secp256k1_exhaustive_tests\r\n    Start 4: secp256k1_ecdsa_example\r\n    Start 5: secp256k1_ecdh_example\r\n    Start 6: secp256k1_schnorr_example\r\n    Start 7: secp256k1_ellswift_example\r\n    Start 8: secp256k1_musig_example\r\n1/8 Test #4: secp256k1_ecdsa_example ..........   Passed    0.00 sec\r\n2/8 Test #5: secp256k1_ecdh_example ...........   Passed    0.00 sec\r\n3/8 Test #6: secp256k1_schnorr_example ........   Passed    0.00 sec\r\n4/8 Test #7: secp256k1_ellswift_example .......   Passed    0.00 sec\r\n5/8 Test #8: secp256k1_musig_example ..........   Passed    0.00 sec\r\n6/8 Test #3: secp256k1_exhaustive_tests .......   Passed    6.26 sec\r\n7/8 Test #1: secp256k1_noverify_tests .........   Passed   14.31 sec\r\n8/8 Test #2: secp256k1_tests ..................   Passed   31.65 sec\r\n\r\n100% tests passed, 0 tests failed out of 8\r\n\r\nTotal Test time (real) =  31.65 sec\r\n```\r\n\r\n---\r\n\r\n**New Feature:** As the number of tests has grown, the _labels_ have been introduced to simplify test management. Now, one can run:\r\n```\r\n$ ctest --test-dir build -j $(nproc) -L example\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 192: secp256k1.example.ecdsa\r\n    Start 193: secp256k1.example.ecdh\r\n    Start 194: secp256k1.example.schnorr\r\n    Start 195: secp256k1.example.ellswift\r\n    Start 196: secp256k1.example.musig\r\n1/5 Test #192: secp256k1.example.ecdsa ..........   Passed    0.00 sec\r\n2/5 Test #193: secp256k1.example.ecdh ...........   Passed    0.00 sec\r\n3/5 Test #194: secp256k1.example.schnorr ........   Passed    0.00 sec\r\n4/5 Test #195: secp256k1.example.ellswift .......   Passed    0.00 sec\r\n5/5 Test #196: secp256k1.example.musig ..........   Passed    0.00 sec\r\n\r\n100% tests passed, 0 tests failed out of 5\r\n\r\nLabel Time Summary:\r\nsecp256k1_example    =   0.01 sec*proc (5 tests)\r\n\r\nTotal Test time (real) =   0.01 sec\r\n```\r\nor\r\n```\r\n$ ctest --test-dir build -j $(nproc) -LE tests\r\nTest project /home/hebasto/dev/secp256k1/secp256k1/build\r\n    Start 192: secp256k1.example.ecdsa\r\n    Start 193: secp256k1.example.ecdh\r\n    Start 194: secp256k1.example.schnorr\r\n    Start 195: secp256k1.example.ellswift\r\n    Start 196: secp256k1.example.musig\r\n    Start 191: secp256k1.exhaustive_tests\r\n1/6 Test #192: secp256k1.example.ecdsa ..........   Passed    0.00 sec\r\n2/6 Test #193: secp256k1.example.ecdh ...........   Passed    0.00 sec\r\n3/6 Test #194: secp256k1.example.schnorr ........   Passed    0.00 sec\r\n4/6 Test #195: secp256k1.example.ellswift .......   Passed    0.00 sec\r\n5/6 Test #196: secp256k1.example.musig ..........   Passed    0.00 sec\r\n6/6 Test #191: secp256k1.exhaustive_tests .......   Passed    6.19 sec\r\n\r\n100% tests passed, 0 tests failed out of 6\r\n\r\nLabel Time Summary:\r\nsecp256k1_example       =   0.01 sec*proc (5 tests)\r\nsecp256k1_exhaustive    =   6.19 sec*proc (1 test)\r\n\r\nTotal Test time (real) =   6.20 sec\r\n```",
     "labels": [
       {
         "id": 4975349089,
@@ -62,11 +62,11 @@
       }
     ],
     "created_at": "2025-10-16T14:24:57Z",
-    "updated_at": "2026-01-19T20:37:40Z",
+    "updated_at": "2026-01-20T16:56:04Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "a7b29beac4b7de3772d2391dd1013c9e4215e203",
+    "merge_commit_sha": "a8380781fc298112e9f1a993d929457461c8b0b0",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -74,7 +74,7 @@
     "head": {
       "label": "hebasto:251016-ctest-opt",
       "ref": "251016-ctest-opt",
-      "sha": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
+      "sha": "8354618e02bcccf3893bcf0ec99639b6e520509f",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -186,7 +186,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-01-13T17:37:39Z",
+        "pushed_at": "2026-01-20T16:54:29Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2026-01-11T21:07:15Z",
         "allow_forking": true,
@@ -307,8 +307,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1117,
-        "stargazers_count": 2382,
-        "watchers_count": 2382,
+        "stargazers_count": 2386,
+        "watchers_count": 2386,
         "size": 14003,
         "default_branch": "master",
         "open_issues_count": 171,
@@ -324,7 +324,7 @@
         "visibility": "public",
         "pushed_at": "2026-01-11T20:45:11Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-01-18T07:39:41Z",
+        "updated_at": "2026-01-20T15:05:15Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -354,7 +354,7 @@
     "deletions": 11,
     "changed_files": 3,
     "commits": 4,
-    "review_comments": 17,
+    "review_comments": 18,
     "comments": 8
   },
   "events": [
@@ -1281,86 +1281,6 @@
       "created_at": "2026-01-13T17:02:50Z"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBjODE3OGU4NmNmZGRjMTkzNDI5YWUzOThjNmQ1ZmY2NTM3ZWY3M2M",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c8178e86cfddc193429ae398c6d5ff6537ef73c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c8178e86cfddc193429ae398c6d5ff6537ef73c",
-      "tree": {
-        "sha": "eeb085d6709b956c5b5de76cb311ade688d8a416",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/eeb085d6709b956c5b5de76cb311ade688d8a416"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree eeb085d6709b956c5b5de76cb311ade688d8a416\nparent f95b263f2366a87c7aa9e7b98882f92d6bb5caec\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768325193 +0000\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768325193 +0000\n\ncmake: Integrate DiscoverTests and normalize test names\n\nUpdates the build system to use the new DiscoverTests module.\nThis also standardizes test names to use dot-separated parts for\nconsistency.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmlmgEkACgkQQQEIES5+\nqB/xExAAsu1JOX0IRLoC3UcdhaXlKwFvH01HwJJyjZkjmudBGmnUMHodhOTiszAa\nEpkJwuZJRGa2VWF7QXOWYuQ2wrifz7vUwxZvo+PIRmjaCm4jIOk5FQOB7ihQA1+8\nBvG14MEpSN2NxMJuM1bxGuug73bq12FuMkVrbwXv6mztnrePeIHkB4jVNR2QE+Cm\nKh14hxlpjb8G8VAcTXYkw37wtllvl1OtML7641cMIPPzPdgeuLNPmvmHHNtrd4T0\nMQJ41S8ZCqTHyheNrDseLxnCUhB0fDHRk9DfK2+vhwTkKgob33jqMM4lyLAwPyQk\nebgcXkrT2A4Sd6okUqB0Nnjc1F1v9sXZVzPpVZOAZiXb1ZJKI6r+21+hsWg4wY7+\nE2tqx7BJUbTKfaMZe65E5wFNU3ynNrEVMTZSxMxa4NdA/HQ4yd2XC5L3j51oJClF\nzCxlHQEA2mYvbr4jYbt3CeQJtUz1ec3Qp5ptvSvhh11xmKINwOYLDy4E1ICjeCGa\nrsvHrsJShQmshYU2dciFg7gtOM6TKUs0FKxYM8t60AacIDwWReBepw+5j4YFSR7b\nr0JT+TP+nPdU1IbYVm9pQutc2K/EhUilHY+p5KxKIhRkBqF14WLKPKZGyOX1moXq\nHPaee9yJT/uKAuowKg5vfem3FU8U0FprMsQQM3cGPi542DJzHaE=\n=vLHZ\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f95b263f2366a87c7aa9e7b98882f92d6bb5caec",
-          "sha": "f95b263f2366a87c7aa9e7b98882f92d6bb5caec",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f95b263f2366a87c7aa9e7b98882f92d6bb5caec"
-        }
-      ],
-      "message": "cmake: Integrate DiscoverTests and normalize test names\n\nUpdates the build system to use the new DiscoverTests module.\nThis also standardizes test names to use dot-separated parts for\nconsistency.",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-01-13T17:26:33Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-01-13T17:26:33Z"
-      },
-      "sha": "0c8178e86cfddc193429ae398c6d5ff6537ef73c"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDU0ZmZjMjEzNzAwNGVhMzA4NWQzYzUwNjhjMTU2MmNhNDZhNmZhZWI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/54ffc2137004ea3085d3c5068c1562ca46a6faeb",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/54ffc2137004ea3085d3c5068c1562ca46a6faeb",
-      "tree": {
-        "sha": "58f65b1c535b4c7580108b0b93f162c8127b73fb",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/58f65b1c535b4c7580108b0b93f162c8127b73fb"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 58f65b1c535b4c7580108b0b93f162c8127b73fb\nparent 0c8178e86cfddc193429ae398c6d5ff6537ef73c\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768325207 +0000\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768325207 +0000\n\ncmake: Set `LABELS` property for tests\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmlmgFcACgkQQQEIES5+\nqB9jVRAApyzKJ+fhP0shNVc/mc4xAbHxY7tprciGO97HXnSblKSTYNFoGFiQ8Buu\nJPcJKV2Sb64QxUWBzH8SqXR26JelAxYPRo70YW+uUndMRyMvrsKMMIEIMxu6XWZl\noaIMyPZZVj37g86jK2fCohARSA4JbYOPjeDhKmb8XFWrx4pEeExCP8JWcN7jsFeO\nB53PSdElwLojJie0gOX+XZt2lUXZYnPF6dL0TKxqKznScayBgjUk8/h8vUHhW5O4\nifIGjMgDfup+EqgyNh1duzHo0/8fAxfbHbzSXEPcSg+udWDfOaf+YzKt10Ih3fcA\n3Fd7cOetNBy+OiI1DTcpFMtFPaHmEGNyJaTbeb0VU/6OuNPriEuDSDx9fN3w4dmQ\nvWadTtY99jUF86kZyY7wIrKucqYTsoFBNSg/SX+JV8GZf15cY+0LrwsHwGYrnrgV\n6kHe9y7wkNHetwXUEZW4cS5/VSf+39SUT5i3VGhvgnxg0MTcnma2NO4etD8IXfBc\nOp8fUA08Hw6acLSjRn4+PFm2328tM0ag5nzmEH6mJbM4wOcvyo8pLULLrxMAaCzl\n9yNPTahEjFads6zCIBkio+HFq/H5wCr6gRAdz6AGujzYSX5N5iPyDtdp8YOXtZ2a\nmgM9R9+rl2kSX1Y0YsnznD32bvb43ppb34WFwQi180oSNk30NTo=\n=2tXJ\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0c8178e86cfddc193429ae398c6d5ff6537ef73c",
-          "sha": "0c8178e86cfddc193429ae398c6d5ff6537ef73c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0c8178e86cfddc193429ae398c6d5ff6537ef73c"
-        }
-      ],
-      "message": "cmake: Set `LABELS` property for tests",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-01-13T17:26:47Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-01-13T17:26:47Z"
-      },
-      "sha": "54ffc2137004ea3085d3c5068c1562ca46a6faeb"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 22023025196,
       "node_id": "HRFPE_lADOAP4Jqs7R75nUzwAAAAUgrLIs",
@@ -1594,6 +1514,117 @@
       "submitted_at": "2026-01-19T20:37:23Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDI5ZjI2ZWMzY2ZiNWFiZjlhOWFjMzEwNmMxMWFlYjI0ZTU3M2ZjMjQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24",
+      "tree": {
+        "sha": "eb8da1f27d4566afb0d8ab97185aab608339b0a3",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/eb8da1f27d4566afb0d8ab97185aab608339b0a3"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree eb8da1f27d4566afb0d8ab97185aab608339b0a3\nparent f95b263f2366a87c7aa9e7b98882f92d6bb5caec\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768927997 +0000\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768927997 +0000\n\ncmake: Integrate DiscoverTests and normalize test names\n\nUpdates the build system to use the new DiscoverTests module.\nThis also standardizes test names to use dot-separated parts for\nconsistency.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmlvsv0ACgkQQQEIES5+\nqB95LxAAjq1+pvc8Cmg4sL+XCG9J85Bq704Y1MLtkKQIYJP/aHNztPYHQTYVGb1w\ni4jSLIvBI5bDCixRNBoz4hJhzGk3P4P5uI196ZyFh7Zd5Ivwr+/DMKx6yypikSrk\n9Sfba4AQOPc4tkY+cX3UxbBb9UbhJntEmaw0FKnRLhrOTT0PPn3+kWYmpbDGdTE/\njQJzsFptK+I7FoogyPN9pI7zQ6hgIy/19FjZUd14BJwkVOIaQ1gWpwJSNTg+q+oN\n0AAMvqdAgulyDgCBid3wyWkNgYv8jeRkBPPhnE24ceg/z1KUnv7W1AYQhEvkcDT4\n5+4VS9T7z1OjFhyJ527hcHf2ogwju0C5Yz3vw5b0eMJxZqoYqudvskDe4SmqCnGq\niTK5+m5/gjOQapDEnOIZZtV+eixLrMQLYFFUPAzL4jj0zT3hmfYgDqYfdU2o83Xp\nXa2NXMvW9KKWaeJp3Ms1fSDKaLA2zqt5/ZOBC8CJRl8RdWtE7zDMQ5KrBk61m4/A\nfKmS8HbgrBKmbB4aodhQEPDSfIKvg+adfC8MjrilbhuTDI3/fL/I5FhsFIFRfE+W\nGPnNn4S9qOBw6weshEMe/tdnEYenObBdnm7EQ1mvKk9VxAiqRZg0YBa/flQgRG67\nJFJ0HijGOUCk1YWUI8CNwqzpBf/X6+dstNLEM6nEbGp6uGBL4uQ=\n=eG1g\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f95b263f2366a87c7aa9e7b98882f92d6bb5caec",
+          "sha": "f95b263f2366a87c7aa9e7b98882f92d6bb5caec",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f95b263f2366a87c7aa9e7b98882f92d6bb5caec"
+        }
+      ],
+      "message": "cmake: Integrate DiscoverTests and normalize test names\n\nUpdates the build system to use the new DiscoverTests module.\nThis also standardizes test names to use dot-separated parts for\nconsistency.",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-01-20T16:53:17Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-01-20T16:53:17Z"
+      },
+      "sha": "29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDgzNTQ2MThlMDJiY2NjZjM4OTNiY2YwZWM5OTYzOWI2ZTUyMDUwOWY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8354618e02bcccf3893bcf0ec99639b6e520509f",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8354618e02bcccf3893bcf0ec99639b6e520509f",
+      "tree": {
+        "sha": "58f65b1c535b4c7580108b0b93f162c8127b73fb",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/58f65b1c535b4c7580108b0b93f162c8127b73fb"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 58f65b1c535b4c7580108b0b93f162c8127b73fb\nparent 29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768325207 +0000\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1768928009 +0000\n\ncmake: Set `LABELS` property for tests\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmlvswkACgkQQQEIES5+\nqB+BLRAArYWSYBAS/XeolrQK61seU3q3feOs9aI5Vh77hsIH0lfw2ADVyRnYVxTF\na2cbbSrmengQM+g+GvjeEehziAagyXHmMJM7V0pwyepzJGoFsjAk6zf2H9wYgRvB\ne7yFxsKErbTRIlwS/YyCQDrLVeyF4PSjlK9EHdkH7rnUNtLOok7ZZHbvid0m9n9Q\nlmEJkzTTMU+qP4l/y+KdTt1PWvg/BXCx4LwyJ+AJSDsocBqKUYv6zQxGMMmrcPe6\nTDS0j5kFK2S/lOx8ibGHLDzj0UdhUkp08bHrA21tWd7wQulREBHZi0u6nGp9HpAT\nGHTfbzbcBryLBpolpcpwPdhpg/Gpw5V6M0zMzeQ0LoNprkr77JMYHvl8LLZMEwPw\nRa5pwXyWxe77sd94euZY2iGpzZRi8kO7TMBSYSIRtmtOHEF3YExsvOzae/OsMW52\nimybBLe4vIIVcGqv5C+MjJjB0NL2cSpdeuKzhwspJjuQIFilHy8vCija5mTdcfR0\nEAR+Uei5Kk6fzWc2E5qSwswBU1MzW5sjV01b1gzBbm06nyFUlykhoTSZUkEvGq7a\nuadOiqS34XpH+rkEFVApghUWEb9+K1OmJ2+SeFzrM/9su/UYQ2LZ/BSu3k1tWXQE\nB0Khjs8kHJsAn1sBwUCswLThxj5fN2EgQ1H51gcnsKFm9mTDTWc=\n=E5AJ\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24",
+          "sha": "29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/29f26ec3cfb5abf9a9ac3106c11aeb24e573fc24"
+        }
+      ],
+      "message": "cmake: Set `LABELS` property for tests",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-01-20T16:53:29Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-01-13T17:26:47Z"
+      },
+      "sha": "8354618e02bcccf3893bcf0ec99639b6e520509f"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 22166863790,
+      "node_id": "HRFPE_lADOAP4Jqs7R75nUzwAAAAUpP3-u",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/22166863790",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "8354618e02bcccf3893bcf0ec99639b6e520509f",
+      "commit_url": "https://api.github.com/repos/hebasto/secp256k1/commits/8354618e02bcccf3893bcf0ec99639b6e520509f",
+      "created_at": "2026-01-20T16:54:18Z"
     }
   ],
   "comments": [
@@ -2400,11 +2431,11 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
         }
       },
-      "start_line": null,
+      "start_line": 11,
       "original_start_line": 11,
-      "start_side": "RIGHT",
-      "line": null,
-      "original_line": 12,
+      "start_side": "LEFT",
+      "line": 11,
+      "original_line": 11,
       "side": "RIGHT"
     },
     {
@@ -2414,9 +2445,9 @@
       "node_id": "PRRC_kwDOAP4Jqs6hScVs",
       "diff_hunk": "@@ -154,6 +154,8 @@ if(SECP256K1_BUILD_TESTS)\n       DISCOVERY_MATCH       \"^\\\\t\\\\\\\\[ *[0-9]+\\\\\\\\] ([^ ].*)$\"\n       TEST_NAME_REPLACEMENT \"secp256k1.${exe_name}.\\\\\\\\1\"\n       TEST_ARGS_REPLACEMENT \"--target=\\\\\\\\1 --log=1\"\n+      PROPERTIES\n+        LABELS \"secp256k1_${exe_name}\"",
       "path": "src/CMakeLists.txt",
-      "position": 5,
+      "position": 19,
       "original_position": 5,
-      "commit_id": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
+      "commit_id": "8354618e02bcccf3893bcf0ec99639b6e520509f",
       "original_commit_id": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
       "in_reply_to_id": null,
       "user": {
@@ -2470,7 +2501,7 @@
       "path": "cmake/DiscoverTests.cmake",
       "position": 20,
       "original_position": 20,
-      "commit_id": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
+      "commit_id": "8354618e02bcccf3893bcf0ec99639b6e520509f",
       "original_commit_id": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
       "in_reply_to_id": null,
       "user": {
@@ -2513,6 +2544,60 @@
       "start_side": "RIGHT",
       "line": 20,
       "original_line": 20,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2709233790",
+      "pull_request_review_id": 3683234811,
+      "id": 2709233790,
+      "node_id": "PRRC_kwDOAP4Jqs6he6B-",
+      "diff_hunk": "@@ -9,7 +9,7 @@ function(add_example name)\n     $<$<PLATFORM_ID:Windows>:bcrypt>\n   )\n   set(test_name ${name}_example)\n-  add_test(NAME secp256k1_${test_name} COMMAND ${target_name})\n+  add_test(NAME secp256k1.example.${name} COMMAND ${target_name})",
+      "path": "examples/CMakeLists.txt",
+      "position": 1,
+      "original_position": 5,
+      "commit_id": "54ffc2137004ea3085d3c5068c1562ca46a6faeb",
+      "original_commit_id": "0c8178e86cfddc193429ae398c6d5ff6537ef73c",
+      "in_reply_to_id": 2705961738,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Update: I see you are removing it in the next commit: [54ffc21](https://github.com/bitcoin-core/secp256k1/commit/54ffc2137004ea3085d3c5068c1562ca46a6faeb).\r\n\r\nIt has been moved to previous commit.",
+      "created_at": "2026-01-20T16:55:22Z",
+      "updated_at": "2026-01-20T16:55:22Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1760#discussion_r2709233790",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2709233790"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1760"
+        }
+      },
+      "start_line": 11,
+      "original_start_line": 11,
+      "start_side": "LEFT",
+      "line": 11,
+      "original_line": 11,
       "side": "RIGHT"
     }
   ]
