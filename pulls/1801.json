@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1801/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
     "number": 1801,
     "state": "open",
     "locked": false,
@@ -53,11 +53,11 @@
       }
     ],
     "created_at": "2026-01-15T00:58:33Z",
-    "updated_at": "2026-01-21T19:37:55Z",
+    "updated_at": "2026-01-22T05:31:09Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "4509d3ec99fa4a6b3e4cc3e94b4afd15f74c991e",
+    "merge_commit_sha": "0bf539f1d648b9cec3686ca0d0a0ec52fc0b78b1",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -65,7 +65,7 @@
     "head": {
       "label": "21-DOT-DEV:CLANG-WARN-WSHORTEN-64-TO-32",
       "ref": "CLANG-WARN-WSHORTEN-64-TO-32",
-      "sha": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+      "sha": "9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
       "user": {
         "login": "21-DOT-DEV",
         "id": 151505347,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-01-21T16:52:39Z",
+        "pushed_at": "2026-01-22T05:29:26Z",
         "created_at": "2025-03-24T09:11:41Z",
         "updated_at": "2026-01-14T22:37:11Z",
         "allow_forking": true,
@@ -341,11 +341,11 @@
     },
     "author_association": "NONE",
     "draft": false,
-    "additions": 8,
-    "deletions": 8,
+    "additions": 12,
+    "deletions": 11,
     "changed_files": 3,
-    "commits": 3,
-    "review_comments": 3,
+    "commits": 4,
+    "review_comments": 6,
     "comments": 2
   },
   "events": [
@@ -751,6 +751,46 @@
       "submitted_at": "2026-01-21T19:37:55Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDllM2RjOTNmZmIyOWJiZmViZGY4MmNiOWZkZGU1ZGFhZjY4YmU1NDE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
+      "tree": {
+        "sha": "4051df647ec105cea041dfa61f95db6732ed32c6",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4051df647ec105cea041dfa61f95db6732ed32c6"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+          "sha": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4a84fb7e4357b8cdc743a3d34d08f4232b75896a"
+        }
+      ],
+      "message": "refactor: preserve unsigned arithmetic and add VERIFY_CHECKs before casts in scalar_4x64_impl.h",
+      "committer": {
+        "name": "csjones",
+        "email": "csjones@users.noreply.github.com",
+        "date": "2026-01-22T05:26:00Z"
+      },
+      "author": {
+        "name": "csjones",
+        "email": "csjones@users.noreply.github.com",
+        "date": "2026-01-22T05:26:00Z"
+      },
+      "sha": "9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541"
     }
   ],
   "comments": [
@@ -761,7 +801,7 @@
       "node_id": "PRRC_kwDOAP4Jqs6hxNTN",
       "diff_hunk": "@@ -109,7 +109,7 @@ static int secp256k1_scalar_add(secp256k1_scalar *r, const secp256k1_scalar *a,\n     secp256k1_u128_accum_u64(&t, a->d[3]);\n     secp256k1_u128_accum_u64(&t, b->d[3]);\n     r->d[3] = secp256k1_u128_to_u64(&t); secp256k1_u128_rshift(&t, 64);\n-    overflow = secp256k1_u128_to_u64(&t) + secp256k1_scalar_check_overflow(r);\n+    overflow = (int)secp256k1_u128_to_u64(&t) + secp256k1_scalar_check_overflow(r);",
       "path": "src/scalar_4x64_impl.h",
-      "position": 5,
+      "position": 1,
       "original_position": 5,
       "commit_id": "3ddc5bedef1206d614de4ee652a35defba66815d",
       "original_commit_id": "3ddc5bedef1206d614de4ee652a35defba66815d",
@@ -804,7 +844,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 112,
+      "line": null,
       "original_line": 112,
       "side": "RIGHT"
     },
@@ -815,7 +855,7 @@
       "node_id": "PRRC_kwDOAP4Jqs6hxQMo",
       "diff_hunk": "@@ -654,7 +654,7 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint64_t *l)\n     muladd_fast(m6, SECP256K1_N_C_1);\n     sumadd_fast(m5);\n     extract_fast(p3);\n-    p4 = c0 + m6;\n+    p4 = (uint32_t)c0 + m6;\n     VERIFY_CHECK(p4 <= 2);",
       "path": "src/scalar_4x64_impl.h",
-      "position": 24,
+      "position": 1,
       "original_position": 24,
       "commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
       "original_commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
@@ -855,10 +895,10 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801"
         }
       },
-      "start_line": 657,
+      "start_line": null,
       "original_start_line": 657,
       "start_side": "RIGHT",
-      "line": 658,
+      "line": null,
       "original_line": 658,
       "side": "RIGHT"
     },
@@ -869,9 +909,9 @@
       "node_id": "PRRC_kwDOAP4Jqs6hxTQd",
       "diff_hunk": "@@ -674,7 +674,7 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint64_t *l)\n #endif\n \n     /* Final reduction of r. */\n-    secp256k1_scalar_reduce(r, c + secp256k1_scalar_check_overflow(r));\n+    secp256k1_scalar_reduce(r, (unsigned int)c + secp256k1_scalar_check_overflow(r));",
       "path": "src/scalar_4x64_impl.h",
-      "position": 32,
+      "position": 48,
       "original_position": 32,
-      "commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+      "commit_id": "9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
       "original_commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
       "in_reply_to_id": null,
       "user": {
@@ -912,8 +952,170 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 677,
+      "line": 678,
       "original_line": 677,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715361061",
+      "pull_request_review_id": 3690653531,
+      "id": 2715361061,
+      "node_id": "PRRC_kwDOAP4Jqs6h2R8l",
+      "diff_hunk": "@@ -674,7 +674,7 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint64_t *l)\n #endif\n \n     /* Final reduction of r. */\n-    secp256k1_scalar_reduce(r, c + secp256k1_scalar_check_overflow(r));\n+    secp256k1_scalar_reduce(r, (unsigned int)c + secp256k1_scalar_check_overflow(r));",
+      "path": "src/scalar_4x64_impl.h",
+      "position": 48,
+      "original_position": 32,
+      "commit_id": "9e3dc93ffb29bbfebdf82cb9fdde5daaf68be541",
+      "original_commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+      "in_reply_to_id": 2714055709,
+      "user": {
+        "login": "csjones",
+        "id": 637026,
+        "node_id": "MDQ6VXNlcjYzNzAyNg==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/637026?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/csjones",
+        "html_url": "https://github.com/csjones",
+        "followers_url": "https://api.github.com/users/csjones/followers",
+        "following_url": "https://api.github.com/users/csjones/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/csjones/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/csjones/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/csjones/subscriptions",
+        "organizations_url": "https://api.github.com/users/csjones/orgs",
+        "repos_url": "https://api.github.com/users/csjones/repos",
+        "events_url": "https://api.github.com/users/csjones/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/csjones/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Added!",
+      "created_at": "2026-01-22T05:30:23Z",
+      "updated_at": "2026-01-22T05:30:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1801#discussion_r2715361061",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715361061"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 678,
+      "original_line": 677,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715361736",
+      "pull_request_review_id": 3690654209,
+      "id": 2715361736,
+      "node_id": "PRRC_kwDOAP4Jqs6h2SHI",
+      "diff_hunk": "@@ -654,7 +654,7 @@ static void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint64_t *l)\n     muladd_fast(m6, SECP256K1_N_C_1);\n     sumadd_fast(m5);\n     extract_fast(p3);\n-    p4 = c0 + m6;\n+    p4 = (uint32_t)c0 + m6;\n     VERIFY_CHECK(p4 <= 2);",
+      "path": "src/scalar_4x64_impl.h",
+      "position": 1,
+      "original_position": 24,
+      "commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+      "original_commit_id": "4a84fb7e4357b8cdc743a3d34d08f4232b75896a",
+      "in_reply_to_id": 2714043176,
+      "user": {
+        "login": "csjones",
+        "id": 637026,
+        "node_id": "MDQ6VXNlcjYzNzAyNg==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/637026?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/csjones",
+        "html_url": "https://github.com/csjones",
+        "followers_url": "https://api.github.com/users/csjones/followers",
+        "following_url": "https://api.github.com/users/csjones/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/csjones/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/csjones/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/csjones/subscriptions",
+        "organizations_url": "https://api.github.com/users/csjones/orgs",
+        "repos_url": "https://api.github.com/users/csjones/repos",
+        "events_url": "https://api.github.com/users/csjones/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/csjones/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Change made",
+      "created_at": "2026-01-22T05:30:45Z",
+      "updated_at": "2026-01-22T05:30:45Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1801#discussion_r2715361736",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715361736"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 657,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 658,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715362533",
+      "pull_request_review_id": 3690655040,
+      "id": 2715362533,
+      "node_id": "PRRC_kwDOAP4Jqs6h2STl",
+      "diff_hunk": "@@ -109,7 +109,7 @@ static int secp256k1_scalar_add(secp256k1_scalar *r, const secp256k1_scalar *a,\n     secp256k1_u128_accum_u64(&t, a->d[3]);\n     secp256k1_u128_accum_u64(&t, b->d[3]);\n     r->d[3] = secp256k1_u128_to_u64(&t); secp256k1_u128_rshift(&t, 64);\n-    overflow = secp256k1_u128_to_u64(&t) + secp256k1_scalar_check_overflow(r);\n+    overflow = (int)secp256k1_u128_to_u64(&t) + secp256k1_scalar_check_overflow(r);",
+      "path": "src/scalar_4x64_impl.h",
+      "position": 1,
+      "original_position": 5,
+      "commit_id": "3ddc5bedef1206d614de4ee652a35defba66815d",
+      "original_commit_id": "3ddc5bedef1206d614de4ee652a35defba66815d",
+      "in_reply_to_id": 2714031309,
+      "user": {
+        "login": "csjones",
+        "id": 637026,
+        "node_id": "MDQ6VXNlcjYzNzAyNg==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/637026?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/csjones",
+        "html_url": "https://github.com/csjones",
+        "followers_url": "https://api.github.com/users/csjones/followers",
+        "following_url": "https://api.github.com/users/csjones/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/csjones/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/csjones/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/csjones/subscriptions",
+        "organizations_url": "https://api.github.com/users/csjones/orgs",
+        "repos_url": "https://api.github.com/users/csjones/repos",
+        "events_url": "https://api.github.com/users/csjones/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/csjones/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Appreciate the feedback, I pushed the change.",
+      "created_at": "2026-01-22T05:31:09Z",
+      "updated_at": "2026-01-22T05:31:09Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1801#discussion_r2715362533",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2715362533"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1801"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 112,
       "side": "RIGHT"
     }
   ]
