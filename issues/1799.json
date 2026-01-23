@@ -40,7 +40,7 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 17,
+    "comments": 18,
     "closed_by": {
       "login": "real-or-random",
       "id": 1071625,
@@ -64,7 +64,7 @@
       "patch_url": null
     },
     "created_at": "2026-01-11T03:21:12Z",
-    "updated_at": "2026-01-23T08:57:25Z"
+    "updated_at": "2026-01-23T12:53:10Z"
   },
   "events": [
     {
@@ -2517,9 +2517,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-01-22T23:31:02Z",
-      "updated_at": "2026-01-22T23:31:02Z",
+      "updated_at": "2026-01-23T12:32:48Z",
       "author_association": "NONE",
-      "body": "@real-or-random thanks for your comments.\n\n>require outputs to be in sequential k order\n\nOther than what was already mentioned about \"ordered-k\", I'm also concerned what putting restrictions on output order does to privacy. If a known SP user sends you money from the 1st and 5th output in a tx, it implies they own the 2nd, 3rd and 4th output as well. And in coinjoin scenarios, you now have to insist on a certain order for outputs, which reveals information to other coinjoin participants. \n\n@theStack \n\n>I assume @RubenSomsen reached a similar conclusion, since in the [gist writeup](https://gist.github.com/RubenSomsen/1e827ee6b48a2e4d489d80b400a461de), the \"targeted attack\" scenario only considers the single-transaction, maximum-N case.\n\nYes, a single tx with maximum N is the worst case for two reasons:\n\n1. The attack scales directly with the number of outputs, and a single tx is the optimal way to maximize them\n\n2. Whenever limit-K approaches N, you can get an up to 2x speedup by removing checked outputs (note I am assuming the outputs are always randomized). This is why in my [gist](https://gist.github.com/RubenSomsen/1e827ee6b48a2e4d489d80b400a461de) I have a different formula for the \"limit K\" scenario and the unlimited \"worst case\" scenario (where K == N).\n\n@w0xlt\n\n>Wallet label count constraint (L ≤ 500) instead of protocol constraint (limited-k)\n\nI think one important point of nuance is that the slowdown from using labels under LabelSet is consistently present. _Every_ user who approaches L=500 will forever be up to 4x slower than BIP style (non-targeted). Under BIP style, if limit K=120 then only _one_ user will be 4x slower (and everyone else will actually be ~3x faster) for as long as that user is being attacked.\n\nI understand not everyone is sold on labels, and it's uncertain what adoption will be like, but I do feel pretty confident in saying we're far more likely to see high label usage than anyone trying to make transactions with lots of outputs to the same recipient in the foreseeable future. Labels enable some pretty common use cases, such as knowing who paid you, accompanying a payment with a description before the payment is made, and even the ability to spend funds that were sent to some set of labels separately from your other funds.\n\n---\n\nLet me test the waters with a concrete proposal - how would people feel about a K=1000 limit (~31x slower, benchmarked at 16 seconds by @theStack)? That's a limit no future use case would conceivably hit in practice. If someone attacked you for a _full day_, filling 144 blocks with outputs to you, UX wise the scanning experience will be equivalent to having been offline for month and then coming back online (and everyone else gets to scan those 144 blocks ~3x faster than normal).",
+      "body": "@real-or-random thanks for your comments.\n\n>require outputs to be in sequential k order\n\nOther than what was already mentioned about \"ordered-k\", I'm also concerned what putting restrictions on output order does to privacy. ~~If a known SP user sends you money from the 1st and 5th output in a tx, it implies they own the 2nd, 3rd and 4th output as well.~~ (edit: incorrect, see [the next comment](#issuecomment-3789112995)) And in coinjoin scenarios, you now have to insist on a certain order for outputs, which reveals information to other coinjoin participants. \n\n@theStack \n\n>I assume @RubenSomsen reached a similar conclusion, since in the [gist writeup](https://gist.github.com/RubenSomsen/1e827ee6b48a2e4d489d80b400a461de), the \"targeted attack\" scenario only considers the single-transaction, maximum-N case.\n\nYes, a single tx with maximum N is the worst case for two reasons:\n\n1. The attack scales directly with the number of outputs, and a single tx is the optimal way to maximize them\n\n2. Whenever limit-K approaches N, you can get an up to 2x speedup by removing checked outputs (note I am assuming the outputs are always randomized). This is why in my [gist](https://gist.github.com/RubenSomsen/1e827ee6b48a2e4d489d80b400a461de) I have a different formula for the \"limit K\" scenario and the unlimited \"worst case\" scenario (where K == N).\n\n@w0xlt\n\n>Wallet label count constraint (L ≤ 500) instead of protocol constraint (limited-k)\n\nI think one important point of nuance is that the slowdown from using labels under LabelSet is consistently present. _Every_ user who approaches L=500 will forever be up to 4x slower than BIP style (non-targeted). Under BIP style, if limit K=120 then only _one_ user will be 4x slower (and everyone else will actually be ~3x faster) for as long as that user is being attacked.\n\nI understand not everyone is sold on labels, and it's uncertain what adoption will be like, but I do feel pretty confident in saying we're far more likely to see high label usage than anyone trying to make transactions with lots of outputs to the same recipient in the foreseeable future. Labels enable some pretty common use cases, such as knowing who paid you, accompanying a payment with a description before the payment is made, and even the ability to spend funds that were sent to some set of labels separately from your other funds.\n\n---\n\nLet me test the waters with a concrete proposal - how would people feel about a K=1000 limit (~31x slower, benchmarked at 16 seconds by @theStack)? That's a limit no future use case would conceivably hit in practice. If someone attacked you for a _full day_, filling 144 blocks with outputs to you, UX wise the scanning experience will be equivalent to having been offline for a month and then coming back online (and everyone else gets to scan those 144 blocks ~3x faster than normal).",
       "user": {
         "login": "RubenSomsen",
         "id": 9066803,
@@ -3036,6 +3036,95 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-01-23T08:49:25Z"
+    },
+    {
+      "event": "commented",
+      "id": 3790019192,
+      "node_id": "IC_kwDOAP4Jqs7h5xp4",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3790019192",
+      "actor": {
+        "login": "RubenSomsen",
+        "id": 9066803,
+        "node_id": "MDQ6VXNlcjkwNjY4MDM=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9066803?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RubenSomsen",
+        "html_url": "https://github.com/RubenSomsen",
+        "followers_url": "https://api.github.com/users/RubenSomsen/followers",
+        "following_url": "https://api.github.com/users/RubenSomsen/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RubenSomsen/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RubenSomsen/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RubenSomsen/subscriptions",
+        "organizations_url": "https://api.github.com/users/RubenSomsen/orgs",
+        "repos_url": "https://api.github.com/users/RubenSomsen/repos",
+        "events_url": "https://api.github.com/users/RubenSomsen/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RubenSomsen/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-23T12:28:27Z",
+      "updated_at": "2026-01-23T12:35:16Z",
+      "author_association": "NONE",
+      "body": ">I don't think so. The 1st output could have k=0 and the 5th output could have k=1?\n\nAh I see, I misunderstood. In that case my argument can be dismissed.\n\n>By the way, one can fit 2324 P2TR outputs in a standard transaction\n\nI would not be opposed to K = 2324 (71x slower) either. At that pace one targeted attack block is equivalent to coming back online after half a day. It's 5x better than the current worst-case, where one targeted attack block takes 2.5 days. \n\n>considering also that the victim will be paid for the scanning in some sense\n\nLet me push back on this a little - there is currently nothing in the spec stopping an attacker from sending 0 sat outputs. There's even the possibility that all outputs are 0 sats except for one and you have to grind through all the 0 sat outputs to figure out whether it's yours. Individual wallets could choose to set limits here, but that won't be consistent across the ecosystem.\n\n>Another possible consideration is multiple CPUs\n\nI think even for limited-k this could apply. Finding a result where `k=1` should be very rare. From `k=2` onward you could just throw all your threads at the problem. For eight threads you'd check `k=2` until `k=9` simultaneously, then at worst you find nothing and seven of your threads will have done some superfluous computation - harmless in practice.\n\n>But on the other hand, our limit should probably consider some kind of \"weakest but still meaningful\" scanning client\n\nI imagine that any device with no more than one CPU would be a light client that also has bandwidth constraints, at which point you'd have to limit your label usage and the LabelSet approach can be applied.\n\nHmm, in thinking about this, I'm realizing one important factor that has been overlooked. Light clients generally do not have access to the full set of taproot outputs (you could download them, and even apply cut-through, but it'd be more bandwidth), so they'd need the LabelSet approach.\n\nThe steps are:\n- Receive tweak data (~33 bytes per eligible tx)\n- Calculate what would be your taproot output(s) (i.e. the LabelSet approach)\n- Check against a filter if they're in the block (more labels == more false positives)\n\nPerhaps we're not getting around the fact that both approaches have use cases...",
+      "user": {
+        "login": "RubenSomsen",
+        "id": 9066803,
+        "node_id": "MDQ6VXNlcjkwNjY4MDM=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9066803?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/RubenSomsen",
+        "html_url": "https://github.com/RubenSomsen",
+        "followers_url": "https://api.github.com/users/RubenSomsen/followers",
+        "following_url": "https://api.github.com/users/RubenSomsen/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/RubenSomsen/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/RubenSomsen/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/RubenSomsen/subscriptions",
+        "organizations_url": "https://api.github.com/users/RubenSomsen/orgs",
+        "repos_url": "https://api.github.com/users/RubenSomsen/repos",
+        "events_url": "https://api.github.com/users/RubenSomsen/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/RubenSomsen/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3790019192",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
+    },
+    {
+      "event": "comment_deleted",
+      "id": 22242034248,
+      "node_id": "CDE_lADOAP4Jqs7iiazUzwAAAAUtuoJI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/22242034248",
+      "actor": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-23T12:53:09Z"
     }
   ]
 }
