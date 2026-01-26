@@ -59,7 +59,7 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 21,
+    "comments": 22,
     "closed_by": {
       "login": "real-or-random",
       "id": 1071625,
@@ -83,7 +83,7 @@
       "patch_url": null
     },
     "created_at": "2026-01-11T03:21:12Z",
-    "updated_at": "2026-01-26T15:41:22Z"
+    "updated_at": "2026-01-26T17:13:49Z"
   },
   "events": [
     {
@@ -3574,6 +3574,64 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-01-26T15:41:24Z"
+    },
+    {
+      "event": "commented",
+      "id": 3800717070,
+      "node_id": "IC_kwDOAP4Jqs7iilcO",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3800717070",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-26T17:13:49Z",
+      "updated_at": "2026-01-26T17:13:49Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > [1] note that we could achieve the previous benchmark results by randomizing the outputs within the scan function, to bring down the average iterations to a find a match to N/2. I'm not sure though if that's a good idea; tending to think that modifying \"list of pointer\" arguments is really ugly from an API point of view (even if it's only done for high output counts).\n> \n> [@theStack](https://github.com/theStack) Isn't this already done for the LabelSet approach? The outputs must be sorted to enable binary searches. If we already accept sorting the `tx_outputs`, what is the reason not to accept random shuffling?\n\nThat's a good point. The major difference is that for the LabelSet approach the sorting is important even for the common case (=no match) scenario for performance reasons ($L * log(N)$ vs. $L * N$ output comparisons if we do it with binary vs. linear search), while for the BIP approach it is only relevant to reduce scanning time of pathological transactions. I.e. it boils down to a philosophical question whether we should include \"optimizing for the worst-case\" code paths, and whether we value a clean API more than a 2x speed-up for a scenario that the majority of users will likely never hit in their life-time. I'm leaning towards the former, but am still open for both. If I'm not mistaken, sorting outputs should have the same effect as shuffling, given that the generated outputs are pseudorandom. We could:\n* sort/randomize the tx outputs internally (as in the LabelSet approach)\n* shift the responsibility to the user, i.e. recommend or demand from the user to sort/randomize outputs prior calling (by mentioning that in the API docs)\n* not do anything of the above\n* (anything else?)\n\nHappy to hear opinions about that.",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3800717070",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
     }
   ]
 }
