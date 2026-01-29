@@ -59,7 +59,7 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 33,
+    "comments": 34,
     "closed_by": {
       "login": "real-or-random",
       "id": 1071625,
@@ -83,7 +83,7 @@
       "patch_url": null
     },
     "created_at": "2026-01-11T03:21:12Z",
-    "updated_at": "2026-01-29T13:51:27Z"
+    "updated_at": "2026-01-29T20:06:17Z"
   },
   "events": [
     {
@@ -4703,6 +4703,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3817820088",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
+    },
+    {
+      "event": "commented",
+      "id": 3820028498,
+      "node_id": "IC_kwDOAP4Jqs7jsQJS",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3820028498",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-29T20:06:17Z",
+      "updated_at": "2026-01-29T20:06:17Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> Taking a step back, I believe this randomization discussion is relevant to this thread, but it's not the primary thing that is blocking us from making progress.\n\nAgree. The ~2x speedup gained from randomization is nice and we should implement it in some way or another, but it doesn't address the fundamental issue of quadratic scaling. Doing only that, we're unfortunately still operating in the same order of magnitude.\n\nIn my view, the primary blocker to move forward is reaching an agreement on a concrete K_max limit. This is based on my impression that there is general consensus regarding the importance of use cases with a high number of labels, which suggests a BIP-style scanning approach with a protocol fix. Light clients are limited by the number of labels they can use, but that's an inherent problem, and as far as I understood not something a secp256k1 module could solve (releasing the LabelSet approach scanning function in [take 5](https://github.com/bitcoin-core/secp256k1/pull/1792) wouldn't change anything about that fact, as it is only faster if the label count is very low; the main problem though is not having full transaction and prevouts data in the first place).\n\nI'll update the [take 4 draft PR](https://github.com/bitcoin-core/secp256k1/pull/1765), by implementing the limitation with an arbitrary value (maybe with K=1000, since that was [suggested before](https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3787281788) and seems to at least not have received strong objections so far) on both sender and receiver sides, and include the worst-case benchmarks shown above, so it's easier for reviewers to form an opinion and experiment with other K_max values.\n\nHappy to hear feedback about the approach to move on, I'll also ping developers of existing SP wallets to chime in the discussion. One question might be if this is even the right place to discuss protocol changes, or should that happen on the mailing list instead, and/or a PR in the bips repository (my intuition would be to only open a BIPs PR after we already have a consensus on what the limit would be)?\n\n> Perhaps what we could do now is to add an (optional?) rand32 arg, i.e., 32 bytes of caller-provided randomness, to the scanning API. The value could even be entirely unused in the first iteration that we merge, but this leaves us all doors open for future refinements.\n\nMakes sense to stay flexible. Before going ahead with that, an alternative idea: instead of an explicit parameter, would it be an option to leverage the secp256k1_context for that purpose, e.g. with a `_silentpayments_context_randomize` function (that could still be introduced in the future)? I'm asking this since the API is already quite large w.r.t. number of parameters (currently the BIP approach scanning function has 10 parameters, with the additional `rand32` it would be 11...), and passing in a different randomness each time the scan function is called seems not needed; it should be sufficient to set it once at the start when the module is initialized (reusing seems fine, it doesn't gain the attacker any advantage)?",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3820028498",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
     }
   ]
