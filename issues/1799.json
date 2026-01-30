@@ -59,7 +59,7 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 35,
+    "comments": 36,
     "closed_by": {
       "login": "real-or-random",
       "id": 1071625,
@@ -83,7 +83,7 @@
       "patch_url": null
     },
     "created_at": "2026-01-11T03:21:12Z",
-    "updated_at": "2026-01-30T09:27:07Z"
+    "updated_at": "2026-01-30T10:30:14Z"
   },
   "events": [
     {
@@ -4819,6 +4819,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3822705303",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
+    },
+    {
+      "event": "commented",
+      "id": 3822979666,
+      "node_id": "IC_kwDOAP4Jqs7j3gpS",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3822979666",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-01-30T10:24:23Z",
+      "updated_at": "2026-01-30T10:30:14Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > If we use the BIP approach for full clients, then light clients will be inherently more restricted in functionality and not just in terms of trust/privacy.\n> \n> I can't follow this conclusion, can you elaborate? [...]\n> \n> My current understanding is: for light clients, neither a BIP nor LabelSet scanning function alone (e.g. [take 5](https://github.com/bitcoin-core/secp256k1/pull/1792) as-is) are helpful. What they need is a function to derive outputs for each of their spend pubkeys (unlabeled and labeled) and k=0 (that's exactly what [`_recipient_create_output_pubkeys`](https://github.com/josibake/secp256k1/blob/a0d2a33690e51b79aee037a50ce78e438849b823/include/secp256k1_silentpayments.h#L416) in the take 3 PR does), in order to check if a block/tx is relevant for them in the first place. Only if that's the case (i.e. one of the derived outputs is included in the downloaded tx's outputs, and thus a k=0 match has been detected manually by the user), then a \"full\" scanning function would come into play, for also finding the potential remaining outputs (k>=1).\n\nYes, that's my understanding, too. I think the confusion comes from me using the term \"LabelSet approach\" a bit more broadly.\n\nMy thinking is, and I believe that matches Ruben's insight from above, that the performance of light clients will at least have a linear factor in the number L of labels. As you say, a light client will need to derive L outputs (k=0 each) per eligible transaction and will also need to send these over the wire as part of some light client protocol, which checks inclusion in the UTXO set. This means that a light client needs o(L) computation and o(L) bandwidth for scanning. This is similar in performance to the LabelSet scanning approach for full clients, and this makes it slow for use cases with a large number of labels. In contrast, the running time of the BIP approach does not really depend on the number of labels (under our working assumption that lookups in the label cache are O(1)).\n\nThis means that, if we move forward with the BIP approach, then, for instance, a wallet generated on a full client may not be portable to a light client due to the two scanning methods having different performance characteristics. But perhaps this is simply a drawback that we need to accept if we want to move forward at all.\n\nedit: Sorry, I had submitted this accidentally when I was still in the middle of writing.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1799#issuecomment-3822979666",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1799"
     }
   ]
