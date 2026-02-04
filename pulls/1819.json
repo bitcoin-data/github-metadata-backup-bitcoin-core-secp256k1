@@ -43,7 +43,7 @@
     "body": "This Pull Request improves the tests for `secp256k1_scalar_check_overflow` as requested in #1812.\r\n\r\n### Changes:\r\n- Removed the redundant \"all ones\" check from `run_scalar_tests`.\r\n- Added a new dedicated test function `test_scalar_check_overflow`.\r\n- Added static checks for edge cases: `0`, `N-1`, `N`, `N+1`, and `MAX`.\r\n- Added random input tests that verify `check_overflow` against a manual byte comparison.\r\n\r\nFixes #1812.",
     "labels": [],
     "created_at": "2026-02-04T07:51:19Z",
-    "updated_at": "2026-02-04T07:51:19Z",
+    "updated_at": "2026-02-04T09:14:54Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -153,7 +153,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 14049,
+        "size": 12822,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -289,7 +289,7 @@
         "forks_count": 1121,
         "stargazers_count": 2398,
         "watchers_count": 2398,
-        "size": 14049,
+        "size": 14052,
         "default_branch": "master",
         "open_issues_count": 167,
         "is_template": false,
@@ -334,7 +334,7 @@
     "deletions": 9,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 2,
     "comments": 0
   },
   "events": [
@@ -377,7 +377,155 @@
         "date": "2026-02-04T07:24:34Z"
       },
       "sha": "a27e7512a775c7f8459b28c1a274a5add8aad8eb"
+    },
+    {
+      "event": "reviewed",
+      "id": 3749882317,
+      "node_id": "PRR_kwDOAP4Jqs7fgqnN",
+      "url": null,
+      "actor": null,
+      "commit_id": "a27e7512a775c7f8459b28c1a274a5add8aad8eb",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-02-04T09:14:54Z",
+      "author_association": "MEMBER",
+      "body": "Trailing spaces should be removed to pass the CI.",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1819#pullrequestreview-3749882317",
+      "submitted_at": "2026-02-04T09:14:54Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1819"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762977187",
+      "pull_request_review_id": 3749882317,
+      "id": 2762977187,
+      "node_id": "PRRC_kwDOAP4Jqs6kr6-j",
+      "diff_hunk": "@@ -2193,8 +2193,81 @@ static void run_scalar_set_b32_seckey_tests(void) {\n     CHECK(secp256k1_scalar_set_b32_seckey(&s2, b32) == 0);\n }\n \n+static void test_scalar_check_overflow(void) {\n+    secp256k1_scalar s;\n+    const secp256k1_scalar n_minus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364140UL\n+    );\n+    const secp256k1_scalar n = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364141UL\n+    );\n+    const secp256k1_scalar n_plus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364142UL\n+    );\n+    const secp256k1_scalar max = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL,\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL\n+    );\n+\n+    int i;\n+    int j;\n+    int overflow = 0;\n+    unsigned char b32[32];\n+    static unsigned int seed = 5381; /* Simple RNG seed */\n+\n+    /* The group order N */\n+    const unsigned char n_bytes[32] = {\n+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,\n+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE,\n+        0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B,\n+        0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41\n+    };\n+\n+    /* 0 */\n+    secp256k1_scalar_set_int(&s, 0);\n+    CHECK(secp256k1_scalar_check_overflow(&s) == 0);\n+\n+    /* N - 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&n_minus_1) == 0);\n+\n+    /* N */\n+    CHECK(secp256k1_scalar_check_overflow(&n) == 1);\n+\n+    /* N + 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&n_plus_1) == 1);\n+\n+    /* 2^256 - 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&max) == 1);\n+\n+    /* Random inputs */\n+    for (i = 0; i < 256; i++) {\n+        int expected_overflow;\n+        ",
+      "path": "src/tests.c",
+      "position": 56,
+      "original_position": 56,
+      "commit_id": "a27e7512a775c7f8459b28c1a274a5add8aad8eb",
+      "original_commit_id": "a27e7512a775c7f8459b28c1a274a5add8aad8eb",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "```suggestion\n\n```",
+      "created_at": "2026-02-04T09:13:54Z",
+      "updated_at": "2026-02-04T09:14:54Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1819#discussion_r2762977187",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762977187"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1819"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 2248,
+      "original_line": 2248,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762979058",
+      "pull_request_review_id": 3749882317,
+      "id": 2762979058,
+      "node_id": "PRRC_kwDOAP4Jqs6kr7by",
+      "diff_hunk": "@@ -2193,8 +2193,81 @@ static void run_scalar_set_b32_seckey_tests(void) {\n     CHECK(secp256k1_scalar_set_b32_seckey(&s2, b32) == 0);\n }\n \n+static void test_scalar_check_overflow(void) {\n+    secp256k1_scalar s;\n+    const secp256k1_scalar n_minus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364140UL\n+    );\n+    const secp256k1_scalar n = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364141UL\n+    );\n+    const secp256k1_scalar n_plus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364142UL\n+    );\n+    const secp256k1_scalar max = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL,\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL\n+    );\n+\n+    int i;\n+    int j;\n+    int overflow = 0;\n+    unsigned char b32[32];\n+    static unsigned int seed = 5381; /* Simple RNG seed */\n+\n+    /* The group order N */\n+    const unsigned char n_bytes[32] = {\n+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,\n+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE,\n+        0xBA, 0xAE, 0xDC, 0xE6, 0xAF, 0x48, 0xA0, 0x3B,\n+        0xBF, 0xD2, 0x5E, 0x8C, 0xD0, 0x36, 0x41, 0x41\n+    };\n+\n+    /* 0 */\n+    secp256k1_scalar_set_int(&s, 0);\n+    CHECK(secp256k1_scalar_check_overflow(&s) == 0);\n+\n+    /* N - 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&n_minus_1) == 0);\n+\n+    /* N */\n+    CHECK(secp256k1_scalar_check_overflow(&n) == 1);\n+\n+    /* N + 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&n_plus_1) == 1);\n+\n+    /* 2^256 - 1 */\n+    CHECK(secp256k1_scalar_check_overflow(&max) == 1);\n+\n+    /* Random inputs */\n+    for (i = 0; i < 256; i++) {\n+        int expected_overflow;\n+        \n+        /* Generate random 32 bytes using a simple Linear Congruential Generator */\n+        for (j = 0; j < 32; j++) {\n+            seed = seed * 1664525 + 1013904223;\n+            b32[j] = (seed >> 24) & 0xFF;\n+        }\n+\n+        /* Force top bits to be 0xFF sometimes to ensure we hit overflows */\n+        if (i % 2 == 0) {\n+            memset(b32, 0xFF, 16); ",
+      "path": "src/tests.c",
+      "position": 65,
+      "original_position": 65,
+      "commit_id": "a27e7512a775c7f8459b28c1a274a5add8aad8eb",
+      "original_commit_id": "a27e7512a775c7f8459b28c1a274a5add8aad8eb",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "```suggestion\n            memset(b32, 0xFF, 16);\n```",
+      "created_at": "2026-02-04T09:14:25Z",
+      "updated_at": "2026-02-04T09:14:54Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1819#discussion_r2762979058",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762979058"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1819"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 2257,
+      "original_line": 2257,
+      "side": "RIGHT"
+    }
+  ]
 }
