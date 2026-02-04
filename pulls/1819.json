@@ -62,9 +62,9 @@
       }
     ],
     "created_at": "2026-02-04T07:51:19Z",
-    "updated_at": "2026-02-04T16:26:52Z",
+    "updated_at": "2026-02-04T17:28:48Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "155800801e9226cc6f3214633e4eb8ef789741a8",
     "assignees": [],
@@ -353,7 +353,7 @@
     "deletions": 9,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 8,
+    "review_comments": 9,
     "comments": 4
   },
   "events": [
@@ -1331,6 +1331,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2764788480"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1819"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 2226,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2765146604",
+      "pull_request_review_id": 3752351236,
+      "id": 2765146604,
+      "node_id": "PRRC_kwDOAP4Jqs6k0Mns",
+      "diff_hunk": "@@ -2193,8 +2195,57 @@ static void run_scalar_set_b32_seckey_tests(void) {\n     CHECK(secp256k1_scalar_set_b32_seckey(&s2, b32) == 0);\n }\n \n+static void test_scalar_check_overflow(void) {\n+    secp256k1_scalar s;\n+    const secp256k1_scalar n_minus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364140UL\n+    );\n+    const secp256k1_scalar n = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364141UL\n+    );\n+    const secp256k1_scalar n_plus_1 = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFEUL,\n+        0xBAAEDCE6UL, 0xAF48A03BUL, 0xBFD25E8CUL, 0xD0364142UL\n+    );\n+    const secp256k1_scalar max = SECP256K1_SCALAR_CONST(\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL,\n+        0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL, 0xFFFFFFFFUL\n+    );\n+\n+    int i;\n+\n+    secp256k1_scalar_set_int(&s, 0);\n+    CHECK(secp256k1_scalar_check_overflow(&s) == 0);\n+    CHECK(secp256k1_scalar_check_overflow(&n_minus_1) == 0);\n+    CHECK(secp256k1_scalar_check_overflow(&n) == 1);\n+    CHECK(secp256k1_scalar_check_overflow(&n_plus_1) == 1);\n+    CHECK(secp256k1_scalar_check_overflow(&max) == 1);\n+\n+    for (i = 0; i < count; i++) {",
+      "path": "src/tests.c",
+      "position": 1,
+      "original_position": 41,
+      "commit_id": "1cee90f55156f85fc2fd31c3ad25d5338d426e6b",
+      "original_commit_id": "1cee90f55156f85fc2fd31c3ad25d5338d426e6b",
+      "in_reply_to_id": 2764788480,
+      "user": {
+        "login": "therohityadav",
+        "id": 138216334,
+        "node_id": "U_kgDOCD0Djg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/138216334?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/therohityadav",
+        "html_url": "https://github.com/therohityadav",
+        "followers_url": "https://api.github.com/users/therohityadav/followers",
+        "following_url": "https://api.github.com/users/therohityadav/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/therohityadav/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/therohityadav/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/therohityadav/subscriptions",
+        "organizations_url": "https://api.github.com/users/therohityadav/orgs",
+        "repos_url": "https://api.github.com/users/therohityadav/repos",
+        "events_url": "https://api.github.com/users/therohityadav/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/therohityadav/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> I literally meant `COUNT`, a global variable in the tests. This loop could run `2 * COUNT` times, I think.\r\n\r\nThank you for the catch. I have removed the local `count` variable and updated the loop to use the global `COUNT`  with `2 * COUNT` iterations.",
+      "created_at": "2026-02-04T17:28:48Z",
+      "updated_at": "2026-02-04T17:28:48Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1819#discussion_r2765146604",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2765146604"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1819"
