@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-02-05T19:44:38Z",
+    "updated_at": "2026-02-05T22:56:43Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 23,
     "commits": 12,
     "review_comments": 63,
-    "comments": 38
+    "comments": 39
   },
   "events": [
     {
@@ -6326,6 +6326,64 @@
       "submitted_at": "2026-02-05T19:44:38Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+    },
+    {
+      "event": "commented",
+      "id": 3856872222,
+      "node_id": "IC_kwDOAP4Jqs7l4zMe",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3856872222",
+      "actor": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-02-05T22:56:43Z",
+      "updated_at": "2026-02-05T22:56:43Z",
+      "author_association": "NONE",
+      "body": "I ran `silentpayments_scan_worstcase` benchmarks for the BIP scan.\r\n\r\n| Case | K=10 | K=100 | K=1000 | K=2325 | K=23255 |\r\n|---|---:|---:|---:|---:|---:|\r\n| No optimization (PR as-is) | 0.168s | 1.285s | 12.13s | 29.29s | 287.33s (4.79 min) |\r\n| Only “found output removal” (0efc140) | 0.169s | 1.234s | 12.14s | 29.22s | 148.55s (2.48 min) |\r\n| All optimizations (0efc140 + 2c24fe8 + 4795a3e) | 0.075s | 0.547s | 5.19s | 11.80s | 60.55s (1.01 min) |\r\n\r\nNotes on the optimizations:\r\n- 0efc140: removes found outputs from the scan list in-place, so later k-iterations scan a shrinking set (~2× at K≈N).\r\n- 2c24fe8: avoids re-serializing/recomputing the generated x-only key inside each inner-loop comparison (compare 32-byte x-only encodings).\r\n- 4795a3e: batches label-candidate conversion to affine (batch inversion), reducing per-output label overhead.\r\n\r\nBench file used (which allows shuffling outputs)):\r\nhttps://github.com/w0xlt/secp256k1/blob/silentpayments_module_fullnode_only_2/src/modules/silentpayments/bench_impl.h\r\n\r\nTo run the K=23255 row, I temporarily set `SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT` >= 23255 (otherwise the scan caps earlier).\r\n\r\nThe data above indicates the combined optimization effect at K=N is roughly multiplicative: ~2× (removal) × ~2.4× (other work per scanned output) ≈ ~4.8×, and we get 287s → 60s (~4.75×).",
+      "user": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3856872222",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
   "comments": [
