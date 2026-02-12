@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-02-11T21:22:45Z",
+    "updated_at": "2026-02-12T01:45:19Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 23,
     "commits": 12,
     "review_comments": 63,
-    "comments": 46
+    "comments": 47
   },
   "events": [
     {
@@ -7038,6 +7038,64 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-02-11T21:22:47Z"
+    },
+    {
+      "event": "commented",
+      "id": 3888202232,
+      "node_id": "IC_kwDOAP4Jqs7nwUH4",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/3888202232",
+      "actor": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-02-12T01:44:07Z",
+      "updated_at": "2026-02-12T01:45:19Z",
+      "author_association": "NONE",
+      "body": "Added a few commits to this repository to handle the distinct labels worst case  (each of the K matching outputs uses a different label `m=0..K-1`, so the discovered-label cache gets no hits)..\r\nIt reduces that case from ~216.1 s to ~66.9 s (3.2x over the unbounded cache, 4.4x over the unoptimized baseline).\r\n\r\n| # | Commit | Description | Time | vs 1721f43 | vs 1faa518 |\r\n|---|---|---|---:|---:|---:|\r\n| — | 1721f43 | Unoptimized | 295.9 s | — | — |\r\n| 7 | 1faa518 | Unbounded cache + distinct labels | 216.1 s | 1.4x | 1x |\r\n| 8 | dcf1d7f | Cap cached labels at 16 | 128.9 s | 2.3x | 1.7x |\r\n| 9 | a953f9a | Rotate label discovery scan order | 85.6 s | 3.5x | 2.5x |\r\n| 10 | 22217b2 | Scan only unused outputs | 66.9 s | **4.4x** | **3.2x** |\r\n\r\n\r\nAt this point the main trade-off is added complexity + some extra memory/bookkeeping in the receiver scan. \r\n\r\nWe may be able to simplify parts of it (or not). Assuming the approach is sound, it gives us additional mitigation knobs beyond a k_max restriction (e.g., bounded label-variant caching and unused-output tracking), while keeping protocol semantics unchanged.",
+      "user": {
+        "login": "w0xlt",
+        "id": 94266259,
+        "node_id": "U_kgDOBZ5jkw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/94266259?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/w0xlt",
+        "html_url": "https://github.com/w0xlt",
+        "followers_url": "https://api.github.com/users/w0xlt/followers",
+        "following_url": "https://api.github.com/users/w0xlt/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/w0xlt/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/w0xlt/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/w0xlt/subscriptions",
+        "organizations_url": "https://api.github.com/users/w0xlt/orgs",
+        "repos_url": "https://api.github.com/users/w0xlt/repos",
+        "events_url": "https://api.github.com/users/w0xlt/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/w0xlt/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3888202232",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
   "comments": [
