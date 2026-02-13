@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-02-13T08:56:12Z",
+    "updated_at": "2026-02-13T09:22:44Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -7247,9 +7247,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-02-13T08:41:37Z",
-      "updated_at": "2026-02-13T08:56:12Z",
+      "updated_at": "2026-02-13T09:22:44Z",
       "author_association": "NONE",
-      "body": "> I added a benchmark toggle to simulate the “actual worst-case” where each matched output uses a distinct labeled spend key (labels don’t repeat, so “discovered-label” caches get no hits).\r\n> \r\n> With K=N=23255 and outputs ordered in descending k (the same worst-case ordering):\r\n> \r\n> * Pre-optimization scan (PR as-is, single label m=0): ~283 s\r\n> * Optimized-scan, single label m=0 (repeated label): ~0.26 s\r\n> * Optimized-scan, distinct labels m=k (no cache hits): ~245 s\r\n\r\nThis is quite unexpected. With `K=N=23255` and distinct labels turned `ON`, the scanning algorithm still takes minutes on my machine. \r\n\r\nFrom what I can understand from https://github.com/w0xlt/secp256k1/tree/silentpayments_module_fullnode_label_cache,\r\nThe main speedup comes from the use of a tx-specific labels cache that allows avoiding the worst-case path unless a new label is used.  This should work pretty well as long as the distinct  Labels used in the Tx, is less than the labels cache size i.e If we use 17 Labels and the cache size is 16, then there will always be a cache miss.\r\n\r\nApart from the \"batch inversion\" optimisation, the rest of the commits seem to be implementing \"Removal and Randomisation\" in a different way (I am still unsure about this).",
+      "body": "> I added a benchmark toggle to simulate the “actual worst-case” where each matched output uses a distinct labeled spend key (labels don’t repeat, so “discovered-label” caches get no hits).\r\n> \r\n> With K=N=23255 and outputs ordered in descending k (the same worst-case ordering):\r\n> \r\n> * Pre-optimization scan (PR as-is, single label m=0): ~283 s\r\n> * Optimized-scan, single label m=0 (repeated label): ~0.26 s\r\n> * Optimized-scan, distinct labels m=k (no cache hits): ~245 s\r\n\r\n~~This is quite unexpected. With `K=N=23255` and distinct labels turned `ON`, the scanning algorithm still takes minutes on my machine.~~\r\nEDIT: I thought the results were presented for distinct labels.\r\n\r\nFrom what I can understand from https://github.com/w0xlt/secp256k1/tree/silentpayments_module_fullnode_label_cache,\r\nThe main speedup comes from the use of a tx-specific labels cache that allows avoiding the worst-case path unless a new label is used.  This should work pretty well as long as the distinct  Labels used in the Tx, is less than the labels cache size i.e If we use 17 Labels and the cache size is 16, then there will always be a cache miss.\r\n\r\nApart from the \"batch inversion\" optimisation, the rest of the commits seem to be implementing \"Removal and Randomisation\" in a different way (I am still unsure about this).",
       "user": {
         "login": "Eunovo",
         "id": 37949128,
