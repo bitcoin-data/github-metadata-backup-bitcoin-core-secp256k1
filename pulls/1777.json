@@ -80,15 +80,13 @@
       }
     ],
     "created_at": "2025-11-27T23:18:33Z",
-    "updated_at": "2026-03-03T06:47:17Z",
-    "mergeable": true,
-    "mergeable_state": "clean",
+    "updated_at": "2026-03-03T07:00:17Z",
+    "mergeable_state": "unknown",
     "merged": false,
     "merge_commit_sha": "16998227f974ab36b7cd183c721299e91c14d770",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
-    "rebaseable": true,
     "head": {
       "label": "furszy:2025_pluggable_sha256_transform",
       "ref": "2025_pluggable_sha256_transform",
@@ -329,7 +327,7 @@
         "watchers_count": 2409,
         "size": 14084,
         "default_branch": "master",
-        "open_issues_count": 165,
+        "open_issues_count": 164,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -340,9 +338,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-03-02T20:01:44Z",
+        "pushed_at": "2026-03-03T08:14:05Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-03-03T06:11:49Z",
+        "updated_at": "2026-03-03T08:14:10Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -372,7 +370,7 @@
     "deletions": 261,
     "changed_files": 23,
     "commits": 3,
-    "review_comments": 85,
+    "review_comments": 86,
     "comments": 16
   },
   "events": [
@@ -7440,6 +7438,60 @@
       "start_side": null,
       "line": 227,
       "original_line": 227,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2876495435",
+      "pull_request_review_id": 3880657817,
+      "id": 2876495435,
+      "node_id": "PRRC_kwDOAP4Jqs6rc9ZL",
+      "diff_hunk": "@@ -10,6 +10,14 @@\n #include <stdlib.h>\n #include <stdint.h>\n \n+typedef void (*secp256k1_fn_sha256_compression)(uint32_t *state, const unsigned char *blocks64, size_t n_blocks);",
+      "path": "src/hash.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "f048f338a030d7ef00b478e72a84a297a8e3509c",
+      "original_commit_id": "d6d14d84d07148d91479bdb4c1cf41a8d7231f9a",
+      "in_reply_to_id": 2874075951,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Ah, but in the public header we have `typedef void (*secp256k1_sha256_compression_fn) ...`.  (I think the reason why the compiler accepts this name clash at all is that the two types are \"compatible\").\r\n\r\nThese should be consistent. And since this name is in the public API, it would probably make sense to see what we've done so far:\r\n```\r\n> git grep \"typedef.*\\*\" include\r\ninclude/secp256k1.h:typedef int (*secp256k1_nonce_function)(\r\ninclude/secp256k1_ecdh.h:typedef int (*secp256k1_ecdh_hash_function)(\r\ninclude/secp256k1_ellswift.h:typedef int (*secp256k1_ellswift_xdh_hash_function)(\r\ninclude/secp256k1_schnorrsig.h:typedef int (*secp256k1_nonce_function_hardened)(\r\n```\r\n\r\nSo the most consistent choice would be `secp256k1_sha256_compression_function`, at least for the type. (And  we could just omit the internal typedef and rely on the one in the public header.) I don't care that much about the name of the corresponding argument to `secp256k1_context_set_sha256_compression`. Adjusting that one is not a breaking change. \r\n\r\nAlternatively, we could also omit the public typedef entirely, and spell out the function type in the signature of `secp256k1_context_set_sha256_compression`. But I tend to think the typedef is a good idea.",
+      "created_at": "2026-03-03T07:00:17Z",
+      "updated_at": "2026-03-03T07:11:25Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1777#discussion_r2876495435",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2876495435"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1777"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 13,
+      "original_line": 13,
       "side": "RIGHT"
     }
   ]
