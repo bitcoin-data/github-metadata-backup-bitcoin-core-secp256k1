@@ -37,16 +37,17 @@
       "received_events_url": "https://api.github.com/users/Raimo33/received_events",
       "type": "User",
       "site_admin": false,
+      "name": null,
       "patch_url": null
     },
     "body": "This adds **avx** and **avx2** intrinsics support to the library in general, as discussed in https://github.com/bitcoin-core/secp256k1/issues/1700, wherever it yields an improvement as per the benchmarks.\r\n\r\nWhy not **sse** and **avx512**?\r\n- **sse** is only useful in the 32bit code path (USE_FORCE_WIDEMUL_INT64=1). but practically, almost all 32bit SSE enabled CPUs are armv7 architectures, not X86\r\n- **avx512** would not be beneficial anywhere, and thermal throttling is a problem on most CPUs that support it.\r\n\r\narm has [different SIMD instruction set](https://developer.arm.com/architectures/instruction-sets/intrinsics/); it would be nice to have a separate PR implementing that as well. Maybe after this is merged...\r\n\r\n## Tasks\r\n- [ ] Add CI/CD flows with permutations of `-mavx`, `-mavx2`, `-mno-avx`, `-mno-avx2` when building for amd64\r\n- [ ] Precompute vectors at startup (the ones marked with `TODO: precompute` )\r\n\r\n## Commits\r\nI've split this PR into multiple commits with the following criteria:\r\n- non-simd optimizations & style changes\r\n- simd optimizations\r\n- temporary scripts for development\r\n- CI flows\r\n\r\n## Test & Benchmark\r\nTo reproduce the following results I temporarily added 3 scripts for building, testing, benchmarking as well as a jupyter notebook to visualize results. You can verify yourself by running: `./simd-build.sh && ./simd-test.sh && ./simd-bench.sh` and executing the notebook as is. \r\n\r\nThe baseline is compiled with `\"-O3 -mavx -mavx2  -U__AVX__ -U__AVX2__\"` so that spontaneous gcc vectorization is allowed, but my manual vectorization is not compiled. \r\n\r\n## Results",
     "labels": [],
     "created_at": "2025-07-18T11:26:24Z",
-    "updated_at": "2025-09-16T12:54:30Z",
+    "updated_at": "2026-03-03T16:32:11Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "57a6c5b2368188f97a99b73068769a11cc4928ef",
+    "merge_commit_sha": "341329dba945e60b3787c985ea2100354e25c4f4",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -74,6 +75,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "repo": {
@@ -100,6 +102,7 @@
           "received_events_url": "https://api.github.com/users/Raimo33/received_events",
           "type": "User",
           "site_admin": false,
+          "name": null,
           "patch_url": null
         },
         "private": false,
@@ -151,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12676,
+        "size": 12816,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -164,9 +167,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-09-10T09:57:33Z",
+        "pushed_at": "2025-12-16T17:23:11Z",
         "created_at": "2025-07-18T11:21:10Z",
-        "updated_at": "2025-07-28T13:19:07Z",
+        "updated_at": "2025-12-16T17:23:16Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -188,7 +191,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "03fb60ad2e38ae9415e64bf5ba523a10100d4c3c",
+      "sha": "b9cb1cbfd72c9391c337ed1e30d71355dde65248",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -208,6 +211,7 @@
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "repo": {
@@ -234,6 +238,7 @@
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
           "site_admin": false,
+          "name": null,
           "patch_url": null
         },
         "private": false,
@@ -282,12 +287,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1089,
-        "stargazers_count": 2301,
-        "watchers_count": 2301,
-        "size": 12717,
+        "forks_count": 1128,
+        "stargazers_count": 2409,
+        "watchers_count": 2409,
+        "size": 14098,
         "default_branch": "master",
-        "open_issues_count": 155,
+        "open_issues_count": 165,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -298,9 +303,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2025-09-15T07:31:10Z",
+        "pushed_at": "2026-03-03T16:32:09Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2025-09-16T12:42:27Z",
+        "updated_at": "2026-03-03T16:32:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -358,6 +363,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -392,6 +398,7 @@
         "received_events_url": "https://api.github.com/users/romanz/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -422,6 +429,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -449,6 +457,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1703#issuecomment-3089826957",
@@ -478,6 +487,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -505,6 +515,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1703#issuecomment-3090097107",
@@ -534,6 +545,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "4b212122fb6922a0f999dd3f269acc55bc8cd034",
@@ -564,6 +576,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -598,6 +611,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "3b97da1a6e10775c033ef34795228c3576fb58d8",
@@ -628,6 +642,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "a74fdb3e1f42be28a6823e4dcd6adc80a073c087",
@@ -658,6 +673,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "10340c5b99b5fd8bc5cc01794ad4043e55c5bcfe",
@@ -688,6 +704,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "39507e4cdc5e77a6651e4a375296b895f5a93b7f",
@@ -718,6 +735,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "3dc01587fb0141697461cc7f2cf979bd0607bb1d",
@@ -748,6 +766,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "8e337d5cd5776d98749db4d261d4dc5650cce6d2",
@@ -778,6 +797,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "44b31f0ce3a74cdf3bbe3e3e7e47bf289df12456",
@@ -808,6 +828,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "2fe10e880119a66607ee587f77afc4507ce9823c",
@@ -838,6 +859,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "d409172499047824778773f3f869363e5002a4fd",
@@ -868,6 +890,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "f1524a9fb979d1df5d65cc0f5cbdd3561b10682b",
@@ -898,6 +921,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "ba4646bc2534079881513abc677533687e99e89f",
@@ -928,6 +952,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -955,6 +980,7 @@
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1703#issuecomment-3244492276",
@@ -984,6 +1010,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1011,6 +1038,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1703#issuecomment-3244557502",
@@ -1040,6 +1068,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "54783bd8d3546b2626fa3c50770c0b2aea496a31",
@@ -1070,6 +1099,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "fdd8411c285aa15109f91787a11a0a51bc27fd0b",
@@ -1100,6 +1130,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "f7371dad21b245f4dbd2087ae156b05cbef5a576",
@@ -1130,6 +1161,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "b050834e451d68e97435b0fb9449742cf06817f0",
@@ -1160,6 +1192,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "ac1cb7185ee9b68f4efb808a14d0bd4a7ab483f8",
@@ -1190,6 +1223,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1220,6 +1254,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1250,6 +1285,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1280,6 +1316,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": null,
@@ -1310,6 +1347,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "df1021d3ed2705e2bf9d1b4d0d9e2a34de8122c5",
@@ -1340,6 +1378,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "d04b9f4e899b44e72aa4e522353aee60e184127b",
@@ -1370,6 +1409,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "1127dce51c11f1a5756e658ee3994a0c62b83919",
@@ -1400,6 +1440,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "25c195f93b39c423153c19353cabd9c9a9c1e0bd",
@@ -1430,6 +1471,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "aca60ecd1fb845ead94ce0a90eee4745be59cae7",
@@ -1460,6 +1502,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "087124482e908320df956145d87b57e77021dec3",
@@ -1490,6 +1533,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "c20f1f231759dde76463f9ec9de84f587eb89e14",
@@ -1520,6 +1564,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "d2c4b752d0113233a9b435036888fc08edefd7b0",
@@ -1550,6 +1595,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "b67f5e3ae195f7b3a2a06cc24a973dd8e1cd5fc0",
@@ -1580,6 +1626,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "36ca271ee5dab0ef395a9571573fe63cc543d392",
@@ -1610,6 +1657,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "2cc4bfb52599da6632da1a5f72a0517452e7ad4a",
@@ -1640,6 +1688,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "890b23451ca080b248ca41424df422f03b261382",
@@ -1670,6 +1719,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "d6b3f65b64bcb3c85924e371d88bac20b333ce24",
@@ -1740,6 +1790,7 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "5140d5c3ffe459014d03e736a572c11a49544b2f",
@@ -1850,49 +1901,12 @@
         "received_events_url": "https://api.github.com/users/Raimo33/received_events",
         "type": "User",
         "site_admin": false,
+        "name": null,
         "patch_url": null
       },
       "commit_id": "056feb157ae151894ee3a816e16455d4519963aa",
       "commit_url": "https://api.github.com/repos/Raimo33/secp256k1/commits/056feb157ae151894ee3a816e16455d4519963aa",
       "created_at": "2025-09-05T14:19:44Z"
-    },
-    {
-      "event": "reviewed",
-      "id": 3229861054,
-      "node_id": "PRR_kwDOAP4Jqs7Ag8S-",
-      "url": null,
-      "actor": null,
-      "commit_id": "056feb157ae151894ee3a816e16455d4519963aa",
-      "commit_url": null,
-      "created_at": null,
-      "updated_at": "2025-09-16T12:54:30Z",
-      "author_association": "NONE",
-      "body": "",
-      "user": {
-        "login": "kmk142789",
-        "id": 208793165,
-        "node_id": "U_kgDODHHuTQ",
-        "avatar_url": "https://avatars.githubusercontent.com/u/208793165?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/kmk142789",
-        "html_url": "https://github.com/kmk142789",
-        "followers_url": "https://api.github.com/users/kmk142789/followers",
-        "following_url": "https://api.github.com/users/kmk142789/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/kmk142789/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/kmk142789/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/kmk142789/subscriptions",
-        "organizations_url": "https://api.github.com/users/kmk142789/orgs",
-        "repos_url": "https://api.github.com/users/kmk142789/repos",
-        "events_url": "https://api.github.com/users/kmk142789/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/kmk142789/received_events",
-        "type": "User",
-        "site_admin": false,
-        "patch_url": null
-      },
-      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1703#pullrequestreview-3229861054",
-      "submitted_at": "2025-09-16T12:54:30Z",
-      "state": "APPROVED",
-      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1703"
     }
   ],
   "comments": []

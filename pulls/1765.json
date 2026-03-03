@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-02-26T02:03:41Z",
+    "updated_at": "2026-03-03T16:32:11Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -163,7 +163,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13840,
+        "size": 15318,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -176,7 +176,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-02-26T01:41:53Z",
+        "pushed_at": "2026-03-03T03:10:31Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -200,7 +200,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "dfe042feb28dcc8e2a1bea5566ba28afb1ebb4a9",
+      "sha": "b9cb1cbfd72c9391c337ed1e30d71355dde65248",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -296,12 +296,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1125,
-        "stargazers_count": 2406,
-        "watchers_count": 2406,
-        "size": 14074,
+        "forks_count": 1128,
+        "stargazers_count": 2409,
+        "watchers_count": 2409,
+        "size": 14098,
         "default_branch": "master",
-        "open_issues_count": 166,
+        "open_issues_count": 165,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -312,9 +312,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-02-25T09:52:55Z",
+        "pushed_at": "2026-03-03T16:32:09Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-02-25T09:52:59Z",
+        "updated_at": "2026-03-03T16:32:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -414,7 +414,7 @@
       "commit_url": null,
       "created_at": "2025-11-06T21:27:50Z",
       "updated_at": "2025-11-06T21:27:50Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Added the optimized version on top of this PR:\r\nhttps://github.com/w0xlt/secp256k1/commit/8d16914cad57ba07da09d104f0c605ae6284462f\r\n\r\nFor more context:\r\nhttps://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3462891318",
       "user": {
         "login": "w0xlt",
@@ -540,7 +540,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2025-11-14T02:04:05Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Nit: Not related to optimization, but the diff below removes some redundant public-key serialization code:\r\n\r\n```diff\r\ndiff --git a/src/modules/silentpayments/main_impl.h b/src/modules/silentpayments/main_impl.h\r\nindex 106da20..922433d 100644\r\n--- a/src/modules/silentpayments/main_impl.h\r\n+++ b/src/modules/silentpayments/main_impl.h\r\n@@ -21,6 +21,19 @@\r\n /** magic bytes for ensuring prevouts_summary objects were initialized correctly. */\r\n static const unsigned char secp256k1_silentpayments_prevouts_summary_magic[4] = { 0xa7, 0x1c, 0xd3, 0x5e };\r\n \r\n+/* Serialize a ge to compressed 33 bytes. Keeps eckey_pubkey_serialize usage uniform\r\n+ * (expects non-const ge*), and centralizes the VERIFY_CHECK. */\r\n+static SECP256K1_INLINE void secp256k1_sp_ge_serialize33(const secp256k1_ge* in, unsigned char out33[33]) {\r\n+    size_t len = 33;\r\n+    secp256k1_ge tmp = *in;\r\n+    int ok = secp256k1_eckey_pubkey_serialize(&tmp, out33, &len, 1);\r\n+#ifdef VERIFY\r\n+    VERIFY_CHECK(ok && len == 33);\r\n+#else\r\n+    (void)ok;\r\n+#endif\r\n+}\r\n+\r\n /** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to\r\n  *  ensure the correct values of k are used when creating multiple outputs for a recipient.\r\n  *\r\n@@ -68,13 +81,11 @@ static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar\r\n     secp256k1_sha256 hash;\r\n     unsigned char pubkey_sum_ser[33];\r\n     unsigned char input_hash[32];\r\n-    size_t len;\r\n     int ret, overflow;\r\n \r\n     secp256k1_silentpayments_sha256_init_inputs(&hash);\r\n     secp256k1_sha256_write(&hash, outpoint_smallest36, 36);\r\n-    ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);\r\n-    VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));\r\n+    secp256k1_sp_ge_serialize33(pubkey_sum, pubkey_sum_ser);\r\n     secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));\r\n     secp256k1_sha256_finalize(&hash, input_hash);\r\n     /* Convert input_hash to a scalar.\r\n@@ -85,15 +96,13 @@ static int secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_scalar\r\n      * an error to ensure strict compliance with BIP0352.\r\n      */\r\n     secp256k1_scalar_set_b32(input_hash_scalar, input_hash, &overflow);\r\n-    ret &= !secp256k1_scalar_is_zero(input_hash_scalar);\r\n+    ret = !secp256k1_scalar_is_zero(input_hash_scalar);\r\n     return ret & !overflow;\r\n }\r\n \r\n static void secp256k1_silentpayments_create_shared_secret(const secp256k1_context *ctx, unsigned char *shared_secret33, const secp256k1_ge *public_component, const secp256k1_scalar *secret_component) {\r\n     secp256k1_gej ss_j;\r\n     secp256k1_ge ss;\r\n-    size_t len;\r\n-    int ret;\r\n \r\n     secp256k1_ecmult_const(&ss_j, public_component, secret_component);\r\n     secp256k1_ge_set_gej(&ss, &ss_j);\r\n@@ -103,12 +112,7 @@ static void secp256k1_silentpayments_create_shared_secret(const secp256k1_contex\r\n      * impossible at this point considering we have already validated the public key and\r\n      * the secret key.\r\n      */\r\n-    ret = secp256k1_eckey_pubkey_serialize(&ss, shared_secret33, &len, 1);\r\n-#ifdef VERIFY\r\n-    VERIFY_CHECK(ret && len == 33);\r\n-#else\r\n-    (void)ret;\r\n-#endif\r\n+    secp256k1_sp_ge_serialize33(&ss, shared_secret33);\r\n \r\n     /* Leaking these values would break indistinguishability of the transaction, so clear them. */\r\n     secp256k1_ge_clear(&ss);\r\n@@ -585,7 +589,6 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                 secp256k1_ge output_negated_ge, tx_output_ge;\r\n                 secp256k1_gej tx_output_gej, label_gej;\r\n                 unsigned char label33[33];\r\n-                size_t len;\r\n \r\n                 secp256k1_xonly_pubkey_load(ctx, &tx_output_ge, tx_outputs[j]);\r\n                 secp256k1_gej_set_ge(&tx_output_gej, &tx_output_ge);\r\n@@ -595,7 +598,6 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                 secp256k1_ge_neg(&output_negated_ge, &output_ge);\r\n                 secp256k1_gej_add_ge_var(&label_gej, &tx_output_gej, &output_negated_ge, NULL);\r\n                 secp256k1_ge_set_gej_var(&label_ge, &label_gej);\r\n-                ret = secp256k1_eckey_pubkey_serialize(&label_ge, label33, &len, 1);\r\n                 /* Serialize must succeed because the point was just loaded.\r\n                  *\r\n                  * Note: serialize will also fail if label_ge is the point at infinity, but we know\r\n@@ -603,7 +605,7 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                  * Thus, we know that label_ge = tx_output_gej + output_negated_ge cannot be the\r\n                  * point at infinity.\r\n                  */\r\n-                VERIFY_CHECK(ret && len == 33);\r\n+                secp256k1_sp_ge_serialize33(&label_ge, label33);\r\n                 label_tweak = label_lookup(label33, label_context);\r\n                 if (label_tweak != NULL) {\r\n                     found = 1;\r\n@@ -617,7 +619,6 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                 secp256k1_gej_neg(&label_gej, &tx_output_gej);\r\n                 secp256k1_gej_add_ge_var(&label_gej, &label_gej, &output_negated_ge, NULL);\r\n                 secp256k1_ge_set_gej_var(&label_ge, &label_gej);\r\n-                ret = secp256k1_eckey_pubkey_serialize(&label_ge, label33, &len, 1);\r\n                 /* Serialize must succeed because the point was just loaded.\r\n                  *\r\n                  * Note: serialize will also fail if label_ge is the point at infinity, but we know\r\n@@ -625,7 +626,7 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                  * Thus, we know that label_ge = tx_output_gej + output_negated_ge cannot be the\r\n                  * point at infinity.\r\n                  */\r\n-                VERIFY_CHECK(ret && len == 33);\r\n+                secp256k1_sp_ge_serialize33(&label_ge, label33);\r\n                 label_tweak = label_lookup(label33, label_context);\r\n                 if (label_tweak != NULL) {\r\n                     found = 1;\r\n``` ",
       "user": {
         "login": "w0xlt",
@@ -579,7 +579,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2025-11-14T02:25:07Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "nit: The following diff removes the implicit cast and clarifies that k is 4 bytes\r\n\r\n```diff\r\ndiff --git a/src/modules/silentpayments/main_impl.h b/src/modules/silentpayments/main_impl.h\r\nindex 922433d..d94aed6 100644\r\n--- a/src/modules/silentpayments/main_impl.h\r\n+++ b/src/modules/silentpayments/main_impl.h\r\n@@ -512,7 +512,8 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n     secp256k1_xonly_pubkey output_xonly;\r\n     unsigned char shared_secret[33];\r\n     const unsigned char *label_tweak = NULL;\r\n-    size_t j, k, found_idx;\r\n+    size_t j, found_idx;\r\n+    uint32_t k;\r\n     int found, combined, valid_scan_key, ret;\r\n \r\n     /* Sanity check inputs */\r\n```",
       "user": {
         "login": "w0xlt",
@@ -1162,7 +1162,7 @@
       "commit_url": null,
       "created_at": "2025-11-20T23:34:35Z",
       "updated_at": "2025-11-20T23:34:35Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Thanks @nymius for reviewing the changes, addressing the main points, and proposing a simplification.\r\n\r\nI’m currently splitting the optimization commit into smaller pieces to make it easier to review. \r\nI’ll also take a closer look at your commit and run it against the benchmark files.\r\n\r\nThe only part of the discussion that still feels a bit ambiguous is the “base” or “usual” case. \r\nFrom my understanding of https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3341766084, the concern is not about typical usage, but rather about an attacker crafting malicious transactions with many outputs, causing the scanning process to take hours.\r\n\r\nSo the goal of this optimization would be to mitigate that scenario, not the collaborative one.",
       "user": {
         "login": "w0xlt",
@@ -1282,7 +1282,7 @@
       "commit_url": null,
       "created_at": "2025-11-21T05:55:27Z",
       "updated_at": "2025-11-21T05:55:27Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "I ran the `examples/silentpayments_mixed_1.c` file with simplified the version suggested by @nymius  https://github.com/jonasnick/secp256k1/commit/311b4ebb2bf6612c46cefd80a8812d9c9b5dc6c4 . It shows slightly worse performance (see below), but the simpler approach may still be worth it\r\n\r\nWithout the `secp256k1_silentpayments_recipient_sort_cmp` stabilization, I got **82s** for the complex version vs. **114s** for the simpler one. Whether the **30s** difference justifies the additional complexity is up for discussion — I don’t have a strong opinion.\r\n\r\nAnswering the questions: `secp256k1_silentpayments_recipient_sort_cmp stabilization` + `heads` speed up the non-adversarial case. The stable sort ensures that the transaction outputs are ordered sequentially by the index $k$.\r\n\r\nThe optimized receiver implementation relies on a heuristic (the `head` pointers) that assumes the next output it is looking for ($k+1$) is located immediately after the previous one ($k$).\r\n\r\n* **With Stable Sort:** The scanner complexity is roughly **O(N)** (Linear).\r\n* **Without Stable Sort:** The scanner complexity degrades to **O(N²)** (Quadratic).",
       "user": {
         "login": "w0xlt",
@@ -1704,7 +1704,7 @@
       "commit_url": null,
       "created_at": "2025-11-22T10:14:22Z",
       "updated_at": "2025-11-22T10:14:22Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@theStack Yes — if we want to keep only the adversarial-scenario optimizations, we can drop sort stabilization and the extra heads.\r\n\r\nI like your idea of avoiding dynamic memory allocation. That’s a very interesting direction. On my machine, the scan completes in about **0.4s**, which feels like a good balance between simplicity and the optimization needed for the labeled case.\r\n\r\nBelow are the changes I had to make for your example to run on my machine and to record the scan time.\r\n\r\n```diff\r\ndiff --git a/examples/silentpayments.c b/examples/silentpayments.c\r\nindex 5e71e73..d43332f 100644\r\n--- a/examples/silentpayments.c\r\n+++ b/examples/silentpayments.c\r\n@@ -10,6 +10,7 @@\r\n #include <stdio.h>\r\n #include <stdlib.h>\r\n #include <string.h>\r\n+#include <time.h>\r\n \r\n #include <secp256k1_extrakeys.h>\r\n #include <secp256k1_silentpayments.h>\r\n@@ -112,15 +113,21 @@ const unsigned char* label_lookup(\r\n     return NULL;\r\n }\r\n \r\n+static secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\r\n+static const secp256k1_xonly_pubkey *tx_input_ptrs[N_INPUTS];\r\n+static secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\r\n+static secp256k1_xonly_pubkey *tx_output_ptrs[N_OUTPUTS];\r\n+static secp256k1_silentpayments_found_output found_outputs[N_OUTPUTS];\r\n+static secp256k1_silentpayments_found_output *found_output_ptrs[N_OUTPUTS];\r\n+static secp256k1_silentpayments_recipient recipients[N_OUTPUTS];\r\n+static const secp256k1_silentpayments_recipient *recipient_ptrs[N_OUTPUTS];\r\n+/* 2D array for holding multiple public key pairs. The second index, i.e., [2],\r\n+ * is to represent the spend and scan public keys. */\r\n+static unsigned char (*sp_addresses[N_OUTPUTS])[2][33];\r\n+\r\n int main(void) {\r\n     unsigned char randomize[32];\r\n     unsigned char serialized_xonly[32];\r\n-    secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\r\n-    const secp256k1_xonly_pubkey *tx_input_ptrs[N_INPUTS];\r\n-    secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\r\n-    secp256k1_xonly_pubkey *tx_output_ptrs[N_OUTPUTS];\r\n-    secp256k1_silentpayments_found_output found_outputs[N_OUTPUTS];\r\n-    secp256k1_silentpayments_found_output *found_output_ptrs[N_OUTPUTS];\r\n     secp256k1_silentpayments_prevouts_summary prevouts_summary;\r\n     secp256k1_pubkey unlabeled_spend_pubkey;\r\n     struct labels_cache bob_labels_cache;\r\n@@ -209,11 +216,6 @@ int main(void) {\r\n     {\r\n         secp256k1_keypair sender_keypairs[N_INPUTS];\r\n         const secp256k1_keypair *sender_keypair_ptrs[N_INPUTS];\r\n-        secp256k1_silentpayments_recipient recipients[N_OUTPUTS];\r\n-        const secp256k1_silentpayments_recipient *recipient_ptrs[N_OUTPUTS];\r\n-        /* 2D array for holding multiple public key pairs. The second index, i.e., [2],\r\n-         * is to represent the spend and scan public keys. */\r\n-        unsigned char (*sp_addresses[N_OUTPUTS])[2][33];\r\n         unsigned char seckey[32];\r\n \r\n         printf(\"Sending...\\n\");\r\n@@ -340,6 +342,9 @@ int main(void) {\r\n              *        `secp256k1_silentpayments_recipient_prevouts_summary_create`\r\n              *     2. Call `secp256k1_silentpayments_recipient_scan_outputs`\r\n              */\r\n+            clock_t start, end;\r\n+            double cpu_time_used;\r\n+\r\n             ret = secp256k1_silentpayments_recipient_prevouts_summary_create(ctx,\r\n                 &prevouts_summary,\r\n                 smallest_outpoint,\r\n@@ -356,14 +361,20 @@ int main(void) {\r\n \r\n             /* Scan the transaction */\r\n             n_found_outputs = 0;\r\n+            \r\n+            start = clock();\r\n             ret = secp256k1_silentpayments_recipient_scan_outputs(ctx,\r\n                 found_output_ptrs, &n_found_outputs,\r\n-                (const secp256k1_xonly_pubkey * const *)tx_output_ptrs, N_OUTPUTS,\r\n+                (const secp256k1_xonly_pubkey **)tx_output_ptrs, N_OUTPUTS,\r\n                 bob_scan_key,\r\n                 &prevouts_summary,\r\n                 &unlabeled_spend_pubkey,\r\n                 label_lookup, &bob_labels_cache /* NULL, NULL for no labels */\r\n             );\r\n+            end = clock();\r\n+            cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;\r\n+            printf(\"Bob's scan took %f seconds\\n\", cpu_time_used);\r\n+            \r\n             if (!ret) {\r\n                 printf(\"This transaction is not valid for Silent Payments, skipping.\\n\");\r\n                 return EXIT_SUCCESS;\r\n@@ -435,7 +446,7 @@ int main(void) {\r\n             n_found_outputs = 0;\r\n             ret = secp256k1_silentpayments_recipient_scan_outputs(ctx,\r\n                 found_output_ptrs, &n_found_outputs,\r\n-                (const secp256k1_xonly_pubkey * const *)tx_output_ptrs, 1, /* dummy scan with one output (we only care about Bob) */\r\n+                (const secp256k1_xonly_pubkey **)tx_output_ptrs, 1, /* dummy scan with one output (we only care about Bob) */\r\n                 carol_scan_key,\r\n                 &prevouts_summary,\r\n                 &unlabeled_spend_pubkey,\r\n```",
       "user": {
         "login": "w0xlt",
@@ -2130,7 +2130,7 @@
       "commit_url": null,
       "created_at": "2025-11-23T06:06:05Z",
       "updated_at": "2025-11-23T06:06:05Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@theStack Thanks for continuing to refine the optimization. The deletion approach performs slightly better (0.40 s vs. 0.45 s), likely because deleting items shrinks the array and cuts the number of loop iterations by about 50% compared to nullifying them.",
       "user": {
         "login": "w0xlt",
@@ -2637,7 +2637,7 @@
       "commit_url": null,
       "created_at": "2025-11-30T09:47:14Z",
       "updated_at": "2025-11-30T09:47:14Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Hi @theStack . That's not actually the worst case. The worst case is when the attacker shuffles the outputs randomly (or in any adversarial order). I modified your benchmark to randomly shuffle outputs, and scanning takes several minutes to hours with the current optimization proposal.\r\n\r\nhttps://github.com/w0xlt/secp256k1/commit/435cb96c2dc3c9d4a0fa967fb84432d8dd77783d\r\n\r\nThe issue is that the scanning function receives a label lookup callback, which makes it harder to build a sorted index upfront. Instead, for each output tweak index k, it linearly scans all transaction outputs — resulting in O(n²) complexity. An attacker creating ~23,000 unordered outputs can make scanning take hours.\r\n\r\nIf we slightly change the API to replace the label lookup callback with a label entry set, we can sort once and search fast:\r\n1. Build a sorted index of outputs by serialized x-only pubkey — O(n log n) upfront\r\n2. Binary search for each candidate — O(log n) per lookup \r\n\r\nThat way, scanning 23,255 adversarially-ordered outputs drops from hours to ~0.3s. The optimization is purely receiver-side, requires no protocol changes, and works regardless of output ordering. This reduces architectural flexibility, though.\r\n\r\nBefore: for each k, scan all n outputs  → O(k × n) ≈ O(n²)\r\nAfter:  sort outputs, binary search     → O(n log n + k log n)  \r\n\r\nThe following commit implements this proposal:  \r\nhttps://github.com/w0xlt/secp256k1/commit/2305d7361ad4a2ead9e335ea76ea4fc047e275cf\r\n\r\nYou can verify by running `./build/bin/silentpayments_example` (ordered) and `./build/bin/silentpayments_shuffled_example` (shuffled).",
       "user": {
         "login": "w0xlt",
@@ -2939,7 +2939,7 @@
       "commit_url": null,
       "created_at": "2025-12-01T03:57:25Z",
       "updated_at": "2025-12-01T03:57:25Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@theStack Thanks for looking into this.\r\nSorry if I wasn’t clear earlier. The shuffled benchmark does perform better in the optimized version than in the baseline, but it loses the sub-second scan times.\r\nThe new proposed approach (assuming it works as expected) should keep those sub-second times even on the shuffled benchmark.",
       "user": {
         "login": "w0xlt",
@@ -3241,7 +3241,7 @@
       "commit_url": null,
       "created_at": "2025-12-02T04:51:53Z",
       "updated_at": "2025-12-02T04:51:53Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Hi @theStack thanks a lot for taking the time to review the proposal and write up the comparison.\r\n\r\nMy view is that we should aim for the most efficient and resilient solution, even if the attack scenario is somewhat unusual. The spec can be updated as needed to reflect improvements. Independently of adversarial cases, reducing scanning time from several minutes to under a second is a major win for user experience.\r\n\r\nRegarding complexity: although this approach adds some moving parts, the underlying idea (e.g., using binary search) is conceptually straightforward, so I don’t think it should pose a significant burden by itself.\r\n\r\nAs for the dynamic memory concern, the allocation doesn’t necessarily have to happen inside the secp256k1 module. We could let the caller provide the required workspace. For example, could we leverage `secp256k1_scratch_space` here?",
       "user": {
         "login": "w0xlt",
@@ -3481,7 +3481,7 @@
       "commit_url": null,
       "created_at": "2025-12-02T22:04:41Z",
       "updated_at": "2025-12-02T22:04:41Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "> Not really sure how to deal with that and what to prioritize. (Provide two scanning implementations and let the user pick? 😬 )\r\n\r\nSome (very) rough ideas on the trade-off…\r\n\r\nIf we can define a general rule that determines when it’s better to use the label-set scan versus the BIP-based scan, we could do something like:\r\n\r\n```c\r\n/* Choose algorithm based on this transaction's characteristics */\r\nif (n_labels > 2 * n_tx_outputs) {\r\n    /* BIP approach: iterate over outputs, add, and look up in label callback */\r\n    use_bip_scan();\r\n} else {\r\n    /* Label-set approach: iterate over labels, add, and search in output index */\r\n    use_labelset_scan();\r\n}\r\n```\r\n\r\nThe heuristic above is just a rough estimate. The BIP version performs roughly ~2N point additions, where *N* is the number of outputs, while the label-set version performs about ~L additions, where *L* is the number of configured labels.\r\n\r\nBut to build a reliable decision rule, we’d need more benchmark data across a range of (N, L) combinations.",
       "user": {
         "login": "w0xlt",
@@ -3597,7 +3597,7 @@
       "commit_url": null,
       "created_at": "2025-12-04T08:27:18Z",
       "updated_at": "2025-12-04T08:27:18Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@theStack  Thanks very much for this benchmark. It is very insightful.\r\n\r\nFrom my understanding, your benchmark confirms that the label-set approach performs better overall and scales more smoothly with the transaction size `N` (number of outputs). For small `N` they are comparable, but as `N` grows the label-set approach becomes significantly faster than the BIP approach.\r\n\r\nI also evaluated Montgomery batch inversion via `secp256k1_ge_set_all_gej_var` in the label-set scanning path on top of your commit. This seems to mainly help when there are many labels (large `L`). For `L = 50` the label-set approach becomes noticeably faster still, so it dominates the BIP-style scanning for almost all `(L, N)` combinations in this benchmark. All runs are using the same “common case” scenario as in your example (one `k` iteration, no match).\r\n\r\nhttps://github.com/w0xlt/secp256k1/commit/1e8d196e456de957e497275205e3e77df2b4f74b\r\n\r\nBelow is the benchmark commit as measured on my machine (no batch inversion):\r\n```\r\n===== BIP approach (calculate label candidates for each output, look them up in labels cache) =====\r\nL= 1: [N=2: 351 us] [N=5: 200 us] [N=10: 231 us] [N=20: 261 us] [N=50: 289 us] [N=100: 451 us] [N=200: 745 us]\r\nL= 2: [N=2:  81 us] [N=5: 109 us] [N=10:  82 us] [N=20: 153 us] [N=50: 218 us] [N=100: 379 us] [N=200: 631 us]\r\nL= 3: [N=2:  55 us] [N=5:  59 us] [N=10:  75 us] [N=20:  99 us] [N=50: 185 us] [N=100: 299 us] [N=200: 586 us]\r\nL= 5: [N=2:  52 us] [N=5:  58 us] [N=10:  70 us] [N=20:  90 us] [N=50: 171 us] [N=100: 302 us] [N=200: 514 us]\r\nL=10: [N=2:  48 us] [N=5:  53 us] [N=10:  62 us] [N=20:  86 us] [N=50: 153 us] [N=100: 269 us] [N=200: 489 us]\r\nL=20: [N=2:  44 us] [N=5:  52 us] [N=10:  64 us] [N=20:  86 us] [N=50: 147 us] [N=100: 267 us] [N=200: 481 us]\r\nL=50: [N=2:  44 us] [N=5:  47 us] [N=10:  61 us] [N=20:  91 us] [N=50: 153 us] [N=100: 257 us] [N=200: 469 us]\r\n\r\n===== Label-set approach (calculate output candidate for each label, look it up in outputs) =====\r\nL= 1: [N=2:  39 us] [N=5:  38 us] [N=10:  37 us] [N=20:  38 us] [N=50:  41 us] [N=100:  48 us] [N=200:  64 us]\r\nL= 2: [N=2:  37 us] [N=5:  36 us] [N=10:  36 us] [N=20:  37 us] [N=50:  41 us] [N=100:  46 us] [N=200:  65 us]\r\nL= 3: [N=2:  40 us] [N=5:  36 us] [N=10:  37 us] [N=20:  39 us] [N=50:  43 us] [N=100:  49 us] [N=200:  75 us]\r\nL= 5: [N=2:  39 us] [N=5:  39 us] [N=10:  41 us] [N=20:  42 us] [N=50:  47 us] [N=100:  51 us] [N=200:  84 us]\r\nL=10: [N=2:  47 us] [N=5:  47 us] [N=10:  45 us] [N=20:  46 us] [N=50:  49 us] [N=100:  55 us] [N=200:  71 us]\r\nL=20: [N=2:  58 us] [N=5:  56 us] [N=10:  58 us] [N=20:  55 us] [N=50:  59 us] [N=100:  66 us] [N=200:  84 us]\r\nL=50: [N=2:  88 us] [N=5:  85 us] [N=10:  93 us] [N=20:  88 us] [N=50:  94 us] [N=100: 100 us] [N=200: 120 us]\r\n```\r\n\r\nThe numbers after applying batch inversion:\r\n```\r\n===== Label-set approach (calculate output candidate for each label, look it up in outputs) =====\r\nL= 1: [N=2:  38 us] [N=5:  37 us] [N=10:  37 us] [N=20:  37 us] [N=50:  41 us] [N=100:  48 us] [N=200:  61 us]\r\nL= 2: [N=2:  35 us] [N=5:  38 us] [N=10:  37 us] [N=20:  44 us] [N=50:  41 us] [N=100:  47 us] [N=200:  62 us]\r\nL= 3: [N=2:  35 us] [N=5:  38 us] [N=10:  39 us] [N=20:  38 us] [N=50:  46 us] [N=100:  46 us] [N=200:  66 us]\r\nL= 5: [N=2:  49 us] [N=5:  36 us] [N=10:  36 us] [N=20:  40 us] [N=50:  42 us] [N=100:  49 us] [N=200:  63 us]\r\nL=10: [N=2:  37 us] [N=5:  37 us] [N=10:  37 us] [N=20:  37 us] [N=50:  41 us] [N=100:  49 us] [N=200:  65 us]\r\nL=20: [N=2:  46 us] [N=5:  47 us] [N=10:  42 us] [N=20:  42 us] [N=50:  48 us] [N=100:  56 us] [N=200:  73 us]\r\nL=50: [N=2:  54 us] [N=5:  46 us] [N=10:  46 us] [N=20:  50 us] [N=50:  52 us] [N=100:  60 us] [N=200:  82 us]\r\n```\r\n\r\nThe only code change here is using batch inversion in the label-set path.",
       "user": {
         "login": "w0xlt",
@@ -4141,7 +4141,7 @@
       "commit_url": null,
       "created_at": "2025-12-11T21:25:41Z",
       "updated_at": "2025-12-11T21:25:41Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "As I understand it, although the LabelSet approach was originally proposed to avoid worst-case performance issues, an interesting side effect is that it gives the user more control and predictability over scanning costs: runtime depends more on the number of labels (which the wallet controls) and less on the number of P2TR outputs in the block (which the wallet cannot control).\r\n\r\nThe LabelSet approach also scales more smoothly with respect to the number of labels than the BIP approach scales with respect to the number of outputs, as shown in the benchmarks:\r\n\r\n```\r\nBenchmark                               ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\nsp_full_scan_BIP-algo_L=50_N=50         ,   138.0       ,   139.0       ,   139.0\r\nsp_full_scan_LabelSet-algo_L=50_N=50    ,    54.2       ,    54.3       ,    54.6\r\n```\r\n\r\nThe hybrid approach gets the best of both worlds and matches the faster of the two algorithms.\r\n\r\nThat said, I agree that the BIP is the easiest and most thoroughly reviewed solution (and the safest to adopt). \r\nThe LabelSet approach appears to offer the best default performance per the benchmark but introduces new assumptions and requires additional review.\r\nThe hybrid approach is likely the best engineering solution, though it comes at the cost of greater complexity and review effort.",
       "user": {
         "login": "w0xlt",
@@ -5597,7 +5597,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-04T07:06:02Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -5817,7 +5817,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-05T19:44:38Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "One subtle API/UX point about `secp256k1_silentpayments_recipient_scan_outputs`: the implementation bounds scanning by `SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT` by capping the `k` loop to `k_max = min(n_tx_outputs, GROUP_LIMIT)`\n\nThe function still returns 1 (success) and only reports `*n_found_outputs` (also capped), so a caller could reasonably assume “all outputs were scanned” unless they read the note in the header docs. It might be worth returning a distinct status / flag when the bound is hit.",
       "user": {
         "login": "w0xlt",
@@ -5877,7 +5877,7 @@
       "commit_url": null,
       "created_at": "2026-02-05T22:56:43Z",
       "updated_at": "2026-02-05T22:56:43Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "I ran `silentpayments_scan_worstcase` benchmarks for the BIP scan.\r\n\r\n| Case | K=10 | K=100 | K=1000 | K=2325 | K=23255 |\r\n|---|---:|---:|---:|---:|---:|\r\n| No optimization (PR as-is) | 0.168s | 1.285s | 12.13s | 29.29s | 287.33s (4.79 min) |\r\n| Only “found output removal” (0efc140) | 0.169s | 1.234s | 12.14s | 29.22s | 148.55s (2.48 min) |\r\n| All optimizations (0efc140 + 2c24fe8 + 4795a3e) | 0.075s | 0.547s | 5.19s | 11.80s | 60.55s (1.01 min) |\r\n\r\nNotes on the optimizations:\r\n- 0efc140: removes found outputs from the scan list in-place, so later k-iterations scan a shrinking set (~2× at K≈N).\r\n- 2c24fe8: avoids re-serializing/recomputing the generated x-only key inside each inner-loop comparison (compare 32-byte x-only encodings).\r\n- 4795a3e: batches label-candidate conversion to affine (batch inversion), reducing per-output label overhead.\r\n\r\nBench file used (which allows shuffling outputs)):\r\nhttps://github.com/w0xlt/secp256k1/blob/silentpayments_module_fullnode_only_2/src/modules/silentpayments/bench_impl.h\r\n\r\nTo run the K=23255 row, I temporarily set `SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT` >= 23255 (otherwise the scan caps earlier).\r\n\r\nThe data above indicates the combined optimization effect at K=N is roughly multiplicative: ~2× (removal) × ~2.4× (other work per scanned output) ≈ ~4.8×, and we get 287s → 60s (~4.75×).",
       "user": {
         "login": "w0xlt",
@@ -6291,7 +6291,7 @@
       "commit_url": null,
       "created_at": "2026-02-11T04:34:30Z",
       "updated_at": "2026-02-11T04:34:30Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "I hope you all don't mind - I have one more optimization suggestion.\r\n\r\nEach commit was benchmarked in isolation to show the individual contribution of each change. The setup is the worst-case full-block scanning attack: N = K = 23,255 taproot outputs, all using the same label (m = 0), reversed in order, as defined in the benchmark file. No randomization, because it does not matter in this approach.\r\n\r\n| # | Commit | Description | Time | vs prev | vs baseline |\r\n|---|--------|-------------|-----:|--------:|------------:|\r\n| 1 | 1721f43 | Remove per-group recipient limit (**baseline**) | 283.3 s | — | 1x |\r\n| 2 | 5be27fe | Batch-invert scan label candidates | 117.7 s | 2.4x | 2.4x |\r\n| 3 | fa8adde | Preprocess outputs for order-independent lookup | 116.0 s | 1.01x | 2.4x |\r\n| 4 | f825296 | Reuse preloaded output group elements | 113.8 s | 1.02x | 2.5x |\r\n| 5 | bb83012 | Cache discovered labels as spend-key variants | 0.70 s | **162x** | **405x** |\r\n| 6 | 41e7ae2 | Compute tweak\\*G once per k for all spend variants | 0.24 s | 3.0x | **1,192x** |\r\n\r\nAll optimizations are purely receiver-side reorganizations. They don't change cryptographic semantics or rely on sender cooperation. The number of labels in the wallet also doesn't matter.\r\n\r\nIf this approach is correct, there might be no need to restrict the protocol to k_max.\r\n\r\nThis certainly increases the complexity, but perhaps it's worth it.\r\n\r\nThe repository is:\r\nhttps://github.com/w0xlt/secp256k1/tree/silentpayments_module_fullnode_label_cache",
       "user": {
         "login": "w0xlt",
@@ -6469,7 +6469,7 @@
       "commit_url": null,
       "created_at": "2026-02-11T21:22:45Z",
       "updated_at": "2026-02-11T21:22:45Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@theStack thanks for the feedback.\r\n\r\nI added a benchmark toggle to simulate the “actual worst-case” where each matched output uses a distinct labeled spend key (labels don’t repeat, so “discovered-label” caches get no hits).\r\n\r\nWith K=N=23255 and outputs ordered in descending k (the same worst-case ordering):\r\n\r\n* Pre-optimization scan (PR as-is, single label m=0): ~283 s\r\n* Optimized-scan, single label m=0 (repeated label): ~0.26 s\r\n* Optimized-scan, distinct labels m=k (no cache hits): ~245 s\r\n\r\nSo if this data is correct, the optimization is still a modest (or negligible) win even in the “distinct labels” adversary model, and it’s a huge win in the repeated-label case. \r\n\r\nGenerating many distinct labeled addresses is also not something a sender can do from just the receiver’s public address (labels depend on the receiver’s scan secret key), unless they first collect many labeled addresses published by the receiver.",
       "user": {
         "login": "w0xlt",
@@ -6589,7 +6589,7 @@
       "commit_url": null,
       "created_at": "2026-02-12T01:44:07Z",
       "updated_at": "2026-02-12T01:45:19Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Added a few commits to this repository to handle the distinct labels worst case  (each of the K matching outputs uses a different label `m=0..K-1`, so the discovered-label cache gets no hits)..\r\nIt reduces that case from ~216.1 s to ~66.9 s (3.2x over the unbounded cache, 4.4x over the unoptimized baseline).\r\n\r\n| # | Commit | Description | Time | vs 1721f43 | vs 1faa518 |\r\n|---|---|---|---:|---:|---:|\r\n| — | 1721f43 | Unoptimized | 295.9 s | — | — |\r\n| 7 | 1faa518 | Unbounded cache + distinct labels | 216.1 s | 1.4x | 1x |\r\n| 8 | dcf1d7f | Cap cached labels at 16 | 128.9 s | 2.3x | 1.7x |\r\n| 9 | a953f9a | Rotate label discovery scan order | 85.6 s | 3.5x | 2.5x |\r\n| 10 | 22217b2 | Scan only unused outputs | 66.9 s | **4.4x** | **3.2x** |\r\n\r\n\r\nAt this point the main trade-off is added complexity + some extra memory/bookkeeping in the receiver scan. \r\n\r\nWe may be able to simplify parts of it (or not). Assuming the approach is sound, it gives us additional mitigation knobs beyond a k_max restriction (e.g., bounded label-variant caching and unused-output tracking), while keeping protocol semantics unchanged.",
       "user": {
         "login": "w0xlt",
@@ -6825,7 +6825,7 @@
       "commit_url": null,
       "created_at": "2026-02-13T18:04:11Z",
       "updated_at": "2026-02-13T18:08:13Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "@Eunovo thanks for reviewing and testing.                                                                                                             \r\n                                                                                                                                                        \r\nThe latest round of optimization commits (fa8adde onward) aren't re-implementing \"Removal and Randomisation\". They introduce a different mechanism: caching discovered labels so future k iterations can check them directly via binary search, instead of re-running the expensive label discovery loop. That's the core.\r\n                                                                                                                                                        \r\nFor the repeated-label worst case (all 23,255 outputs match using the same label, i.e. K=N=23255, m=0), this is where the massive speedup comes from - 0.27s vs ~159s with batch inversion + removal and randomization only.\r\n                                                                                                                                                        \r\nYou're right that with 17 distinct labels and a cache size of 16, we get constant misses. Even so, the full stack of optimizations  brings that case (K=N=23255, m=k) down to ~67s (commit 22217b2), vs ~159s with batch inversion + removal and randomization.\r\nThe \"randomization\" in a953f9a (technically a rotation) was just reintroduced specifically  to handle the distinct-label worst case (m=k) that @theStack raised. \r\n\r\nI don't think we should worry much about the distinct-label case (m=k). An attacker would need to collect thousands of labeled addresses from the same recipient, which is more of a theoretical possibility than a realistic attack. But since it was raised, I proposed a solution.\r\n\r\nThat said, as @theStack noted, if we're happy with a K_max protocol limit, then batch inversion + output randomization is likely sufficient — no need for the label cache complexity. \r\n\r\nThe optimizations proposed here are primarily useful if we want to avoid capping k entirely.\r\n",
       "user": {
         "login": "w0xlt",
@@ -7553,7 +7553,7 @@
       "commit_url": null,
       "created_at": "2026-02-16T17:25:50Z",
       "updated_at": "2026-02-16T17:25:50Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "> My suggestions would be:\r\n\r\n>K_max = 1000 (see https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3862265628 with the proposed optimizations)\r\nAPI docs comment, directly at the label creation function:\r\n\r\nLooks good to me.",
       "user": {
         "login": "w0xlt",
@@ -7857,7 +7857,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T04:57:01Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -7895,7 +7895,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T04:58:27Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -7933,7 +7933,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T04:58:48Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -7971,7 +7971,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T05:26:09Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -8009,7 +8009,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T05:30:42Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -8047,7 +8047,7 @@
       "commit_url": null,
       "created_at": null,
       "updated_at": "2026-02-24T05:33:05Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "user": {
         "login": "w0xlt",
         "id": 94266259,
@@ -8923,6 +8923,37 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3963469982",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
+    },
+    {
+      "event": "referenced",
+      "id": 23228962990,
+      "node_id": "REFE_lADOAP4Jqs7VEWwNzwAAAAVojdiu",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/23228962990",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "b9cb1cbfd72c9391c337ed1e30d71355dde65248",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/b9cb1cbfd72c9391c337ed1e30d71355dde65248",
+      "created_at": "2026-03-03T14:31:56Z"
     }
   ],
   "comments": [
@@ -11880,7 +11911,7 @@
       "created_at": "2026-02-04T00:10:10Z",
       "updated_at": "2026-02-04T07:06:02Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2761578265",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2761578265"
@@ -11934,7 +11965,7 @@
       "created_at": "2026-02-04T06:56:09Z",
       "updated_at": "2026-02-04T07:06:02Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2762495463",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762495463"
@@ -11988,7 +12019,7 @@
       "created_at": "2026-02-04T07:00:21Z",
       "updated_at": "2026-02-04T07:06:02Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2762506274",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762506274"
@@ -12042,7 +12073,7 @@
       "created_at": "2026-02-04T07:03:00Z",
       "updated_at": "2026-02-04T07:06:02Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2762513681",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762513681"
@@ -12096,7 +12127,7 @@
       "created_at": "2026-02-04T07:04:09Z",
       "updated_at": "2026-02-04T07:06:02Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2762516512",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2762516512"
@@ -12366,7 +12397,7 @@
       "created_at": "2026-02-24T04:57:01Z",
       "updated_at": "2026-02-24T04:57:16Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844505726",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844505726"
@@ -12420,7 +12451,7 @@
       "created_at": "2026-02-24T04:58:27Z",
       "updated_at": "2026-02-24T04:58:27Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844508936",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844508936"
@@ -12474,7 +12505,7 @@
       "created_at": "2026-02-24T04:58:48Z",
       "updated_at": "2026-02-24T04:58:48Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844509691",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844509691"
@@ -12528,7 +12559,7 @@
       "created_at": "2026-02-24T05:26:09Z",
       "updated_at": "2026-02-24T05:34:08Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844590301",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844590301"
@@ -12582,7 +12613,7 @@
       "created_at": "2026-02-24T05:30:42Z",
       "updated_at": "2026-02-24T05:30:42Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844606042",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844606042"
@@ -12636,7 +12667,7 @@
       "created_at": "2026-02-24T05:33:05Z",
       "updated_at": "2026-02-24T05:33:05Z",
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r2844613434",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/2844613434"

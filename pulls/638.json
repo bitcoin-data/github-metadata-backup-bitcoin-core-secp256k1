@@ -43,7 +43,7 @@
     "body": "@DavidBurkett requested to allow computing the optimal scratch size for Schnorr batch verification (https://github.com/ElementsProject/secp256k1-zkp/issues/69). This PR is a prerequisite but also contains a bunch of other fixups.\r\n\r\nOther than adding the new function this PR refactors scratch space handling in ecmult_impl to improve code quality, tests and documentation. \r\n\r\nThe biggest part of this PR is to make computing the scratch size and its inverse more precise by not assuming maximum padding when aligning, but rather using the actual padding. This is not strictly necessary but removes a leaky abstraction and makes testing easier.\r\n",
     "labels": [],
     "created_at": "2019-06-12T21:34:48Z",
-    "updated_at": "2026-02-03T10:42:24Z",
+    "updated_at": "2026-03-03T16:32:15Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -190,7 +190,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "d8a246324650c3df8d54d133a8ac3c1b857a7a4e",
+      "sha": "b9cb1cbfd72c9391c337ed1e30d71355dde65248",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -286,12 +286,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1119,
-        "stargazers_count": 2397,
-        "watchers_count": 2397,
-        "size": 14056,
+        "forks_count": 1128,
+        "stargazers_count": 2409,
+        "watchers_count": 2409,
+        "size": 14098,
         "default_branch": "master",
-        "open_issues_count": 170,
+        "open_issues_count": 165,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -302,9 +302,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-02-02T15:20:08Z",
+        "pushed_at": "2026-03-03T16:32:09Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-02-02T15:23:25Z",
+        "updated_at": "2026-03-03T16:32:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -1575,7 +1575,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 3156,
+      "original_line": 3097,
       "side": "RIGHT"
     },
     {
@@ -1682,8 +1682,8 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": null,
-      "original_line": 143,
+      "line": 143,
+      "original_line": 96,
       "side": "RIGHT"
     },
     {
@@ -1693,7 +1693,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5MzM1OTM1Ng==",
       "diff_hunk": "@@ -1267,4 +1267,20 @@ static int secp256k1_ecmult_multi_var(const secp256k1_callback* error_callback,\n     return 1;\n }\n \n+/**\n+ * Returns the optimal scratch space size for a given number of points\n+ * excluding base point G.\n+ */\n+static size_t secp256k1_ecmult_multi_scratch_size(size_t n_points) {\n+    if (n_points > ECMULT_MAX_POINTS_PER_BATCH) {\n+        n_points = ECMULT_MAX_POINTS_PER_BATCH;\n+    }\n+    if (n_points >= ECMULT_PIPPENGER_THRESHOLD) {\n+        int bucket_window = secp256k1_pippenger_bucket_window(n_points);\n+        return secp256k1_pippenger_scratch_size(n_points, bucket_window);\n+    } else {\n+        return secp256k1_strauss_scratch_size(n_points);\n+    }",
       "path": "src/ecmult_impl.h",
-      "position": 309,
+      "position": 625,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -1737,7 +1737,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 1002,
-      "original_line": 1002,
+      "original_line": 1283,
       "side": "RIGHT"
     },
     {
@@ -1791,7 +1791,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 1097,
+      "original_line": 1011,
       "side": "RIGHT"
     },
     {
@@ -1909,7 +1909,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5MzM3MzE1NQ==",
       "diff_hunk": "@@ -1267,4 +1267,20 @@ static int secp256k1_ecmult_multi_var(const secp256k1_callback* error_callback,\n     return 1;\n }\n \n+/**\n+ * Returns the optimal scratch space size for a given number of points\n+ * excluding base point G.\n+ */\n+static size_t secp256k1_ecmult_multi_scratch_size(size_t n_points) {\n+    if (n_points > ECMULT_MAX_POINTS_PER_BATCH) {\n+        n_points = ECMULT_MAX_POINTS_PER_BATCH;\n+    }\n+    if (n_points >= ECMULT_PIPPENGER_THRESHOLD) {\n+        int bucket_window = secp256k1_pippenger_bucket_window(n_points);\n+        return secp256k1_pippenger_scratch_size(n_points, bucket_window);\n+    } else {\n+        return secp256k1_strauss_scratch_size(n_points);\n+    }",
       "path": "src/ecmult_impl.h",
-      "position": 309,
+      "position": 625,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -1953,7 +1953,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 1002,
-      "original_line": 1002,
+      "original_line": 1283,
       "side": "RIGHT"
     },
     {
@@ -1963,7 +1963,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5MzM3NjE2OQ==",
       "diff_hunk": "@@ -1267,4 +1267,20 @@ static int secp256k1_ecmult_multi_var(const secp256k1_callback* error_callback,\n     return 1;\n }\n \n+/**\n+ * Returns the optimal scratch space size for a given number of points\n+ * excluding base point G.\n+ */\n+static size_t secp256k1_ecmult_multi_scratch_size(size_t n_points) {\n+    if (n_points > ECMULT_MAX_POINTS_PER_BATCH) {\n+        n_points = ECMULT_MAX_POINTS_PER_BATCH;\n+    }\n+    if (n_points >= ECMULT_PIPPENGER_THRESHOLD) {\n+        int bucket_window = secp256k1_pippenger_bucket_window(n_points);\n+        return secp256k1_pippenger_scratch_size(n_points, bucket_window);\n+    } else {\n+        return secp256k1_strauss_scratch_size(n_points);\n+    }",
       "path": "src/ecmult_impl.h",
-      "position": 309,
+      "position": 625,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -2007,7 +2007,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 1002,
-      "original_line": 1002,
+      "original_line": 1283,
       "side": "RIGHT"
     },
     {
@@ -2071,7 +2071,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5MzM4MzE3OQ==",
       "diff_hunk": "@@ -1267,4 +1267,20 @@ static int secp256k1_ecmult_multi_var(const secp256k1_callback* error_callback,\n     return 1;\n }\n \n+/**\n+ * Returns the optimal scratch space size for a given number of points\n+ * excluding base point G.\n+ */\n+static size_t secp256k1_ecmult_multi_scratch_size(size_t n_points) {\n+    if (n_points > ECMULT_MAX_POINTS_PER_BATCH) {\n+        n_points = ECMULT_MAX_POINTS_PER_BATCH;\n+    }\n+    if (n_points >= ECMULT_PIPPENGER_THRESHOLD) {\n+        int bucket_window = secp256k1_pippenger_bucket_window(n_points);\n+        return secp256k1_pippenger_scratch_size(n_points, bucket_window);\n+    } else {\n+        return secp256k1_strauss_scratch_size(n_points);\n+    }",
       "path": "src/ecmult_impl.h",
-      "position": 309,
+      "position": 625,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -2115,7 +2115,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 1002,
-      "original_line": 1002,
+      "original_line": 1283,
       "side": "RIGHT"
     },
     {
@@ -2179,7 +2179,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5MzQ2NzgxMg==",
       "diff_hunk": "@@ -1081,27 +1124,39 @@ static int secp256k1_ecmult_pippenger_batch_single(const secp256k1_callback* err\n  * used.\n  */\n static size_t secp256k1_pippenger_max_points(const secp256k1_callback* error_callback, secp256k1_scratch *scratch) {\n-    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, PIPPENGER_SCRATCH_OBJECTS);\n+    /* Call max_allocation with 0 objects because it would assume worst case\n+     * padding but in this function we want to get an exact number (and\n+     * pippenger_scratch_size_points will already account for alignment). */\n+    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, 0);\n     int bucket_window;\n     size_t res = 0;\n \n     for (bucket_window = 1; bucket_window <= PIPPENGER_MAX_BUCKET_WINDOW; bucket_window++) {\n         size_t n_points;\n         size_t max_points = secp256k1_pippenger_bucket_window_inv(bucket_window);\n         size_t space_for_points;\n-        size_t space_overhead;\n-        size_t entry_size = sizeof(secp256k1_ge) + sizeof(secp256k1_scalar) + sizeof(struct secp256k1_pippenger_point_state) + (WNAF_SIZE(bucket_window+1)+1)*sizeof(int);\n+        size_t space_constant;\n+        size_t entry_size = secp256k1_pippenger_scratch_size_points(0, bucket_window, 0);\n \n-#ifdef USE_ENDOMORPHISM\n-        entry_size = 2*entry_size;\n-#endif\n-        space_overhead = (sizeof(secp256k1_gej) << bucket_window) + entry_size + sizeof(struct secp256k1_pippenger_state);\n-        if (space_overhead > max_alloc) {\n+        space_constant = secp256k1_pippenger_scratch_size_constant(bucket_window);\n+        if (space_constant + entry_size > max_alloc) {\n             break;\n         }\n-        space_for_points = max_alloc - space_overhead;\n+        space_for_points = max_alloc - space_constant;\n+\n+        /* Compute an upper bound for the number of points after subtracting\n+         * space for the base point G. It's an upper bound because alignment is\n+         * not taken into account. */\n+        n_points = (space_for_points - entry_size)/entry_size;\n+        if (n_points > 0\n+              && space_for_points < secp256k1_pippenger_scratch_size_points(n_points, bucket_window, 1)) {\n+            /* If there's not enough space after alignment is taken into\n+             * account it suffices to decrease n_points by one. This is because\n+             * the maximum padding required is less than an entry. */\n+            n_points -= 1;\n+            VERIFY_CHECK(space_for_points >= secp256k1_pippenger_scratch_size_points(n_points, bucket_window, 1));",
       "path": "src/ecmult_impl.h",
-      "position": 285,
+      "position": 563,
       "original_position": 187,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -2223,7 +2223,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 876,
-      "original_line": 876,
+      "original_line": 1157,
       "side": "RIGHT"
     },
     {
@@ -2233,7 +2233,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDI5NDA2MDAwNg==",
       "diff_hunk": "@@ -1081,27 +1124,39 @@ static int secp256k1_ecmult_pippenger_batch_single(const secp256k1_callback* err\n  * used.\n  */\n static size_t secp256k1_pippenger_max_points(const secp256k1_callback* error_callback, secp256k1_scratch *scratch) {\n-    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, PIPPENGER_SCRATCH_OBJECTS);\n+    /* Call max_allocation with 0 objects because it would assume worst case\n+     * padding but in this function we want to get an exact number (and\n+     * pippenger_scratch_size_points will already account for alignment). */\n+    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, 0);\n     int bucket_window;\n     size_t res = 0;\n \n     for (bucket_window = 1; bucket_window <= PIPPENGER_MAX_BUCKET_WINDOW; bucket_window++) {\n         size_t n_points;\n         size_t max_points = secp256k1_pippenger_bucket_window_inv(bucket_window);\n         size_t space_for_points;\n-        size_t space_overhead;\n-        size_t entry_size = sizeof(secp256k1_ge) + sizeof(secp256k1_scalar) + sizeof(struct secp256k1_pippenger_point_state) + (WNAF_SIZE(bucket_window+1)+1)*sizeof(int);\n+        size_t space_constant;\n+        size_t entry_size = secp256k1_pippenger_scratch_size_points(0, bucket_window, 0);\n \n-#ifdef USE_ENDOMORPHISM\n-        entry_size = 2*entry_size;\n-#endif\n-        space_overhead = (sizeof(secp256k1_gej) << bucket_window) + entry_size + sizeof(struct secp256k1_pippenger_state);\n-        if (space_overhead > max_alloc) {\n+        space_constant = secp256k1_pippenger_scratch_size_constant(bucket_window);\n+        if (space_constant + entry_size > max_alloc) {\n             break;\n         }\n-        space_for_points = max_alloc - space_overhead;\n+        space_for_points = max_alloc - space_constant;\n+\n+        /* Compute an upper bound for the number of points after subtracting\n+         * space for the base point G. It's an upper bound because alignment is\n+         * not taken into account. */\n+        n_points = (space_for_points - entry_size)/entry_size;\n+        if (n_points > 0\n+              && space_for_points < secp256k1_pippenger_scratch_size_points(n_points, bucket_window, 1)) {\n+            /* If there's not enough space after alignment is taken into\n+             * account it suffices to decrease n_points by one. This is because\n+             * the maximum padding required is less than an entry. */\n+            n_points -= 1;\n+            VERIFY_CHECK(space_for_points >= secp256k1_pippenger_scratch_size_points(n_points, bucket_window, 1));",
       "path": "src/ecmult_impl.h",
-      "position": 285,
+      "position": 563,
       "original_position": 187,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -2277,7 +2277,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 876,
-      "original_line": 876,
+      "original_line": 1157,
       "side": "RIGHT"
     },
     {
@@ -2439,7 +2439,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 1097,
+      "original_line": 1011,
       "side": "RIGHT"
     },
     {
@@ -2493,7 +2493,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 857,
+      "original_line": 1177,
       "side": "RIGHT"
     },
     {
@@ -2547,7 +2547,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 857,
+      "original_line": 1177,
       "side": "RIGHT"
     },
     {
@@ -2709,7 +2709,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": null,
-      "original_line": 857,
+      "original_line": 1177,
       "side": "RIGHT"
     },
     {
@@ -2719,7 +2719,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tLjvs",
       "diff_hunk": "@@ -801,13 +820,17 @@ static int secp256k1_ecmult_pippenger_batch_single(const secp256k1_callback* err\n     return secp256k1_ecmult_pippenger_batch(error_callback, scratch, r, inp_g_sc, cb, cbdata, n, 0);\n }\n \n-/**\n- * Returns the maximum number of points in addition to G that can be used with\n- * a given scratch space. The function ensures that fewer points may also be\n- * used.\n+/* Returns the (near) maximum number of points in addition to G that can be",
       "path": "src/ecmult_impl.h",
-      "position": 240,
+      "position": 518,
       "original_position": 37,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "1e8189575362c7e0a972cafa953bea3d4dcaaf12",
@@ -2763,7 +2763,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 838,
-      "original_line": 838,
+      "original_line": 823,
       "side": "RIGHT"
     },
     {
@@ -2773,7 +2773,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOnq8",
       "diff_hunk": "@@ -630,22 +671,75 @@ SECP256K1_INLINE static void secp256k1_ecmult_endo_split(secp256k1_scalar *s1, s\n     }\n }\n \n+static size_t secp256k1_pippenger_scratch_size_constant(int bucket_window) {\n+    /* 4 objects are accounted for in pippenger_scratch_size_points */\n+    enum { N_SIZES = PIPPENGER_SCRATCH_OBJECTS - 4 };\n+    size_t sizes[N_SIZES];\n+    sizes[0] = sizeof(struct secp256k1_pippenger_state);\n+    sizes[1] = sizeof(secp256k1_gej) << bucket_window;\n+\n+    return secp256k1_scratch_alloc_size(sizes, N_SIZES);\n+}\n+\n+static SECP256K1_INLINE size_t secp256k1_pippenger_entries(size_t n_points) {\n+    return 2*n_points + 2;\n+}\n+\n+/**\n+ * Returns the scratch size required for a given number of points excluding\n+ * base point G and excluding the parts not dependent on the number of points.\n+ * If called with 0 n_points it'll return the size required for the base point\n+ * G. If the as_allocated argument is 0, this function will return the sum of\n+ * the sizes of the individual parts. Otherwise it will return the size that is\n+ * actually allocated with secp256k1_scratch_alloc which is greater or equal.\n+ */\n+static size_t secp256k1_pippenger_scratch_size_points(size_t n_points, int bucket_window, int as_allocated) {\n+    size_t entries = secp256k1_pippenger_entries(n_points);\n+    /* 4 objects are accounted for in pippenger_scratch_size_constant */\n+    enum { N_SIZES = PIPPENGER_SCRATCH_OBJECTS - 2 };\n+    size_t sizes[N_SIZES];\n+    sizes[0] = entries * sizeof(secp256k1_ge);\n+    sizes[1] = entries * sizeof(secp256k1_scalar);\n+    sizes[2] = entries * sizeof(struct secp256k1_pippenger_point_state);\n+    sizes[3] = entries * WNAF_SIZE(bucket_window+1) * sizeof(int);\n+    if (as_allocated) {\n+        return secp256k1_scratch_alloc_size(sizes, N_SIZES);\n+    } else {\n+        return secp256k1_ecmult_sum_array(sizes, N_SIZES);\n+    }\n+}\n+\n /**\n  * Returns the scratch size required for a given number of points (excluding\n- * base point G) without considering alignment.\n+ * base point G) as it would be allocated on a scratch space.\n  */\n static size_t secp256k1_pippenger_scratch_size(size_t n_points, int bucket_window) {\n-    size_t entries = 2*n_points + 2;\n-    size_t entry_size = sizeof(secp256k1_ge) + sizeof(secp256k1_scalar) + sizeof(struct secp256k1_pippenger_point_state) + (WNAF_SIZE(bucket_window+1)+1)*sizeof(int);\n-    return (sizeof(secp256k1_gej) << bucket_window) + sizeof(struct secp256k1_pippenger_state) + entries * entry_size;\n+    return secp256k1_pippenger_scratch_size_constant(bucket_window)\n+            + secp256k1_pippenger_scratch_size_points(n_points, bucket_window, 1);\n+}\n+\n+static int secp256k1_ecmult_pippenger_batch_allocate(const secp256k1_callback* error_callback, secp256k1_scratch *scratch, size_t entries, int bucket_window, secp256k1_ge **points, secp256k1_scalar **scalars, secp256k1_gej **buckets, struct secp256k1_pippenger_state **state_space) {\n+    *points = (secp256k1_ge *) secp256k1_scratch_alloc(error_callback, scratch, entries * sizeof(secp256k1_ge));\n+    *scalars = (secp256k1_scalar *) secp256k1_scratch_alloc(error_callback, scratch, entries * sizeof(secp256k1_scalar));\n+    *state_space = (struct secp256k1_pippenger_state *) secp256k1_scratch_alloc(error_callback, scratch, sizeof(struct secp256k1_pippenger_state));\n+    if (*points == NULL || *scalars == NULL || *state_space == NULL) {\n+        return 0;\n+    }\n+    (*state_space)->ps = (struct secp256k1_pippenger_point_state *) secp256k1_scratch_alloc(error_callback, scratch, entries * sizeof(struct secp256k1_pippenger_point_state));\n+    (*state_space)->wnaf_na = (int *) secp256k1_scratch_alloc(error_callback, scratch, entries * WNAF_SIZE(bucket_window+1) * sizeof(int));\n+    *buckets = (secp256k1_gej *) secp256k1_scratch_alloc(error_callback, scratch, sizeof(secp256k1_gej) << bucket_window);\n+    if ((*state_space)->ps == NULL || (*state_space)->wnaf_na == NULL || *buckets == NULL) {\n+        return 0;\n+    }\n+    return 1;\n }\n \n static int secp256k1_ecmult_pippenger_batch(const secp256k1_callback* error_callback, secp256k1_scratch *scratch, secp256k1_gej *r, const secp256k1_scalar *inp_g_sc, secp256k1_ecmult_multi_callback cb, void *cbdata, size_t n_points, size_t cb_offset) {\n     const size_t scratch_checkpoint = secp256k1_scratch_checkpoint(error_callback, scratch);\n     /* Use 2(n+1) with the endomorphism, when calculating batch\n      * sizes. The reason for +1 is that we add the G scalar to the list of\n      * other scalars. */\n-    size_t entries = 2*n_points + 2;\n+    size_t entries = secp256k1_pippenger_entries(n_points);",
       "path": "src/ecmult_impl.h",
-      "position": 204,
+      "position": 456,
       "original_position": 155,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "63811c4680f9bb93894608648332edf79886e28f",
@@ -2817,7 +2817,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 777,
-      "original_line": 777,
+      "original_line": 742,
       "side": "RIGHT"
     },
     {
@@ -2827,7 +2827,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOoil",
       "diff_hunk": "@@ -732,17 +815,19 @@ static size_t secp256k1_pippenger_max_points(const secp256k1_callback* error_cal\n         size_t n_points;\n         size_t max_points = secp256k1_pippenger_bucket_window_inv(bucket_window);\n         size_t space_for_points;\n-        size_t space_overhead;\n-        size_t entry_size = sizeof(secp256k1_ge) + sizeof(secp256k1_scalar) + sizeof(struct secp256k1_pippenger_point_state) + (WNAF_SIZE(bucket_window+1)+1)*sizeof(int);\n+        size_t space_constant;\n+        /* Compute entry size without taking alignment into account */\n+        size_t entry_size = secp256k1_pippenger_scratch_size_points(0, bucket_window, 0);\n \n-        entry_size = 2*entry_size;\n-        space_overhead = (sizeof(secp256k1_gej) << bucket_window) + entry_size + sizeof(struct secp256k1_pippenger_state);\n-        if (space_overhead > max_alloc) {\n+        space_constant = secp256k1_pippenger_scratch_size_constant(bucket_window);\n+        if (space_constant + entry_size > max_alloc) {",
       "path": "src/ecmult_impl.h",
-      "position": 269,
+      "position": 547,
       "original_position": 193,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "63811c4680f9bb93894608648332edf79886e28f",
@@ -2871,7 +2871,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 861,
-      "original_line": 861,
+      "original_line": 823,
       "side": "RIGHT"
     },
     {
@@ -2881,7 +2881,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOtGi",
       "diff_hunk": "@@ -4098,6 +4099,20 @@ void test_ecmult_multi_strauss_scratch_size(void) {\n     }\n }\n \n+/* Spot check that any scratch space is large enough to fit\n+ * `strauss_max_points(scratch)` many points. */\n+void test_ecmult_multi_strauss_max_points(void) {\n+    size_t scratch_size = secp256k1_strauss_scratch_size_raw(1, 0);\n+    size_t max_scratch_size = secp256k1_strauss_scratch_size_raw(1, 1) + 1;\n+    for (; scratch_size < max_scratch_size; scratch_size++) {",
       "path": "src/tests.c",
-      "position": 78,
+      "position": 4052,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "1e8189575362c7e0a972cafa953bea3d4dcaaf12",
@@ -2925,7 +2925,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 4345,
-      "original_line": 4345,
+      "original_line": 4107,
       "side": "RIGHT"
     },
     {
@@ -2935,7 +2935,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOtQK",
       "diff_hunk": "@@ -4098,6 +4099,20 @@ void test_ecmult_multi_strauss_scratch_size(void) {\n     }\n }\n \n+/* Spot check that any scratch space is large enough to fit\n+ * `strauss_max_points(scratch)` many points. */\n+void test_ecmult_multi_strauss_max_points(void) {\n+    size_t scratch_size = secp256k1_strauss_scratch_size_raw(1, 0);\n+    size_t max_scratch_size = secp256k1_strauss_scratch_size_raw(1, 1) + 1;\n+    for (; scratch_size < max_scratch_size; scratch_size++) {\n+        secp256k1_scratch *scratch = secp256k1_scratch_create(&ctx->error_callback, scratch_size);\n+        size_t n_points = secp256k1_strauss_max_points(&ctx->error_callback, scratch);\n+        CHECK(secp256k1_scratch_max_allocation(&ctx->error_callback, scratch, 0) == scratch_size);\n+        CHECK(scratch_size >= secp256k1_strauss_scratch_size(n_points));",
       "path": "src/tests.c",
-      "position": 82,
+      "position": 4056,
       "original_position": 21,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "1e8189575362c7e0a972cafa953bea3d4dcaaf12",
@@ -2979,7 +2979,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 4349,
-      "original_line": 4349,
+      "original_line": 4111,
       "side": "RIGHT"
     },
     {
@@ -2989,7 +2989,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOtzv",
       "diff_hunk": "@@ -1267,4 +1267,20 @@ static int secp256k1_ecmult_multi_var(const secp256k1_callback* error_callback,\n     return 1;\n }\n \n+/**\n+ * Returns the optimal scratch space size for a given number of points\n+ * excluding base point G.\n+ */\n+static size_t secp256k1_ecmult_multi_scratch_size(size_t n_points) {\n+    if (n_points > ECMULT_MAX_POINTS_PER_BATCH) {\n+        n_points = ECMULT_MAX_POINTS_PER_BATCH;\n+    }\n+    if (n_points >= ECMULT_PIPPENGER_THRESHOLD) {\n+        int bucket_window = secp256k1_pippenger_bucket_window(n_points);\n+        return secp256k1_pippenger_scratch_size(n_points, bucket_window);\n+    } else {\n+        return secp256k1_strauss_scratch_size(n_points);\n+    }",
       "path": "src/ecmult_impl.h",
-      "position": 309,
+      "position": 625,
       "original_position": 17,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e774a6eea8f19fe56aeacdaadc4e1d270ff11cad",
@@ -3033,7 +3033,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 1002,
-      "original_line": 1002,
+      "original_line": 1283,
       "side": "RIGHT"
     },
     {
@@ -3043,7 +3043,7 @@
       "node_id": "PRRC_kwDOAP4Jqs4tOz7p",
       "diff_hunk": "@@ -718,31 +820,51 @@ static int secp256k1_ecmult_pippenger_batch_single(const secp256k1_callback* err\n     return secp256k1_ecmult_pippenger_batch(error_callback, scratch, r, inp_g_sc, cb, cbdata, n, 0);\n }\n \n-/**\n- * Returns the maximum number of points in addition to G that can be used with\n- * a given scratch space. The function ensures that fewer points may also be\n- * used.\n+/* Returns the (near) maximum number of points in addition to G that can be\n+ * used with a given scratch space. It may not return the actual maximum number\n+ * of points possible. Otherwise, fewer points would not fit into the scratch\n+ * space in general. If a scratch space has exactly\n+ * `pippenger_scratch_size(n_points)` left, then\n+ * `pippenger_max_points(cb, scratch) <= n_points`.\n  */\n static size_t secp256k1_pippenger_max_points(const secp256k1_callback* error_callback, secp256k1_scratch *scratch) {\n-    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, PIPPENGER_SCRATCH_OBJECTS);\n+    /* Call max_allocation with 0 objects because otherwise it would assume\n+     * worst case padding but in this function we want to be exact. */\n+    size_t max_alloc = secp256k1_scratch_max_allocation(error_callback, scratch, 0);\n     int bucket_window;\n     size_t res = 0;\n \n     for (bucket_window = 1; bucket_window <= PIPPENGER_MAX_BUCKET_WINDOW; bucket_window++) {\n         size_t n_points;\n         size_t max_points = secp256k1_pippenger_bucket_window_inv(bucket_window);\n         size_t space_for_points;\n-        size_t space_overhead;\n-        size_t entry_size = sizeof(secp256k1_ge) + sizeof(secp256k1_scalar) + sizeof(struct secp256k1_pippenger_point_state) + (WNAF_SIZE(bucket_window+1)+1)*sizeof(int);\n+        size_t space_constant;\n+        /* Compute entry size without taking alignment into account */\n+        size_t entry_size = secp256k1_pippenger_scratch_size_points(0, bucket_window, 0);",
       "path": "src/ecmult_impl.h",
-      "position": 263,
+      "position": 541,
       "original_position": 248,
       "commit_id": "0d574b436687898c85b434132aca117374dd64d7",
       "original_commit_id": "e54c1aff71c7480095624aaa3f6cd53cf893eae0",
@@ -3087,7 +3087,7 @@
       "original_start_line": null,
       "start_side": null,
       "line": 858,
-      "original_line": 858,
+      "original_line": 843,
       "side": "RIGHT"
     },
     {
