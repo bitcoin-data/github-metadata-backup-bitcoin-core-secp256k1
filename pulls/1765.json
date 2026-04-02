@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-04-01T18:39:05Z",
+    "updated_at": "2026-04-01T23:44:38Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -297,7 +297,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1134,
+        "forks_count": 1135,
         "stargazers_count": 2414,
         "watchers_count": 2414,
         "size": 14192,
@@ -346,7 +346,7 @@
     "changed_files": 23,
     "commits": 13,
     "review_comments": 78,
-    "comments": 67
+    "comments": 68
   },
   "events": [
     {
@@ -9877,6 +9877,64 @@
       "submitted_at": "2026-04-01T18:39:05Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+    },
+    {
+      "event": "commented",
+      "id": 4173614871,
+      "node_id": "IC_kwDOAP4Jqs74xE8X",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4173614871",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-04-01T23:44:38Z",
+      "updated_at": "2026-04-01T23:44:38Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> Is the silentpayments -> schnorrsig build dependency intentional? The public header and implementation seem to depend on extrakeys, not directly on the Schnorr API.\r\n\r\nThat's a good point. The schnorrsig module is only used in tests (the receiving side test vectors contain an [expected Schnorr signature created with a tweaked spend key](https://github.com/bitcoin/bips/blob/805c9b54f6d38f644d1f9c3ce871e2ea3df1f7d8/bip-0352.mediawiki?plain=1#L432) for each found output on a fixed message), and not needed for the actual library code shipped.\r\n\r\n> \r\n> For the library/module itself, silentpayments does output derivation and scanning rather than Schnorr signing or verification, so a downstream may want silentpayments without exposing or compiling libsecp256k1’s schnorrsig API.\r\n\r\nIndeed. Hm, we could remove the hard build dependency and skip the signature comparison in the tests if the schnorrsig module is not available (i.e. put within an `#if` conditional). From a testing perspective I think that would be fine, as the essential part of the scanning functionality is already covered by checking the expected [tweaks for each found output](https://github.com/bitcoin/bips/blob/805c9b54f6d38f644d1f9c3ce871e2ea3df1f7d8/bip-0352.mediawiki?plain=1#L430) -- creating a signature based on that data doesn't seem to add all that much, and it's not in the responsibility of the silentpayments module anyways. Curious what maintainers and other reviewers think. Maybe we could even remove the signature checks and drop the schnorrsig dependency completely (and reduce the size of the generated vectors.h file as a small side benefit).",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-4173614871",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
   "comments": [
