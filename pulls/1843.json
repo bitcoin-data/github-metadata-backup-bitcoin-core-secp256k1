@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1843/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1843/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
     "number": 1843,
     "state": "open",
     "locked": false,
@@ -43,11 +43,11 @@
     "body": "Additive public key tweaking (i.e. given a public key $P$ and a tweak scalar $t$, calculating $P' = P + t \\cdot G$) is currently implemented using the \"double multiply\" algorithm `secp256k1_ecmult` ($R = na \\cdot A + ng \\cdot G$), with $na=1$ and $ng=t$: \r\nhttps://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/ecmult.h#L43-L47\r\nhttps://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/eckey_impl.h#L62-L65\r\n\r\nAfter some tinkering I found that this could be sped up quite a bit. To take full use of the fact that the tweak scalar is typically not considered sensitive data (as opposed to secret keys or nonces), this PR first introduces a variable-time generator point multiplication routine `secp256k1_ecmult_gen_var`, which is essentially a copy of `secp256k1_ecmult_gen` [1], but with all the side-channel resistance mitigations stripped out. This function is significantly faster than its constant-time original in all COMB table size configurations, over 66% in all but the smallest 2KB setting (benchmarked via `$ ./build/bin/bench_ecmult`):\r\n| ECMULT_GEN_KB | `ecmult_gen` | `ecmult_gen_var` | speedup |\r\n|---------------|--------------|------------------|---------|\r\n| 2             | 11.6 us      | 8.7 us           | ~33.3%    |\r\n| 22            | 10.3 us      | 6.18 us          | ~66.6%    |\r\n| 86 (default)  | 9.85 us      | 5.86 us          | ~68.1%    |\r\n\r\nPlugging that new routine into the internal function `secp256k1_eckey_pubkey_tweak_add` function (which is easy as the vartime variant is stateless and thus doesn't need a context object anymore) yields the following speedups for the API function `secp256k1_ec_pubkey_tweak_add` (benchmarked via `$ ./build/bin/bench tweak` on the second vs. third commit):\r\n\r\n| ECMULT_GEN_KB | `ec_pubkey_tweak_add`<br>(using `ecmult`) | `ec_pubkey_tweak_add` <br>(using new `ecmult_gen_var`) | speedup |\r\n|---------------|-----------------------------------------|-----------------------------------------------------|---------|\r\n| 2             | 16.3 us                                 | 11.6 us                                             | ~40.5%  |\r\n| 22            | 16.3 us                                 | 8.98 us                                             | ~81.5%  |\r\n| 86 (default)  | 16.3 us                                 | 8.65 us                                             | ~88.4%  |\r\n\r\nNote that the improved code path (function `secp256k1_eckey_pubkey_tweak_add`) is also used in the following API functions, so they should all benefit from it:\r\n* [`secp256k1_xonly_pubkey_tweak_add`](https://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/modules/extrakeys/main_impl.h#L128)\r\n* [`secp256k1_xonly_pubkey_tweak_add_check`](https://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/modules/extrakeys/main_impl.h#L145) (this one is used for [verifying P2TR script path spends in Bitcoin Core](https://github.com/bitcoin/bitcoin/blob/a7c30da1f6fc2eebd7514dd032fbb54940d467de/src/pubkey.cpp#L257-L263) and thus consensus-critical, see BIP341)\r\n* [`secp256k1_keypair_xonly_tweak_add`](https://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/modules/extrakeys/main_impl.h#L274)\r\n* [`secp256k1_musig_pubkey_{ec,xonly}_tweak_add`](https://github.com/bitcoin-core/secp256k1/blob/7262adb4b40074201fb30847035a82b8d742f350/src/modules/musig/keyagg_impl.h#L255)\r\n* [`secp256k1_silentpayments_recipient_scan_outputs`](https://github.com/theStack/secp256k1/blob/67873086e33bc7a36134178bf09ae6a88f3cabf7/src/modules/silentpayments/main_impl.h#L655) in PR #1765\r\n\r\nImproving Silent Payments scanning performance was the original motivation to look into this (see also https://github.com/craigraw/bench_bip352/), and in fact the \"common case\" benchmarks show a 15-20% speedup if this branch is applied.\r\n\r\n[1] I've also experimented with reintroducing the much simpler `ECMULT_GEN_PREC_BITS` precomputation table (which was used prior to [SDMC](https://github.com/bitcoin-core/secp256k1/pull/1058) in versions earlier than 0.5.0) and that performs even better with PREC_BITS=8: https://github.com/theStack/secp256k1/commit/8f7fc93db4710ea2b7f88c7c458de7d4832968b4 (needing only 31 point additions rather than 42). However, given that it's unclear where to store this table data (having the choice of either bloating up the library size further or again needing some form of context, if it's calculated at runtime) I decided to stick with a solution that uses the already available table data first.",
     "labels": [],
     "created_at": "2026-04-05T23:47:53Z",
-    "updated_at": "2026-04-06T22:15:21Z",
+    "updated_at": "2026-04-08T18:21:28Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "cb4de3f52c35f1b7ad17c1814845b260cae7da89",
+    "merge_commit_sha": "1f84c06af2ee6c1a8439eb006d1bd554864a1d2c",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "theStack:pubkey_tweak_add-boost",
       "ref": "pubkey_tweak_add-boost",
-      "sha": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
+      "sha": "0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -154,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 15435,
+        "size": 67495,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-04-05T21:51:45Z",
+        "pushed_at": "2026-04-08T18:21:09Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -287,12 +287,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1136,
-        "stargazers_count": 2417,
-        "watchers_count": 2417,
+        "forks_count": 1135,
+        "stargazers_count": 2418,
+        "watchers_count": 2418,
         "size": 14192,
         "default_branch": "master",
-        "open_issues_count": 166,
+        "open_issues_count": 165,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -305,7 +305,7 @@
         "visibility": "public",
         "pushed_at": "2026-03-26T11:02:02Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-04-05T23:02:26Z",
+        "updated_at": "2026-04-07T03:03:36Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -331,134 +331,14 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 150,
-    "deletions": 8,
-    "changed_files": 7,
-    "commits": 3,
-    "review_comments": 1,
-    "comments": 1
+    "additions": 191,
+    "deletions": 35,
+    "changed_files": 12,
+    "commits": 4,
+    "review_comments": 2,
+    "comments": 2
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDRmMWI0N2JkOTlhYWJjMTNkNjUyMGNiOTE0NmQ2OTBkNDEzMTI2ZjQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4f1b47bd99aabc13d6520cb9146d690d413126f4",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4f1b47bd99aabc13d6520cb9146d690d413126f4",
-      "tree": {
-        "sha": "9bdff58a50367bc81f00438b605bcb03afaeb255",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9bdff58a50367bc81f00438b605bcb03afaeb255"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7262adb4b40074201fb30847035a82b8d742f350",
-          "sha": "7262adb4b40074201fb30847035a82b8d742f350",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7262adb4b40074201fb30847035a82b8d742f350"
-        }
-      ],
-      "message": "ecmult_gen: introduce `secp256k1_ecmult_gen_var`\n\nAdd a faster variable-time variant for generator point multiplication.\nThis is essentially `ecmult_gen` without side-channel mitigations and\nwithout requiring a context object. Intended for use cases where the\nscalar is not representing sensitive data (e.g. pubkey tweaking).\n\nOn arm64, this is ~66% faster than the constant-time variant\n(with the default build table size, i.e. ECMULT_GEN_KB=86):\n\n$ ./build/bin/bench_ecmult\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\necmult_gen                    ,     9.94      ,    10.0       ,    10.1\necmult_gen_var                ,     5.96      ,     5.99      ,     6.02\n.....\n\nTODOs:\n- calculate gen_scalar_diff constants at compile time\n- clean up _ecmult_gen_var function, remove further constant-time paths (rotr32?)",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T21:50:56Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T00:44:02Z"
-      },
-      "sha": "4f1b47bd99aabc13d6520cb9146d690d413126f4"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDhkZTEwYzdkNGNlMGQ0NjE5NWE0YWFlNjJjNDNmM2RkOTgxM2UyZDU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5",
-      "tree": {
-        "sha": "f291c3c1400a7fca5bdd9697e1adb7468a3e3f11",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f291c3c1400a7fca5bdd9697e1adb7468a3e3f11"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4f1b47bd99aabc13d6520cb9146d690d413126f4",
-          "sha": "4f1b47bd99aabc13d6520cb9146d690d413126f4",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4f1b47bd99aabc13d6520cb9146d690d413126f4"
-        }
-      ],
-      "message": "bench: add benchmark for `secp256k1_ec_pubkey_tweak_add`",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T21:51:30Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-04T23:11:06Z"
-      },
-      "sha": "8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGY2NDMwNmFhNWIzYjFmMjAyM2U2ZTMwMWY2OWFjYThlMjdkMmQ4NDM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
-      "tree": {
-        "sha": "5c107e2e8ddd1e50eb80f61e03c0a983d5a76158",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5c107e2e8ddd1e50eb80f61e03c0a983d5a76158"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5",
-          "sha": "8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8de10c7d4ce0d46195a4aae62c43f3dd9813e2d5"
-        }
-      ],
-      "message": "eckey: speed up `_pubkey_tweak_add` by using ecmult_gen_var\n\nRather than using the generic double multiply (with na=1), use the\nnewly introduced fast variable-time generator point multiplication\nand add it up to the base public key manually.\n\nOn arm64, this improves the performance of the\n`secp256k1_ec_pubkey_tweak_add` API function by about 80%:\n\n----- Before (prior this commit): -----\n```\n$ ./build/bin/bench tweak\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\n\nec_pk_tweak_add               ,    16.1       ,    16.2       ,    16.6\n```\n\n----- After (this commit): -----\n```\n$ ./build/bin/bench tweak\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\n\nec_pk_tweak_add               ,     8.94      ,     8.98      ,     9.29\n```\n\nNote that the following API functions also benefit from the improved code path:\n- secp256k1_xonly_pubkey_tweak_add\n- secp256k1_xonly_pubkey_tweak_add_check\n  (this one is consensus-critical for P2TR script path spends, see BIP341)\n- secp256k1_keypair_xonly_tweak_add\n- secp256k1_musig_pubkey_ec_tweak_add\n- secp256k1_musig_pubkey_xonly_tweak_add",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T21:51:30Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T01:11:06Z"
-      },
-      "sha": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843"
-    },
     {
       "event": "commented",
       "id": 4195285342,
@@ -554,6 +434,255 @@
       "submitted_at": "2026-04-06T22:15:21Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1843"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ0NWRjNDY1OThmNzk0MDJiMWZhYTdkNDlhMjQzYTBiYTM5ZGQwNGQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d45dc46598f79402b1faa7d49a243a0ba39dd04d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d45dc46598f79402b1faa7d49a243a0ba39dd04d",
+      "tree": {
+        "sha": "f60645f3a4d2e8f8c4444e5b2a43f56c8c8360f4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f60645f3a4d2e8f8c4444e5b2a43f56c8c8360f4"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7262adb4b40074201fb30847035a82b8d742f350",
+          "sha": "7262adb4b40074201fb30847035a82b8d742f350",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7262adb4b40074201fb30847035a82b8d742f350"
+        }
+      ],
+      "message": "ecmult_gen: compute `ecmult_gen_scalar_diff` at compile-time\n\nHaving this available in as a global constant allows to introduce\nan alternative `ecmult_gen` function that doesn't need access to\na context, see next commit.\n\nNote that the precomputed constant takes the name of the function\nthat previously generated it at run-time (`secp256k1_ecmult_gen_scalar_diff`),\nwhile the function is now renamed to include the \"compute\" verb\n(`secp256k1_ecmult_gen_compute_scalar_diff`), to match the naming\nof the table generation function.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-08T16:28:47Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-08T16:10:50Z"
+      },
+      "sha": "d45dc46598f79402b1faa7d49a243a0ba39dd04d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDZiNWMwNjIyYjgwN2U1OTZjYzc3M2FiZTA5MmM1NGI5ZWE0MjA2MjI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6b5c0622b807e596cc773abe092c54b9ea420622",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6b5c0622b807e596cc773abe092c54b9ea420622",
+      "tree": {
+        "sha": "d6bedd2043291575759431d6076f33bbaf435a6a",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d6bedd2043291575759431d6076f33bbaf435a6a"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d45dc46598f79402b1faa7d49a243a0ba39dd04d",
+          "sha": "d45dc46598f79402b1faa7d49a243a0ba39dd04d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d45dc46598f79402b1faa7d49a243a0ba39dd04d"
+        }
+      ],
+      "message": "ecmult_gen: introduce `secp256k1_ecmult_gen_var`\n\nAdd a faster variable-time variant for generator point multiplication.\nThis is essentially `ecmult_gen` without side-channel mitigations and\nwithout requiring a context object. Intended for use cases where the\nscalar is not representing sensitive data (e.g. pubkey tweaking).\n\nOn arm64, this is ~66% faster than the constant-time variant\n(with the default build table size, i.e. ECMULT_GEN_KB=86):\n\n$ ./build/bin/bench_ecmult\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\necmult_gen                    ,     9.94      ,    10.0       ,    10.1\necmult_gen_var                ,     5.96      ,     5.99      ,     6.02\n.....",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-08T16:32:18Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-05T00:44:02Z"
+      },
+      "sha": "6b5c0622b807e596cc773abe092c54b9ea420622"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDllNTU1OTc5YzUzYTVjYTQyNGEyZDQxMzhlMTU0MzFjYjE2ZmU5N2E",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9e555979c53a5ca424a2d4138e15431cb16fe97a",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9e555979c53a5ca424a2d4138e15431cb16fe97a",
+      "tree": {
+        "sha": "6b71b99b1c38568869d1546b9c91ba972588af14",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6b71b99b1c38568869d1546b9c91ba972588af14"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6b5c0622b807e596cc773abe092c54b9ea420622",
+          "sha": "6b5c0622b807e596cc773abe092c54b9ea420622",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6b5c0622b807e596cc773abe092c54b9ea420622"
+        }
+      ],
+      "message": "bench: add benchmark for `secp256k1_ec_pubkey_tweak_add`",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-08T16:32:25Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-04T23:11:06Z"
+      },
+      "sha": "9e555979c53a5ca424a2d4138e15431cb16fe97a"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDBlYmIxYWFiZjYyYTIwMWFlZjZkYTVlNWE5ZTk3MTlhZmJiMjZhOTA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
+      "tree": {
+        "sha": "318f6ebebb056f15e8424bb7b3a69633163cb72b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/318f6ebebb056f15e8424bb7b3a69633163cb72b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9e555979c53a5ca424a2d4138e15431cb16fe97a",
+          "sha": "9e555979c53a5ca424a2d4138e15431cb16fe97a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9e555979c53a5ca424a2d4138e15431cb16fe97a"
+        }
+      ],
+      "message": "eckey: speed up `_pubkey_tweak_add` by using ecmult_gen_var\n\nRather than using the generic double multiply (with na=1), use the\nnewly introduced fast variable-time generator point multiplication\nand add it up to the base public key manually.\n\nOn arm64, this improves the performance of the\n`secp256k1_ec_pubkey_tweak_add` API function by about 80%:\n\n----- Before (prior this commit): -----\n```\n$ ./build/bin/bench tweak\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\n\nec_pk_tweak_add               ,    16.1       ,    16.2       ,    16.6\n```\n\n----- After (this commit): -----\n```\n$ ./build/bin/bench tweak\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\n\nec_pk_tweak_add               ,     8.94      ,     8.98      ,     9.29\n```\n\nNote that the following API functions also benefit from the improved code path:\n- secp256k1_xonly_pubkey_tweak_add\n- secp256k1_xonly_pubkey_tweak_add_check\n  (this one is consensus-critical for P2TR script path spends, see BIP341)\n- secp256k1_keypair_xonly_tweak_add\n- secp256k1_musig_pubkey_ec_tweak_add\n- secp256k1_musig_pubkey_xonly_tweak_add",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-08T16:32:25Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-05T01:11:06Z"
+      },
+      "sha": "0ebb1aabf62a201aef6da5e5a9e9719afbb26a90"
+    },
+    {
+      "event": "commented",
+      "id": 4208497144,
+      "node_id": "IC_kwDOAP4Jqs762JH4",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4208497144",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-04-08T18:20:12Z",
+      "updated_at": "2026-04-08T18:20:12Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Added a preparatory commit that moves the `ecmult_gen_scalar_diff` constant precomputation from run-time to compile-time with the `precompute_ecmult_gen` binary (for the exhaustive tests though, its generated at run-time, similarly how its done with the the table), and addressed https://github.com/bitcoin-core/secp256k1/pull/1843#discussion_r3041954262.\r\n\r\n> My guess would be that even bigger SDMC tables would be even better, because the cost of constant-time table lookups disappears (which needs to reads through the entire table).\r\n\r\nAh, indeed! I've tried with table sizes up to ~18 MB, and at least on my arm64 machine, the ~5MB one (GEN_KB=5120) yields the best results (see https://github.com/theStack/secp256k1/commit/aa1a4e719f90c8b9ab5b418a7254f5487f969d51 and `$ ./bench_gen_var_with_all_tables.sh`):\r\n\r\n| ECMULT_GEN_KB | `ecmult_gen` | `ecmult_gen_var`  | `ec_pubkey_tweak_add` | speedup to unoptimized  `ec_pubkey_tweak_add` (16.3 us) |\r\n|---------------|--------------|-------------------|-----------------------|---------------------------------------------------------|\r\n| 2             | 11.7 us      | 8.81 us           | 11.7 us               | 39.3%                                                   |\r\n| 22            | 10.5 us      | 6.31 us           | 9.05 us               | 80.1%                                                   |\r\n| 86            | **9.96 us**  | 5.94 us           | 8.67 us               | 88.0%                                                   |\r\n| 148           | 11.4 us      | 5.18 us           | 7.91 us               | 106.1%                                                  |\r\n| 256           | 14.3 us      | 4.46 us           | 7.22 us               | 125.8%                                                  |\r\n| 464           | 21.1 us      | 4.04 us           | 6.85 us               | 138.0%                                                  |\r\n| 832           | 33.1 us      | 3.66 us           | 6.46 us               | 152.3%                                                  |\r\n| 1536          | 61.2 us      | 3.46 us           | 6.21 us               | 162.5%                                                  |\r\n| 2816          | 103.0 us     | 3.13 us           | 6.02 us               | 170.8%                                                  |\r\n| 5120          | 188.0 us     | **2.85 us**       | **5.80 us**           | **181.0%**                                              |\r\n| 9728          | 371.0 us     | 2.95 us           | 6.33 us               | 157.5%                                                  |\r\n| 18432         | 506.0 us     | 4.02 us           | 7.32 us               |  122.7%                                                 |\r\n\r\nSo we would need to embed two different tables to get the most out of it (without degrading the signing/nonce generation speed). Not sure how performance-critical pubkey tweaking is though in practice, the only currently widespread scenario I could think of is verification of taproot commitments. For silentpayments I still have to check how these larger table values would affect overall performance.",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1843#issuecomment-4208497144",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1843"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 24306588657,
+      "node_id": "HRFPE_lADOAP4Jqs763ccPzwAAAAWoyRvx",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/24306588657",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
+      "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/0ebb1aabf62a201aef6da5e5a9e9719afbb26a90",
+      "created_at": "2026-04-08T18:21:10Z"
     }
   ],
   "comments": [
@@ -564,7 +693,7 @@
       "node_id": "PRRC_kwDOAP4Jqs61UInW",
       "diff_hunk": "@@ -281,6 +305,73 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25\n     secp256k1_memclear_explicit(&recoded, sizeof(recoded));\n }\n \n+/* Variable-time variant for generator point multiplication.\n+ *\n+ * This is essentially a copy of `secp256k1_ecmult_gen`, but with all side-channel\n+ * mitigations (i.e., constant-time code, random scalar blinding, and memory clearing)\n+ * removed. The EC point operation calls (addition, doubling) are replaced with their\n+ * faster variable-time equivalents. This function is stateless and does not require\n+ * a context parameter, enabling its use in internal functions (e.g., `eckey_pubkey_tweak_add`).\n+ *\n+ * Note that the branch for the first table lookup assignment is also removed: since\n+ * the result is initialized to the point at infinity, adding to it with `_gej_add_ge_var`\n+ * is equivalent to a simple copy. */\n+static void secp256k1_ecmult_gen_var(secp256k1_gej *r, const secp256k1_scalar *gn) {\n+    uint32_t comb_off;\n+    secp256k1_ge add;\n+    secp256k1_scalar d;\n+    uint32_t recoded[(COMB_BITS + 31) >> 5] = {0};\n+    int i;\n+\n+    /* Adjust input scalar for difference and convert to recoded array. */\n+    secp256k1_scalar_add(&d, &gen_scalar_diff, gn);\n+    for (i = 0; i < 8 && i < ((COMB_BITS + 31) >> 5); ++i) {\n+        recoded[i] = secp256k1_scalar_get_bits_limb32(&d, 32 * i, 32);\n+    }\n+\n+    /* Outer loop: iterate over comb_off from COMB_SPACING - 1 down to 0. */\n+    secp256k1_gej_set_infinity(r);\n+    comb_off = COMB_SPACING - 1;\n+    while (1) {\n+        uint32_t block;\n+        uint32_t bit_pos = comb_off;\n+        /* Inner loop: for each block, add table entries to the result. */\n+        for (block = 0; block < COMB_BLOCKS; ++block) {\n+            /* Gather the mask(block)-selected bits of d into bits. They're packed:\n+             * bits[tooth] = d[(block*COMB_TEETH + tooth)*COMB_SPACING + comb_off]. */\n+            uint32_t bits = 0, sign, abs, tooth;\n+            for (tooth = 0; tooth < COMB_TEETH; ++tooth) {\n+                uint32_t bitdata = secp256k1_rotr32(recoded[bit_pos >> 5], bit_pos & 0x1f);\n+\n+                /* Clear the bit at position tooth */\n+                bits &= ~(1 << tooth);\n+\n+                /* Write the bit into position tooth (and junk into higher bits). */",
       "path": "src/ecmult_gen_impl.h",
-      "position": 76,
+      "position": 1,
       "original_position": 76,
       "commit_id": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
       "original_commit_id": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
@@ -607,7 +736,61 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 349,
+      "line": null,
+      "original_line": 349,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3053328398",
+      "pull_request_review_id": 4077294242,
+      "id": 3053328398,
+      "node_id": "PRRC_kwDOAP4Jqs61_hgO",
+      "diff_hunk": "@@ -281,6 +305,73 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25\n     secp256k1_memclear_explicit(&recoded, sizeof(recoded));\n }\n \n+/* Variable-time variant for generator point multiplication.\n+ *\n+ * This is essentially a copy of `secp256k1_ecmult_gen`, but with all side-channel\n+ * mitigations (i.e., constant-time code, random scalar blinding, and memory clearing)\n+ * removed. The EC point operation calls (addition, doubling) are replaced with their\n+ * faster variable-time equivalents. This function is stateless and does not require\n+ * a context parameter, enabling its use in internal functions (e.g., `eckey_pubkey_tweak_add`).\n+ *\n+ * Note that the branch for the first table lookup assignment is also removed: since\n+ * the result is initialized to the point at infinity, adding to it with `_gej_add_ge_var`\n+ * is equivalent to a simple copy. */\n+static void secp256k1_ecmult_gen_var(secp256k1_gej *r, const secp256k1_scalar *gn) {\n+    uint32_t comb_off;\n+    secp256k1_ge add;\n+    secp256k1_scalar d;\n+    uint32_t recoded[(COMB_BITS + 31) >> 5] = {0};\n+    int i;\n+\n+    /* Adjust input scalar for difference and convert to recoded array. */\n+    secp256k1_scalar_add(&d, &gen_scalar_diff, gn);\n+    for (i = 0; i < 8 && i < ((COMB_BITS + 31) >> 5); ++i) {\n+        recoded[i] = secp256k1_scalar_get_bits_limb32(&d, 32 * i, 32);\n+    }\n+\n+    /* Outer loop: iterate over comb_off from COMB_SPACING - 1 down to 0. */\n+    secp256k1_gej_set_infinity(r);\n+    comb_off = COMB_SPACING - 1;\n+    while (1) {\n+        uint32_t block;\n+        uint32_t bit_pos = comb_off;\n+        /* Inner loop: for each block, add table entries to the result. */\n+        for (block = 0; block < COMB_BLOCKS; ++block) {\n+            /* Gather the mask(block)-selected bits of d into bits. They're packed:\n+             * bits[tooth] = d[(block*COMB_TEETH + tooth)*COMB_SPACING + comb_off]. */\n+            uint32_t bits = 0, sign, abs, tooth;\n+            for (tooth = 0; tooth < COMB_TEETH; ++tooth) {\n+                uint32_t bitdata = secp256k1_rotr32(recoded[bit_pos >> 5], bit_pos & 0x1f);\n+\n+                /* Clear the bit at position tooth */\n+                bits &= ~(1 << tooth);\n+\n+                /* Write the bit into position tooth (and junk into higher bits). */",
+      "path": "src/ecmult_gen_impl.h",
+      "position": 1,
+      "original_position": 76,
+      "commit_id": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
+      "original_commit_id": "f64306aa5b3b1f2023e6e301f69aca8e27d2d843",
+      "in_reply_to_id": 3041954262,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Makes sense, removed it.",
+      "created_at": "2026-04-08T18:21:28Z",
+      "updated_at": "2026-04-08T18:21:28Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1843#discussion_r3053328398",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3053328398"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1843"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
       "original_line": 349,
       "side": "RIGHT"
     }
