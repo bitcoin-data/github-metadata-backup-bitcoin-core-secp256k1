@@ -43,7 +43,7 @@
     "body": "This is a follow-up to PR #1849.\r\n\r\n### Problem\r\n`secp256k1_musig_nonce_gen` returns failure if its [arguments are invalid](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/include/secp256k1_musig.h#L337), for example when a non-NULL [`seckey`](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/include/secp256k1_musig.h#L347-L348) fails [secret-key validation](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L391).\r\n\r\nOn that path, `secp256k1_musig_nonce_gen_internal` invalidates the [secret nonce](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L414) on failure, but still unconditionally saves the derived [public nonce output](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L433) before returning failure.\r\n\r\n### Fix\r\nClear `pubnonce` before returning the invalid-`seckey` failure, so a failed nonce-generation call does not leave a newly written `pubnonce` behind.\r\n\r\nThe implementation still saves the public nonce before clearing it on failure (instead of branching around the save), to preserve constant-time control flow with respect to the secret-key validation result.\r\n\r\nThe second commit only extends existing MuSig API failure-path coverage for paths where `secp256k1_musig_nonce_gen_internal` already clears `pubnonce` at function entry before any of its own validation steps.",
     "labels": [],
     "created_at": "2026-04-29T10:41:13Z",
-    "updated_at": "2026-04-29T15:30:24Z",
+    "updated_at": "2026-04-29T16:44:28Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -292,7 +292,7 @@
         "watchers_count": 2425,
         "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 168,
+        "open_issues_count": 169,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -335,8 +335,8 @@
     "deletions": 0,
     "changed_files": 2,
     "commits": 2,
-    "review_comments": 1,
-    "comments": 0
+    "review_comments": 3,
+    "comments": 1
   },
   "events": [
     {
@@ -457,6 +457,64 @@
       "submitted_at": "2026-04-29T15:30:24Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850"
+    },
+    {
+      "event": "commented",
+      "id": 4345710633,
+      "node_id": "IC_kwDOAP4Jqs8AAAABAwZIKQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4345710633",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-04-29T16:44:28Z",
+      "updated_at": "2026-04-29T16:44:28Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK 7ed2abc96871d78baaeafe2b664381f01068f49",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1850#issuecomment-4345710633",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1850"
     }
   ],
   "comments": [
@@ -502,6 +560,114 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3162168617"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 289,
+      "original_line": 289,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3162499094",
+      "pull_request_review_id": 4198752196,
+      "id": 3162499094,
+      "node_id": "PRRC_kwDOAP4Jqs68f-gW",
+      "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
+      "path": "src/modules/musig/tests_impl.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "in_reply_to_id": 3162168617,
+      "user": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "No, this is the one that reproduces the fix (it fails without the fix), the next commit adds these checks that were already correct. Would it help if I moved that commit first?",
+      "created_at": "2026-04-29T16:14:17Z",
+      "updated_at": "2026-04-29T16:14:17Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1850#discussion_r3162499094",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3162499094"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 289,
+      "original_line": 289,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3162685931",
+      "pull_request_review_id": 4198969485,
+      "id": 3162685931,
+      "node_id": "PRRC_kwDOAP4Jqs68gsHr",
+      "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
+      "path": "src/modules/musig/tests_impl.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "in_reply_to_id": 3162168617,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Ah, I see now. Swapping commits would indeed help to clarify that I think, but happy to (re-)ACK in either order.",
+      "created_at": "2026-04-29T16:44:22Z",
+      "updated_at": "2026-04-29T16:44:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1850#discussion_r3162685931",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3162685931"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850"
