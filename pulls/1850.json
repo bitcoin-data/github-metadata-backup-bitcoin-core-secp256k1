@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1850/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7ed2abc96871d78baaeafe2b664381f01068f499",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
     "number": 1850,
     "state": "open",
     "locked": false,
@@ -43,11 +43,11 @@
     "body": "This is a follow-up to PR #1849.\r\n\r\n### Problem\r\n`secp256k1_musig_nonce_gen` returns failure if its [arguments are invalid](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/include/secp256k1_musig.h#L337), for example when a non-NULL [`seckey`](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/include/secp256k1_musig.h#L347-L348) fails [secret-key validation](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L391).\r\n\r\nOn that path, `secp256k1_musig_nonce_gen_internal` invalidates the [secret nonce](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L414) on failure, but still unconditionally saves the derived [public nonce output](https://github.com/bitcoin-core/secp256k1/blob/b11340b3ce2afac1b6ffda4ce5828c30621d2917/src/modules/musig/session_impl.h#L433) before returning failure.\r\n\r\n### Fix\r\nClear `pubnonce` before returning the invalid-`seckey` failure, so a failed nonce-generation call does not leave a newly written `pubnonce` behind.\r\n\r\nThe implementation still saves the public nonce before clearing it on failure (instead of branching around the save), to preserve constant-time control flow with respect to the secret-key validation result.\r\n\r\nThe second commit only extends existing MuSig API failure-path coverage for paths where `secp256k1_musig_nonce_gen_internal` already clears `pubnonce` at function entry before any of its own validation steps.",
     "labels": [],
     "created_at": "2026-04-29T10:41:13Z",
-    "updated_at": "2026-04-29T16:44:28Z",
+    "updated_at": "2026-04-29T17:40:26Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "5da98ca259c7ff4528dbcb2a3dcdba90624c20cb",
+    "merge_commit_sha": "0fb57b911bf3cdf12390af42542084ed24b0e8da",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "l0rinc:l0rinc/musig-clear-invalid-seckey-pubnonce",
       "ref": "l0rinc/musig-clear-invalid-seckey-pubnonce",
-      "sha": "7ed2abc96871d78baaeafe2b664381f01068f499",
+      "sha": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
       "user": {
         "login": "l0rinc",
         "id": 1841944,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-04-29T10:39:20Z",
+        "pushed_at": "2026-04-29T17:40:08Z",
         "created_at": "2025-09-09T05:01:20Z",
         "updated_at": "2026-04-29T09:20:59Z",
         "allow_forking": true,
@@ -335,90 +335,10 @@
     "deletions": 0,
     "changed_files": 2,
     "commits": 2,
-    "review_comments": 3,
+    "review_comments": 4,
     "comments": 1
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGZkZTk0MGYzOGEwZGRhYTNjNGI1NTZlZWZmNDJiY2QzZWQ4OWMzMTk",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
-      "tree": {
-        "sha": "279c6156e53d56edc459f874dc4c6a966ad3599a",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/279c6156e53d56edc459f874dc4c6a966ad3599a"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 279c6156e53d56edc459f874dc4c6a966ad3599a\nparent b11340b3ce2afac1b6ffda4ce5828c30621d2917\nauthor Lőrinc <pap.lorinc@gmail.com> 1777451227 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1777458599 +0200\n\nmusig: clear pubnonce output for invalid seckey\n\n`secp256k1_musig_nonce_gen` returns failure for invalid arguments, including a non-NULL `seckey` that fails validation.\n\n`secp256k1_musig_nonce_gen_internal` already invalidates `secnonce` on that failure, but it still saves derived nonce points into `pubnonce` before returning.\n\nClear `pubnonce` with a conditional clear after the save, so the cleanup stays branchless with respect to the secret-key validation result and reverting this cleanup leaves stale derived nonce data in the MuSig API test.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmnx3acACgkQZp//D/pH\nenZkFRAAjOLxlz37yAUBJ8A9ybcRxEKzHu++leTgwNpg42XIGby1NWUvXCAGahdj\nhSK59e3pP/LUocCG2SwTdhWa8pLCYlx9DowIFUZUU12PK/u0oCFhDKx1IjH4FJhy\n5eJHhQfsU0eXS3Mf6/7XLr9zCeR4rTvF804tYZr8JtxTN4wcjpJvYFMoQl3sZ7cV\nF/RAL/kI8zKLEmKC+uqEgxwcbLLsJPOIQSm0YpNNcT4oVr8EcyY7g3Ay4B5s5fQp\n621S46Y23sbEJXw72NpjKwi5AiFSzzY1bLDRHI3MpTgAV4t0xhPX01Q9FgdQcRJv\nTwGC7Nab75vfeKT5IuLznVLHTOCGeBv3icWI1TqBxOJ5q0+h5pX4bdZO9aldyOur\nV4YF+BbHDA9dBa2yY8/LMP1UYB0dWyLZhQMZDH4X07yl+bCJPqjrOTA0bHYQeG1v\nx3nT4QqqHnePVR3tk8mTMKq5JPZJlFqhzSi2DHI536uNguyV5AQkNd+k/ozCJIJL\nEIS4TeShY4dZklpvQ2R7N56HV6uKJBnLOqGKRda/mpAY5KMvlkWuIjT/vIjnsNOO\nWfKrMBbE960nMcn+aQtEQTElj6hMfqAQwk4m/U+eyOJwXbsEvZkiWWcCJRwKAOcK\nfB057hY8sYuUL5l/xNsQSquAeieggfrLwrj7Q5pNG7BUR4N5Xg0=\n=6aFp\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b11340b3ce2afac1b6ffda4ce5828c30621d2917",
-          "sha": "b11340b3ce2afac1b6ffda4ce5828c30621d2917",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b11340b3ce2afac1b6ffda4ce5828c30621d2917"
-        }
-      ],
-      "message": "musig: clear pubnonce output for invalid seckey\n\n`secp256k1_musig_nonce_gen` returns failure for invalid arguments, including a non-NULL `seckey` that fails validation.\n\n`secp256k1_musig_nonce_gen_internal` already invalidates `secnonce` on that failure, but it still saves derived nonce points into `pubnonce` before returning.\n\nClear `pubnonce` with a conditional clear after the save, so the cleanup stays branchless with respect to the secret-key validation result and reverting this cleanup leaves stale derived nonce data in the MuSig API test.",
-      "committer": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-04-29T10:29:59Z"
-      },
-      "author": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-04-29T08:27:07Z"
-      },
-      "sha": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDdlZDJhYmM5Njg3MWQ3OGJhYWVhZmUyYjY2NDM4MWYwMTA2OGY0OTk",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7ed2abc96871d78baaeafe2b664381f01068f499",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7ed2abc96871d78baaeafe2b664381f01068f499",
-      "tree": {
-        "sha": "ec5da18f2b6c83f2b1ecc0f26d18242294cb368c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ec5da18f2b6c83f2b1ecc0f26d18242294cb368c"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree ec5da18f2b6c83f2b1ecc0f26d18242294cb368c\nparent fde940f38a0ddaa3c4b556eeff42bcd3ed89c319\nauthor Lőrinc <pap.lorinc@gmail.com> 1777451254 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1777458602 +0200\n\nmusig: test cleared nonce outputs on failures\n\n`secp256k1_musig_nonce_gen_internal` clears `pubnonce` at the top of the function, before the later validation steps covered here.\n\nExtend the existing MuSig API failure-path checks for `nonce_gen` and `nonce_gen_counter` to assert that these paths leave the public nonce output cleared.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmnx3aoACgkQZp//D/pH\nenb0sw//d8Lt5eXHlwSrLnHvjlqQoCU5Ea3R0hOzYDDa40tBF9Y4scO3MWuAut2b\nPu2/S28XbWGhnF0TrEZ7VDvGXU9PxDd2AXoPyu7HJ8B5TlpaRq9s7u4hmBh97w9l\nuvKehiYudIqPG7upWULkAg8yevbwwtMs1iSXv3De6dh0SGz708824EWL60XXzP3M\nxZoLlvd/wIc/9bgEkuiwb4puD5wQwV3DcrdvnxkJt+5sX1JFyDA3TZl5HrLWP5Te\n+R3aVq3Tl3TP3YBbU3EaBFGxYKBhuTg/318mCR+Zd0App8RF/LCNpoAqJdfR4YkQ\n5Uzn2NJ1REMsxcxq270SjycFQOVJquxctnLLaPgOUVMHq6bckBBtCuC1H1toTLOx\n9q8dSZQHJ5PP3tHiaD0GvaHDXNT4DNLVMk92mfv8U92lldjPczTDukPMfBEXIC7e\nqVITquaXpluTgpkGbEx1gxjwAgYbqzdoO+jMEoTLtmrre4ODU1atn2gZbwF0u8fz\n//jQQ87jwi7fSD3pkWGVV+2gfEaVa0tjLRBwI22ad9OCPb5U22sgOcR2IB4BLD58\nbpKf5123l1CAvyx64NtPuUOp5KLTJDVdy8APWPPNfCUGVJ76JvAX+eesJC92llq5\nKQu2upnp7UpA9hfl/e6NlhvMESFjDPAywPZwfUsS+7ATTER1laQ=\n=X0Bc\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
-          "sha": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fde940f38a0ddaa3c4b556eeff42bcd3ed89c319"
-        }
-      ],
-      "message": "musig: test cleared nonce outputs on failures\n\n`secp256k1_musig_nonce_gen_internal` clears `pubnonce` at the top of the function, before the later validation steps covered here.\n\nExtend the existing MuSig API failure-path checks for `nonce_gen` and `nonce_gen_counter` to assert that these paths leave the public nonce output cleared.",
-      "committer": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-04-29T10:30:02Z"
-      },
-      "author": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-04-29T08:27:34Z"
-      },
-      "sha": "7ed2abc96871d78baaeafe2b664381f01068f499"
-    },
     {
       "event": "reviewed",
       "id": 4198377216,
@@ -515,6 +435,117 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1850#issuecomment-4345710633",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1850"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGJkMzg1OTgyN2VmM2Y3Yzg2MmYyMTE3MDJlNDgwYjcxOGVjMGE0NGQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd3859827ef3f7c862f211702e480b718ec0a44d",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd3859827ef3f7c862f211702e480b718ec0a44d",
+      "tree": {
+        "sha": "45b026d03c437f6521af7db4dd95da5ed58201ca",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/45b026d03c437f6521af7db4dd95da5ed58201ca"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 45b026d03c437f6521af7db4dd95da5ed58201ca\nparent b11340b3ce2afac1b6ffda4ce5828c30621d2917\nauthor Lőrinc <pap.lorinc@gmail.com> 1777451254 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1777484351 +0200\n\nmusig: test cleared nonce outputs on failures\n\n`secp256k1_musig_nonce_gen_internal` clears `pubnonce` at the top of the function, before the later validation steps covered here.\n\nExtend the existing MuSig API failure-path checks for `nonce_gen` and `nonce_gen_counter` to assert that these paths leave the public nonce output cleared.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmnyQj8ACgkQZp//D/pH\nenaXcQ/5AXU4gZBBrCF5BdcITXa8r1HJkhKVOBUKuoZd5gqJkIwN9sDmOiAQeInM\nJK9Q/qI96ZQNaa7TBocpPecI+SBdEirS/hS5Q3hu4lWNZnUT0lTkiU7XmjkK4cug\n9vF8yo8XD7nCKMG1tfgPScLEHPjWuwb+47c+GKHS4Qf/t0prUT1ttiUQbW2yC8Gd\nvYJot4YabdoI2JKnlMvRnrzyiRqQeR2orIgz6KN1RTVEvUEVl+ZDnm4jsrfspa+E\nN3UJqoA30e6BGhqSiQnNvFM6s+Mal9DjtsZjeyuHlWmHcCrHaAfGaWXFa9RkXGlQ\nmiCO4Ko/XfCX1j/OVjvfUfgNxjXsbVQy0BcvmNXdkbAySAYWeZAmILaWHhy2urph\nHNIxp1Lhe666wvHEY/Dik82pF9ZDfFoV7ffdL37j5dSQSQIgkE5hra9pNzoPsYaF\nPDFuXGPXHfdVVxxsb7HWAflzsJ0wVnSIelhObxCdMcNpOvKKy+5GA0GIDRWvJUAj\nO51PMH/CMoq3YJEx6LOk7v3FHYLkDlXUR3iyYU9Tel0QIO0v8oRYrZWfPV6lBQ78\nJcA60Vi6wDluPZAwVBomHaIIP0xWI5pSv/YiNjW+lS8pBk5n6T+Z9E53ihj3QksT\n6BBtCK07x9fGvmP8jrF+9ZgeU6ZzUGQS67BJnXidKEqBkcvvJTo=\n=fKuB\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b11340b3ce2afac1b6ffda4ce5828c30621d2917",
+          "sha": "b11340b3ce2afac1b6ffda4ce5828c30621d2917",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b11340b3ce2afac1b6ffda4ce5828c30621d2917"
+        }
+      ],
+      "message": "musig: test cleared nonce outputs on failures\n\n`secp256k1_musig_nonce_gen_internal` clears `pubnonce` at the top of the function, before the later validation steps covered here.\n\nExtend the existing MuSig API failure-path checks for `nonce_gen` and `nonce_gen_counter` to assert that these paths leave the public nonce output cleared.",
+      "committer": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-04-29T17:39:11Z"
+      },
+      "author": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-04-29T08:27:34Z"
+      },
+      "sha": "bd3859827ef3f7c862f211702e480b718ec0a44d"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ2NzlkMmNmOTFiOTEyOWQ4ZjgzOTRkNThmMWE1NGY2YTgyZWRlNTQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
+      "tree": {
+        "sha": "ec5da18f2b6c83f2b1ecc0f26d18242294cb368c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ec5da18f2b6c83f2b1ecc0f26d18242294cb368c"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree ec5da18f2b6c83f2b1ecc0f26d18242294cb368c\nparent bd3859827ef3f7c862f211702e480b718ec0a44d\nauthor Lőrinc <pap.lorinc@gmail.com> 1777451227 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1777484351 +0200\n\nmusig: clear pubnonce output for invalid seckey\n\n`secp256k1_musig_nonce_gen` returns failure for invalid arguments, including a non-NULL `seckey` that fails validation.\n\n`secp256k1_musig_nonce_gen_internal` already invalidates `secnonce` on that failure, but it still saves derived nonce points into `pubnonce` before returning.\n\nClear `pubnonce` with a conditional clear after the save, so the cleanup stays branchless with respect to the secret-key validation result and reverting this cleanup leaves stale derived nonce data in the MuSig API test.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmnyQj8ACgkQZp//D/pH\nenZckhAAqqS8q0VWB0NRdD0LkQKwURoAgScBaGolGNiod7VEw0ale3I/eV/9B045\nHakufO3AKE53RgSNBH6fMSShE1sspWBoME6vKu9rKH94KSaATFl5L5tREhzHfkJT\nmmDFxq77zyc7RIU+7aCfKymty1FqRGKNJuYDFv2Gp37XEj6dm8hFwXu7wA3g7wTg\nUNH5/SPt4c8pXonF4Yu47OHmfCkG+6LQi5X9cRl29omRxarTKpMeKnmNyVC0MUW1\nOD1B5PCRXPrrDm6o4WX/ofayLlX4vwHEPp0+myPqoITdRjg1q0iasMzprHvQRjJM\nlAtEh30WF0af8IFJL/w3pJ2lXIlYFozPFIS805g5RE1sfxsKPeosiua8wQKxOqh3\nB4HtWpXI5YZ+w1XQfvGNKX5bepVh63+yPLBEt7wmwkadk/J7I/MUyrAgkGiUXCN/\n41eIyM8q8vpwu8E9BaFDpaup3OBHBkswhQ0JAkivAFqVQUk8GSn6ui2STLmxIUe4\npmz3g7hgqDdgYs1dV2bCeu2J1GYRX1b2A0K/mPKNCiX3joEFBAi1X+7bFX5n+m4b\nsG5OyCRDRtGhXldWJmN8u66/21+uRQHTXGd5QaPQOtfAWo18MamNPb1/rE1cAOAz\nStGcyRa5oZ+cUzrYZhb1CFzsaOqKkXbibTV57J46vLRR4sIGgHk=\n=9h0p\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd3859827ef3f7c862f211702e480b718ec0a44d",
+          "sha": "bd3859827ef3f7c862f211702e480b718ec0a44d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd3859827ef3f7c862f211702e480b718ec0a44d"
+        }
+      ],
+      "message": "musig: clear pubnonce output for invalid seckey\n\n`secp256k1_musig_nonce_gen` returns failure for invalid arguments, including a non-NULL `seckey` that fails validation.\n\n`secp256k1_musig_nonce_gen_internal` already invalidates `secnonce` on that failure, but it still saves derived nonce points into `pubnonce` before returning.\n\nClear `pubnonce` with a conditional clear after the save, so the cleanup stays branchless with respect to the secret-key validation result and reverting this cleanup leaves stale derived nonce data in the MuSig API test.",
+      "committer": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-04-29T17:39:11Z"
+      },
+      "author": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-04-29T08:27:07Z"
+      },
+      "sha": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 25001878276,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABA0UITs8AAAAF0jpjBA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/25001878276",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
+      "commit_url": "https://api.github.com/repos/l0rinc/secp256k1/commits/d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
+      "created_at": "2026-04-29T17:40:10Z"
     }
   ],
   "comments": [
@@ -525,9 +556,9 @@
       "node_id": "PRRC_kwDOAP4Jqs68et0p",
       "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
       "path": "src/modules/musig/tests_impl.h",
-      "position": 4,
+      "position": 12,
       "original_position": 4,
-      "commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "commit_id": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
       "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
       "in_reply_to_id": null,
       "user": {
@@ -568,7 +599,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 289,
+      "line": 290,
       "original_line": 289,
       "side": "RIGHT"
     },
@@ -579,9 +610,9 @@
       "node_id": "PRRC_kwDOAP4Jqs68f-gW",
       "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
       "path": "src/modules/musig/tests_impl.h",
-      "position": 4,
+      "position": 12,
       "original_position": 4,
-      "commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "commit_id": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
       "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
       "in_reply_to_id": 3162168617,
       "user": {
@@ -622,7 +653,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 289,
+      "line": 290,
       "original_line": 289,
       "side": "RIGHT"
     },
@@ -633,9 +664,9 @@
       "node_id": "PRRC_kwDOAP4Jqs68gsHr",
       "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
       "path": "src/modules/musig/tests_impl.h",
-      "position": 4,
+      "position": 12,
       "original_position": 4,
-      "commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "commit_id": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
       "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
       "in_reply_to_id": 3162168617,
       "user": {
@@ -676,7 +707,61 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 289,
+      "line": 290,
+      "original_line": 289,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3163005717",
+      "pull_request_review_id": 4199361231,
+      "id": 3163005717,
+      "node_id": "PRRC_kwDOAP4Jqs68h6MV",
+      "diff_hunk": "@@ -286,6 +286,7 @@ static void musig_api_tests(void) {\n     /* invalid seckey */\n     CHECK(secp256k1_musig_nonce_gen(CTX, &secnonce[0], &pubnonce[0], session_secrand[0], max64, &pk[0], msg, &keyagg_cache, max64) == 0);\n     CHECK(memcmp_and_randomize(secnonce[0].data, zeros132, sizeof(secnonce[0].data)) == 0);\n+    CHECK(memcmp_and_randomize(pubnonce[0].data, zeros132, sizeof(pubnonce[0].data)) == 0);",
+      "path": "src/modules/musig/tests_impl.h",
+      "position": 12,
+      "original_position": 4,
+      "commit_id": "d679d2cf91b9129d8f8394d58f1a54f6a82ede54",
+      "original_commit_id": "fde940f38a0ddaa3c4b556eeff42bcd3ed89c319",
+      "in_reply_to_id": 3162168617,
+      "user": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Swapped the commits, thanks!",
+      "created_at": "2026-04-29T17:40:26Z",
+      "updated_at": "2026-04-29T17:40:27Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1850#discussion_r3163005717",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3163005717"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1850"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 290,
       "original_line": 289,
       "side": "RIGHT"
     }
