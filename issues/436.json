@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/436/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/436",
     "number": 436,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "speed optimization",
     "body": "I suggest following optimizations in the scalar_4x64_imp.h file:\r\n\r\nCHANGE:\r\n```\r\n#define muladd_fast(a,b) { \\\r\n    uint64_t tl, th; \\\r\n    { \\\r\n        uint128_t t = (uint128_t)a * b; \\\r\n        th = t >> 64;         /* at most 0xFFFFFFFFFFFFFFFE */ \\\r\n        tl = t; \\\r\n    } \\\r\n    c0 += tl;                 /* overflow is handled on the next line */ \\\r\n    th += (c0 < tl) ? 1 : 0;  /* at most 0xFFFFFFFFFFFFFFFF */ \\\r\n    c1 += th;                 /* never overflows by contract (verified in the next line) */ \\\r\n    VERIFY_CHECK(c1 >= th); \\\r\n}\r\n```\r\nTO:\r\n\r\n```\r\n#define muladd_fast(a,b) { \\\r\n    uint64_t tl, th; \\\r\n    uint128_t t = (uint128_t)a * b + c0; \\\r\n    c0 = (uint64_t)t; \\\r\n    c1 += (uint64_t)(t >> 64);  /* never overflows by contract (verified in the next line) */ \\\r\n    VERIFY_CHECK(c1 >= t >> 64); \\\r\n}\r\n```\r\n\r\nThis is repeated in multiple macros.\r\n",
     "user": {
@@ -32,15 +32,40 @@
       "events_url": "https://api.github.com/users/msotoodeh/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/msotoodeh/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "labels": [],
     "assignees": [],
     "author_association": "NONE",
     "locked": false,
     "comments": 4,
+    "closed_at": "2026-05-09T08:49:01Z",
+    "closed_by": {
+      "login": "jonasnick",
+      "id": 2582071,
+      "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/jonasnick",
+      "html_url": "https://github.com/jonasnick",
+      "followers_url": "https://api.github.com/users/jonasnick/followers",
+      "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+      "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+      "repos_url": "https://api.github.com/users/jonasnick/repos",
+      "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/jonasnick/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "created_at": "2016-12-29T19:38:36Z",
-    "updated_at": "2019-02-26T11:04:53Z"
+    "updated_at": "2026-05-09T08:49:01Z"
   },
   "events": [
     {
@@ -66,7 +91,9 @@
         "events_url": "https://api.github.com/users/msotoodeh/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/msotoodeh/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -92,7 +119,9 @@
         "events_url": "https://api.github.com/users/msotoodeh/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/msotoodeh/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/436#issuecomment-269683151",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/436"
@@ -120,7 +149,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -149,7 +180,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -175,7 +208,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/436#issuecomment-465853396",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/436"
@@ -203,7 +238,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -229,7 +266,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/436#issuecomment-467197177",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/436"
@@ -257,7 +296,9 @@
         "events_url": "https://api.github.com/users/msotoodeh/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/msotoodeh/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -286,7 +327,9 @@
         "events_url": "https://api.github.com/users/msotoodeh/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/msotoodeh/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -315,7 +358,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -341,92 +386,43 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/436#issuecomment-467396360",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/436"
     },
     {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
+      "event": "closed",
+      "id": 25335520255,
+      "node_id": "CE_lADOAP4Jqs4LziAGzwAAAAXmHVv_",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/25335520255",
       "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "login": "jonasnick",
+        "id": 2582071,
+        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
         "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "url": "https://api.github.com/users/jonasnick",
+        "html_url": "https://github.com/jonasnick",
+        "followers_url": "https://api.github.com/users/jonasnick/followers",
+        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
+        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
+        "repos_url": "https://api.github.com/users/jonasnick/repos",
+        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2020-08-07T08:20:27Z",
-      "updated_at": "2020-08-07T08:20:27Z",
-      "source": {
-        "issue": {
-          "id": 674691815,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NDY0MzM4Njc4",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/786",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/786/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/786/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/786/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/786",
-          "number": 786,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Use double-wide types for additions in scalar code",
-          "body": "Suggested [here](https://github.com/bitcoin-core/secp256k1/pull/772#issuecomment-667884910) by Andy Polyakov.\r\n\r\nThis is shorter, easier to reason about, more likely to not contain branches, and likely (slightly) faster too.\r\n\r\n",
-          "user": {
-            "login": "sipa",
-            "id": 548488,
-            "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-            "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/sipa",
-            "html_url": "https://github.com/sipa",
-            "followers_url": "https://api.github.com/users/sipa/followers",
-            "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-            "organizations_url": "https://api.github.com/users/sipa/orgs",
-            "repos_url": "https://api.github.com/users/sipa/repos",
-            "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/sipa/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 12,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/786",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/786",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/786.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/786.patch"
-          },
-          "closed_at": "2023-05-08T15:51:45Z",
-          "created_at": "2020-08-07T01:22:53Z",
-          "updated_at": "2023-05-08T15:51:45Z"
-        },
-        "type": "issue"
-      }
+      "created_at": "2026-05-09T08:49:02Z"
     }
   ]
 }
