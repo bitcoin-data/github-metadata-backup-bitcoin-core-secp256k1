@@ -141,9 +141,9 @@
       "updated_at": "2026-05-13T14:15:42Z"
     },
     "locked": false,
-    "comments": 3,
+    "comments": 4,
     "created_at": "2015-01-11T05:30:31Z",
-    "updated_at": "2026-05-13T15:40:00Z"
+    "updated_at": "2026-05-13T16:38:49Z"
   },
   "events": [
     {
@@ -537,6 +537,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/188#issuecomment-4442712773",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/188"
+    },
+    {
+      "event": "commented",
+      "id": 4443142638,
+      "node_id": "IC_kwDOAP4Jqs8AAAABCNT57g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4443142638",
+      "actor": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-05-13T16:24:40Z",
+      "updated_at": "2026-05-13T16:38:49Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "In theory the library is currently less safe to use on embedded devices with small stacks, arguably it's less safe to use on any system with less than the 8MB stacks or whatever is the default on the systems' its developed and tested on.  The problem is exacerbated in that the execution environments most likely to have a limited stack are the same ones where tools like valgrind or memcheck are hardest to use-- or where its even harder to run the ordinary tests.  Places where smaller than desktop stacks exist include practically every embedded device, but also some specialized desktop cases e.g. the multimedia codecs in firefox (and I'd WAG chrome) run in threads with cut down stacks to reduce the memory usage from spinning up lots of concurrent decoders.\n\nTesting aggressively isn't necessarily sufficient to assure that there is no memory corruption from exceeding the stack but even if it were a random update (including a security fix) could increase the stack usage without disclosure (including unintentionally), and of course memory corruption during signing could lead to signatures that functionally leak keys and during validation lead to incorrect acceptance or rejection. -- or cause security or correctness issues elsewhere in the host application.\n\nIn the C calling convention the amount of stack needed to call a function is effectively part of the interface-- if you don't have enough things will fail!-- but unfortunately it's not something normally documented.  On desktops its \"solved\" by making the available space enormous and hoping for the best.\n\nFor libsecp256k1 the need for memory is usually pretty minimal and 100% predictable (or at least not data dependent) which should make it easy to manage.  OTOH stuff like batch operations and the very prudent avoidance of (failure prone and embedded unfriendly) runtime memory allocation makes it tempting for developers to just shove tons of crap on the stack.  I think it would be very easy to ship updates that break small embedded signers and never have CI or reviewers notice.  May even have happened before-- since culturally embedded developers have not historically been as inclined to participate in the open, and after hitting an issue they may just throw out libsecp256k1 in favor of a less securely developed embedded only library (we we learned some did before the signing tables were made const so they could go in flash), or fix it themselves in local patches.",
+      "user": {
+        "login": "gmaxwell",
+        "id": 858454,
+        "node_id": "MDQ6VXNlcjg1ODQ1NA==",
+        "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/gmaxwell",
+        "html_url": "https://github.com/gmaxwell",
+        "followers_url": "https://api.github.com/users/gmaxwell/followers",
+        "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
+        "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
+        "repos_url": "https://api.github.com/users/gmaxwell/repos",
+        "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/188#issuecomment-4443142638",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/188"
     }
   ]
