@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-05-14T18:06:01Z",
+    "updated_at": "2026-05-15T12:34:41Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-05-14T17:46:46Z",
+        "pushed_at": "2026-05-14T22:08:10Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -302,7 +302,7 @@
         "watchers_count": 2424,
         "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 148,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -345,7 +345,7 @@
     "deletions": 36,
     "changed_files": 23,
     "commits": 14,
-    "review_comments": 104,
+    "review_comments": 105,
     "comments": 75
   },
   "events": [
@@ -11044,6 +11044,44 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-05-14T18:06:03Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 4298123807,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABADAqHw",
+      "url": null,
+      "actor": null,
+      "commit_id": "2fc950165dc710c5a54084b437f2293a94f037e1",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-05-15T12:34:41Z",
+      "author_association": "NONE",
+      "user": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#pullrequestreview-4298123807",
+      "submitted_at": "2026-05-15T12:34:41Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
     }
   ],
   "comments": [
@@ -16661,6 +16699,60 @@
       "start_side": null,
       "line": null,
       "original_line": 123,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3248197539",
+      "pull_request_review_id": 4298123807,
+      "id": 3248197539,
+      "node_id": "PRRC_kwDOAP4Jqs7Bm4-j",
+      "diff_hunk": "@@ -226,6 +226,159 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipien\n     const secp256k1_silentpayments_label *label\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Opaque data structure that holds Silent Payments prevouts summary data.\n+ *\n+ *  The exact representation of data inside is implementation defined and not\n+ *  guaranteed to be portable between different platforms or versions. It is\n+ *  however guaranteed to be 101 bytes in size, and can be safely copied/moved.\n+ *  This structure does not contain secret data. It can be created with\n+ *  `secp256k1_silentpayments_recipient_prevouts_summary_create`.\n+ */\n+typedef struct secp256k1_silentpayments_prevouts_summary {\n+    unsigned char data[101];\n+} secp256k1_silentpayments_prevouts_summary;\n+\n+/** Compute Silent Payments prevouts summary from prevout public keys and transaction\n+ *  inputs.\n+ *\n+ *  Given a list of n public keys A_1...A_n (one for each Silent Payments\n+ *  eligible input to spend) and a serialized outpoint_smallest36, create a\n+ *  `prevouts_summary` object. This object summarizes the prevout data from the\n+ *  transaction inputs needed for scanning.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both Silent Payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment.\n+ *\n+ *  The public keys have to be passed in via two different parameter pairs, one\n+ *  for regular and one for x-only public keys, in order to avoid the need of\n+ *  users converting to a common public key format before calling this function.\n+ *  The resulting data can be used for scanning on the recipient side.\n+ *\n+ *  Returns: 1 if prevouts summary creation was successful.\n+ *           0 if the transaction is not a Silent Payments transaction.\n+ *\n+ *  Args:                 ctx: pointer to a context object\n+ *  Out:     prevouts_summary: pointer to prevouts_summary object containing the\n+ *                             summed public key and input_hash.\n+ *  In:   outpoint_smallest36: serialized smallest outpoint (lexicographically)\n+ *                             from the transaction inputs\n+ *              xonly_pubkeys: pointer to an array of pointers to taproot\n+ *                             x-only public keys (can be NULL if no taproot\n+ *                             inputs are used)\n+ *            n_xonly_pubkeys: the size of the xonly_pubkeys array.\n+ *              plain_pubkeys: pointer to an array of pointers to non-taproot\n+ *                             public keys (can be NULL if no non-taproot\n+ *                             inputs are used)\n+ *            n_plain_pubkeys: the size of the plain_pubkeys array.\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_prevouts_summary_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *plain_pubkeys,\n+    size_t n_plain_pubkeys\n+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);\n+\n+/** Type of callback function for label lookups\n+ *\n+ *  A function of this type will be used to retrieve the label tweak for a given\n+ *  label during scanning. A typical implementation will perform a lookup in a\n+ *  key-value store called the \"label cache\".\n+ *\n+ *  For creating the label cache data,\n+ *  `secp256k1_silentpayments_recipient_label_create` and\n+ *  `secp256k1_silentpayments_recipient_label_serialize` can be used.\n+ *\n+ *  Returns: pointer to the 32-byte label tweak if there is a match.\n+ *           NULL pointer if there is no match.\n+ *\n+ *  In:         label: pointer to the serialized 33-byte label to check\n+ *                     (computed during scanning)\n+ *      label_context: pointer to the recipient's label cache.\n+ */\n+typedef const unsigned char* (*secp256k1_silentpayments_label_lookup)(const unsigned char* label33, const void* label_context);\n+\n+/** Found outputs struct\n+ *\n+ *  Struct for holding a found output along with data needed to spend it later.\n+ *\n+ *            output: the x-only public key for the taproot output\n+ *             tweak: the 32-byte tweak needed to spend the output\n+ *  found_with_label: boolean value to indicate if the output was sent to a\n+ *                    labeled address. If true, label will be set to a valid value.\n+ *             label: the label used. If found_with_label = false, this is set to\n+ *                    an invalid value.\n+ */\n+typedef struct secp256k1_silentpayments_found_output {\n+    secp256k1_xonly_pubkey output;\n+    unsigned char tweak[32];\n+    int found_with_label;\n+    secp256k1_silentpayments_label label;\n+} secp256k1_silentpayments_found_output;\n+\n+/** Scan for Silent Payments transaction outputs.\n+ *\n+ *  Given a prevouts_summary object, a recipient's 32 byte scan key and spend public key,\n+ *  and the relevant transaction outputs, scan for outputs belonging to\n+ *  the recipient and return the tweak(s) needed for spending the output(s). An\n+ *  optional label_lookup callback function and label_context can be passed if\n+ *  the recipient uses labels. This allows for checking if a label exists in\n+ *  the recipients label cache and retrieving the label tweak during scanning.\n+ *\n+ *  If used, the `label_lookup` function must return a pointer to a 32-byte label\n+ *  tweak if the label is found, or NULL otherwise. The returned pointer must remain\n+ *  valid until the next call to `label_lookup` or until the function returns,\n+ *  whichever comes first. It is not retained beyond that.\n+ *\n+ *  For creating the label cache, `secp256k1_silentpayments_recipient_label_create`\n+ *  and `secp256k1_silentpayments_recipient_label_serialize` can be used.\n+ *\n+ *  Returns: 1 if output scanning was successful.\n+ *           0 if the transaction is not a Silent Payments transaction,\n+ *             or if the arguments are invalid.\n+ *\n+ *  Args:                   ctx: pointer to a context object\n+ *  Out:          found_outputs: pointer to an array of pointers to found\n+ *                               output objects. The found outputs array MUST\n+ *                               have the same length as the tx_outputs array.\n+ *              n_found_outputs: pointer to an integer indicating the final\n+ *                               size of the found outputs array. This number\n+ *                               represents the number of outputs found while\n+ *                               scanning (0 if none are found).\n+ *  In:              tx_outputs: pointer to the transaction's x-only public key outputs\n+ *                 n_tx_outputs: the size of the tx_outputs array.\n+ *                   scan_key32: pointer to the recipient's 32 byte scan key. The scan\n+ *                               key is valid if it passes secp256k1_ec_seckey_verify\n+ *             prevouts_summary: pointer to the transaction prevouts summary data (see\n+ *                               `secp256k1_silentpayments_recipient_prevouts_summary_create`).\n+ *       unlabeled_spend_pubkey: pointer to the recipient's unlabeled spend public key\n+ *                 label_lookup: pointer to a callback function for looking up\n+ *                               a label value. This function takes a serialized 33-byte\n+ *                               label as an argument and returns a pointer to the\n+ *                               32-byte label tweak if the label exists, otherwise\n+ *                               returns a NULL pointer (NULL if labels are not\n+ *                               used)\n+ *                label_context: pointer to a label context object (NULL if\n+ *                               labels are not used or context is not needed)\n+ */\n+SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_silentpayments_recipient_scan_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_found_output **found_outputs,\n+    uint32_t *n_found_outputs,\n+    const secp256k1_xonly_pubkey * const *tx_outputs,\n+    size_t n_tx_outputs,\n+    const unsigned char *scan_key32,\n+    const secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const secp256k1_pubkey *unlabeled_spend_pubkey,\n+    const secp256k1_silentpayments_label_lookup label_lookup,",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 392,
+      "original_position": 169,
+      "commit_id": "33e22255c5d7644654f289f57f889a68e82a0d13",
+      "original_commit_id": "2fc950165dc710c5a54084b437f2293a94f037e1",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "Eunovo",
+        "id": 37949128,
+        "node_id": "MDQ6VXNlcjM3OTQ5MTI4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/37949128?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Eunovo",
+        "html_url": "https://github.com/Eunovo",
+        "followers_url": "https://api.github.com/users/Eunovo/followers",
+        "following_url": "https://api.github.com/users/Eunovo/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Eunovo/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Eunovo/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Eunovo/subscriptions",
+        "organizations_url": "https://api.github.com/users/Eunovo/orgs",
+        "repos_url": "https://api.github.com/users/Eunovo/repos",
+        "events_url": "https://api.github.com/users/Eunovo/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Eunovo/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "https://github.com/bitcoin-core/secp256k1/pull/1765/commits/2fc950165dc710c5a54084b437f2293a94f037e1:\r\n\r\nBitcoin-core's tidy CI fails with:\r\n```\r\nerror: parameter 'label_lookup' is const-qualified in the function declaration; const-qualification of parameters only has an effect in function definitions [readability-avoid-const-params-in-decls,-warnings-as-errors]\r\n```\r\nSee\r\nhttps://github.com/bitcoin/bitcoin/actions/runs/25916053419/job/76172900029?pr=32966",
+      "created_at": "2026-05-15T12:34:41Z",
+      "updated_at": "2026-05-15T12:34:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3248197539",
+      "author_association": "NONE",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3248197539"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 392,
+      "original_line": 378,
       "side": "RIGHT"
     }
   ]
