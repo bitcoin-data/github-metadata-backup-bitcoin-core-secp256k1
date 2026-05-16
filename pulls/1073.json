@@ -36,18 +36,23 @@
       "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/k06a/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "body": "Original algorithm borrowed from this paper (LS3):\r\nhttps://www.researchgate.net/publication/304417579_Modular_Inverse_Algorithms_Without_Multiplications_for_Cryptographic_Applications\r\n\r\n<img width=\"777\" alt=\"image\" src=\"https://user-images.githubusercontent.com/702124/152866106-a7ad5d03-fa7d-496a-bcbb-fcb77c8331e8.png\">\r\n\r\nWas improved by Anton Bukov (@k06a) and Mikhail Melnik (@zumzoom) to use unsigned 256-bit integers: https://gist.github.com/k06a/b990b7c7dda766d4f661e653d6804a53\r\n\r\nThis would allow to avoid usage of 62-bit signed representation and compute modinv without 256-bit multiplications and division.\r\n\r\nCode is passing all the tests, but we injected some code to benchmark new also, need to move it to the bench target for sure, maybe someone could help with this?\r\n\r\nRunning tests on ARM64 (Apple M1 Max) gives 20% improvement for `modinv()` method:\r\n```c\r\nt1 = clock();\r\nfor (i = 0; i < 1000000; i++) {\r\n    secp256k1_scalar_to_signed62(&s, x);\r\n    secp256k1_modinv64(&s, &secp256k1_const_modinfo_scalar);\r\n    secp256k1_scalar_from_signed62(r, &s);\r\n    CHECK(secp256k1_scalar_eq(r, &rrr));\r\n}\r\nt2 = clock();\r\nfor (i = 0; i < 1000000; i++) {    \r\n    secp256k1_modinv64_scalar(r, x, &secp256k1_const_mod_scalar);\r\n    CHECK(secp256k1_scalar_eq(r, &rrr));\r\n}\r\nt3 = clock();\r\nprintf(\"Time old: %f\\n\", ((double)(t2 - t1)) / CLOCKS_PER_SEC);\r\nprintf(\"Time new: %f\\n\", ((double)(t3 - t2)) / CLOCKS_PER_SEC);\r\nprintf(\"Improvement: %.2f%%\\n\", (1 - (double)(t3 - t2) / (double)(t2 - t1)) * 100);\r\n```\r\n=>\r\n```\r\nTime old: 3.284568\r\nTime new: 2.639177\r\nImprovement: 19.65%\r\n```\r\n\r\nPlease help to test in on x86 and x64 architectures, we tested only ARM64.",
     "labels": [],
     "created_at": "2022-02-07T20:24:52Z",
     "updated_at": "2022-07-14T15:16:47Z",
     "closed_at": "2022-04-16T12:49:35Z",
-    "mergeable_state": "unknown",
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "merged": false,
     "merge_commit_sha": "86b28c8fce1ef98eda962da02bf6c3a214640659",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
+    "rebaseable": false,
     "head": {
       "label": "1inch:feature/new-modinv",
       "ref": "feature/new-modinv",
@@ -70,7 +75,9 @@
         "events_url": "https://api.github.com/users/1inch/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/1inch/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 456250218,
@@ -95,7 +102,9 @@
           "events_url": "https://api.github.com/users/1inch/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/1inch/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/1inch/secp256k1",
@@ -142,7 +151,7 @@
         "clone_url": "https://github.com/1inch/secp256k1.git",
         "hooks_url": "https://api.github.com/repos/1inch/secp256k1/hooks",
         "svn_url": "https://github.com/1inch/secp256k1",
-        "forks_count": 0,
+        "forks_count": 1,
         "stargazers_count": 0,
         "watchers_count": 0,
         "size": 7957,
@@ -155,12 +164,13 @@
         "has_wiki": false,
         "has_pages": false,
         "has_downloads": true,
-        "archived": false,
+        "archived": true,
         "disabled": false,
         "visibility": "public",
         "pushed_at": "2022-02-07T21:29:31Z",
         "created_at": "2022-02-06T19:26:44Z",
-        "updated_at": "2022-02-07T20:17:37Z",
+        "updated_at": "2025-02-14T12:19:15Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -200,7 +210,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -225,7 +237,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -273,12 +287,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 1140,
+        "stargazers_count": 2425,
+        "watchers_count": 2425,
+        "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -289,9 +303,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2026-04-29T06:04:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2026-05-15T16:10:42Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -707,7 +722,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -736,7 +753,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -765,7 +784,9 @@
         "events_url": "https://api.github.com/users/ZumZoom/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ZumZoom/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -794,7 +815,9 @@
         "events_url": "https://api.github.com/users/ZumZoom/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ZumZoom/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -863,7 +886,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -932,7 +957,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -958,7 +985,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031915045",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1026,7 +1055,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1052,7 +1083,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031927718",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1080,7 +1113,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1106,7 +1141,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031930501",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1134,7 +1171,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1163,7 +1202,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1192,7 +1233,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1218,7 +1261,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031931077",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1246,7 +1291,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1272,7 +1319,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031932574",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1300,7 +1349,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1326,7 +1377,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031933811",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1354,7 +1407,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1383,7 +1438,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1412,7 +1469,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1438,7 +1497,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031939253",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1466,7 +1527,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1492,7 +1555,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031940437",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1520,7 +1585,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1546,7 +1613,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031942113",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1574,7 +1643,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1603,7 +1674,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1672,7 +1745,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1698,7 +1773,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031945565",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1726,7 +1803,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1755,7 +1834,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1784,7 +1865,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1810,7 +1893,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031953419",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1838,7 +1923,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1864,7 +1951,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031953988",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -1892,7 +1981,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1921,7 +2012,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1950,7 +2043,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1976,7 +2071,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1031957826",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -2004,7 +2101,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2033,7 +2132,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2062,7 +2163,9 @@
         "events_url": "https://api.github.com/users/mratsim/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/mratsim/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2088,7 +2191,9 @@
         "events_url": "https://api.github.com/users/mratsim/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/mratsim/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1033565870",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -2116,7 +2221,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2142,7 +2249,9 @@
         "events_url": "https://api.github.com/users/k06a/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/k06a/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1073#issuecomment-1033700251",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1073"
@@ -2170,7 +2279,9 @@
         "events_url": "https://api.github.com/users/mratsim/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/mratsim/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2199,7 +2310,9 @@
         "events_url": "https://api.github.com/users/mratsim/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/mratsim/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2228,7 +2341,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,

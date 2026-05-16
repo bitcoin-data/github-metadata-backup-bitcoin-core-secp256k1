@@ -36,7 +36,9 @@
       "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/elichai/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "body": "I've been playing with the benchmarks and I started thinking about the optimizer.\r\nNow most of the benchmarks reuse the variables from past iterations(thanks @apoelstra for showing me that:) ) but the compiler might still be able to figure out it can remove at least the last iteration.\r\n\r\nanother thing is the jacobi symbol calculation, that has 0 side effect, so I would assume the optimizer will just remove it (which it seems to do so).\r\nI'm not sure what to make out of these results and I think I'll need to try and read the ASM itself to figure out what's going on.\r\n\r\nBut before:\r\n```\r\n$ ./bench_internal \r\nscalar_add: min 0.00771us / avg 0.00811us / max 0.00934us\r\nscalar_negate: min 0.00274us / avg 0.00277us / max 0.00280us\r\nscalar_sqr: min 0.0296us / avg 0.0301us / max 0.0308us\r\nscalar_mul: min 0.0305us / avg 0.0311us / max 0.0323us\r\nscalar_inverse: min 8.65us / avg 8.76us / max 9.03us\r\nscalar_inverse_var: min 2.08us / avg 2.14us / max 2.21us\r\nfield_normalize: min 0.00718us / avg 0.00744us / max 0.00797us\r\nfield_normalize_weak: min 0.00294us / avg 0.00316us / max 0.00360us\r\nfield_sqr: min 0.0140us / avg 0.0147us / max 0.0153us\r\nfield_mul: min 0.0185us / avg 0.0189us / max 0.0195us\r\nfield_inverse: min 4.09us / avg 4.12us / max 4.17us\r\nfield_inverse_var: min 2.10us / avg 2.11us / max 2.15us\r\nfield_sqrt: min 4.07us / avg 4.09us / max 4.14us\r\ngroup_double_var: min 0.123us / avg 0.124us / max 0.126us\r\ngroup_add_var: min 0.283us / avg 0.284us / max 0.287us\r\ngroup_add_affine: min 0.242us / avg 0.244us / max 0.249us\r\ngroup_add_affine_var: min 0.203us / avg 0.204us / max 0.208us\r\ngroup_jacobi_var: min 0.179us / avg 0.186us / max 0.197us\r\nwnaf_const: min 0.118us / avg 0.120us / max 0.124us\r\necmult_wnaf: min 0.447us / avg 0.454us / max 0.465us\r\nhash_sha256: min 0.252us / avg 0.257us / max 0.265us\r\nhash_hmac_sha256: min 1.01us / avg 1.02us / max 1.06us\r\nhash_rfc6979_hmac_sha256: min 5.56us / avg 5.72us / max 6.10us\r\ncontext_verify: min 2652us / avg 2732us / max 2909us\r\ncontext_sign: min 28.1us / avg 31.1us / max 33.2us\r\nnum_jacobi: min 0.0881us / avg 0.0893us / max 0.0913us\r\n\r\n$ ./bench_internal \r\nscalar_add: min 0.00793us / avg 0.00834us / max 0.00901us\r\nscalar_negate: min 0.00285us / avg 0.00290us / max 0.00294us\r\nscalar_sqr: min 0.0302us / avg 0.0310us / max 0.0321us\r\nscalar_mul: min 0.0312us / avg 0.0318us / max 0.0323us\r\nscalar_inverse: min 8.99us / avg 9.21us / max 9.47us\r\nscalar_inverse_var: min 2.16us / avg 2.26us / max 2.39us\r\nfield_normalize: min 0.00753us / avg 0.00767us / max 0.00792us\r\nfield_normalize_weak: min 0.00305us / avg 0.00313us / max 0.00319us\r\nfield_sqr: min 0.0147us / avg 0.0152us / max 0.0158us\r\nfield_mul: min 0.0194us / avg 0.0196us / max 0.0200us\r\nfield_inverse: min 4.20us / avg 4.25us / max 4.34us\r\nfield_inverse_var: min 2.15us / avg 2.19us / max 2.26us\r\nfield_sqrt: min 4.16us / avg 4.19us / max 4.26us\r\ngroup_double_var: min 0.126us / avg 0.128us / max 0.130us\r\ngroup_add_var: min 0.291us / avg 0.293us / max 0.300us\r\ngroup_add_affine: min 0.250us / avg 0.251us / max 0.252us\r\ngroup_add_affine_var: min 0.208us / avg 0.213us / max 0.223us\r\ngroup_jacobi_var: min 0.182us / avg 0.196us / max 0.204us\r\nwnaf_const: min 0.124us / avg 0.126us / max 0.129us\r\necmult_wnaf: min 0.456us / avg 0.464us / max 0.476us\r\nhash_sha256: min 0.261us / avg 0.266us / max 0.274us\r\nhash_hmac_sha256: min 1.04us / avg 1.06us / max 1.08us\r\nhash_rfc6979_hmac_sha256: min 5.72us / avg 5.76us / max 5.87us\r\ncontext_verify: min 2720us / avg 2789us / max 2922us\r\ncontext_sign: min 28.4us / avg 29.6us / max 31.9us\r\nnum_jacobi: min 0.0867us / avg 0.0882us / max 0.0906us\r\n```\r\n\r\nAfter:\r\n```\r\n$ ./bench_internal \r\nscalar_add: min 0.00950us / avg 0.00985us / max 0.0104us\r\nscalar_negate: min 0.00338us / avg 0.00343us / max 0.00365us\r\nscalar_sqr: min 0.0303us / avg 0.0311us / max 0.0325us\r\nscalar_mul: min 0.0319us / avg 0.0325us / max 0.0335us\r\nscalar_inverse: min 9.05us / avg 9.15us / max 9.39us\r\nscalar_inverse_var: min 2.13us / avg 2.20us / max 2.35us\r\nfield_normalize: min 0.00853us / avg 0.00864us / max 0.00879us\r\nfield_normalize_weak: min 0.00394us / avg 0.00401us / max 0.00405us\r\nfield_sqr: min 0.0151us / avg 0.0154us / max 0.0161us\r\nfield_mul: min 0.0192us / avg 0.0198us / max 0.0204us\r\nfield_inverse: min 4.20us / avg 4.24us / max 4.34us\r\nfield_inverse_var: min 2.17us / avg 2.19us / max 2.22us\r\nfield_sqrt: min 4.18us / avg 4.25us / max 4.36us\r\ngroup_double_var: min 0.128us / avg 0.129us / max 0.131us\r\ngroup_add_var: min 0.294us / avg 0.298us / max 0.303us\r\ngroup_add_affine: min 0.254us / avg 0.259us / max 0.268us\r\ngroup_add_affine_var: min 0.212us / avg 0.215us / max 0.220us\r\ngroup_jacobi_var: min 0.187us / avg 0.196us / max 0.205us\r\nwnaf_const: min 0.124us / avg 0.126us / max 0.129us\r\necmult_wnaf: min 0.469us / avg 0.475us / max 0.482us\r\nhash_sha256: min 0.262us / avg 0.267us / max 0.272us\r\nhash_hmac_sha256: min 1.05us / avg 1.06us / max 1.08us\r\nhash_rfc6979_hmac_sha256: min 5.84us / avg 5.88us / max 5.97us\r\ncontext_verify: min 2832us / avg 2899us / max 2999us\r\ncontext_sign: min 29.9us / avg 31.5us / max 32.9us\r\nnum_jacobi: min 0.670us / avg 0.684us / max 0.699us\r\n\r\n$ ./bench_internal \r\nscalar_add: min 0.00910us / avg 0.00965us / max 0.0108us\r\nscalar_negate: min 0.00326us / avg 0.00331us / max 0.00337us\r\nscalar_sqr: min 0.0297us / avg 0.0304us / max 0.0316us\r\nscalar_mul: min 0.0309us / avg 0.0316us / max 0.0320us\r\nscalar_inverse: min 8.87us / avg 8.97us / max 9.08us\r\nscalar_inverse_var: min 2.06us / avg 2.17us / max 2.27us\r\nfield_normalize: min 0.00828us / avg 0.00843us / max 0.00863us\r\nfield_normalize_weak: min 0.00383us / avg 0.00388us / max 0.00393us\r\nfield_sqr: min 0.0144us / avg 0.0148us / max 0.0153us\r\nfield_mul: min 0.0185us / avg 0.0189us / max 0.0197us\r\nfield_inverse: min 4.15us / avg 4.17us / max 4.26us\r\nfield_inverse_var: min 2.09us / avg 2.11us / max 2.15us\r\nfield_sqrt: min 4.09us / avg 4.11us / max 4.14us\r\ngroup_double_var: min 0.125us / avg 0.126us / max 0.128us\r\ngroup_add_var: min 0.284us / avg 0.286us / max 0.287us\r\ngroup_add_affine: min 0.245us / avg 0.246us / max 0.249us\r\ngroup_add_affine_var: min 0.205us / avg 0.207us / max 0.210us\r\ngroup_jacobi_var: min 0.185us / avg 0.192us / max 0.198us\r\nwnaf_const: min 0.119us / avg 0.121us / max 0.124us\r\necmult_wnaf: min 0.456us / avg 0.462us / max 0.478us\r\nhash_sha256: min 0.248us / avg 0.257us / max 0.261us\r\nhash_hmac_sha256: min 1.02us / avg 1.05us / max 1.09us\r\nhash_rfc6979_hmac_sha256: min 5.58us / avg 5.63us / max 5.72us\r\ncontext_verify: min 2652us / avg 2668us / max 2730us\r\ncontext_sign: min 27.7us / avg 29.0us / max 31.4us\r\nnum_jacobi: min 0.650us / avg 0.656us / max 0.663us\r\n```\r\n\r\nIt does seem like there's a big difference in `num_jacobi` (from 0.0882us before to 0.656us)",
     "labels": [],
@@ -45,6 +47,7 @@
     "closed_at": "2023-05-08T15:11:01Z",
     "mergeable": false,
     "mergeable_state": "dirty",
+    "merged": false,
     "merge_commit_sha": "1e18a3aba850253c476975743e2a1228848dac2b",
     "assignees": [],
     "requested_reviewers": [],
@@ -72,7 +75,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 191781642,
@@ -97,7 +102,9 @@
           "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/elichai/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/elichai/secp256k1",
@@ -164,6 +171,7 @@
         "pushed_at": "2022-02-23T14:15:18Z",
         "created_at": "2019-06-13T14:46:01Z",
         "updated_at": "2020-06-18T19:51:27Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -203,7 +211,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -228,7 +238,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -276,12 +288,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 1140,
+        "stargazers_count": 2425,
+        "watchers_count": 2425,
+        "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +304,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2026-04-29T06:04:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2026-05-15T16:10:42Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -350,7 +363,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -379,7 +394,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -408,10 +425,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
       "created_at": "2019-09-27T17:43:36Z"
     },
     {
@@ -437,7 +456,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -463,7 +484,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-536186989",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -491,7 +514,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -517,7 +542,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-536725505",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -545,7 +572,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -571,7 +600,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-536733546",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -585,6 +616,7 @@
       "commit_id": "2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2019-10-07T12:41:08Z",
       "author_association": "CONTRIBUTOR",
       "body": "I'm getting similar numbers to @elichai. Interestingly with clang the jacobi computation isn't optimized out on master.\r\n\r\nUnfortunately this PR doesn't solve the problem completely because the memory barrier as implemented here doesn't work with all compilers. In particular, it works with gcc and clang but not with Microsoft Visual C afaik. Ideally we would check the results of the individual benchmark computations in `bench_teardown` similar to how the other `bench` binaries work. Perhaps `bench_internal` could even print a note saying that the results are to be taken with a grain of salt if not on gcc/clang.\r\n\r\nWhy didn't you add the memory barrier to `context_verify/sign`? Doesn't seem to make a difference though.",
       "user": {
@@ -605,7 +637,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#pullrequestreview-298090816",
       "submitted_at": "2019-10-07T12:41:08Z",
@@ -635,7 +669,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -661,7 +697,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-538994748",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -689,7 +727,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -715,7 +755,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-539042036",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -743,7 +785,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -769,7 +813,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-539277110",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -797,7 +843,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -823,7 +871,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-539278472",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -851,7 +901,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -880,7 +932,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -909,7 +963,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -935,7 +991,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-539622903",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1003,10 +1061,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "79dbc5628c968db3bccabc4a18bd134a937b505c",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/79dbc5628c968db3bccabc4a18bd134a937b505c",
       "created_at": "2019-10-21T21:19:25Z"
     },
     {
@@ -1032,7 +1092,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1058,7 +1120,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-544714010",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1072,6 +1136,7 @@
       "commit_id": "79dbc5628c968db3bccabc4a18bd134a937b505c",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2019-10-21T21:28:04Z",
       "author_association": "CONTRIBUTOR",
       "user": {
         "login": "elichai",
@@ -1091,7 +1156,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#pullrequestreview-304861946",
       "submitted_at": "2019-10-21T21:28:04Z",
@@ -1161,10 +1228,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "a5198c52ba9f3eac992fba8000aec8f155039575",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/a5198c52ba9f3eac992fba8000aec8f155039575",
       "created_at": "2019-10-21T21:30:35Z"
     },
     {
@@ -1190,7 +1259,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1216,7 +1287,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545156210",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1244,7 +1317,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1270,7 +1345,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545160395",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1298,7 +1375,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1324,7 +1403,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545165983",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1352,7 +1433,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1378,7 +1461,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545168975",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1406,7 +1491,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1432,7 +1519,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545447863",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1460,7 +1549,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1489,93 +1580,13 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
       "created_at": "2019-10-23T13:37:31Z"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "elichai",
-        "id": 2167860,
-        "node_id": "MDQ6VXNlcjIxNjc4NjA=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/elichai",
-        "html_url": "https://github.com/elichai",
-        "followers_url": "https://api.github.com/users/elichai/followers",
-        "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
-        "organizations_url": "https://api.github.com/users/elichai/orgs",
-        "repos_url": "https://api.github.com/users/elichai/repos",
-        "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/elichai/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2019-10-23T20:06:58Z",
-      "updated_at": "2019-10-23T20:06:58Z",
-      "source": {
-        "issue": {
-          "id": 102062873,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NDI4OTE4NTk=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/290",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/290/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/290/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/290/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/290",
-          "number": 290,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Add native num implementation; modular inverse and Jacobi symbol without GMP",
-          "body": "Implement `num.h` API without GMP backend; benchmarks show modular inversion taking about 65% longer than with GMP, but much faster than the constant-time version.\n\nI will update this PR with an implementation of the Jacobi symbol computation; for now I'm pushing it in the hopes that somebody will see some more perf improvements that will let us catch up with GMP. (In fact, since we don't require arbitrary size numbers or allocation we should in principle be able to beat them..). This has a modular inverse but no Jacobi symbol.\n\nThis is required for https://github.com/bitcoin/secp256k1/pull/262 because we do not want to require a GMP dependency.\n\n**Edit:** I have a <a href=\"http://www.jstor.org/stable/40234522\">paper</a> by the author of the GMP code which describes (mostly) what they are doing. With this I am able to read the GMP code; I think I see how to optimize it for our special case. So we should hold off any detailed review until I've written new gcd code.\n",
-          "user": {
-            "login": "apoelstra",
-            "id": 1351933,
-            "node_id": "MDQ6VXNlcjEzNTE5MzM=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1351933?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/apoelstra",
-            "html_url": "https://github.com/apoelstra",
-            "followers_url": "https://api.github.com/users/apoelstra/followers",
-            "following_url": "https://api.github.com/users/apoelstra/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/apoelstra/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/apoelstra/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/apoelstra/subscriptions",
-            "organizations_url": "https://api.github.com/users/apoelstra/orgs",
-            "repos_url": "https://api.github.com/users/apoelstra/repos",
-            "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/apoelstra/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 28,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/290",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/290",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/290.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/290.patch"
-          },
-          "closed_at": "2021-03-24T21:13:10Z",
-          "created_at": "2015-08-20T05:03:49Z",
-          "updated_at": "2021-03-24T21:13:11Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "commented",
@@ -1600,7 +1611,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1626,7 +1639,9 @@
         "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/apoelstra/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-545636695",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1654,7 +1669,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1680,7 +1697,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-546885951",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1708,7 +1727,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1734,92 +1755,12 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-546888519",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "elichai",
-        "id": 2167860,
-        "node_id": "MDQ6VXNlcjIxNjc4NjA=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/elichai",
-        "html_url": "https://github.com/elichai",
-        "followers_url": "https://api.github.com/users/elichai/followers",
-        "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
-        "organizations_url": "https://api.github.com/users/elichai/orgs",
-        "repos_url": "https://api.github.com/users/elichai/repos",
-        "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/elichai/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2019-10-28T14:31:16Z",
-      "updated_at": "2019-10-28T14:31:16Z",
-      "source": {
-        "issue": {
-          "id": 513341794,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0MzMzMTQ2OTM5",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/678",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/678/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/678/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/678/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/678",
-          "number": 678,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Preventing compiler optimizations in benchmarks without a memory fence",
-          "body": "As asked https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-546885951 this is the parts of #667 that don't require an assembly memory fence.\r\n\r\nI splitted them to 2 commits, one with obvious easy ones. and another that changes the logic a bit to achieve this (See https://github.com/bitcoin-core/secp256k1/pull/667#discussion_r337248398 )",
-          "user": {
-            "login": "elichai",
-            "id": 2167860,
-            "node_id": "MDQ6VXNlcjIxNjc4NjA=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/elichai",
-            "html_url": "https://github.com/elichai",
-            "followers_url": "https://api.github.com/users/elichai/followers",
-            "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
-            "organizations_url": "https://api.github.com/users/elichai/orgs",
-            "repos_url": "https://api.github.com/users/elichai/repos",
-            "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/elichai/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 5,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/678",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/678",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/678.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/678.patch"
-          },
-          "closed_at": "2019-11-18T20:11:10Z",
-          "created_at": "2019-10-28T14:31:16Z",
-          "updated_at": "2019-11-18T20:11:10Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "commented",
@@ -1844,7 +1785,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1870,7 +1813,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-546973061",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -1898,7 +1843,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "544002c008fcd8e4bf030c8261ea77dc1664c968",
       "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/544002c008fcd8e4bf030c8261ea77dc1664c968",
@@ -1927,7 +1874,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1953,167 +1902,12 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-558091782",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "elichai",
-        "id": 2167860,
-        "node_id": "MDQ6VXNlcjIxNjc4NjA=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/elichai",
-        "html_url": "https://github.com/elichai",
-        "followers_url": "https://api.github.com/users/elichai/followers",
-        "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
-        "organizations_url": "https://api.github.com/users/elichai/orgs",
-        "repos_url": "https://api.github.com/users/elichai/repos",
-        "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/elichai/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2020-03-01T16:26:12Z",
-      "updated_at": "2020-03-01T16:26:12Z",
-      "source": {
-        "issue": {
-          "id": 569806788,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0Mzc4OTQ5Mjg3",
-          "url": "https://api.github.com/repos/kaspanet/go-secp256k1/issues/1",
-          "repository_url": "https://api.github.com/repos/kaspanet/go-secp256k1",
-          "labels_url": "https://api.github.com/repos/kaspanet/go-secp256k1/issues/1/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/kaspanet/go-secp256k1/issues/1/comments",
-          "events_url": "https://api.github.com/repos/kaspanet/go-secp256k1/issues/1/events",
-          "html_url": "https://github.com/kaspanet/go-secp256k1/pull/1",
-          "number": 1,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Implement go bindings to secp256k1",
-          "body": "Hi,\r\nThese are go bindings for the https://github.com/kaspanet/secp256k1 repository.\r\nthe repo is included as a subtree with the script `./depend/update-subtree.sh` to pull updates from the subtree.\r\n\r\nThere are currently some integration problems into kaspad, mostly because kaspad does utxo multiset diffs. which aren't supported by the code, but this should probably be changed in kaspad if I understand things correctly.\r\n\r\nAs usual review is done best commit by commit :)",
-          "user": {
-            "login": "elichai",
-            "id": 2167860,
-            "node_id": "MDQ6VXNlcjIxNjc4NjA=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2167860?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/elichai",
-            "html_url": "https://github.com/elichai",
-            "followers_url": "https://api.github.com/users/elichai/followers",
-            "following_url": "https://api.github.com/users/elichai/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/elichai/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/elichai/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/elichai/subscriptions",
-            "organizations_url": "https://api.github.com/users/elichai/orgs",
-            "repos_url": "https://api.github.com/users/elichai/repos",
-            "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/elichai/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "MEMBER",
-          "locked": false,
-          "comments": 4,
-          "pull_request": {
-            "url": "https://api.github.com/repos/kaspanet/go-secp256k1/pulls/1",
-            "html_url": "https://github.com/kaspanet/go-secp256k1/pull/1",
-            "diff_url": "https://github.com/kaspanet/go-secp256k1/pull/1.diff",
-            "patch_url": "https://github.com/kaspanet/go-secp256k1/pull/1.patch"
-          },
-          "closed_at": "2020-03-24T12:14:22Z",
-          "created_at": "2020-02-24T11:50:17Z",
-          "updated_at": "2020-03-24T12:16:03Z"
-        },
-        "type": "issue"
-      }
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2020-03-24T09:54:10Z",
-      "updated_at": "2020-03-24T09:54:10Z",
-      "source": {
-        "issue": {
-          "id": 586832810,
-          "node_id": "MDU6SXNzdWU1ODY4MzI4MTA=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/726/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/726",
-          "number": 726,
-          "state": "open",
-          "state_reason": null,
-          "title": "Consider removing x86_64 field assembly",
-          "body": "I noticed that turning off x86_64 assembly on my laptop actually speeds up `ecdsa_verify`. The internal benchmarks show that `--without-asm` scalar operations are slower, but field operations are faster. In order to investigate this I created a branch that includes the configurable benchmark iterations from #722, a test_matrix.sh script and allows turning on field assembly individually (https://github.com/jonasnick/secp256k1/tree/eval-asm).\r\n\r\nHere are the results with gcc 9.3.0 (got similar results with clang 9.0.1):\r\n```\r\nSECP256K1_BENCH_ITERS=200000\r\n\r\nbench config CFLAGS=-DUSE_ASM_X86_64_FIELD ./configure --disable-openssl-tests --with-asm=x86_64\r\nscalar_sqr: min 0.0331us / avg 0.0332us / max 0.0337us\r\nscalar_mul: min 0.0342us / avg 0.0343us / max 0.0345us\r\nfield_sqr: min 0.0165us / avg 0.0165us / max 0.0167us\r\nfield_mul: min 0.0204us / avg 0.0205us / max 0.0209us\r\necdsa_sign: min 40.3us / avg 40.3us / max 40.4us\r\necdsa_verify: min 56.9us / avg 56.9us / max 56.9us\r\n\r\nbench config CFLAGS= ./configure --disable-openssl-tests --without-asm\r\nscalar_sqr: min 0.0375us / avg 0.0376us / max 0.0383us\r\nscalar_mul: min 0.0362us / avg 0.0366us / max 0.0396us\r\nfield_sqr: min 0.0152us / avg 0.0152us / max 0.0152us\r\nfield_mul: min 0.0177us / avg 0.0178us / max 0.0178us\r\necdsa_sign: min 41.8us / avg 41.8us / max 41.9us\r\necdsa_verify: min 54.6us / avg 54.7us / max 54.7us\r\n\r\nbench config CFLAGS= ./configure --disable-openssl-tests --with-asm=x86_64\r\nscalar_sqr: min 0.0331us / avg 0.0331us / max 0.0333us\r\nscalar_mul: min 0.0342us / avg 0.0343us / max 0.0347us\r\nfield_sqr: min 0.0152us / avg 0.0153us / max 0.0154us\r\nfield_mul: min 0.0178us / avg 0.0178us / max 0.0180us\r\necdsa_sign: min 40.3us / avg 40.3us / max 40.4us\r\necdsa_verify: min 53.2us / avg 53.2us / max 53.2us\r\n```\r\n\r\nNote the 6.5% ecdsa_verify speedup. However, I don't fully understand this:\r\n\r\n1. There's assembly for field_sqr and field_mul. If we remove it, both functions are faster. But, some other internal functions are slower. For example:\r\n    ```\r\n    SECP256K1_BENCH_ITERS=200000\r\n    group_add_affine: min 0.257us / avg 0.257us / max 0.259us\r\n    vs.\r\n    group_add_affine: min 0.263us / avg 0.263us / max 0.264us\r\n    ```\r\n    This could just be an artifact of micro-benching and I have not tested this with #667.\r\n2. Removing field arithmetic also makes ecdsa verification slower if endomorphism is enabled.\r\n    ```\r\n    SECP256K1_BENCH_ITERS=200000\r\n    ecdsa_verify: min 41.1us / avg 41.1us / max 41.1us\r\n    vs.\r\n    ecdsa_verify: min 41.5us / avg 41.6us / max 41.6us\r\n    ```\r\n\r\nIt should be noted that without field arithmetic assembly, in order to use 64 bit field arithmetic you need to have `__int128` support (or use field=32bit with a 40% verification slowdown). I did not check where this is supported (MSVC?). Also we should try this with older compilers.\r\n",
-          "user": {
-            "login": "jonasnick",
-            "id": 2582071,
-            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/jonasnick",
-            "html_url": "https://github.com/jonasnick",
-            "followers_url": "https://api.github.com/users/jonasnick/followers",
-            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-            "repos_url": "https://api.github.com/users/jonasnick/repos",
-            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 12,
-          "created_at": "2020-03-24T09:54:10Z",
-          "updated_at": "2020-06-04T12:55:27Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "commented",
@@ -2138,7 +1932,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2164,7 +1960,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-620036717",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -2192,7 +1990,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2218,7 +2018,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/667#issuecomment-1538530116",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/667"
@@ -2246,7 +2048,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2261,7 +2065,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDMzMTk5MDc1Nw==",
       "diff_hunk": "@@ -27,6 +27,7 @@ typedef struct {\n     int wnaf[256];\n } bench_inv;\n \n+",
       "path": "src/bench_internal.c",
-      "position": null,
+      "position": 1,
       "original_position": 4,
       "commit_id": "a5198c52ba9f3eac992fba8000aec8f155039575",
       "original_commit_id": "2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
@@ -2284,7 +2088,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "nit: unnecessary newline?",
       "created_at": "2019-10-07T12:31:08Z",
@@ -2313,7 +2119,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDMzMTk5MTE1Mw==",
       "diff_hunk": "@@ -12,6 +12,10 @@\n #include <math.h>\n #include \"sys/time.h\"\n \n+static void escape(void *p) {",
       "path": "src/bench.h",
-      "position": null,
+      "position": 1,
       "original_position": 4,
       "commit_id": "a5198c52ba9f3eac992fba8000aec8f155039575",
       "original_commit_id": "2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
@@ -2336,7 +2142,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "nit: Perhaps rename to memory fence/barrier to make this more clear and add a comment what this is for?",
       "created_at": "2019-10-07T12:32:05Z",
@@ -2365,7 +2173,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDMzMTk5OTQ5MA==",
       "diff_hunk": "@@ -12,6 +12,10 @@\n #include <math.h>\n #include \"sys/time.h\"\n \n+static void escape(void *p) {",
       "path": "src/bench.h",
-      "position": null,
+      "position": 1,
       "original_position": 4,
       "commit_id": "a5198c52ba9f3eac992fba8000aec8f155039575",
       "original_commit_id": "2bf75d4b4ed1f157ab94bd52fc0f5ac46f5c2a72",
@@ -2388,7 +2196,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Yeah i'll rename and add a comment, maybe even an inline hint?",
       "created_at": "2019-10-07T12:51:14Z",
@@ -2440,7 +2250,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I think this should be fine because it solves for `x=a-y*lambda` and `y=(a-x)/lambda` so adding them up again every time should *not* result back in the same `a` and should give a different result.\r\n\r\nBut please tell me if there's something here I'm missing(maybe it will make it go to zero very quickly? (though I don't think so because this is all in Fp so it overflows) but if it does I can replace the addition with multiplication if it's any better)",
       "created_at": "2019-10-21T21:28:03Z",

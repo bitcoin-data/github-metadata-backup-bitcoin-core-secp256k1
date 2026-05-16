@@ -36,7 +36,9 @@
       "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/elichai/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "body": "I went over the public API and added missing explanations on when a pointer can be null and when it cannot,\r\nand added some missing checks for null ctx and null pubkey pointers.\r\n \r\nOpen questions IMHO:\r\n1. Can `secp256k1_context_create` return NULL? right now it could return null if you replaced the callbacks at compile time to ones that do return(unlike the default ones which never return).\r\n2. Related to the first, should we document that the callbacks should never return? (in the tests we use returning callbacks but we can violate our own API) right now we say the following:\r\n\r\n> After this callback returns, anything may happen, including crashing.\r\n\r\nIs this enough to document answer `no` for the first question and just saying that if the callback returned then you violated the API so `secp256k1_context_create` can return NULL even though it is promised not to?\r\nRight now we AFAICT we never check if it returns null\r\n\r\nAnother nit I'm not sure about is wording `(does nothing if NULL)`/`(ignored if NULL)`/`(can be NULL)` \r\n\r\nMore missing docs:\r\n1. Documenting the `data` argument to the default nonce functions ",
     "labels": [],
@@ -44,7 +46,30 @@
     "updated_at": "2021-09-15T15:47:29Z",
     "closed_at": "2021-09-15T14:36:43Z",
     "mergeable_state": "unknown",
+    "merged": true,
     "merged_at": "2021-09-15T14:36:43Z",
+    "merged_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "merge_commit_sha": "aa5d34a8fe99b1f69306be20819f337dbd3283db",
     "assignees": [],
     "requested_reviewers": [],
@@ -71,7 +96,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 191781642,
@@ -96,7 +123,9 @@
           "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/elichai/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/elichai/secp256k1",
@@ -163,6 +192,7 @@
         "pushed_at": "2022-02-23T14:15:18Z",
         "created_at": "2019-06-13T14:46:01Z",
         "updated_at": "2020-06-18T19:51:27Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -202,7 +232,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -227,7 +259,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -275,12 +309,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 1140,
+        "stargazers_count": 2425,
+        "watchers_count": 2425,
+        "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -291,9 +325,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2026-04-29T06:04:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2026-05-15T16:10:42Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -335,6 +370,7 @@
       "commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2020-07-30T10:53:55Z",
       "author_association": "CONTRIBUTOR",
       "body": "",
       "user": {
@@ -355,122 +391,14 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-458290165",
       "submitted_at": "2020-07-30T10:53:55Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2020-09-11T19:03:03Z",
-      "updated_at": "2020-09-11T19:03:03Z",
-      "source": {
-        "issue": {
-          "id": 699647768,
-          "node_id": "MDU6SXNzdWU2OTk2NDc3Njg=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/811",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/811/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/811/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/811/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/811",
-          "number": 811,
-          "state": "open",
-          "state_reason": null,
-          "title": "API/docs: Return value if ARG_CHECK fires",
-          "body": "For some functions handling public keys, the API docs claim that these functions always return 1. But when a zeroed pubkey is passed, the ARG_CHECK fires and they return 0. \r\n\r\nExamples:\r\n - `secp256k1_ec_pubkey_negate`\r\n - `secp256k1_ec_pubkey_serialize` \r\n\r\nPerhabs we can fix this as part of #783 .\r\n",
-          "user": {
-            "login": "real-or-random",
-            "id": 1071625,
-            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/real-or-random",
-            "html_url": "https://github.com/real-or-random",
-            "followers_url": "https://api.github.com/users/real-or-random/followers",
-            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-            "repos_url": "https://api.github.com/users/real-or-random/repos",
-            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "milestone": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/1",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/milestone/1",
-            "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/1/labels",
-            "id": 1276306,
-            "node_id": "MDk6TWlsZXN0b25lMTI3NjMwNg==",
-            "number": 1,
-            "state": "open",
-            "title": "stable release (1.0.0-rc.1)",
-            "description": "Motivation: libsecp is already widely used today, but often in a terribly outdated version. It's likely that a release process would help with that. Moreover, it simplifies using libsecp which may prevent developers from using less well tested alternatives. Lastly, without releases it's difficult to update the library in an organized fashion and communicate these updates.\r\n\r\nRelease Goals:\r\n\r\n- Stabilize API and documentation for functionality that exist today.\r\n- Fix a few known bugs.\r\n- Make ECDH non-experimental.\r\n\r\nThis milestone can be discussed in issue https://github.com/bitcoin-core/secp256k1/issues/286.",
-            "creator": {
-              "login": "gmaxwell",
-              "id": 858454,
-              "node_id": "MDQ6VXNlcjg1ODQ1NA==",
-              "avatar_url": "https://avatars.githubusercontent.com/u/858454?v=4",
-              "gravatar_id": "",
-              "url": "https://api.github.com/users/gmaxwell",
-              "html_url": "https://github.com/gmaxwell",
-              "followers_url": "https://api.github.com/users/gmaxwell/followers",
-              "following_url": "https://api.github.com/users/gmaxwell/following%7B/other_user%7D",
-              "gists_url": "https://api.github.com/users/gmaxwell/gists%7B/gist_id%7D",
-              "starred_url": "https://api.github.com/users/gmaxwell/starred%7B/owner%7D%7B/repo%7D",
-              "subscriptions_url": "https://api.github.com/users/gmaxwell/subscriptions",
-              "organizations_url": "https://api.github.com/users/gmaxwell/orgs",
-              "repos_url": "https://api.github.com/users/gmaxwell/repos",
-              "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
-              "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
-              "type": "User",
-              "site_admin": false
-            },
-            "open_issues": 12,
-            "closed_issues": 26,
-            "created_at": "2015-08-27T18:21:31Z",
-            "updated_at": "2023-04-10T15:36:41Z"
-          },
-          "locked": false,
-          "comments": 6,
-          "created_at": "2020-09-11T19:03:03Z",
-          "updated_at": "2020-11-24T09:13:34Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "reviewed",
@@ -481,6 +409,7 @@
       "commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2020-09-16T13:31:33Z",
       "author_association": "NONE",
       "body": "",
       "user": {
@@ -501,7 +430,9 @@
         "events_url": "https://api.github.com/users/tnawanna/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/tnawanna/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-489627728",
       "submitted_at": "2020-09-16T13:31:33Z",
@@ -531,7 +462,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -557,92 +490,12 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-695082220",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2020-10-28T09:28:39Z",
-      "updated_at": "2020-10-28T09:28:39Z",
-      "source": {
-        "issue": {
-          "id": 729578294,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NTEwMDQxNjEw",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/840",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/840/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/840/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/840/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/840",
-          "number": 840,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Return NULL early in context_preallocated_create if flags invalid",
-          "body": "If the user passes invalid flags to _context_create, and the default\r\nillegal callback does not abort the program (which is possible), then we\r\nwork with the result of malloc(0), which may be undefined behavior. This\r\nviolates the promise that a library function won't crash after the\r\nillegal callback has been called.\r\n\r\nThis commit fixes this issue by returning NULL early in _context_create\r\nin that case.",
-          "user": {
-            "login": "real-or-random",
-            "id": 1071625,
-            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/real-or-random",
-            "html_url": "https://github.com/real-or-random",
-            "followers_url": "https://api.github.com/users/real-or-random/followers",
-            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-            "repos_url": "https://api.github.com/users/real-or-random/repos",
-            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 5,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/840",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/840",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/840.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/840.patch"
-          },
-          "closed_at": "2020-10-30T17:46:06Z",
-          "created_at": "2020-10-26T13:47:17Z",
-          "updated_at": "2021-05-23T12:10:59Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "reviewed",
@@ -653,6 +506,7 @@
       "commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2020-11-04T22:50:08Z",
       "author_association": "CONTRIBUTOR",
       "body": "Agree with @sipa, just documenting which arguments are optional is better. As far as wording goes, it'd make sense to state what happens if the argument is NULL. If applicable, something like `Ignored if NULL` (without parantheses preferably).\r\n\r\n> Can secp256k1_context_create return NULL?\r\n> Related to the first, should we document that the callbacks should never return?\r\n\r\nEven if we mention that illegal callbacks should never return, `context_create` can still return NULL. That happens for example if malloc fails and the error callback is called. This seems to be already mentioned in the docs:\r\n\r\n> When this [error] callback is triggered, the API function called is guaranteed not to cause a crash, though its return value and output arguments are undefined.\r\n",
       "user": {
@@ -673,7 +527,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-523793510",
       "submitted_at": "2020-11-04T22:50:08Z",
@@ -703,10 +559,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/e34258e1669e63c7f17dadff098a3135a8989c64",
       "created_at": "2021-01-23T18:41:28Z"
     },
     {
@@ -718,6 +576,7 @@
       "commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2021-01-25T16:27:21Z",
       "author_association": "CONTRIBUTOR",
       "body": "Really good to get rid of the \"(cannot be NULL)\". There's one more of those in `secp256k1_ecdsa_signature_normalize` (see `sigin` argument) and more in `contrib/lax_der_privatekey_parsing.h`.",
       "user": {
@@ -738,94 +597,14 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-575562332",
       "submitted_at": "2021-01-25T16:27:21Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-02-05T21:06:58Z",
-      "updated_at": "2021-02-05T21:06:58Z",
-      "source": {
-        "issue": {
-          "id": 776612794,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NTQ3MDY4MDI4",
-          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/117",
-          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
-          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/117/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/117/comments",
-          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/117/events",
-          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/117",
-          "number": 117,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Add ECDSA adaptor signatures module",
-          "body": "### Overview\r\n\r\nThis PR adds support for ECDSA adaptor signatures. It is based on the work of @jonasnick in https://github.com/jonasnick/secp256k1/pull/14.\r\n\r\n### ECDSA Adaptor Signatures\r\n\r\nThis implementation conforms to the [DLC specification](https://github.com/discreetlogcontracts/dlcspecs/pull/114) and includes test vectors from the specification.\r\n\r\nThe specification is based on the [paper](https://github.com/LLFourn/one-time-VES/blob/master/main.pdf) \"One-Time Verifiably Encrypted Signatures A.K.A. Adaptor Signatures\" by @LLFourn. The idea was first proposed in a lightning-dev [post](https://lists.linuxfoundation.org/pipermail/lightning-dev/2019-November/002316.html).\r\n\r\n### Python\r\n\r\nI've [implemented](https://github.com/jesseposner/dlc/blob/master/ecdsa_adaptor.py) the specification in Python as well, which can be useful for testing purposes. [needs to be updated to match the latest spec revision]",
-          "user": {
-            "login": "jesseposner",
-            "id": 12010116,
-            "node_id": "MDQ6VXNlcjEyMDEwMTE2",
-            "avatar_url": "https://avatars.githubusercontent.com/u/12010116?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/jesseposner",
-            "html_url": "https://github.com/jesseposner",
-            "followers_url": "https://api.github.com/users/jesseposner/followers",
-            "following_url": "https://api.github.com/users/jesseposner/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/jesseposner/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/jesseposner/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/jesseposner/subscriptions",
-            "organizations_url": "https://api.github.com/users/jesseposner/orgs",
-            "repos_url": "https://api.github.com/users/jesseposner/repos",
-            "events_url": "https://api.github.com/users/jesseposner/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/jesseposner/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 32,
-          "pull_request": {
-            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/117",
-            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/117",
-            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/117.diff",
-            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/117.patch"
-          },
-          "closed_at": "2021-04-06T12:13:29Z",
-          "created_at": "2020-12-30T19:54:09Z",
-          "updated_at": "2021-04-16T00:27:18Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "commented",
@@ -850,7 +629,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -876,174 +657,12 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-781991309",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-04-28T16:34:04Z",
-      "updated_at": "2021-04-28T16:34:04Z",
-      "source": {
-        "issue": {
-          "id": 748292866,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NTI1MzE5OTE1",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/850",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/850/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/850/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/850/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/850",
-          "number": 850,
-          "state": "closed",
-          "state_reason": null,
-          "title": "add `secp256k1_ec_pubkey_cmp` method",
-          "body": "",
-          "user": {
-            "login": "apoelstra",
-            "id": 1351933,
-            "node_id": "MDQ6VXNlcjEzNTE5MzM=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1351933?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/apoelstra",
-            "html_url": "https://github.com/apoelstra",
-            "followers_url": "https://api.github.com/users/apoelstra/followers",
-            "following_url": "https://api.github.com/users/apoelstra/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/apoelstra/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/apoelstra/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/apoelstra/subscriptions",
-            "organizations_url": "https://api.github.com/users/apoelstra/orgs",
-            "repos_url": "https://api.github.com/users/apoelstra/repos",
-            "events_url": "https://api.github.com/users/apoelstra/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/apoelstra/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 28,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/850",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/850",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/850.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/850.patch"
-          },
-          "closed_at": "2021-05-13T19:17:12Z",
-          "created_at": "2020-11-22T17:34:09Z",
-          "updated_at": "2021-05-13T19:17:12Z"
-        },
-        "type": "issue"
-      }
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-04-28T17:02:19Z",
-      "updated_at": "2021-04-28T17:02:19Z",
-      "source": {
-        "issue": {
-          "id": 870162894,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NjI1NDA0NDI1",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/926",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/926/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/926/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/926/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/926",
-          "number": 926,
-          "state": "closed",
-          "state_reason": null,
-          "title": "secp256k1.h: clarify that by default arguments must be != NULL",
-          "body": "The same file says that the illegal callback will only triger for violations\r\nexplicitly mentioned, which is not true without this commit because we often\r\ndon't mention that an argument is not allowed to be NULL.\r\n\r\nThis line is extracted from #783 in the hope that it gets merged faster because other PRs depend on it.",
-          "user": {
-            "login": "jonasnick",
-            "id": 2582071,
-            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/jonasnick",
-            "html_url": "https://github.com/jonasnick",
-            "followers_url": "https://api.github.com/users/jonasnick/followers",
-            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-            "repos_url": "https://api.github.com/users/jonasnick/repos",
-            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 3,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/926",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/926",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/926.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/926.patch"
-          },
-          "closed_at": "2021-05-07T21:21:48Z",
-          "created_at": "2021-04-28T17:02:19Z",
-          "updated_at": "2021-05-07T21:21:48Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "referenced",
@@ -1068,7 +687,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "69394879b64e6de7943296c778de156d58453137",
       "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/69394879b64e6de7943296c778de156d58453137",
@@ -1097,7 +718,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1123,92 +746,12 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-867177657",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-06-23T21:37:34Z",
-      "updated_at": "2021-06-23T21:37:34Z",
-      "source": {
-        "issue": {
-          "id": 734766550,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NTE0MjczOTI4",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/844",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/844/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/844/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/844/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/844",
-          "number": 844,
-          "state": "closed",
-          "state_reason": null,
-          "title": "schnorrsig API overhaul",
-          "body": "This is a work in progress because I wanted to put this up for discussion before writing tests. It addresses the TODOs that didn't make it in the schnorrsig PR and changes the APIs of `schnorrsig_sign`, `schnorrsig_verify` and `hardened_nonce_function`.\r\n\r\n- Ideally, the new `aux_rand32` argument for `sign` would be const, but didn't find a solution I was happy with.\r\n- Support for variable length message signing and verification supports the [suggested BIP amendment](https://github.com/sipa/bips/issues/207#issuecomment-673681901) for such messages.\r\n- ~~`sign_custom` with its opaque config object allows adding more arguments later without having to change the API again. Perhaps there are other sensible customization options, but I'm thinking of [sign-to-contract/covert-channel](https://github.com/bitcoin-core/secp256k1/pull/590) in particular. It would require adding the fields `unsigned char *s2c_data32` and `secp256k1_s2c_opening *s2c_opening` to the config struct. The former is the data to commit to and the latter is written to by `sign_custom`.~~ (EDIT: see below)\r\n",
-          "user": {
-            "login": "jonasnick",
-            "id": 2582071,
-            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/jonasnick",
-            "html_url": "https://github.com/jonasnick",
-            "followers_url": "https://api.github.com/users/jonasnick/followers",
-            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-            "repos_url": "https://api.github.com/users/jonasnick/repos",
-            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 26,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/844",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/844",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/844.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/844.patch"
-          },
-          "closed_at": "2021-07-03T09:45:41Z",
-          "created_at": "2020-11-02T19:34:33Z",
-          "updated_at": "2021-07-05T08:42:15Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "reviewed",
@@ -1219,6 +762,7 @@
       "commit_id": "55ad72a784bce02264f24f690bc91a8bbc4f2ce2",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2021-06-24T22:42:14Z",
       "author_association": "NONE",
       "body": "Otherwise good to me, let me know if I'm completely astray w.r.t to `SECP256K1_ARG_NONNULL`",
       "user": {
@@ -1239,169 +783,14 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-692267884",
       "submitted_at": "2021-06-24T22:42:14Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/783"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-07-02T22:28:57Z",
-      "updated_at": "2021-07-02T22:28:57Z",
-      "source": {
-        "issue": {
-          "id": 935874745,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0NjgyNzE3MjE2",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/960",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/960/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/960/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/960/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/960",
-          "number": 960,
-          "state": "closed",
-          "state_reason": null,
-          "title": "tests_exhaustive: check the result of secp256k1_ecdsa_sign",
-          "body": "Hello,\r\n\r\nIn `test_exhaustive_sign`, if `secp256k1_ecdsa_sign` fails, the signature which is then loaded by `secp256k1_ecdsa_signature_load` is garbage. Exit early with an error when this occurs.\r\n\r\nBy the way, I am wondering whether attribute `SECP256K1_WARN_UNUSED_RESULT` should be added to function `secp256k1_ecdsa_sign`: as (according to the documentation of this function) the nonce generation function may fail, it seems to be a good idea to force callers to check the value returned by this function. What do you think about this?",
-          "user": {
-            "login": "niooss-ledger",
-            "id": 64031241,
-            "node_id": "MDQ6VXNlcjY0MDMxMjQx",
-            "avatar_url": "https://avatars.githubusercontent.com/u/64031241?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/niooss-ledger",
-            "html_url": "https://github.com/niooss-ledger",
-            "followers_url": "https://api.github.com/users/niooss-ledger/followers",
-            "following_url": "https://api.github.com/users/niooss-ledger/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/niooss-ledger/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/niooss-ledger/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/niooss-ledger/subscriptions",
-            "organizations_url": "https://api.github.com/users/niooss-ledger/orgs",
-            "repos_url": "https://api.github.com/users/niooss-ledger/repos",
-            "events_url": "https://api.github.com/users/niooss-ledger/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/niooss-ledger/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 2,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/960",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/960",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/960.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/960.patch"
-          },
-          "closed_at": "2021-07-03T09:21:35Z",
-          "created_at": "2021-07-02T15:30:45Z",
-          "updated_at": "2021-07-03T18:48:00Z"
-        },
-        "type": "issue"
-      }
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-07-03T09:25:13Z",
-      "updated_at": "2021-07-03T09:25:13Z",
-      "source": {
-        "issue": {
-          "id": 936214643,
-          "node_id": "MDU6SXNzdWU5MzYyMTQ2NDM=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/961",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/961/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/961/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/961/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/961",
-          "number": 961,
-          "state": "open",
-          "state_reason": null,
-          "title": "Policy for SECP256K1_WARN_UNUSED_RESULT",
-          "body": "\r\n> By the way, I am wondering whether attribute `SECP256K1_WARN_UNUSED_RESULT` should be added to function `secp256k1_ecdsa_sign`: as (according to the documentation of this function) the nonce generation function may fail, it seems to be a good idea to force callers to check the value returned by this function. What do you think about this?\r\n\r\nThe default nonce generation function will fail only with astronomically low probability. So if you know that you have a valid secret key and you use the default nonce function (99% of the use cases), it's okay not to check the return value.\r\n\r\nHaving said that, I think we're not entirely consistent here... For example, the same argument would apply to `secp256k1_ec_seckey_verify` (https://github.com/bitcoin-core/secp256k1/blob/master/include/secp256k1.h#L632). Even `secp256k1_ec_pubkey_negate` \r\nhttps://github.com/bitcoin-core/secp256k1/blob/master/include/secp256k1.h#L650 has  `SECP256K1_WARN_UNUSED_RESULT` even if it's guaranteed to return 1 according to the docs...\r\n\r\nMaybe we should have a look at this in https://github.com/bitcoin-core/secp256k1/pull/783 or in a follow up PR.\r\n\r\n_Originally posted by @real-or-random in https://github.com/bitcoin-core/secp256k1/issues/960#issuecomment-873285651_\r\n\r\nSo I wonder what our (unwritten) policy for `SECP256K1_WARN_UNUSED_RESULT` should be. I think we're overdoing it in the two mentioned cases but I'm happy to hear other opinions.",
-          "user": {
-            "login": "real-or-random",
-            "id": 1071625,
-            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/real-or-random",
-            "html_url": "https://github.com/real-or-random",
-            "followers_url": "https://api.github.com/users/real-or-random/followers",
-            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-            "repos_url": "https://api.github.com/users/real-or-random/repos",
-            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 1,
-          "created_at": "2021-07-03T09:25:13Z",
-          "updated_at": "2021-10-09T20:48:27Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "head_ref_force_pushed",
@@ -1426,10 +815,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "98d91be5223261a973e34ad61b9f29b3c892be38",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/98d91be5223261a973e34ad61b9f29b3c892be38",
       "created_at": "2021-07-04T09:15:25Z"
     },
     {
@@ -1535,10 +926,12 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
+      "commit_url": "https://api.github.com/repos/elichai/secp256k1/commits/adec5a16383f1704d80d7c767b2a65d9221cee08",
       "created_at": "2021-07-04T09:48:00Z"
     },
     {
@@ -1564,7 +957,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1590,7 +985,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-873556741",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
@@ -1604,6 +1001,7 @@
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2021-07-05T21:27:03Z",
       "author_association": "CONTRIBUTOR",
       "body": "ACK mod nit",
       "user": {
@@ -1624,7 +1022,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-699422635",
       "submitted_at": "2021-07-05T21:27:03Z",
@@ -1654,7 +1054,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1680,7 +1082,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-874700604",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
@@ -1694,6 +1098,7 @@
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "commit_url": null,
       "created_at": null,
+      "updated_at": "2021-09-15T12:45:46Z",
       "author_association": "CONTRIBUTOR",
       "body": "ACK adec5a16383f1704d80d7c767b2a65d9221cee08",
       "user": {
@@ -1714,7 +1119,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#pullrequestreview-755068997",
       "submitted_at": "2021-09-15T12:45:46Z",
@@ -1744,7 +1151,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1770,7 +1179,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/783#issuecomment-920066364",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/783"
@@ -1798,7 +1209,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1827,7 +1240,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1856,7 +1271,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "aa5d34a8fe99b1f69306be20819f337dbd3283db",
       "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/aa5d34a8fe99b1f69306be20819f337dbd3283db",
@@ -1885,7 +1302,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1914,93 +1333,13 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
       "created_at": "2021-09-15T15:47:29Z"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "jonasnick",
-        "id": 2582071,
-        "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/jonasnick",
-        "html_url": "https://github.com/jonasnick",
-        "followers_url": "https://api.github.com/users/jonasnick/followers",
-        "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-        "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-        "repos_url": "https://api.github.com/users/jonasnick/repos",
-        "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-09-15T19:49:16Z",
-      "updated_at": "2021-09-15T19:49:16Z",
-      "source": {
-        "issue": {
-          "id": 997451345,
-          "node_id": "PR_kwDOAjZbZs4rzS1b",
-          "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/144",
-          "repository_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp",
-          "labels_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/144/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/144/comments",
-          "events_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/issues/144/events",
-          "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/144",
-          "number": 144,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Upstream PRs 969, 956, 783, 976",
-          "body": "[bitcoin-core/secp256k1#969]: ci: Fixes after Debian release\r\n[bitcoin-core/secp256k1#956]: Replace ecmult_context with a generated static array.\r\n[bitcoin-core/secp256k1#783]: Make the public API docs more consistent and explicit\r\n[bitcoin-core/secp256k1#976]: `secp256k1_schnorrsig_sign_internal` should be static\r\n\r\nThis PR can be recreated  with `./sync-upstream.sh range 2a3a97c665475bc00d5d60f2f04830202983a631`.",
-          "user": {
-            "login": "jonasnick",
-            "id": 2582071,
-            "node_id": "MDQ6VXNlcjI1ODIwNzE=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/2582071?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/jonasnick",
-            "html_url": "https://github.com/jonasnick",
-            "followers_url": "https://api.github.com/users/jonasnick/followers",
-            "following_url": "https://api.github.com/users/jonasnick/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/jonasnick/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/jonasnick/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/jonasnick/subscriptions",
-            "organizations_url": "https://api.github.com/users/jonasnick/orgs",
-            "repos_url": "https://api.github.com/users/jonasnick/repos",
-            "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/jonasnick/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 0,
-          "pull_request": {
-            "url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/pulls/144",
-            "html_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/144",
-            "diff_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/144.diff",
-            "patch_url": "https://github.com/BlockstreamResearch/secp256k1-zkp/pull/144.patch"
-          },
-          "closed_at": "2021-10-15T13:20:46Z",
-          "created_at": "2021-09-15T19:49:16Z",
-          "updated_at": "2022-01-04T09:50:44Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "referenced",
@@ -2025,7 +1364,9 @@
         "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/fanquake/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "ff458a7b78fccd7455c1c78e875f42f6118f7d82",
       "commit_url": "https://api.github.com/repos/fanquake/bitcoin/commits/ff458a7b78fccd7455c1c78e875f42f6118f7d82",
@@ -2054,7 +1395,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "7812feb89646f4d36641c58a593294ddc924a25f",
       "commit_url": "https://api.github.com/repos/BlockstreamResearch/secp256k1-zkp/commits/7812feb89646f4d36641c58a593294ddc924a25f",
@@ -2083,7 +1426,9 @@
         "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/fanquake/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "8f5cd5e8937b34e5de0147b959afbc2dc99b049e",
       "commit_url": "https://api.github.com/repos/fanquake/bitcoin/commits/8f5cd5e8937b34e5de0147b959afbc2dc99b049e",
@@ -2112,7 +1457,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "f727914d7ebeb80df7fb5e9e77813c92fe6307a4",
       "commit_url": "https://api.github.com/repos/sipa/bitcoin/commits/f727914d7ebeb80df7fb5e9e77813c92fe6307a4",
@@ -2141,7 +1488,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "440f7ec80eff1f4f5b2139d66b89cc6f33053c80",
       "commit_url": "https://api.github.com/repos/sipa/bitcoin/commits/440f7ec80eff1f4f5b2139d66b89cc6f33053c80",
@@ -2170,7 +1519,9 @@
         "events_url": "https://api.github.com/users/dhruv/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/dhruv/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "395e1155b960ab72b68a71e9316a966a134c237e",
       "commit_url": "https://api.github.com/repos/dhruv/bitcoin/commits/395e1155b960ab72b68a71e9316a966a134c237e",
@@ -2199,7 +1550,9 @@
         "events_url": "https://api.github.com/users/dhruv/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/dhruv/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "184e1fac177a4af7284df283cd75a8a4da17161d",
       "commit_url": "https://api.github.com/repos/dhruv/bitcoin/commits/184e1fac177a4af7284df283cd75a8a4da17161d",
@@ -2228,7 +1581,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "d057eae556f5487b3ac21a524b87ab6b87aab368",
       "commit_url": "https://api.github.com/repos/sipa/bitcoin/commits/d057eae556f5487b3ac21a524b87ab6b87aab368",
@@ -2257,7 +1612,9 @@
         "events_url": "https://api.github.com/users/fanquake/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/fanquake/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "c4a1e09a8c91f8e124e6559b1e9514fc153e8231",
       "commit_url": "https://api.github.com/repos/fanquake/bitcoin/commits/c4a1e09a8c91f8e124e6559b1e9514fc153e8231",
@@ -2286,7 +1643,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "86dbc4d075decb82fbba837aaa283cf0561897ad",
       "commit_url": "https://api.github.com/repos/sipa/bitcoin/commits/86dbc4d075decb82fbba837aaa283cf0561897ad",
@@ -2315,7 +1674,9 @@
         "events_url": "https://api.github.com/users/gwillen/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gwillen/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "35d6112a72ef419af9cb1ee3ffd9e28ad0df04a0",
       "commit_url": "https://api.github.com/repos/gwillen/elements/commits/35d6112a72ef419af9cb1ee3ffd9e28ad0df04a0",
@@ -2344,7 +1705,9 @@
         "events_url": "https://api.github.com/users/janus/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/janus/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "879a9a27b98cba59ddf771ce357d95c8ef9358d3",
       "commit_url": "https://api.github.com/repos/BitgesellOfficial/bitgesell/commits/879a9a27b98cba59ddf771ce357d95c8ef9358d3",
@@ -2373,7 +1736,9 @@
         "events_url": "https://api.github.com/users/patricklodder/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/patricklodder/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "21badcf9d23f51d831a2069a3d61ad320de417ea",
       "commit_url": "https://api.github.com/repos/patricklodder/dogecoin/commits/21badcf9d23f51d831a2069a3d61ad320de417ea",
@@ -2402,7 +1767,9 @@
         "events_url": "https://api.github.com/users/patricklodder/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/patricklodder/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "03002a9013ffb5efdccfbae3f3510f4a44c0da20",
       "commit_url": "https://api.github.com/repos/patricklodder/dogecoin/commits/03002a9013ffb5efdccfbae3f3510f4a44c0da20",
@@ -2431,7 +1798,9 @@
         "events_url": "https://api.github.com/users/backpacker69/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/backpacker69/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "77186f4a04bd2b9b1e799daeb569b638faa00202",
       "commit_url": "https://api.github.com/repos/peercoin/peercoin/commits/77186f4a04bd2b9b1e799daeb569b638faa00202",
@@ -2460,7 +1829,9 @@
         "events_url": "https://api.github.com/users/str4d/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/str4d/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "6de4698bf9ac87c6f8d7884e6e60e10ebdef01c9",
       "commit_url": "https://api.github.com/repos/str4d/zcash/commits/6de4698bf9ac87c6f8d7884e6e60e10ebdef01c9",
@@ -2489,7 +1860,9 @@
         "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/vmta/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
       "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/e1120c94a1fe2208bfe6c939b4f67f6d37ce931c",
@@ -2518,11 +1891,75 @@
         "events_url": "https://api.github.com/users/vmta/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/vmta/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": "8f03457eede9abfd1d7a0d26abc379a710e16755",
       "commit_url": "https://api.github.com/repos/umkoin/umkoin/commits/8f03457eede9abfd1d7a0d26abc379a710e16755",
       "created_at": "2023-07-01T12:32:56Z"
+    },
+    {
+      "event": "referenced",
+      "id": 21989640735,
+      "node_id": "REFE_lADOAP4Jqs4n2W3hzwAAAAUer0of",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21989640735",
+      "actor": {
+        "login": "Fabcien",
+        "id": 44533924,
+        "node_id": "MDQ6VXNlcjQ0NTMzOTI0",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44533924?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Fabcien",
+        "html_url": "https://github.com/Fabcien",
+        "followers_url": "https://api.github.com/users/Fabcien/followers",
+        "following_url": "https://api.github.com/users/Fabcien/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Fabcien/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Fabcien/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Fabcien/subscriptions",
+        "organizations_url": "https://api.github.com/users/Fabcien/orgs",
+        "repos_url": "https://api.github.com/users/Fabcien/repos",
+        "events_url": "https://api.github.com/users/Fabcien/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Fabcien/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "ed7dc0e33579406388dad8f5744285c44e3dea54",
+      "commit_url": "https://api.github.com/repos/Bitcoin-ABC/secp256k1/commits/ed7dc0e33579406388dad8f5744285c44e3dea54",
+      "created_at": "2026-01-12T13:28:59Z"
+    },
+    {
+      "event": "referenced",
+      "id": 21989645076,
+      "node_id": "REFE_lADOAP4Jqs4n2W3hzwAAAAUer1sU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/21989645076",
+      "actor": {
+        "login": "Fabcien",
+        "id": 44533924,
+        "node_id": "MDQ6VXNlcjQ0NTMzOTI0",
+        "avatar_url": "https://avatars.githubusercontent.com/u/44533924?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Fabcien",
+        "html_url": "https://github.com/Fabcien",
+        "followers_url": "https://api.github.com/users/Fabcien/followers",
+        "following_url": "https://api.github.com/users/Fabcien/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Fabcien/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Fabcien/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Fabcien/subscriptions",
+        "organizations_url": "https://api.github.com/users/Fabcien/orgs",
+        "repos_url": "https://api.github.com/users/Fabcien/repos",
+        "events_url": "https://api.github.com/users/Fabcien/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Fabcien/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "fe59c0dee9dd3ea841b19e47b48e46a7ab46642e",
+      "commit_url": "https://api.github.com/repos/Bitcoin-ABC/bitcoin-abc/commits/fe59c0dee9dd3ea841b19e47b48e46a7ab46642e",
+      "created_at": "2026-01-12T13:29:11Z"
     }
   ],
   "comments": [
@@ -2533,7 +1970,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDQ2MjkxMjM2NA==",
       "diff_hunk": "@@ -229,7 +229,7 @@ SECP256K1_API secp256k1_context* secp256k1_context_clone(\n  *  be used instead.\n  *\n  *  Args:   ctx: an existing context to destroy, constructed using\n- *               secp256k1_context_create or secp256k1_context_clone\n+ *               secp256k1_context_create or secp256k1_context_clone (does nothing if NULL)",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 5,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
@@ -2556,7 +1993,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I don't think that we want to guarantee this. As I understand it, we don't define any behavior if you pass NULL, so it's UB (we're just nice currently and do nothing :)) ",
       "created_at": "2020-07-30T10:48:20Z",
@@ -2585,7 +2024,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDQ2MjkxMzU0MQ==",
       "diff_hunk": "@@ -268,7 +268,7 @@ SECP256K1_API void secp256k1_context_destroy(\n  *  In:   fun:  a pointer to a function to call when an illegal argument is\n  *              passed to the API, taking a message and an opaque pointer.\n  *              (NULL restores the default handler.)\n- *        data: the opaque pointer to pass to fun above.\n+ *        data: the opaque pointer to pass to fun above (can be NULL for default handler)",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 14,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
@@ -2608,7 +2047,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I think we could say \"must be NULL\" for default handler because the default handler does not expect data. (Again, nothing bad happens if you don't obey.) ",
       "created_at": "2020-07-30T10:50:52Z",
@@ -2637,7 +2078,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDQ2MjkxMzk0Ng==",
       "diff_hunk": "@@ -318,8 +318,8 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT secp256k1_scratch_space* secp256k1_sc\n /** Destroy a secp256k1 scratch space.\n  *\n  *  The pointer may not be used afterwards.\n- *  Args:       ctx: a secp256k1 context object.\n- *          scratch: space to destroy\n+ *  Args:       ctx: a secp256k1 context object (cannot be NULL)",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 33,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
@@ -2660,7 +2101,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Well NULL is not a secp256k1, not sure if we need to say this everywhere.\r\n\r\nBut apparently we say this in some places, so we could make it consistent. But personally I'd prefer to omit it consistently.",
       "created_at": "2020-07-30T10:51:44Z",
@@ -2689,7 +2132,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDQ2MjkxNDEyNA==",
       "diff_hunk": "@@ -318,8 +318,8 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT secp256k1_scratch_space* secp256k1_sc\n /** Destroy a secp256k1 scratch space.\n  *\n  *  The pointer may not be used afterwards.\n- *  Args:       ctx: a secp256k1 context object.\n- *          scratch: space to destroy\n+ *  Args:       ctx: a secp256k1 context object (cannot be NULL)\n+ *          scratch: space to destroy (does nothing if NULL)",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 34,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
@@ -2712,7 +2155,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "same as with the context, not sure why we would want to guarantee this.",
       "created_at": "2020-07-30T10:52:08Z",
@@ -2741,7 +2186,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDQ2MjkxNzA0MA==",
       "diff_hunk": "@@ -318,8 +318,8 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT secp256k1_scratch_space* secp256k1_sc\n /** Destroy a secp256k1 scratch space.\n  *\n  *  The pointer may not be used afterwards.\n- *  Args:       ctx: a secp256k1 context object.\n- *          scratch: space to destroy\n+ *  Args:       ctx: a secp256k1 context object (cannot be NULL)",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 33,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "298b850c1304fa01e9150ee5a41369380f5af975",
@@ -2764,7 +2209,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "yeah I started by omitting it when it's obvious that it cannot be null, but then other places didn't omit so I settled on being explicit *everywhere*",
       "created_at": "2020-07-30T10:58:04Z",
@@ -2793,7 +2240,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDU2Mzg1MDc4Mw==",
       "diff_hunk": "@@ -394,10 +396,10 @@ SECP256K1_API int secp256k1_ecdsa_signature_parse_compact(\n /** Parse a DER ECDSA signature.\n  *\n  *  Returns: 1 when the signature could be parsed, 0 otherwise.\n- *  Args: ctx:      a secp256k1 context object\n- *  Out:  sig:      a pointer to a signature object\n- *  In:   input:    a pointer to the signature to be parsed\n- *        inputlen: the length of the array pointed to be input\n+ *  Args: ctx:      a secp256k1 context object.\n+ *  Out:  sig:      a pointer to a signature object.\n+ *  In:   input:    a pointer to the signature to be parsed.\n+ *        inputlen: the length of the array pointed to be input.",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 109,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -2816,7 +2263,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Adding periods for every arguments seems a bit unnecessary. So far I've tried to follow the rule to add a period only if it follows an actual sentence (obj + verb).",
       "created_at": "2021-01-25T16:17:32Z",
@@ -2845,7 +2294,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDU2Mzg1MzY2Mg==",
       "diff_hunk": "@@ -72,13 +70,13 @@ SECP256K1_API int secp256k1_xonly_pubkey_serialize(\n  *  Returns: 1 if the public key was successfully converted\n  *           0 otherwise\n  *\n- *  Args:         ctx: pointer to a context object (cannot be NULL)\n+ *  Args:         ctx: pointer to a context object.\n  *  Out: xonly_pubkey: pointer to an x-only public key object for placing the\n- *                     converted public key (cannot be NULL)\n- *          pk_parity: pointer to an integer that will be set to 1 if the point\n- *                     encoded by xonly_pubkey is the negation of the pubkey and\n- *                     set to 0 otherwise. (can be NULL)\n- *  In:        pubkey: pointer to a public key that is converted (cannot be NULL)\n+ *                     converted public key.\n+ *          pk_parity: Optional(if NULL): pointer to an integer that",
       "path": "include/secp256k1_extrakeys.h",
-      "position": null,
+      "position": 1,
       "original_position": 41,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -2868,7 +2317,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "How about `Ignored if NULL. Otherwise, pointer ....`",
       "created_at": "2021-01-25T16:21:12Z",
@@ -2897,7 +2348,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDU2Mzg1ODE2OA==",
       "diff_hunk": "@@ -69,15 +69,14 @@ SECP256K1_API extern const secp256k1_nonce_function_hardened secp256k1_nonce_fun\n  *  randomness.\n  *\n  *  Returns 1 on success, 0 on failure.\n- *  Args:    ctx: pointer to a context object, initialized for signing (cannot be NULL)\n- *  Out:   sig64: pointer to a 64-byte array to store the serialized signature (cannot be NULL)\n- *  In:    msg32: the 32-byte message being signed (cannot be NULL)\n- *       keypair: pointer to an initialized keypair (cannot be NULL)\n+ *  Args:    ctx: pointer to a context object, initialized for signing.\n+ *  Out:   sig64: pointer to a 64-byte array to store the serialized signature.\n+ *  In:    msg32: the 32-byte message being signed.\n+ *       keypair: pointer to an initialized keypair.\n  *       noncefp: pointer to a nonce generation function. If NULL, secp256k1_nonce_function_bip340 is used\n  *         ndata: pointer to arbitrary data used by the nonce generation\n- *                function (can be NULL). If it is non-NULL and\n- *                secp256k1_nonce_function_bip340 is used, then ndata must be a\n- *                pointer to 32-byte auxiliary randomness as per BIP-340.\n+ *                function for secp256k1_nonce_function_bip340 it can either be NULL or\n+ *                non-NULL and then ndata must be a pointer to 32-byte auxiliary randomness as per BIP-340.",
       "path": "include/secp256k1_schnorrsig.h",
-      "position": null,
+      "position": 1,
       "original_position": 18,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -2920,7 +2371,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "How about\r\n\r\npointer to arbitrary data used by the nonce generation function. secp256k1_nonce_function_bip340 ignores ndata if it is NULL, otherwise it must be a pointer to 32-byte auxiliary randomness as per BIP-340.\r\n\r\n\r\nAlso I think we should try to keep the line width <= 100 chars.",
       "created_at": "2021-01-25T16:26:55Z",
@@ -2949,7 +2402,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDU2Mzk4MzY4Ng==",
       "diff_hunk": "@@ -394,10 +396,10 @@ SECP256K1_API int secp256k1_ecdsa_signature_parse_compact(\n /** Parse a DER ECDSA signature.\n  *\n  *  Returns: 1 when the signature could be parsed, 0 otherwise.\n- *  Args: ctx:      a secp256k1 context object\n- *  Out:  sig:      a pointer to a signature object\n- *  In:   input:    a pointer to the signature to be parsed\n- *        inputlen: the length of the array pointed to be input\n+ *  Args: ctx:      a secp256k1 context object.\n+ *  Out:  sig:      a pointer to a signature object.\n+ *  In:   input:    a pointer to the signature to be parsed.\n+ *        inputlen: the length of the array pointed to be input.",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 109,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -2972,7 +2425,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I mostly wanted consistency and thought that will be the less controversial way, but I'll remove that change",
       "created_at": "2021-01-25T19:23:34Z",
@@ -3001,7 +2456,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDY1ODMxNjA4MQ==",
       "diff_hunk": "@@ -751,18 +750,18 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_context_randomize(\n  *\n  *  Returns: 1: the sum of the public keys is valid.\n  *           0: the sum of the public keys is not valid.\n- *  Args:   ctx:        pointer to a context object\n- *  Out:    out:        pointer to a public key object for placing the resulting public key\n- *                      (cannot be NULL)\n- *  In:     ins:        pointer to array of pointers to public keys (cannot be NULL)\n- *          n:          the number of public keys to add together (must be at least 1)\n+ *  Args:   ctx:        pointer to a context object.\n+ *  Out:    out:        pointer to a public key object for placing the resulting public key.\n+ *                     .",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 357,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "55ad72a784bce02264f24f690bc91a8bbc4f2ce2",
@@ -3024,7 +2479,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "nit: i believe this dot is redundant",
       "created_at": "2021-06-24T22:10:58Z",
@@ -3076,7 +2533,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Does `secp256k1_context_destroy`'s `ctx` deserves its own `SECP256K1_ARG_NONNULL` annotation?\r\n\r\nedit: Have a look on `secp256k1_ecdsa_signature_normalize`'s second arg, missing too?\r\nre-edit: `secp256k1_context_randomize`'s second arg?",
       "created_at": "2021-06-24T22:22:06Z",
@@ -3128,7 +2587,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Same, missing `SECP256K1_ARG_NONNULL` on `secp256k1_context_preallocated_destroy`'s first arg ?",
       "created_at": "2021-06-24T22:37:21Z",
@@ -3180,7 +2641,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Well maybe here you need to drop the annotation for third arg?",
       "created_at": "2021-06-24T22:38:44Z",
@@ -3232,7 +2695,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Good question if it shouldn't be null, right now it will work if it's not but we don't promise that so I think it should have.\r\n\r\nAs for the rest:\r\n`secp256k1_ecdsa_signature_normalize` 2nd argument can be NULL if you just want to check for normalization without normalizing.\r\n`secp256k1_context_randomize` you can pass NULL as the 2nd argument to reset to the initial state.",
       "created_at": "2021-07-04T08:56:46Z",
@@ -3284,7 +2749,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Good find! Thanks",
       "created_at": "2021-07-04T08:57:49Z",
@@ -3336,7 +2803,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Added, Thanks!",
       "created_at": "2021-07-04T09:50:04Z",
@@ -3388,7 +2857,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I was wrong for writing `recid` is optional, so I removed that change. Thanks!",
       "created_at": "2021-07-04T09:50:29Z",
@@ -3417,7 +2888,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDY2MzQ3Nzc4Mg==",
       "diff_hunk": "@@ -69,15 +69,14 @@ SECP256K1_API extern const secp256k1_nonce_function_hardened secp256k1_nonce_fun\n  *  randomness.\n  *\n  *  Returns 1 on success, 0 on failure.\n- *  Args:    ctx: pointer to a context object, initialized for signing (cannot be NULL)\n- *  Out:   sig64: pointer to a 64-byte array to store the serialized signature (cannot be NULL)\n- *  In:    msg32: the 32-byte message being signed (cannot be NULL)\n- *       keypair: pointer to an initialized keypair (cannot be NULL)\n+ *  Args:    ctx: pointer to a context object, initialized for signing.\n+ *  Out:   sig64: pointer to a 64-byte array to store the serialized signature.\n+ *  In:    msg32: the 32-byte message being signed.\n+ *       keypair: pointer to an initialized keypair.\n  *       noncefp: pointer to a nonce generation function. If NULL, secp256k1_nonce_function_bip340 is used\n  *         ndata: pointer to arbitrary data used by the nonce generation\n- *                function (can be NULL). If it is non-NULL and\n- *                secp256k1_nonce_function_bip340 is used, then ndata must be a\n- *                pointer to 32-byte auxiliary randomness as per BIP-340.\n+ *                function for secp256k1_nonce_function_bip340 it can either be NULL or\n+ *                non-NULL and then ndata must be a pointer to 32-byte auxiliary randomness as per BIP-340.",
       "path": "include/secp256k1_schnorrsig.h",
-      "position": null,
+      "position": 1,
       "original_position": 18,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -3440,7 +2911,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "That's better, Thanks!",
       "created_at": "2021-07-04T09:51:29Z",
@@ -3469,7 +2942,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDY2MzQ3Nzc5Mg==",
       "diff_hunk": "@@ -72,13 +70,13 @@ SECP256K1_API int secp256k1_xonly_pubkey_serialize(\n  *  Returns: 1 if the public key was successfully converted\n  *           0 otherwise\n  *\n- *  Args:         ctx: pointer to a context object (cannot be NULL)\n+ *  Args:         ctx: pointer to a context object.\n  *  Out: xonly_pubkey: pointer to an x-only public key object for placing the\n- *                     converted public key (cannot be NULL)\n- *          pk_parity: pointer to an integer that will be set to 1 if the point\n- *                     encoded by xonly_pubkey is the negation of the pubkey and\n- *                     set to 0 otherwise. (can be NULL)\n- *  In:        pubkey: pointer to a public key that is converted (cannot be NULL)\n+ *                     converted public key.\n+ *          pk_parity: Optional(if NULL): pointer to an integer that",
       "path": "include/secp256k1_extrakeys.h",
-      "position": null,
+      "position": 1,
       "original_position": 41,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -3492,7 +2965,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "That's better, Thanks!",
       "created_at": "2021-07-04T09:51:40Z",
@@ -3521,7 +2996,7 @@
       "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDY2MzQ3Nzg2Ng==",
       "diff_hunk": "@@ -394,10 +396,10 @@ SECP256K1_API int secp256k1_ecdsa_signature_parse_compact(\n /** Parse a DER ECDSA signature.\n  *\n  *  Returns: 1 when the signature could be parsed, 0 otherwise.\n- *  Args: ctx:      a secp256k1 context object\n- *  Out:  sig:      a pointer to a signature object\n- *  In:   input:    a pointer to the signature to be parsed\n- *        inputlen: the length of the array pointed to be input\n+ *  Args: ctx:      a secp256k1 context object.\n+ *  Out:  sig:      a pointer to a signature object.\n+ *  In:   input:    a pointer to the signature to be parsed.\n+ *        inputlen: the length of the array pointed to be input.",
       "path": "include/secp256k1.h",
-      "position": null,
+      "position": 1,
       "original_position": 109,
       "commit_id": "adec5a16383f1704d80d7c767b2a65d9221cee08",
       "original_commit_id": "e34258e1669e63c7f17dadff098a3135a8989c64",
@@ -3544,7 +3019,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I removed all the changes that simply added periods",
       "created_at": "2021-07-04T09:52:00Z",
@@ -3596,7 +3073,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I don't think it's worth changing the API of `context_destroy` and `preallocated_destroy` given that it is fine to give NULL pointers to `free()`.",
       "created_at": "2021-07-05T21:26:49Z",
@@ -3648,7 +3127,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Good point, though i don't know how \"if ptr NULL, no operations is performed\" guarantee holds beyond standardized *nix platforms.",
       "created_at": "2021-07-06T12:02:29Z",
@@ -3700,7 +3181,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Probably best to mention this behavior in the doc (\"Ignored if NULL\" or something).",
       "created_at": "2021-07-06T12:43:53Z",
@@ -3752,7 +3235,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "@jonasnick See @real-or-random's comment at: https://github.com/bitcoin-core/secp256k1/pull/783#discussion_r462912364",
       "created_at": "2021-07-06T13:31:07Z",
@@ -3804,7 +3289,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "If we don't mention this, we will have the exact same discussion again at some point. But fine either way imo.",
       "created_at": "2021-07-06T13:59:05Z",
@@ -3856,7 +3343,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "@ariard that behavior is part of the C standard (http://port70.net/~nsz/c/c89/c89-draft.html#4.10.3.2)",
       "created_at": "2021-07-06T14:01:03Z",
@@ -3908,7 +3397,9 @@
         "events_url": "https://api.github.com/users/elichai/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/elichai/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Yeah, I wanted to make that promise too, but not too important (as long as it's explicitly either NON_NULL or allowed to be null, I prefer not to leave it in a limbo)",
       "created_at": "2021-07-06T16:19:58Z",
@@ -3960,7 +3451,9 @@
         "events_url": "https://api.github.com/users/ariard/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/ariard/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "> @ariard that behavior is part of the C standard (http://port70.net/~nsz/c/c89/c89-draft.html#4.10.3.2)\r\n\r\nAh right, so \"allowed to be null\"/\"Ignored if NULL\" recalling C standard?\r\n",
       "created_at": "2021-07-07T00:30:54Z",
@@ -4012,7 +3505,9 @@
         "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "@ariard Not sure if we're talking past each other. Sure the current `free(NULL)` implementation is fine. I was just pointing out that adding the promise that `secp256k1_context_destroy(NULL)` is a no-op will be an API change and I don't see a reason to make this change. ",
       "created_at": "2021-07-07T09:44:31Z",
@@ -4064,7 +3559,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "I still think it would be better to remove the `SECP256K1_ARG_NONNULL` because it is a backwards-incompatible API change.",
       "created_at": "2021-07-08T18:51:58Z",
@@ -4116,7 +3613,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Just to clarify, it's an API change since before 0881633d we didn't force that pointer args must not be NULL if not mentioned otherwise. But here we never mentioned \"cannot be NULL\" or similar.",
       "created_at": "2021-08-09T13:30:50Z",
@@ -4168,7 +3667,9 @@
         "events_url": "https://api.github.com/users/jonasnick/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jonasnick/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "@real-or-random pointed out that while there wasn't a \"cannot be NULL\", an _existing_ context was required. So I think it's ok as is now.",
       "created_at": "2021-09-15T12:45:24Z",

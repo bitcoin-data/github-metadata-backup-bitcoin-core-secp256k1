@@ -36,7 +36,9 @@
       "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/theuni/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "body": "This is _not_ meant for merge as-is, but rather to discuss whether it's worth doing, and if so, how it might be done correctly.\n\nAbstract: If a baseline can be established where compilers (with all paranoid checks enabled) produce zero warnings, bugs in new code become much easier to spot.\n\nThis PR adds 2 configure switches: enable all paranoid warnings (and filter out the few that we don't care about), and turn warnings into errors. When combined, the pull-tester will fail when a new warning is introduced. It also adds clang to the build matrix in order to add a new batch of warnings (-Weverything)\n\nThe results are here: https://travis-ci.org/theuni/secp256k1/builds/28015905\n\nObviously most of these warnings are completely harmless and have no consequences, but a few legitimate bugs turn up as well. In a heavy math/crypto lib, type narrowing and implicit sign changes can be especially dangerous, so I would argue that these warnings are actually quite valuable.\n\nAlso, obviously the warnings that compilers enable with \"-Wall -Wextra -Weverything\" are entirely arbitrary, so the list of filtered warnings will likely evolve a bit.\n\nAssuming this work is wanted, I see 2 possible ways to go about it:\n1. as done in this pr. Quell all warnings so that the pull tester is happy, then begin fixing them up correctly. Please read the commit message from https://github.com/theuni/secp256k1/commit/30fba32ddab28d034afdd530d8dbd8d524832619 before pointing out the stupid changes in that commit.\n2. don't flip the 'all warnings are errors' switch, and fix up each case properly. then flip the switch.\n",
     "labels": [],
@@ -45,6 +47,7 @@
     "closed_at": "2014-12-12T01:21:00Z",
     "mergeable": false,
     "mergeable_state": "dirty",
+    "merged": false,
     "merge_commit_sha": "4fb7f057f9ed8774378faf9d127f5069174849b8",
     "assignees": [],
     "requested_reviewers": [],
@@ -72,7 +75,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 20003297,
@@ -97,7 +102,9 @@
           "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/theuni/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/theuni/secp256k1",
@@ -146,9 +153,9 @@
         "svn_url": "https://github.com/theuni/secp256k1",
         "language": "C",
         "forks_count": 1,
-        "stargazers_count": 0,
-        "watchers_count": 0,
-        "size": 10523,
+        "stargazers_count": 2,
+        "watchers_count": 2,
+        "size": 12659,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -161,9 +168,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-07-25T20:38:06Z",
+        "pushed_at": "2025-07-02T15:23:43Z",
         "created_at": "2014-05-21T01:09:55Z",
-        "updated_at": "2016-04-27T10:13:49Z",
+        "updated_at": "2025-11-18T11:38:31Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -203,7 +211,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -228,7 +238,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -276,12 +288,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 1140,
+        "stargazers_count": 2425,
+        "watchers_count": 2425,
+        "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +304,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2026-04-29T06:04:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2026-05-15T16:10:42Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -430,7 +443,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -456,7 +471,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46703956",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -484,7 +501,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -510,7 +529,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46704354",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -538,7 +559,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -567,7 +590,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -596,7 +621,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -622,7 +649,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46704527",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -650,7 +679,9 @@
         "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jgarzik/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -676,7 +707,9 @@
         "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jgarzik/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46705118",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -704,7 +737,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -730,7 +765,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46705863",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -758,7 +795,9 @@
         "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jgarzik/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -787,7 +826,9 @@
         "events_url": "https://api.github.com/users/jgarzik/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/jgarzik/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -816,7 +857,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -842,7 +885,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/33#issuecomment-46706231",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/33"
@@ -1450,7 +1495,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1488,7 +1535,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "Why?\n",
       "created_at": "2014-06-26T23:58:49Z",
@@ -1540,7 +1589,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "What is this for?\n",
       "created_at": "2014-06-26T23:59:08Z",
@@ -1592,7 +1643,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "sizeof(secp256k1_ge_consts_t)\n",
       "created_at": "2014-06-27T00:00:33Z",
@@ -1644,7 +1697,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "??\n",
       "created_at": "2014-06-27T00:01:33Z",
@@ -1696,7 +1751,9 @@
         "events_url": "https://api.github.com/users/theuni/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/theuni/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "body": "c is unused. Obviously the right thing to do is just not create it, but I was trying to leave the result unaffected.\n",
       "created_at": "2014-06-27T00:01:34Z",

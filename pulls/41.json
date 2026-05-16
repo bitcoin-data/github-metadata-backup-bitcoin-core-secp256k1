@@ -36,7 +36,9 @@
       "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
       "received_events_url": "https://api.github.com/users/peterdettman/received_events",
       "type": "User",
-      "site_admin": false
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
     },
     "body": "- Selected Co-Z formulas from \"Scalar Multiplication on Weierstraß Elliptic Curves from Co-Z Arithmetic\" (Goundar, Joye, et. al.) added as group methods with new type sep256k1_coz_t.\n- Co-Z methods used for point precomputations in secp256k1_ecmult.\n- WINDOW_A size increased to 6 since the precomputation is much faster per-point.\n- DBLU cost: 3M+4S, ZADDU cost: 5M+2S.\n- From 2.4% to 3.8% faster 'bench' results, depending on configuration.\n\n(UPDATE: Technique explicitly described in https://eprint.iacr.org/2008/051)\n\nIt's probably best to have a read of the paper (http://joye.site88.net/papers/GJMRV11regpm.pdf) if not familiar with Co-Z arithmetic, but roughly it's based on the observations that\n1) points with equal Z coordinate (Co-Z) can be added very cheaply.\n2) an input to a Co-Z double or add can be updated to have the same Z coordinate as the result, almost for free, allowing \"chaining\" of operations.\n\nThis works out well for generating a table of 1P, (2P), 3P, 5P, etc... as the 2P can be created with the same Z as 1P, then added to 1P, 3P, etc., in each case being updated to have the same Z as the previous output, which is also the next input. Then the total cost for a table of 8 values is 3M+4S + 7(5M+2S) = 38M+18S, compared to 3M+4S + 7(12M+4S) = 87M+32S. Alternatively, as this PR does, a table of 16 values can be built instead for 3M+4S + 15(5M+2S) = 78M+34S, which is still cheaper than the current table generation; then ~6 point additions are saved during the scalar multiplication (72M+24S), for a total saving of 72M+24S + 87M+32S - (78M+34S) = 81M+22S, or ~100M.\n\nTiming results for 'bench' across a variety of configurations (bignum=gmp throughout):\n\n| Field | Endo? | Before | After | %Perf |\n| --- | --- | --- | --- | --- |\n| 64bit | yes | 1m10.623s | 1m8.147s | +3.6% |\n| 64bit | no | 1m35.524s | 1m32.660s | +3.1% |\n| 32bit | yes | 1m43.756s | 1m39.973s | +3.8% |\n| 32bit | no | 2m21.871s | 2m17.690s | +3.0% |\n| gmp | yes | 1m41.278s | 1m37.710s | +3.7% |\n| gmp | no | 2m24.717s | 2m21.326s | +2.4% |\n",
     "labels": [],
@@ -45,6 +47,7 @@
     "closed_at": "2015-02-11T23:20:37Z",
     "mergeable": false,
     "mergeable_state": "dirty",
+    "merged": false,
     "merge_commit_sha": "f3b9315b6d40569e84ed8f3120e116a4505a1d90",
     "assignees": [],
     "requested_reviewers": [],
@@ -72,7 +75,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 19929656,
@@ -97,7 +102,9 @@
           "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/peterdettman/received_events",
           "type": "User",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/peterdettman/secp256k1",
@@ -148,7 +155,7 @@
         "forks_count": 0,
         "stargazers_count": 1,
         "watchers_count": 1,
-        "size": 9530,
+        "size": 13357,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -161,9 +168,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2022-04-20T06:00:57Z",
+        "pushed_at": "2026-04-12T10:38:48Z",
         "created_at": "2014-05-19T04:58:16Z",
-        "updated_at": "2022-01-01T06:09:08Z",
+        "updated_at": "2026-04-12T07:44:27Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -203,7 +211,9 @@
         "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
         "type": "Organization",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "repo": {
         "id": 16648618,
@@ -228,7 +238,9 @@
           "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
           "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
           "type": "Organization",
-          "site_admin": false
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
         },
         "private": false,
         "html_url": "https://github.com/bitcoin-core/secp256k1",
@@ -276,12 +288,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 962,
-        "stargazers_count": 1802,
-        "watchers_count": 1802,
-        "size": 10374,
+        "forks_count": 1140,
+        "stargazers_count": 2425,
+        "watchers_count": 2425,
+        "size": 14198,
         "default_branch": "master",
-        "open_issues_count": 145,
+        "open_issues_count": 149,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -292,9 +304,10 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2023-08-01T01:00:35Z",
+        "pushed_at": "2026-04-29T06:04:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2023-08-01T08:52:35Z",
+        "updated_at": "2026-05-15T16:10:42Z",
+        "allow_forking": true,
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -350,7 +363,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -376,7 +391,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-47298010",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -404,7 +421,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -430,7 +449,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-47311986",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -458,7 +479,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -487,7 +510,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -516,7 +541,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -542,7 +569,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-48361076",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -570,7 +599,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -596,7 +627,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-49158677",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -624,7 +657,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -653,7 +688,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -682,7 +719,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -715,7 +754,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -741,7 +782,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-49394485",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -769,7 +812,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -795,7 +840,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-51004703",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -823,7 +870,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -849,7 +898,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-51004868",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -877,10 +928,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "be150ae4f9976f2b6c9aded09db3381dadf6e7a3",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/be150ae4f9976f2b6c9aded09db3381dadf6e7a3",
       "created_at": "2014-08-20T04:17:11Z"
     },
     {
@@ -906,7 +959,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -932,7 +987,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-52733653",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -960,7 +1017,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -989,7 +1048,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1018,7 +1079,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1044,7 +1107,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-52805524",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1072,7 +1137,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1101,7 +1168,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1130,7 +1199,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1156,7 +1227,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-52805559",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1184,7 +1257,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1210,7 +1285,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-52926963",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1238,7 +1315,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1267,7 +1346,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1296,10 +1377,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "7deaf917f33a52263ae8418665ac0c0a7fd6a0dc",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/7deaf917f33a52263ae8418665ac0c0a7fd6a0dc",
       "created_at": "2014-11-01T10:05:19Z"
     },
     {
@@ -1325,10 +1408,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "784bb9bf95b6f8147442badfd77ccf73f51cc714",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/784bb9bf95b6f8147442badfd77ccf73f51cc714",
       "created_at": "2014-11-04T03:59:49Z"
     },
     {
@@ -1354,10 +1439,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "03f6bddb75f420aed998abe441945ac29fcf43a0",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/03f6bddb75f420aed998abe441945ac29fcf43a0",
       "created_at": "2014-11-04T07:56:39Z"
     },
     {
@@ -1383,10 +1470,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "4d569fed2bf29fbc1bf52723a9ad6411e9d756c5",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/4d569fed2bf29fbc1bf52723a9ad6411e9d756c5",
       "created_at": "2014-11-04T12:19:47Z"
     },
     {
@@ -1412,10 +1501,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "272a9261b97b758ebbb8e30a19749a75189cc241",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/272a9261b97b758ebbb8e30a19749a75189cc241",
       "created_at": "2014-11-05T13:04:38Z"
     },
     {
@@ -1441,10 +1532,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "80cc0c369e3f4af5f7199d4a7639751aec5f8e5b",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/80cc0c369e3f4af5f7199d4a7639751aec5f8e5b",
       "created_at": "2014-11-09T08:39:13Z"
     },
     {
@@ -1470,10 +1563,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "ad409c918a2eac3d135caab9beec4ccf3a11fec0",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/ad409c918a2eac3d135caab9beec4ccf3a11fec0",
       "created_at": "2014-11-13T03:25:43Z"
     },
     {
@@ -1499,10 +1594,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "943bd94b8bb2d1fb22beef298195795b2aad5e6e",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/943bd94b8bb2d1fb22beef298195795b2aad5e6e",
       "created_at": "2014-11-15T15:50:16Z"
     },
     {
@@ -1528,10 +1625,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "e84b4d8768cf0635e33468ab4eebcf587c296748",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/e84b4d8768cf0635e33468ab4eebcf587c296748",
       "created_at": "2014-11-15T15:56:55Z"
     },
     {
@@ -1557,10 +1656,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "01a56dd620fcbd055d7d3af47f354c540cf61ee3",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/01a56dd620fcbd055d7d3af47f354c540cf61ee3",
       "created_at": "2014-11-18T03:51:29Z"
     },
     {
@@ -1586,10 +1687,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "7bbba4a451190cab31612d8bf03c77161fd2473b",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/7bbba4a451190cab31612d8bf03c77161fd2473b",
       "created_at": "2014-11-19T03:12:30Z"
     },
     {
@@ -1615,7 +1718,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1641,7 +1746,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-65695257",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1669,7 +1776,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1698,7 +1807,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1727,7 +1838,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1753,7 +1866,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66604661",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1781,7 +1896,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1810,7 +1927,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1839,10 +1958,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "d1256c69db4bc18d7800c9a01070f3a3002ac9f1",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/d1256c69db4bc18d7800c9a01070f3a3002ac9f1",
       "created_at": "2014-12-12T03:54:25Z"
     },
     {
@@ -1868,10 +1989,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "da142eb294924ad20af156307e43c3f6193b4b4b",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/da142eb294924ad20af156307e43c3f6193b4b4b",
       "created_at": "2014-12-12T10:29:09Z"
     },
     {
@@ -1897,7 +2020,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1923,7 +2048,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66756837",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -1951,7 +2078,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -1980,7 +2109,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2009,10 +2140,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "3f07a4e8613f7a8d86475d2d9d0e2acf4a072b85",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/3f07a4e8613f7a8d86475d2d9d0e2acf4a072b85",
       "created_at": "2014-12-12T12:55:14Z"
     },
     {
@@ -2038,10 +2171,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "0b4129fa003bc44dc9a558ec42d17b1c861bd306",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/0b4129fa003bc44dc9a558ec42d17b1c861bd306",
       "created_at": "2014-12-13T03:29:08Z"
     },
     {
@@ -2067,7 +2202,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2093,7 +2230,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66867000",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -2121,7 +2260,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2150,7 +2291,9 @@
         "events_url": "https://api.github.com/users/gmaxwell/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/gmaxwell/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2179,7 +2322,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2205,7 +2350,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66900245",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -2233,7 +2380,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2259,7 +2408,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66901297",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -2287,7 +2438,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2313,7 +2466,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-66906184",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -2341,7 +2496,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2370,7 +2527,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2399,10 +2558,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "b1a0a9c8343a25952775da301efb84a549a10ba2",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/b1a0a9c8343a25952775da301efb84a549a10ba2",
       "created_at": "2014-12-18T04:33:37Z"
     },
     {
@@ -2428,93 +2589,13 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "0057bcf54d68ff692fc8732a2609d4e0db1b1bf0",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/0057bcf54d68ff692fc8732a2609d4e0db1b1bf0",
       "created_at": "2014-12-21T03:58:45Z"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "peterdettman",
-        "id": 3423981,
-        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/peterdettman",
-        "html_url": "https://github.com/peterdettman",
-        "followers_url": "https://api.github.com/users/peterdettman/followers",
-        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
-        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
-        "repos_url": "https://api.github.com/users/peterdettman/repos",
-        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2014-12-21T09:02:11Z",
-      "updated_at": "2014-12-21T09:02:11Z",
-      "source": {
-        "issue": {
-          "id": 52590355,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0MjY0MjU4NDI=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/171",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/171/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/171/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/171/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/171",
-          "number": 171,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Effectively affine precomp A for _ecmult without inversion!",
-          "body": "- Builds on top of https://github.com/bitcoin/secp256k1/pull/41 (Co-Z arithmetic for precomputation).\n- Instead of inversion, scales all precomp A points to the same Z (usually != 1).\n- Store the precomp A as affine by discarding the z coordinate (whilst noting the single Z value for later), which is equivalent to taking them as affine points on an isogenous curve.\n- In secp256k1_ecmult, we treat the accumulator (\"r\") as operating on this isogenous curve.\n- Doubling formula needs no changes, adding of precomp A points is a simple _gej_add_ge_var.\n- G precomp remains the same, but each add of these requires an extra 1M to bring the accumulator temporarily back to the \"default isogeny\". For simplicity here I've modified _gej_add_ge_var to support this.\n- The z value of the final result needs to be scaled (1M) also.\n- Optimal at WINDOW_A=5.\n\nAnyway, the upshot of this is an ~5% performance improvement for bench_verify (64bit, endo=yes), over and above the Co-Z precomputation itself, so >8% total vs master. Rough math suggests it's saving ~116M vs the Co-Z arithmetic PR, which appears to make any inversion approach obsolete.\n\nQuestions welcome, as I'm not sure how to explain this in a straight-forward way (as far as I know this is a novel idea). I guess it's important to understand why the isogeny works out so neatly; it's a rather nice property of secp256k1 that stems from it having a==0 in the curve equation; otherwise, operating on an isogenous curve would require changes to the doubling formula. I recommend e.g. http://joye.site88.net/papers/TJ10coordblind.pdf, where this is discussed in the context of blinding (which reminds me I was meaning to PR a demo of that), albeit the a==0 case is not explicitly called out. It may be easier just to think of it as playing games with the z values...\n\nEDIT: I'll leave it as I wrote it, but I think the above should be talking about isomorphisms rather than isogenies.\n",
-          "user": {
-            "login": "peterdettman",
-            "id": 3423981,
-            "node_id": "MDQ6VXNlcjM0MjM5ODE=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/peterdettman",
-            "html_url": "https://github.com/peterdettman",
-            "followers_url": "https://api.github.com/users/peterdettman/followers",
-            "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
-            "organizations_url": "https://api.github.com/users/peterdettman/orgs",
-            "repos_url": "https://api.github.com/users/peterdettman/repos",
-            "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/peterdettman/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 7,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/171",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/171",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/171.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/171.patch"
-          },
-          "closed_at": "2015-02-13T00:35:26Z",
-          "created_at": "2014-12-21T09:02:11Z",
-          "updated_at": "2015-02-13T00:35:26Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "head_ref_force_pushed",
@@ -2539,10 +2620,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "400e0b617114a32a9442a6fba9e626d421701238",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/400e0b617114a32a9442a6fba9e626d421701238",
       "created_at": "2014-12-23T10:52:54Z"
     },
     {
@@ -2608,10 +2691,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
-      "commit_id": null,
-      "commit_url": null,
+      "commit_id": "47a765238473d9539779c72abffcf61e1d7dd7ec",
+      "commit_url": "https://api.github.com/repos/peterdettman/secp256k1/commits/47a765238473d9539779c72abffcf61e1d7dd7ec",
       "created_at": "2014-12-24T08:51:48Z"
     },
     {
@@ -2637,7 +2722,9 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2663,174 +2750,12 @@
         "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/peterdettman/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-68232777",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "peterdettman",
-        "id": 3423981,
-        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/peterdettman",
-        "html_url": "https://github.com/peterdettman",
-        "followers_url": "https://api.github.com/users/peterdettman/followers",
-        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
-        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
-        "repos_url": "https://api.github.com/users/peterdettman/repos",
-        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2014-12-30T01:10:29Z",
-      "updated_at": "2014-12-30T01:10:29Z",
-      "source": {
-        "issue": {
-          "id": 53016197,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0MjY2MzA1MzU=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/174",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/174/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/174/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/174/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/174",
-          "number": 174,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Co-Z + effective affine precomputation + tests",
-          "body": "This builds on top of #171 but reworks the group element tests, making them much more extensive (and faster).\n",
-          "user": {
-            "login": "sipa",
-            "id": 548488,
-            "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-            "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/sipa",
-            "html_url": "https://github.com/sipa",
-            "followers_url": "https://api.github.com/users/sipa/followers",
-            "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-            "organizations_url": "https://api.github.com/users/sipa/orgs",
-            "repos_url": "https://api.github.com/users/sipa/repos",
-            "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/sipa/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 17,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/174",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/174",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/174.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/174.patch"
-          },
-          "closed_at": "2015-02-11T23:18:49Z",
-          "created_at": "2014-12-29T02:28:06Z",
-          "updated_at": "2015-02-11T23:18:49Z"
-        },
-        "type": "issue"
-      }
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "sipa",
-        "id": 548488,
-        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/sipa",
-        "html_url": "https://github.com/sipa",
-        "followers_url": "https://api.github.com/users/sipa/followers",
-        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-        "organizations_url": "https://api.github.com/users/sipa/orgs",
-        "repos_url": "https://api.github.com/users/sipa/repos",
-        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/sipa/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2015-02-11T23:20:19Z",
-      "updated_at": "2015-02-11T23:20:19Z",
-      "source": {
-        "issue": {
-          "id": 57393368,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0MjkxMzg1MDU=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/210",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/210/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/210/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/210/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/210",
-          "number": 210,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Effective affine precomputation (by Peter Dettman)",
-          "body": "Significantly refactored version of Peter Dettman's effective affine precomputation tricks.\n\nSee #174 and #41 for old discussion.\n",
-          "user": {
-            "login": "sipa",
-            "id": 548488,
-            "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-            "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/sipa",
-            "html_url": "https://github.com/sipa",
-            "followers_url": "https://api.github.com/users/sipa/followers",
-            "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-            "organizations_url": "https://api.github.com/users/sipa/orgs",
-            "repos_url": "https://api.github.com/users/sipa/repos",
-            "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/sipa/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 21,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/210",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/210",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/210.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/210.patch"
-          },
-          "closed_at": "2015-04-30T19:54:56Z",
-          "created_at": "2015-02-11T23:20:19Z",
-          "updated_at": "2015-05-04T04:47:18Z"
-        },
-        "type": "issue"
-      }
     },
     {
       "event": "commented",
@@ -2855,7 +2780,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
@@ -2881,7 +2808,9 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/41#issuecomment-73986816",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/41"
@@ -2909,168 +2838,13 @@
         "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
         "received_events_url": "https://api.github.com/users/sipa/received_events",
         "type": "User",
-        "site_admin": false
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
       },
       "commit_id": null,
       "commit_url": null,
       "created_at": "2015-02-11T23:20:38Z"
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "sipa",
-        "id": 548488,
-        "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-        "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/sipa",
-        "html_url": "https://github.com/sipa",
-        "followers_url": "https://api.github.com/users/sipa/followers",
-        "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-        "organizations_url": "https://api.github.com/users/sipa/orgs",
-        "repos_url": "https://api.github.com/users/sipa/repos",
-        "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/sipa/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2015-02-11T23:21:32Z",
-      "updated_at": "2015-02-11T23:21:32Z",
-      "source": {
-        "issue": {
-          "id": 57393497,
-          "node_id": "MDExOlB1bGxSZXF1ZXN0MjkxMzg1OTA=",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/211",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/211/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/211/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/211/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/pull/211",
-          "number": 211,
-          "state": "closed",
-          "state_reason": null,
-          "title": "Co-Z based precomputation (by Peter Dettman)",
-          "body": "Refactored version of Co-Z code from #41 and #174.\n\nBuilds on top of #210.\n",
-          "user": {
-            "login": "sipa",
-            "id": 548488,
-            "node_id": "MDQ6VXNlcjU0ODQ4OA==",
-            "avatar_url": "https://avatars.githubusercontent.com/u/548488?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/sipa",
-            "html_url": "https://github.com/sipa",
-            "followers_url": "https://api.github.com/users/sipa/followers",
-            "following_url": "https://api.github.com/users/sipa/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/sipa/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/sipa/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/sipa/subscriptions",
-            "organizations_url": "https://api.github.com/users/sipa/orgs",
-            "repos_url": "https://api.github.com/users/sipa/repos",
-            "events_url": "https://api.github.com/users/sipa/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/sipa/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 8,
-          "pull_request": {
-            "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/211",
-            "html_url": "https://github.com/bitcoin-core/secp256k1/pull/211",
-            "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/211.diff",
-            "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/211.patch"
-          },
-          "closed_at": "2023-05-08T10:20:44Z",
-          "created_at": "2015-02-11T23:21:32Z",
-          "updated_at": "2023-05-08T10:20:44Z"
-        },
-        "type": "issue"
-      }
-    },
-    {
-      "event": "cross-referenced",
-      "id": null,
-      "node_id": null,
-      "url": null,
-      "actor": {
-        "login": "peterdettman",
-        "id": 3423981,
-        "node_id": "MDQ6VXNlcjM0MjM5ODE=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/3423981?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/peterdettman",
-        "html_url": "https://github.com/peterdettman",
-        "followers_url": "https://api.github.com/users/peterdettman/followers",
-        "following_url": "https://api.github.com/users/peterdettman/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/peterdettman/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/peterdettman/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/peterdettman/subscriptions",
-        "organizations_url": "https://api.github.com/users/peterdettman/orgs",
-        "repos_url": "https://api.github.com/users/peterdettman/repos",
-        "events_url": "https://api.github.com/users/peterdettman/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/peterdettman/received_events",
-        "type": "User",
-        "site_admin": false
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2021-12-24T13:20:42Z",
-      "updated_at": "2021-12-24T13:20:42Z",
-      "source": {
-        "issue": {
-          "id": 1087816645,
-          "node_id": "I_kwDOAP4Jqs5A1sPF",
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051",
-          "repository_url": "https://api.github.com/repos/bitcoin-core/secp256k1",
-          "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/labels%7B/name%7D",
-          "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/comments",
-          "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1051/events",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1051",
-          "number": 1051,
-          "state": "open",
-          "state_reason": null,
-          "title": "Try a non-uniform group law (e.g., for ecmult_gen)?",
-          "body": "The group law in `secp256k1_gej_add_ge` is uniform, i.e., it works for P + Q no matter if P != Q or P = Q. (It still needs to handle infinity and has another special case.) \r\n\r\nIt needs 7 fe mul and 5 fe sqr, the best non-uniform group law in EFD needs one fewer sqr (https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-madd-2007-bl). Mabye it's faster also in practice. We could simply implement it and benchmark it.\r\n\r\nDepending on the specifics of our ecmult_gen algorithm, it may be the case that this algorithm never adds P + Q with P = Q (for example, the ecmult algorithm within the MuSig-DN circuit has a similar property)). Then, we could get away with the non-uniform law in ecmult_gen.\r\n\r\nI think we shouldn't really think about this before https://github.com/bitcoin-core/secp256k1/pull/693 has been done.",
-          "user": {
-            "login": "real-or-random",
-            "id": 1071625,
-            "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-            "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/real-or-random",
-            "html_url": "https://github.com/real-or-random",
-            "followers_url": "https://api.github.com/users/real-or-random/followers",
-            "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-            "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-            "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-            "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-            "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-            "repos_url": "https://api.github.com/users/real-or-random/repos",
-            "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-            "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-            "type": "User",
-            "site_admin": false
-          },
-          "labels": [],
-          "assignees": [],
-          "author_association": "CONTRIBUTOR",
-          "locked": false,
-          "comments": 30,
-          "created_at": "2021-12-23T15:38:09Z",
-          "updated_at": "2022-12-03T16:44:05Z"
-        },
-        "type": "issue"
-      }
     }
   ],
   "comments": []
