@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-05-28T14:41:42Z",
+    "updated_at": "2026-05-28T15:39:58Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -345,7 +345,7 @@
     "deletions": 36,
     "changed_files": 23,
     "commits": 14,
-    "review_comments": 124,
+    "review_comments": 128,
     "comments": 77
   },
   "events": [
@@ -18453,6 +18453,222 @@
       "start_side": null,
       "line": 362,
       "original_line": 362,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318747688",
+      "pull_request_review_id": 4382167906,
+      "id": 3318747688,
+      "node_id": "PRRC_kwDOAP4Jqs7F0BIo",
+      "diff_hunk": "@@ -454,4 +457,297 @@ int secp256k1_silentpayments_recipient_create_labeled_spend_pubkey(const secp256\n     return 1;\n }\n \n+/** An explanation of the prevouts_summary object and its usage:\n+ *\n+ *  The prevouts_summary object contains:\n+ *\n+ *  [magic: 4 bytes][boolean: 1 byte][prevouts_pubkey_sum: 64 bytes][input_hash: 32 bytes]\n+ *\n+ *  The magic bytes are checked by functions using the prevouts_summary object to\n+ *  check that the prevouts_summary object was initialized correctly.\n+ *\n+ *  The boolean (combined) indicates whether or not the summed prevout public keys and the\n+ *  input_hash scalar have already been combined or are both included. The reason\n+ *  for keeping input_hash and the summed prevout public keys separate is so that an elliptic\n+ *  curve multiplication can be avoided when creating the shared secret, i.e.,\n+ *  (recipient_scan_key * input_hash) * prevouts_pubkey_sum.\n+ *\n+ *  But when storing the prevouts_summary object (not supported yet), either to send to\n+ *  light clients or for wallet rescans, we can save 32-bytes by combining the input_hash\n+ *  and prevouts_pubkey_sum and saving the resulting point serialized as a compressed\n+ *  public key, i.e., input_hash * prevouts_pubkey_sum.\n+ *\n+ *  For each function:\n+ *\n+ *  - `_recipient_prevouts_summary_create` always creates a prevouts_summary object with combined = false\n+ */\n+\n+int secp256k1_silentpayments_recipient_prevouts_summary_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *pubkeys,\n+    size_t n_pubkeys\n+) {\n+    size_t i;\n+    secp256k1_ge prevouts_pubkey_sum_ge, addend;\n+    secp256k1_gej prevouts_pubkey_sum_gej;\n+    secp256k1_scalar input_hash_scalar;\n+\n+    /* Sanity check inputs */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(prevouts_summary != NULL);\n+    memset(prevouts_summary, 0, sizeof(*prevouts_summary));\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    ARG_CHECK((pubkeys != NULL) || (xonly_pubkeys != NULL));\n+    if (xonly_pubkeys != NULL) {\n+        ARG_CHECK(n_xonly_pubkeys > 0);\n+        for (i = 0; i < n_xonly_pubkeys; i++) {\n+            ARG_CHECK(xonly_pubkeys[i] != NULL);\n+        }\n+    } else {\n+        ARG_CHECK(n_xonly_pubkeys == 0);\n+    }\n+    if (pubkeys != NULL) {\n+        ARG_CHECK(n_pubkeys > 0);\n+        for (i = 0; i < n_pubkeys; i++) {\n+            ARG_CHECK(pubkeys[i] != NULL);\n+        }\n+    } else {\n+        ARG_CHECK(n_pubkeys == 0);\n+    }\n+\n+    /* Compute prevouts_pubkey_sum = A_1 + A_2 + ... + A_n.\n+     *\n+     * Since an attacker can maliciously craft transactions where the public keys sum to zero, fail early here\n+     * to avoid making the caller do extra work, e.g., when building an index or scanning a malicious transaction.\n+     *\n+     * This will also fail if any of the provided prevout public keys are malformed.\n+     */\n+    secp256k1_gej_set_infinity(&prevouts_pubkey_sum_gej);\n+    for (i = 0; i < n_pubkeys; i++) {\n+        if (!secp256k1_pubkey_load(ctx, &addend, pubkeys[i])) {\n+            return 0;\n+        }\n+        secp256k1_gej_add_ge_var(&prevouts_pubkey_sum_gej, &prevouts_pubkey_sum_gej, &addend, NULL);\n+    }\n+    for (i = 0; i < n_xonly_pubkeys; i++) {\n+        if (!secp256k1_xonly_pubkey_load(ctx, &addend, xonly_pubkeys[i])) {\n+            return 0;\n+        }\n+        secp256k1_gej_add_ge_var(&prevouts_pubkey_sum_gej, &prevouts_pubkey_sum_gej, &addend, NULL);\n+    }\n+    if (secp256k1_gej_is_infinity(&prevouts_pubkey_sum_gej)) {\n+        return 0;\n+    }\n+    secp256k1_ge_set_gej_var(&prevouts_pubkey_sum_ge, &prevouts_pubkey_sum_gej);\n+    /* Calculate the input_hash and convert it to a scalar.\n+     *\n+     * Note: _input_hash_scalar can only fail if the output of the hash function is zero or greater than or equal to the\n+     * curve order, which is statistically improbable. Returning an error here results in an untestable branch in the\n+     * code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_get_hash_context(ctx), &input_hash_scalar, outpoint_smallest36, &prevouts_pubkey_sum_ge)) {\n+        return 0;\n+    }\n+    memcpy(&prevouts_summary->data[0], secp256k1_silentpayments_prevouts_summary_magic, 4);\n+    prevouts_summary->data[4] = 0;\n+    secp256k1_ge_to_bytes(&prevouts_summary->data[5], &prevouts_pubkey_sum_ge);\n+    secp256k1_scalar_get_b32(&prevouts_summary->data[5 + 64], &input_hash_scalar);\n+    return 1;\n+}\n+\n+int secp256k1_silentpayments_recipient_scan_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_found_output **found_outputs, uint32_t *n_found_outputs,\n+    const secp256k1_xonly_pubkey * const *tx_outputs, size_t n_tx_outputs,\n+    const unsigned char *scan_key32,\n+    const secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const secp256k1_pubkey *unlabeled_spend_pubkey,\n+    secp256k1_silentpayments_label_lookup label_lookup,\n+    const void *label_context\n+) {\n+    secp256k1_scalar scan_key_scalar;\n+    secp256k1_ge unlabeled_spend_pubkey_ge, prevouts_pubkey_sum_ge, tx_output_ge;\n+    unsigned char shared_secret[33];\n+    uint32_t k;\n+    size_t i;\n+    int found_idx, combined, valid_scan_key, ret;\n+\n+    /* Sanity check inputs */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(found_outputs != NULL);\n+    ARG_CHECK(n_found_outputs != NULL);\n+    *n_found_outputs = 0;\n+    ARG_CHECK(tx_outputs != NULL);\n+    ARG_CHECK(n_tx_outputs > 0);\n+    for (i = 0; i < n_tx_outputs; i++) {\n+        ARG_CHECK(found_outputs[i] != NULL);\n+        ARG_CHECK(tx_outputs[i] != NULL);\n+        /* Validate each tx output object early so malformed pubkeys are always rejected. */\n+        if (!secp256k1_xonly_pubkey_load(ctx, &tx_output_ge, tx_outputs[i])) {\n+            return 0;\n+        }\n+    }\n+    ARG_CHECK(scan_key32 != NULL);\n+    ARG_CHECK(prevouts_summary != NULL);\n+    ARG_CHECK(secp256k1_memcmp_var(&prevouts_summary->data[0], secp256k1_silentpayments_prevouts_summary_magic, 4) == 0);\n+    ARG_CHECK(unlabeled_spend_pubkey != NULL);\n+    /* Passing a context without a lookup function is non-sensical */\n+    if (label_context != NULL) {\n+        ARG_CHECK(label_lookup != NULL);\n+    }\n+    valid_scan_key = secp256k1_scalar_set_b32_seckey(&scan_key_scalar, scan_key32);\n+    secp256k1_declassify(ctx, &valid_scan_key, sizeof(valid_scan_key));\n+    if (!valid_scan_key) {\n+        secp256k1_scalar_clear(&scan_key_scalar);\n+        return 0;\n+    }\n+    secp256k1_ge_from_bytes(&prevouts_pubkey_sum_ge, &prevouts_summary->data[5]);\n+    combined = (int)prevouts_summary->data[4];\n+    if (!combined) {\n+        secp256k1_scalar input_hash_scalar;\n+        secp256k1_scalar_set_b32(&input_hash_scalar, &prevouts_summary->data[5 + 64], NULL);\n+        secp256k1_scalar_mul(&scan_key_scalar, &scan_key_scalar, &input_hash_scalar);\n+    }\n+    ret = secp256k1_pubkey_load(ctx, &unlabeled_spend_pubkey_ge, unlabeled_spend_pubkey);\n+    if (!ret) {\n+        secp256k1_scalar_clear(&scan_key_scalar);\n+        return 0;\n+    }\n+    /* Creating the shared secret requires that the public and secret components are\n+     * non-infinity and non-zero, respectively. Note that the involved parts (input hash,\n+     * scan secret key, and prevouts public key sum) have all been verified at this point,\n+     * assuming that the user hasn't tampered the `prevouts_summary` object manually. */\n+    secp256k1_silentpayments_create_shared_secret(shared_secret, &prevouts_pubkey_sum_ge, &scan_key_scalar);\n+    /* Clear the scan_key_scalar since we no longer need it and leaking this value would break indistinguishability of the transaction. */\n+    secp256k1_scalar_clear(&scan_key_scalar);\n+\n+    found_idx = -1;\n+    /* TODO: limit number of k iterations, in order to avoid quadratic scaling issue */\n+    /* TODO: improve scanning performance by performing batch inversion for label scanning */\n+    for (k = 0; k < n_tx_outputs; k++) {\n+        secp256k1_scalar t_k_scalar;\n+        secp256k1_xonly_pubkey unlabeled_output_xonly;\n+        secp256k1_ge unlabeled_output_ge = unlabeled_spend_pubkey_ge;\n+        secp256k1_ge unlabeled_output_negated_ge;\n+        const unsigned char *label_tweak = NULL;\n+        secp256k1_ge label_ge;\n+        size_t j;\n+\n+        /* Calculate the output tweak t_k and convert it to a scalar.\n+         *\n+         * Note: _create_output_tweak can only fail if the output of the hash function is zero or greater than or equal\n+         * to the curve order, which is statistically improbable. Returning an error here results in an untestable\n+         * branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+         */\n+        if (!secp256k1_silentpayments_create_output_tweak(ctx, &t_k_scalar, shared_secret, k)) {\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+            return 0;\n+        }\n+\n+        /* Calculate unlabeled_output = unlabeled_spend_pubkey + t_k * G.\n+         * This can fail if t_k * G is the negation of unlabeled_spend_pubkey, but this happens only with negligible\n+         * probability for honestly created unlabeled_spend_pubkey as t_k is the output of a hash function. */\n+        if (!secp256k1_eckey_pubkey_tweak_add(&unlabeled_output_ge, &t_k_scalar)) {\n+            /* Leaking these values would break indistinguishability of the transaction, so clear them. */\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+            return 0;\n+        }\n+        /* Calculate unlabeled_output_negated = -unlabeled_output */\n+        secp256k1_ge_neg(&unlabeled_output_negated_ge, &unlabeled_output_ge);\n+\n+        found_idx = -1;\n+        secp256k1_fe_normalize_var(&unlabeled_output_ge.y);\n+        secp256k1_extrakeys_ge_even_y(&unlabeled_output_ge);\n+        secp256k1_xonly_pubkey_save(&unlabeled_output_xonly, &unlabeled_output_ge);\n+        for (j = 0; j < n_tx_outputs; j++) {\n+            if (secp256k1_xonly_pubkey_cmp(ctx, &unlabeled_output_xonly, tx_outputs[j]) == 0) {\n+                label_tweak = NULL;\n+                found_idx = j;\n+                break;\n+            }\n+\n+            /* If not found, proceed to check for labels (if a label lookup function is provided). */\n+            if (label_lookup != NULL) {\n+                secp256k1_gej tx_output_gej;\n+                secp256k1_gej label_candidates_gej[2];\n+                secp256k1_ge label_candidates_ge[2];\n+\n+                secp256k1_xonly_pubkey_load(ctx, &tx_output_ge, tx_outputs[j]);\n+                secp256k1_gej_set_ge(&tx_output_gej, &tx_output_ge);\n+                /* Calculate scan label candidates:\n+                 *     label_candidate1 =  tx_output - unlabeled_output\n+                 *     label_candidate2 = -tx_output - unlabeled_output\n+                 */\n+                secp256k1_gej_add_ge_var(&label_candidates_gej[0], &tx_output_gej, &unlabeled_output_negated_ge, NULL);\n+                secp256k1_gej_neg(&tx_output_gej, &tx_output_gej);\n+                secp256k1_gej_add_ge_var(&label_candidates_gej[1], &tx_output_gej, &unlabeled_output_negated_ge, NULL);\n+                secp256k1_ge_set_all_gej_var(label_candidates_ge, label_candidates_gej, 2);\n+\n+                /* Check if either of the label candidates is in the label cache */\n+                for (i = 0; i < 2; i++) {\n+                    unsigned char label33[33];\n+                    /* Note: serialize will only fail if label_ge is the point at infinity, but we know this\n+                     * cannot happen since we only hit this branch if tx_output != unlabeled_output_xonly.\n+                     * Thus, we know that label_ge = tx_output_gej + unlabeled_output_negated_ge cannot be the\n+                     * point at infinity.\n+                     */\n+                    secp256k1_eckey_pubkey_serialize33(&label_candidates_ge[i], label33);\n+                    label_tweak = label_lookup(label33, label_context);\n+                    if (label_tweak != NULL) {\n+                        found_idx = j;\n+                        label_ge = label_candidates_ge[i];\n+                        break;\n+                    }\n+                }\n+                if (found_idx != -1) {\n+                    break;\n+                }\n+            }\n+        }\n+        if (found_idx != -1) {\n+            found_outputs[k]->output = *tx_outputs[found_idx];\n+            secp256k1_scalar_get_b32(found_outputs[k]->tweak, &t_k_scalar);\n+            /* Clear the t_k_scalar since we no longer need it and leaking this value would\n+             * break indistinguishability of the transaction. */\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            if (label_tweak != NULL) {\n+                found_outputs[k]->found_with_label = 1;\n+                /* This is extremely unlikely to fail in that it can only really fail if label_tweak\n+                 * is the negation of the shared secret tweak. But since both tweak and label_tweak are\n+                 * created by hashing data, practically speaking this would only happen if an attacker\n+                 * tricked us into using a particular label_tweak (deviating from the protocol).\n+                 *\n+                 * Furthermore, although technically a failure for ec_seckey_tweak_add, this is not treated\n+                 * as a failure for Silent Payments because the output is still spendable with just the\n+                 * spend secret key. We set `tweak = 0` for this case.\n+                 */",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 283,
+      "original_position": 283,
+      "commit_id": "09cb88250c6048ac5fdbb034c51a77926e3370fc",
+      "original_commit_id": "09cb88250c6048ac5fdbb034c51a77926e3370fc",
+      "in_reply_to_id": 3316322694,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I spent some more time looking at it and based on other review comments, I would suggest just adding a sentence that says we are not worried about other failure cases because we expect the labels tweaks were created using the functions in this library (where they are already checked for correctness). I would suggest using a different function / approach at this stage.",
+      "created_at": "2026-05-28T15:05:51Z",
+      "updated_at": "2026-05-28T15:05:52Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3318747688",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318747688"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 721,
+      "original_start_line": 721,
+      "start_side": "RIGHT",
+      "line": 729,
+      "original_line": 729,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318760261",
+      "pull_request_review_id": 4382183463,
+      "id": 3318760261,
+      "node_id": "PRRC_kwDOAP4Jqs7F0ENF",
+      "diff_hunk": "@@ -338,6 +344,13 @@ typedef struct secp256k1_silentpayments_found_output {\n  *  For creating the label cache, `secp256k1_silentpayments_recipient_label_create`\n  *  and `secp256k1_silentpayments_recipient_label_serialize` can be used.\n  *\n+ *  Note:\n+ *  Scanning is bounded by SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT and may\n+ *  miss outputs if a transaction contains more outputs for a single scan public\n+ *  key group than this limit.\n+ *  It's recommended to shuffle `tx_outputs` before calling this function to ensure\n+ *  runtime is not affected by the ordering of the outputs.",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 29,
+      "original_position": 29,
+      "commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
+      "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
+      "in_reply_to_id": 3316349550,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Yeah, the worst case scanning time is reached with a specific ordering, where all the matching outputs are placed at the end of the tx outputs list, such that the total number of loop iterations is maximized (see also `silentpayments_scan_worstcase` benchmarks). With the outputs shuffled, the run-time is improved by ~2x on average (~15 sec. vs. ~30 sec. on my notebook AFAIR), so it's better but still on the same order of magnitude. I think given the very low incentive for an adversary to ever create such a transaction (even more so with the introduced K_max limit), removing that hint might also be acceptable, but no strong opinion.",
+      "created_at": "2026-05-28T15:07:30Z",
+      "updated_at": "2026-05-28T15:07:31Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3318760261",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318760261"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 351,
+      "original_start_line": 351,
+      "start_side": "RIGHT",
+      "line": 352,
+      "original_line": 352,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318826210",
+      "pull_request_review_id": 4382272005,
+      "id": 3318826210,
+      "node_id": "PRRC_kwDOAP4Jqs7F0UTi",
+      "diff_hunk": "@@ -349,7 +362,8 @@ typedef struct secp256k1_silentpayments_found_output {\n  *              n_found_outputs: pointer to an integer indicating the final",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 35,
+      "original_position": 35,
+      "commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
+      "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
+      "in_reply_to_id": 3316368117,
+      "user": {
+        "login": "josibake",
+        "id": 7444140,
+        "node_id": "MDQ6VXNlcjc0NDQxNDA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/7444140?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/josibake",
+        "html_url": "https://github.com/josibake",
+        "followers_url": "https://api.github.com/users/josibake/followers",
+        "following_url": "https://api.github.com/users/josibake/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/josibake/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/josibake/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/josibake/subscriptions",
+        "organizations_url": "https://api.github.com/users/josibake/orgs",
+        "repos_url": "https://api.github.com/users/josibake/repos",
+        "events_url": "https://api.github.com/users/josibake/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/josibake/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "You're right! Apologies for my confusion. I was naively thinking multiple senders could construct a transaction together, but as of right now there is no specification on how to do this and if multiple senders were (e.g., a coinjoin) they would need to coordinate and that coordination would need to respect the group limit.",
+      "created_at": "2026-05-28T15:17:46Z",
+      "updated_at": "2026-05-28T15:17:47Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3318826210",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318826210"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 362,
+      "original_line": 362,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318963207",
+      "pull_request_review_id": 4382444341,
+      "id": 3318963207,
+      "node_id": "PRRC_kwDOAP4Jqs7F01wH",
+      "diff_hunk": "@@ -454,4 +457,297 @@ int secp256k1_silentpayments_recipient_create_labeled_spend_pubkey(const secp256\n     return 1;\n }\n \n+/** An explanation of the prevouts_summary object and its usage:\n+ *\n+ *  The prevouts_summary object contains:\n+ *\n+ *  [magic: 4 bytes][boolean: 1 byte][prevouts_pubkey_sum: 64 bytes][input_hash: 32 bytes]\n+ *\n+ *  The magic bytes are checked by functions using the prevouts_summary object to\n+ *  check that the prevouts_summary object was initialized correctly.\n+ *\n+ *  The boolean (combined) indicates whether or not the summed prevout public keys and the\n+ *  input_hash scalar have already been combined or are both included. The reason\n+ *  for keeping input_hash and the summed prevout public keys separate is so that an elliptic\n+ *  curve multiplication can be avoided when creating the shared secret, i.e.,\n+ *  (recipient_scan_key * input_hash) * prevouts_pubkey_sum.\n+ *\n+ *  But when storing the prevouts_summary object (not supported yet), either to send to\n+ *  light clients or for wallet rescans, we can save 32-bytes by combining the input_hash\n+ *  and prevouts_pubkey_sum and saving the resulting point serialized as a compressed\n+ *  public key, i.e., input_hash * prevouts_pubkey_sum.\n+ *\n+ *  For each function:\n+ *\n+ *  - `_recipient_prevouts_summary_create` always creates a prevouts_summary object with combined = false\n+ */\n+\n+int secp256k1_silentpayments_recipient_prevouts_summary_create(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const unsigned char *outpoint_smallest36,\n+    const secp256k1_xonly_pubkey * const *xonly_pubkeys,\n+    size_t n_xonly_pubkeys,\n+    const secp256k1_pubkey * const *pubkeys,\n+    size_t n_pubkeys\n+) {\n+    size_t i;\n+    secp256k1_ge prevouts_pubkey_sum_ge, addend;\n+    secp256k1_gej prevouts_pubkey_sum_gej;\n+    secp256k1_scalar input_hash_scalar;\n+\n+    /* Sanity check inputs */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(prevouts_summary != NULL);\n+    memset(prevouts_summary, 0, sizeof(*prevouts_summary));\n+    ARG_CHECK(outpoint_smallest36 != NULL);\n+    ARG_CHECK((pubkeys != NULL) || (xonly_pubkeys != NULL));\n+    if (xonly_pubkeys != NULL) {\n+        ARG_CHECK(n_xonly_pubkeys > 0);\n+        for (i = 0; i < n_xonly_pubkeys; i++) {\n+            ARG_CHECK(xonly_pubkeys[i] != NULL);\n+        }\n+    } else {\n+        ARG_CHECK(n_xonly_pubkeys == 0);\n+    }\n+    if (pubkeys != NULL) {\n+        ARG_CHECK(n_pubkeys > 0);\n+        for (i = 0; i < n_pubkeys; i++) {\n+            ARG_CHECK(pubkeys[i] != NULL);\n+        }\n+    } else {\n+        ARG_CHECK(n_pubkeys == 0);\n+    }\n+\n+    /* Compute prevouts_pubkey_sum = A_1 + A_2 + ... + A_n.\n+     *\n+     * Since an attacker can maliciously craft transactions where the public keys sum to zero, fail early here\n+     * to avoid making the caller do extra work, e.g., when building an index or scanning a malicious transaction.\n+     *\n+     * This will also fail if any of the provided prevout public keys are malformed.\n+     */\n+    secp256k1_gej_set_infinity(&prevouts_pubkey_sum_gej);\n+    for (i = 0; i < n_pubkeys; i++) {\n+        if (!secp256k1_pubkey_load(ctx, &addend, pubkeys[i])) {\n+            return 0;\n+        }\n+        secp256k1_gej_add_ge_var(&prevouts_pubkey_sum_gej, &prevouts_pubkey_sum_gej, &addend, NULL);\n+    }\n+    for (i = 0; i < n_xonly_pubkeys; i++) {\n+        if (!secp256k1_xonly_pubkey_load(ctx, &addend, xonly_pubkeys[i])) {\n+            return 0;\n+        }\n+        secp256k1_gej_add_ge_var(&prevouts_pubkey_sum_gej, &prevouts_pubkey_sum_gej, &addend, NULL);\n+    }\n+    if (secp256k1_gej_is_infinity(&prevouts_pubkey_sum_gej)) {\n+        return 0;\n+    }\n+    secp256k1_ge_set_gej_var(&prevouts_pubkey_sum_ge, &prevouts_pubkey_sum_gej);\n+    /* Calculate the input_hash and convert it to a scalar.\n+     *\n+     * Note: _input_hash_scalar can only fail if the output of the hash function is zero or greater than or equal to the\n+     * curve order, which is statistically improbable. Returning an error here results in an untestable branch in the\n+     * code, but we do this anyways to ensure strict compliance with BIP0352.\n+     */\n+    if (!secp256k1_silentpayments_calculate_input_hash_scalar(secp256k1_get_hash_context(ctx), &input_hash_scalar, outpoint_smallest36, &prevouts_pubkey_sum_ge)) {\n+        return 0;\n+    }\n+    memcpy(&prevouts_summary->data[0], secp256k1_silentpayments_prevouts_summary_magic, 4);\n+    prevouts_summary->data[4] = 0;\n+    secp256k1_ge_to_bytes(&prevouts_summary->data[5], &prevouts_pubkey_sum_ge);\n+    secp256k1_scalar_get_b32(&prevouts_summary->data[5 + 64], &input_hash_scalar);\n+    return 1;\n+}\n+\n+int secp256k1_silentpayments_recipient_scan_outputs(\n+    const secp256k1_context *ctx,\n+    secp256k1_silentpayments_found_output **found_outputs, uint32_t *n_found_outputs,\n+    const secp256k1_xonly_pubkey * const *tx_outputs, size_t n_tx_outputs,\n+    const unsigned char *scan_key32,\n+    const secp256k1_silentpayments_prevouts_summary *prevouts_summary,\n+    const secp256k1_pubkey *unlabeled_spend_pubkey,\n+    secp256k1_silentpayments_label_lookup label_lookup,\n+    const void *label_context\n+) {\n+    secp256k1_scalar scan_key_scalar;\n+    secp256k1_ge unlabeled_spend_pubkey_ge, prevouts_pubkey_sum_ge, tx_output_ge;\n+    unsigned char shared_secret[33];\n+    uint32_t k;\n+    size_t i;\n+    int found_idx, combined, valid_scan_key, ret;\n+\n+    /* Sanity check inputs */\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(found_outputs != NULL);\n+    ARG_CHECK(n_found_outputs != NULL);\n+    *n_found_outputs = 0;\n+    ARG_CHECK(tx_outputs != NULL);\n+    ARG_CHECK(n_tx_outputs > 0);\n+    for (i = 0; i < n_tx_outputs; i++) {\n+        ARG_CHECK(found_outputs[i] != NULL);\n+        ARG_CHECK(tx_outputs[i] != NULL);\n+        /* Validate each tx output object early so malformed pubkeys are always rejected. */\n+        if (!secp256k1_xonly_pubkey_load(ctx, &tx_output_ge, tx_outputs[i])) {\n+            return 0;\n+        }\n+    }\n+    ARG_CHECK(scan_key32 != NULL);\n+    ARG_CHECK(prevouts_summary != NULL);\n+    ARG_CHECK(secp256k1_memcmp_var(&prevouts_summary->data[0], secp256k1_silentpayments_prevouts_summary_magic, 4) == 0);\n+    ARG_CHECK(unlabeled_spend_pubkey != NULL);\n+    /* Passing a context without a lookup function is non-sensical */\n+    if (label_context != NULL) {\n+        ARG_CHECK(label_lookup != NULL);\n+    }\n+    valid_scan_key = secp256k1_scalar_set_b32_seckey(&scan_key_scalar, scan_key32);\n+    secp256k1_declassify(ctx, &valid_scan_key, sizeof(valid_scan_key));\n+    if (!valid_scan_key) {\n+        secp256k1_scalar_clear(&scan_key_scalar);\n+        return 0;\n+    }\n+    secp256k1_ge_from_bytes(&prevouts_pubkey_sum_ge, &prevouts_summary->data[5]);\n+    combined = (int)prevouts_summary->data[4];\n+    if (!combined) {\n+        secp256k1_scalar input_hash_scalar;\n+        secp256k1_scalar_set_b32(&input_hash_scalar, &prevouts_summary->data[5 + 64], NULL);\n+        secp256k1_scalar_mul(&scan_key_scalar, &scan_key_scalar, &input_hash_scalar);\n+    }\n+    ret = secp256k1_pubkey_load(ctx, &unlabeled_spend_pubkey_ge, unlabeled_spend_pubkey);\n+    if (!ret) {\n+        secp256k1_scalar_clear(&scan_key_scalar);\n+        return 0;\n+    }\n+    /* Creating the shared secret requires that the public and secret components are\n+     * non-infinity and non-zero, respectively. Note that the involved parts (input hash,\n+     * scan secret key, and prevouts public key sum) have all been verified at this point,\n+     * assuming that the user hasn't tampered the `prevouts_summary` object manually. */\n+    secp256k1_silentpayments_create_shared_secret(shared_secret, &prevouts_pubkey_sum_ge, &scan_key_scalar);\n+    /* Clear the scan_key_scalar since we no longer need it and leaking this value would break indistinguishability of the transaction. */\n+    secp256k1_scalar_clear(&scan_key_scalar);\n+\n+    found_idx = -1;\n+    /* TODO: limit number of k iterations, in order to avoid quadratic scaling issue */\n+    /* TODO: improve scanning performance by performing batch inversion for label scanning */\n+    for (k = 0; k < n_tx_outputs; k++) {\n+        secp256k1_scalar t_k_scalar;\n+        secp256k1_xonly_pubkey unlabeled_output_xonly;\n+        secp256k1_ge unlabeled_output_ge = unlabeled_spend_pubkey_ge;\n+        secp256k1_ge unlabeled_output_negated_ge;\n+        const unsigned char *label_tweak = NULL;\n+        secp256k1_ge label_ge;\n+        size_t j;\n+\n+        /* Calculate the output tweak t_k and convert it to a scalar.\n+         *\n+         * Note: _create_output_tweak can only fail if the output of the hash function is zero or greater than or equal\n+         * to the curve order, which is statistically improbable. Returning an error here results in an untestable\n+         * branch in the code, but we do this anyways to ensure strict compliance with BIP0352.\n+         */\n+        if (!secp256k1_silentpayments_create_output_tweak(ctx, &t_k_scalar, shared_secret, k)) {\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+            return 0;\n+        }\n+\n+        /* Calculate unlabeled_output = unlabeled_spend_pubkey + t_k * G.\n+         * This can fail if t_k * G is the negation of unlabeled_spend_pubkey, but this happens only with negligible\n+         * probability for honestly created unlabeled_spend_pubkey as t_k is the output of a hash function. */\n+        if (!secp256k1_eckey_pubkey_tweak_add(&unlabeled_output_ge, &t_k_scalar)) {\n+            /* Leaking these values would break indistinguishability of the transaction, so clear them. */\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            secp256k1_memclear_explicit(&shared_secret, sizeof(shared_secret));\n+            return 0;\n+        }\n+        /* Calculate unlabeled_output_negated = -unlabeled_output */\n+        secp256k1_ge_neg(&unlabeled_output_negated_ge, &unlabeled_output_ge);\n+\n+        found_idx = -1;\n+        secp256k1_fe_normalize_var(&unlabeled_output_ge.y);\n+        secp256k1_extrakeys_ge_even_y(&unlabeled_output_ge);\n+        secp256k1_xonly_pubkey_save(&unlabeled_output_xonly, &unlabeled_output_ge);\n+        for (j = 0; j < n_tx_outputs; j++) {\n+            if (secp256k1_xonly_pubkey_cmp(ctx, &unlabeled_output_xonly, tx_outputs[j]) == 0) {\n+                label_tweak = NULL;\n+                found_idx = j;\n+                break;\n+            }\n+\n+            /* If not found, proceed to check for labels (if a label lookup function is provided). */\n+            if (label_lookup != NULL) {\n+                secp256k1_gej tx_output_gej;\n+                secp256k1_gej label_candidates_gej[2];\n+                secp256k1_ge label_candidates_ge[2];\n+\n+                secp256k1_xonly_pubkey_load(ctx, &tx_output_ge, tx_outputs[j]);\n+                secp256k1_gej_set_ge(&tx_output_gej, &tx_output_ge);\n+                /* Calculate scan label candidates:\n+                 *     label_candidate1 =  tx_output - unlabeled_output\n+                 *     label_candidate2 = -tx_output - unlabeled_output\n+                 */\n+                secp256k1_gej_add_ge_var(&label_candidates_gej[0], &tx_output_gej, &unlabeled_output_negated_ge, NULL);\n+                secp256k1_gej_neg(&tx_output_gej, &tx_output_gej);\n+                secp256k1_gej_add_ge_var(&label_candidates_gej[1], &tx_output_gej, &unlabeled_output_negated_ge, NULL);\n+                secp256k1_ge_set_all_gej_var(label_candidates_ge, label_candidates_gej, 2);\n+\n+                /* Check if either of the label candidates is in the label cache */\n+                for (i = 0; i < 2; i++) {\n+                    unsigned char label33[33];\n+                    /* Note: serialize will only fail if label_ge is the point at infinity, but we know this\n+                     * cannot happen since we only hit this branch if tx_output != unlabeled_output_xonly.\n+                     * Thus, we know that label_ge = tx_output_gej + unlabeled_output_negated_ge cannot be the\n+                     * point at infinity.\n+                     */\n+                    secp256k1_eckey_pubkey_serialize33(&label_candidates_ge[i], label33);\n+                    label_tweak = label_lookup(label33, label_context);\n+                    if (label_tweak != NULL) {\n+                        found_idx = j;\n+                        label_ge = label_candidates_ge[i];\n+                        break;\n+                    }\n+                }\n+                if (found_idx != -1) {\n+                    break;\n+                }\n+            }\n+        }\n+        if (found_idx != -1) {\n+            found_outputs[k]->output = *tx_outputs[found_idx];\n+            secp256k1_scalar_get_b32(found_outputs[k]->tweak, &t_k_scalar);\n+            /* Clear the t_k_scalar since we no longer need it and leaking this value would\n+             * break indistinguishability of the transaction. */\n+            secp256k1_scalar_clear(&t_k_scalar);\n+            if (label_tweak != NULL) {\n+                found_outputs[k]->found_with_label = 1;\n+                /* This is extremely unlikely to fail in that it can only really fail if label_tweak\n+                 * is the negation of the shared secret tweak. But since both tweak and label_tweak are\n+                 * created by hashing data, practically speaking this would only happen if an attacker\n+                 * tricked us into using a particular label_tweak (deviating from the protocol).\n+                 *\n+                 * Furthermore, although technically a failure for ec_seckey_tweak_add, this is not treated\n+                 * as a failure for Silent Payments because the output is still spendable with just the\n+                 * spend secret key. We set `tweak = 0` for this case.\n+                 */",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 283,
+      "original_position": 283,
+      "commit_id": "09cb88250c6048ac5fdbb034c51a77926e3370fc",
+      "original_commit_id": "09cb88250c6048ac5fdbb034c51a77926e3370fc",
+      "in_reply_to_id": 3316322694,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Makes sense to keep the changes simple at this stage. How about:\r\n```diff\r\ndiff --git a/src/modules/silentpayments/main_impl.h b/src/modules/silentpayments/main_impl.h\r\nindex eacbd5ee..3f488e65 100644\r\n--- a/src/modules/silentpayments/main_impl.h\r\n+++ b/src/modules/silentpayments/main_impl.h\r\n@@ -722,6 +722,9 @@ int secp256k1_silentpayments_recipient_scan_outputs(\r\n                  * is the negation of the shared secret tweak. But since both tweak and label_tweak are\r\n                  * created by hashing data, practically speaking this would only happen if an attacker\r\n                  * tricked us into using a particular label_tweak (deviating from the protocol).\r\n+                 * Note that this call could also fail due to a malformed label_tweak data from the\r\n+                 * label cache, but we generally assume the passed in data is created using the API\r\n+                 * functions and thus have already been checked for correctness.\r\n                  *\r\n                  * Furthermore, although technically a failure for ec_seckey_tweak_add, this is not treated\r\n                  * as a failure for Silent Payments because the output is still spendable with just the\r\n\r\n```",
+      "created_at": "2026-05-28T15:39:58Z",
+      "updated_at": "2026-05-28T15:39:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3318963207",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3318963207"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 721,
+      "original_start_line": 721,
+      "start_side": "RIGHT",
+      "line": 729,
+      "original_line": 729,
       "side": "RIGHT"
     }
   ]
