@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1861/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1861/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/26b88d9597ce346290cfe5069dd78cd822097320",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9e017e5062bfe306eb5724fe39debe94b6223592",
     "number": 1861,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "refactor: introduce `_ge_ecmult_gen` helper (preventing accidental gej leaks)",
+    "title": "refactor: introduce `_ecmult_gen_ge` helper (preventing accidental gej leaks)",
     "user": {
       "login": "theStack",
       "id": 91535,
@@ -62,11 +62,11 @@
       }
     ],
     "created_at": "2026-06-03T15:05:52Z",
-    "updated_at": "2026-06-07T13:36:55Z",
+    "updated_at": "2026-06-07T18:47:05Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "3970d602604874124ccf0dec40dfeb9b92929a48",
+    "merge_commit_sha": "88a9c5b600788d110bdb42ce9b233330e13d5b8e",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -74,7 +74,7 @@
     "head": {
       "label": "theStack:introduce-ecmult_gen_affine-helper",
       "ref": "introduce-ecmult_gen_affine-helper",
-      "sha": "26b88d9597ce346290cfe5069dd78cd822097320",
+      "sha": "9e017e5062bfe306eb5724fe39debe94b6223592",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -186,7 +186,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-07T11:43:07Z",
+        "pushed_at": "2026-06-07T18:28:03Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -210,7 +210,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "a39093de15345a330fc8acbd09515fd150853bc8",
+      "sha": "c63062380f9610084409ac445af723a057a90f6b",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -349,13 +349,13 @@
       }
     },
     "author_association": "CONTRIBUTOR",
-    "draft": true,
+    "draft": false,
     "additions": 33,
     "deletions": 35,
     "changed_files": 9,
     "commits": 2,
     "review_comments": 0,
-    "comments": 6
+    "comments": 7
   },
   "events": [
     {
@@ -415,86 +415,6 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1861#issuecomment-4622907847",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1861"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGYxODhhZDE1MGRiZTJiOWY1ZjlmYWMwYmY5ZmUzODNiYzA4N2I1Yzg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8",
-      "tree": {
-        "sha": "ce340229ad4a32685f8943836e944718c34e22a8",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ce340229ad4a32685f8943836e944718c34e22a8"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a39093de15345a330fc8acbd09515fd150853bc8",
-          "sha": "a39093de15345a330fc8acbd09515fd150853bc8",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a39093de15345a330fc8acbd09515fd150853bc8"
-        }
-      ],
-      "message": "refactor: introduce `ge_ecmult_gen` helper (preventing accidental gej leaks)\n\nScalar multiplication with the generator point frequently involves a\nconversion to affine coordinates and clearing out the temporary Jacobian\ngroup element object after to avoid leaking secret key material, i.e.\nexecuting the following three steps:\n    - secp256k1_ecmult_gen(ctx, &rj, ...)\n    - secp256k1_ge_set_gej(&r, &rj)\n    - secp256k1_gej_clear(&rj)\n\nThis commit introduces a corresponding helper to deduplicate code\nand mitigate the risk that last step is forgotten (which can easily\nhappen and is not detected by tests).\n\nThe idea came up during a conversation with furszy, see\nhttps://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-4482838033",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-04T14:30:25Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-05-19T14:29:05Z"
-      },
-      "sha": "f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI2Yjg4ZDk1OTdjZTM0NjI5MGNmZTUwNjlkZDc4Y2Q4MjIwOTczMjA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26b88d9597ce346290cfe5069dd78cd822097320",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26b88d9597ce346290cfe5069dd78cd822097320",
-      "tree": {
-        "sha": "87c11e4a443198abe139a9f518741f5362ed0c3d",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/87c11e4a443198abe139a9f518741f5362ed0c3d"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8",
-          "sha": "f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f188ad150dbe2b9f5f9fac0bf9fe383bc087b5c8"
-        }
-      ],
-      "message": "refactor: rename `_ecmult_gen` -> `_gej_ecmult_gen` for consistency\n\nNow that we have a function `_ge_ecmult_gen`, it makes sense to rename\nthe existing function `_ecmult_gen` to `_gej_ecmult_gen` for\nconsistency, to signal that the result is a Jacobian group element.\n\nThis diff was created by applying\n```\n$ sed -i s/secp256k1_ecmult_gen\\(/secp256k1_gej_ecmult_gen\\(/g $(git ls-files)\n```",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-04T14:39:04Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-04T14:35:12Z"
-      },
-      "sha": "26b88d9597ce346290cfe5069dd78cd822097320"
     },
     {
       "event": "head_ref_force_pushed",
@@ -952,6 +872,241 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1861#issuecomment-4642831249",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1861"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGEzMjk2ZDVlMjNmMTQ3NTU3NWNiOGYwYWE4MjA5MzQ5Y2M5YTZjZmI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a3296d5e23f1475575cb8f0aa8209349cc9a6cfb",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a3296d5e23f1475575cb8f0aa8209349cc9a6cfb",
+      "tree": {
+        "sha": "afdfeb068561886de4ee8bff205f6d43c82fecf2",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/afdfeb068561886de4ee8bff205f6d43c82fecf2"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c63062380f9610084409ac445af723a057a90f6b",
+          "sha": "c63062380f9610084409ac445af723a057a90f6b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c63062380f9610084409ac445af723a057a90f6b"
+        }
+      ],
+      "message": "refactor: introduce `_ecmult_gen_ge` helper (preventing accidental gej leaks)\n\nScalar multiplication with the generator point frequently involves a\nconversion to affine coordinates and clearing out the temporary Jacobian\ngroup element object after to avoid leaking secret key material, i.e.\nexecuting the following three steps:\n    - secp256k1_ecmult_gen(ctx, &rj, ...)\n    - secp256k1_ge_set_gej(&r, &rj)\n    - secp256k1_gej_clear(&rj)\n\nThis commit introduces a corresponding helper to deduplicate code\nand mitigate the risk that last step is forgotten (which can easily\nhappen and is not detected by tests).\n\nThe idea came up during a conversation with furszy, see\nhttps://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-4482838033",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-07T18:21:18Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-05-19T14:29:05Z"
+      },
+      "sha": "a3296d5e23f1475575cb8f0aa8209349cc9a6cfb"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDllMDE3ZTUwNjJiZmUzMDZlYjU3MjRmZTM5ZGViZTk0YjYyMjM1OTI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9e017e5062bfe306eb5724fe39debe94b6223592",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9e017e5062bfe306eb5724fe39debe94b6223592",
+      "tree": {
+        "sha": "f0c6ba465093536b95cbd76082639ad21b28bf07",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f0c6ba465093536b95cbd76082639ad21b28bf07"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a3296d5e23f1475575cb8f0aa8209349cc9a6cfb",
+          "sha": "a3296d5e23f1475575cb8f0aa8209349cc9a6cfb",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a3296d5e23f1475575cb8f0aa8209349cc9a6cfb"
+        }
+      ],
+      "message": "refactor: rename `_ecmult_gen` -> `_ecmult_gen_gej` for consistency\n\nNow that we have a function `_ecmult_gen_ge`, it makes sense to rename\nthe existing function `_ecmult_gen` to `_ecmult_gen_gej` for\nconsistency, to signal that the result is a Jacobian group element.\n\nThis diff was created by applying\n```\n$ sed -i s/secp256k1_ecmult_gen\\(/secp256k1_ecmult_gen_gej\\(/g $(git ls-files)\n```",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-07T18:21:18Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-04T14:35:12Z"
+      },
+      "sha": "9e017e5062bfe306eb5724fe39debe94b6223592"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 26444637025,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABEQ3iIs8AAAAGKDkjYQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26444637025",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "9e017e5062bfe306eb5724fe39debe94b6223592",
+      "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/9e017e5062bfe306eb5724fe39debe94b6223592",
+      "created_at": "2026-06-07T18:28:04Z"
+    },
+    {
+      "event": "renamed",
+      "id": 26444675980,
+      "node_id": "RTE_lADOAP4Jqs8AAAABEQ3iIs8AAAAGKDm7jA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26444675980",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-07T18:31:31Z",
+      "rename": {
+        "from": "refactor: introduce `_ge_ecmult_gen` helper (preventing accidental gej leaks)",
+        "to": "refactor: introduce `_ecmult_gen_ge` helper (preventing accidental gej leaks)"
+      }
+    },
+    {
+      "event": "commented",
+      "id": 4643668741,
+      "node_id": "IC_kwDOAP4Jqs8AAAABFMjDBQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4643668741",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-07T18:46:59Z",
+      "updated_at": "2026-06-07T18:46:59Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Thanks, switched back to `_ecmult_gen_{ge,gej}` :ok_hand: ",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1861#issuecomment-4643668741",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1861"
+    },
+    {
+      "event": "ready_for_review",
+      "id": 26444872442,
+      "node_id": "RFRE_lADOAP4Jqs8AAAABEQ3iIs8AAAAGKDy6-g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26444872442",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-07T18:47:05Z"
     }
   ],
   "comments": []
