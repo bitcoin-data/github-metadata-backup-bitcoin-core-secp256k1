@@ -41,13 +41,32 @@
       "patch_url": null
     },
     "body": "`secp256k1_ellswift_create` assumes sha256 clears the data in its buffer\r\nafter hashing it, which is not the case. So we shouldn't declassify the whole\r\nstruct, only the hash result. We should also clear it at the end, so the sk\r\ndoesn't linger on the stack when no aux rnd is given.\r\n\r\nOn master, can add the following diff and run the tests to see sk sitting\r\nin the buffer.\r\n```diff\r\ndiff --git a/src/modules/ellswift/main_impl.h b/src/modules/ellswift/main_impl.h\r\n--- a/src/modules/ellswift/main_impl.h\t\r\n+++ b/src/modules/ellswift/main_impl.h\t\r\n@@ -461,6 +461,9 @@\r\n     secp256k1_ellswift_elligatorswift_var(ctx, ell64, &t, &p, &hash); /* puts u in ell64[0..32] */\r\n     secp256k1_fe_get_b32(ell64 + 32, &t); /* puts t in ell64[32..64] */\r\n \r\n+    /* DEMO: fail because sk sits in the buffer */\r\n+    if (!auxrnd32) VERIFY_CHECK(memcmp(hash.buf, seckey32, 32) != 0);\r\n     secp256k1_memczero(ell64, 64, !ret);\r\n```",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975380966,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5J5g",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/side-channel",
+        "name": "side-channel",
+        "description": "",
+        "color": "F9D0C4",
+        "default": false
+      },
+      {
+        "id": 5492448291,
+        "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/tweak/refactor",
+        "name": "tweak/refactor",
+        "description": "",
+        "color": "FBCA04",
+        "default": false
+      }
+    ],
     "created_at": "2026-06-06T18:11:23Z",
-    "updated_at": "2026-06-08T17:54:58Z",
+    "updated_at": "2026-06-09T09:27:06Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "79e468bf44e3eccc01e62a1731a99a6ba2afa0e3",
+    "merge_commit_sha": "3d2c7c13c89bfb840da1f03540dae368c1eea557",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -287,10 +306,10 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1145,
+        "forks_count": 1146,
         "stargazers_count": 2435,
         "watchers_count": 2435,
-        "size": 12923,
+        "size": 12926,
         "default_branch": "master",
         "open_issues_count": 149,
         "is_template": false,
@@ -303,9 +322,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-08T15:36:26Z",
+        "pushed_at": "2026-06-09T08:06:04Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-06-08T15:37:45Z",
+        "updated_at": "2026-06-09T08:06:11Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -436,6 +455,76 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1863#issuecomment-4651847271",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1863"
+    },
+    {
+      "event": "labeled",
+      "id": 26515449035,
+      "node_id": "LE_lADOAP4Jqs8AAAABEnSolc8AAAAGLHGkyw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26515449035",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-09T09:27:06Z",
+      "label": {
+        "name": "side-channel",
+        "color": "F9D0C4"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 26515449073,
+      "node_id": "LE_lADOAP4Jqs8AAAABEnSolc8AAAAGLHGk8Q",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26515449073",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-09T09:27:06Z",
+      "label": {
+        "name": "tweak/refactor",
+        "color": "FBCA04"
+      }
     }
   ],
   "comments": []
