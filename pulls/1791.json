@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1791/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/37152afa0e84d1983404fb57eecfc15a3f82f578",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9c08b450d7a530082131317f1768f254968bd246",
     "number": 1791,
     "state": "open",
     "locked": false,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "Using the CMake-based build system enables smoother integration with parent projects by providing both CMake package configuration files and the traditional `libsecp256k1.pc`.\r\n\r\nHowever, packagers on some systems, such as [Gentoo](https://github.com/bitcoin-core/secp256k1/blob/f9a944ff2dbcd7ff1829880636f861caf0a91392/Makefile.am#L83) and [Guix](https://codeberg.org/guix/guix/pulls/2566#issuecomment-7360201), insist on recreating the precomputed files, which is not currently supported by the CMake-based build system.\r\n\r\nThis PR addresses the issue by introducing a new build option, `SECP256K1_BUILD_PRECOMPUTED`, which is disabled by default.",
+    "body": "Using the CMake-based build system enables smoother integration with parent projects by providing both CMake package configuration files and the traditional `libsecp256k1.pc`.\r\n\r\nHowever, packagers on some systems, such as [Gentoo](https://github.com/bitcoin-core/secp256k1/blob/f9a944ff2dbcd7ff1829880636f861caf0a91392/Makefile.am#L83) and [Guix](https://codeberg.org/guix/guix/pulls/2566#issuecomment-7360201), insist on recreating the precomputed files, which is not currently supported by the CMake-based build system.\r\n\r\nThis PR addresses the issue by introducing a new `SECP256K1_BUILD_PRECOMPUTED` option (`OFF` by default) that generates `precomputed_ecmult.c` and `precomputed_ecmult_gen.c` in the build tree. Those files are then compiled instead of the ones checked into the source tree.\r\n\r\nHere is an example:\r\n```\r\n$ cmake -B build -G Ninja -DSECP256K1_BUILD_PRECOMPUTED=ON\r\n$ ninja -C build src/precomputed_ecmult.c src/precomputed_ecmult_gen.c | cat\r\nninja: Entering directory `build'\r\n[1/6] Building C object src/CMakeFiles/secp256k1_precompute_ecmult.dir/precompute_ecmult.c.o\r\n[2/6] Building C object src/CMakeFiles/secp256k1_precompute_ecmult_gen.dir/precompute_ecmult_gen.c.o\r\n[3/6] Linking C executable secp256k1_precompute_ecmult_gen\r\n[4/6] Linking C executable secp256k1_precompute_ecmult\r\n[5/6] Generating precomputed_ecmult_gen.c\r\n[6/6] Generating precomputed_ecmult.c\r\n```\r\n\r\nWhen configuring with CMake 3.31 or newer, the built-in `codegen` target can be used to generate those files:\r\n```\r\n$ cmake -B build -G Ninja -DSECP256K1_BUILD_PRECOMPUTED=ON\r\n$ cmake --build build -t codegen | cat\r\n[1/6] Building C object src/CMakeFiles/secp256k1_precompute_ecmult.dir/precompute_ecmult.c.o\r\n[2/6] Building C object src/CMakeFiles/secp256k1_precompute_ecmult_gen.dir/precompute_ecmult_gen.c.o\r\n[3/6] Linking C executable secp256k1_precompute_ecmult_gen\r\n[4/6] Linking C executable secp256k1_precompute_ecmult\r\n[5/6] Generating precomputed_ecmult_gen.c\r\n[6/6] Generating precomputed_ecmult.c\r\n```",
     "labels": [
       {
         "id": 4975353639,
@@ -71,11 +71,11 @@
       }
     ],
     "created_at": "2025-12-20T20:02:50Z",
-    "updated_at": "2026-06-11T12:56:05Z",
+    "updated_at": "2026-06-11T13:58:08Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "e8e645e0132a7f47d95c488741b47b77a58d1db0",
+    "merge_commit_sha": "6812431aaab085c20b61c8415a2cca85a4de8ef5",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -83,7 +83,7 @@
     "head": {
       "label": "hebasto:251220-cmake-precomputed",
       "ref": "251220-cmake-precomputed",
-      "sha": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "sha": "9c08b450d7a530082131317f1768f254968bd246",
       "user": {
         "login": "hebasto",
         "id": 32963518,
@@ -182,7 +182,7 @@
         "forks_count": 0,
         "stargazers_count": 3,
         "watchers_count": 3,
-        "size": 13997,
+        "size": 14008,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -195,7 +195,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-11T12:55:24Z",
+        "pushed_at": "2026-06-11T13:53:30Z",
         "created_at": "2021-12-03T12:27:02Z",
         "updated_at": "2026-06-09T11:01:05Z",
         "allow_forking": true,
@@ -359,12 +359,12 @@
     },
     "author_association": "MEMBER",
     "draft": false,
-    "additions": 70,
-    "deletions": 10,
-    "changed_files": 9,
+    "additions": 68,
+    "deletions": 9,
+    "changed_files": 8,
     "commits": 2,
-    "review_comments": 20,
-    "comments": 14
+    "review_comments": 26,
+    "comments": 15
   },
   "events": [
     {
@@ -2058,86 +2058,6 @@
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1791"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGFlZTAyMWJmNTMxNWQ5MzdjMTgyNDU4ZmM3NTI4MWJmNTYxMjU3ZTk",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/aee021bf5315d937c182458fc75281bf561257e9",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/aee021bf5315d937c182458fc75281bf561257e9",
-      "tree": {
-        "sha": "bab1b107f4982629276f4da9c13070dc149d0c7c",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/bab1b107f4982629276f4da9c13070dc149d0c7c"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree bab1b107f4982629276f4da9c13070dc149d0c7c\nparent 0f4a7e6bf9d971addb2b851df7cd2777fc62b212\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781179242 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781179242 +0100\n\ncmake: Add option to generate precomputed files\n\nAdd a new `SECP256K1_BUILD_PRECOMPUTED` option (`OFF` by default) that\ngenerates `precomputed_ecmult.c` and `precomputed_ecmult_gen.c` in the\nbuild tree. Those files are then compiled instead of the ones checked\ninto the source tree.\n\nWhen configuring with CMake 3.31 or newer, the built-in `codegen` target\ncan be used to generate those files.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmoqo2oACgkQQQEIES5+\nqB+0Pw/8CE8RD2RPSVQZDnVgRnEY8T6hSfqpe5DP5toIYQJUnqQsYmzz3ZUCFhbM\nckO5olW7sbrAFLS3H47LDNrUdLUO69O+NwhKwacb+1bFEhvn8q+n0vrtn/VIscEW\njN479WiHmkjFXHJVZHUpbkFbqxCM4MN2Lvkbrd69nM9gbpV0v9q3lgOoIprOy7CZ\npimSzY8Z5mTGnhXEyxg+LEnvsFGKcV4Gb5hbtrCtl7ZVUNoAyFQ0ygfaXaJn5S7m\nHqr3hHnj89XC4y3Tp8rkKD7YYUboqP88FR7bZ67i1DARauTShGvPeC9b3Wv47OJZ\n4Mg6GaXIPNJ3sL3g29BeqOMtnJtDg2O3UIc0C33qwQE8+G1dMElnZgavwbXsIUXE\nfPweIvJBfYhYFN5cl6Nj8Q6WZalOYLQBjEbm/1pA31CeUMq5AkJJZXB8Hg0hd/Kk\nmMuALh5GEVzN+hYU05uz4kIvTsOZfCnb0aLBTZgiU0v8e3hCU8OZ9FfIKpNpC6l6\n2rDvA7hUk9K0AIjTougYb66xBYIr164RWMrCot2WB2d7Dxp74SA8Lo95OQPYdHN1\ntHlJ/vcM1nxFrNLkJuSojRtog/+OEoLvULzTvp2H9Z3e0iYYMRJWyo5WHSXtHGYQ\nJ/pgv0gDnd125Unde+wMEns5tXcs70hv7GpA7tQMwbsAzqMLYf4=\n=eHQT\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0f4a7e6bf9d971addb2b851df7cd2777fc62b212",
-          "sha": "0f4a7e6bf9d971addb2b851df7cd2777fc62b212",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f4a7e6bf9d971addb2b851df7cd2777fc62b212"
-        }
-      ],
-      "message": "cmake: Add option to generate precomputed files\n\nAdd a new `SECP256K1_BUILD_PRECOMPUTED` option (`OFF` by default) that\ngenerates `precomputed_ecmult.c` and `precomputed_ecmult_gen.c` in the\nbuild tree. Those files are then compiled instead of the ones checked\ninto the source tree.\n\nWhen configuring with CMake 3.31 or newer, the built-in `codegen` target\ncan be used to generate those files.",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-06-11T12:00:42Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-06-11T12:00:42Z"
-      },
-      "sha": "aee021bf5315d937c182458fc75281bf561257e9"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDM3MTUyYWZhMGU4NGQxOTgzNDA0ZmI1N2VlY2ZjMTVhM2Y4MmY1Nzg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/37152afa0e84d1983404fb57eecfc15a3f82f578",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/37152afa0e84d1983404fb57eecfc15a3f82f578",
-      "tree": {
-        "sha": "53ae91bfe43ef12f572da170c76f2424540aa546",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/53ae91bfe43ef12f572da170c76f2424540aa546"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 53ae91bfe43ef12f572da170c76f2424540aa546\nparent aee021bf5315d937c182458fc75281bf561257e9\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781182487 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781182487 +0100\n\nci: Add `-DSECP256K1_BUILD_PRECOMPUTED=ON` to CMake jobs\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmoqsBcACgkQQQEIES5+\nqB9NPw/7BxMuR4EikCDH+IHCvo0XaSLgqMNZLQ0LQRt6Nt1CaP52VEjEdcTTBmOW\nJ2BoLCbvCGwLleWwcl9Z3YVbwQv2q3I2PD0dm9XV8YChe4zX6Xdkvr+qumyoeuOM\npIHyBXyDNSsUKQsLRDzFuxfRR21KRvTXCkb34cmt6FPPJq5kquWyh7bxy6nwab0H\nzcRhJ6DfoLFAk1ZEu0iuYVf1vhD4hWMDUcQ6+WZhgnY+JEGbPMHRFKisMhcFjY2A\nTZL8AvApDwA3OCrtVMqSv6vaqTW4D+nb2cdj98LaTz/sPEAYY+++E+CuViqaYIV0\n6i8TDcrG0eVThqF62bEcbhcnLCm2vCSkUa8mhUNb20AOTfcngjgzfyGzKiKFJMtf\nmetoToYqO1cJAHKdakc6dyFKu0W3aQ3wuCJFJa1t+8/qVHJfiPWIsbc+Y0o4GjDe\nF48T3c9rGEHbi2O+/4fEaCAR/bHkFrHRHBeOyAQVGkunnjDV+ZaAHv84TD+T+SVS\nBzh2y4pIJ/zwzAMVhcJo8LlrcS7YhxFwfFY0X4c/XQjPbGqzDxe3bTkMPABShyRG\nXry71cidEOCbGhMTIH0Rt9I5HyBMVz6osnLjEsSR5JNZhfsskd3mYjYy9YgN1Hbr\n6IXwJge5v9I0Ym9YN3AoRMdHdacJ+k1dQxVPIUbpK4ChInlXP/4=\n=JGhq\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/aee021bf5315d937c182458fc75281bf561257e9",
-          "sha": "aee021bf5315d937c182458fc75281bf561257e9",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/aee021bf5315d937c182458fc75281bf561257e9"
-        }
-      ],
-      "message": "ci: Add `-DSECP256K1_BUILD_PRECOMPUTED=ON` to CMake jobs",
-      "committer": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-06-11T12:54:47Z"
-      },
-      "author": {
-        "name": "Hennadii Stepanov",
-        "email": "32963518+hebasto@users.noreply.github.com",
-        "date": "2026-06-11T12:54:47Z"
-      },
-      "sha": "37152afa0e84d1983404fb57eecfc15a3f82f578"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 26625917450,
       "node_id": "HRFPE_lADOAP4Jqs7figAtzwAAAAYzB0IK",
@@ -2202,6 +2122,213 @@
         "from": "cmake: Add option to recreate precomputed files",
         "to": "cmake: Add option to generate precomputed files"
       }
+    },
+    {
+      "event": "commented",
+      "id": 4680878989,
+      "node_id": "IC_kwDOAP4Jqs8AAAABFwCLjQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4680878989",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-11T13:07:07Z",
+      "updated_at": "2026-06-11T13:07:07Z",
+      "author_association": "MEMBER",
+      "body": "Reworked per recent feedback. Added [`CODEGEN`](https://cmake.org/cmake/help/latest/policy/CMP0171.html) support for modern CMake.\r\n\r\nThe PR description has been updated.\r\n\r\n> So you've changed `precompute_ecmult.c` and `precomputed_ecmult.c` but not `precompute_ecmult_gen.c` and `precomputed_ecmult_gen.c`.\r\n\r\nMy bad. Fixed.\r\n\r\n> For autotools builds on CI, we have `git diff` that checks the files in the repo are not outdated. We could do the same on CI for CMake, i.e., copy the files back to the source tree and run `git diff --exit-code`.\r\n\r\nDone.",
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#issuecomment-4680878989",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1791"
+    },
+    {
+      "event": "reviewed",
+      "id": 4477230443,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABCt0daw",
+      "url": null,
+      "actor": null,
+      "commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-06-11T13:38:13Z",
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#pullrequestreview-4477230443",
+      "submitted_at": "2026-06-11T13:38:13Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQzNjU4MGNkYzMwYjBmYmI2MjIwMWIzZjE1NmQ4ZWQzODc0MTU3OWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d36580cdc30b0fbb62201b3f156d8ed38741579c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d36580cdc30b0fbb62201b3f156d8ed38741579c",
+      "tree": {
+        "sha": "da21972e65105633b055bdde7ee0b2b6905569e0",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/da21972e65105633b055bdde7ee0b2b6905569e0"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree da21972e65105633b055bdde7ee0b2b6905569e0\nparent 0f4a7e6bf9d971addb2b851df7cd2777fc62b212\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781185975 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781185975 +0100\n\ncmake: Add option to generate precomputed files\n\nAdd a new `SECP256K1_BUILD_PRECOMPUTED` option (`OFF` by default) that\ngenerates `precomputed_ecmult.c` and `precomputed_ecmult_gen.c` in the\nbuild tree. Those files are then compiled instead of the ones checked\ninto the source tree.\n\nWhen configuring with CMake 3.31 or newer, the built-in `codegen` target\ncan be used to generate those files.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmoqvbcACgkQQQEIES5+\nqB+b5hAAszam2k/FeinCCXnSStbwtnAQTq414s3/Q5AxxNevvHAoIWWd8In/QcXu\nAfJgSUmcbAPltY8M69YRwjryswWBOQjvn1TVqfjamJ6ly/UrGNUEBHFAzZdlz6dS\nimMBjYKur8bNmJ56NPkA3lLCqeHT3psmHHsW8MPE4li+wnYKUcJo9A2qUl264O6p\nMK6sdVI0iT09k8hr5y2QRnG6ysxljcJ35GZhSzpc+xtbagS3808fTiEzffMY93we\nqDLZuy8TV4wMKevVvjaWjAayDgiVLT1LGL/pqZa/tpcTyeq3TUu+pVGzYRJpXmv1\nB9GLQeSPYzkhFIIeIBZtpFlfc3jILxwEfXABCbzH14MBIFsyJG5cu0c235Rtlov2\n/HA7gs3OgVq2J0cbA9moAfm+JY8fz5pDHSBt/MEg4xMtXg4RmETjZXNhcP0hitaG\nvQHRm3CJfiNDJN0uM+mu5H+2UVAVzFzrCyGyLDO0LovlWydgrhhF6NuAzl4i93OK\nzd538bYZxSVi98J6X/Wt9tnp1EtR/O9NC3zmlCA7ByKQuJgkV2VPzMLSsSWJtlXP\nKpKgpWybhWE7Nm7ugnynS3I3aPzi1KlzvOT/0kDOejlDIMnjJ1QmGccQZUv4us46\n7vdvM/ZOipbtTlzMhtqJt4MdYNjXoixmL1UItUwnOnYiurS9l60=\n=SExe\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0f4a7e6bf9d971addb2b851df7cd2777fc62b212",
+          "sha": "0f4a7e6bf9d971addb2b851df7cd2777fc62b212",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f4a7e6bf9d971addb2b851df7cd2777fc62b212"
+        }
+      ],
+      "message": "cmake: Add option to generate precomputed files\n\nAdd a new `SECP256K1_BUILD_PRECOMPUTED` option (`OFF` by default) that\ngenerates `precomputed_ecmult.c` and `precomputed_ecmult_gen.c` in the\nbuild tree. Those files are then compiled instead of the ones checked\ninto the source tree.\n\nWhen configuring with CMake 3.31 or newer, the built-in `codegen` target\ncan be used to generate those files.",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-06-11T13:52:55Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-06-11T13:52:55Z"
+      },
+      "sha": "d36580cdc30b0fbb62201b3f156d8ed38741579c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDljMDhiNDUwZDdhNTMwMDgyMTMxMzE3ZjE3NjhmMjU0OTY4YmQyNDY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9c08b450d7a530082131317f1768f254968bd246",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9c08b450d7a530082131317f1768f254968bd246",
+      "tree": {
+        "sha": "01517c2289cd67c8e49ed5c38c0a03e804eef8bf",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/01517c2289cd67c8e49ed5c38c0a03e804eef8bf"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 01517c2289cd67c8e49ed5c38c0a03e804eef8bf\nparent d36580cdc30b0fbb62201b3f156d8ed38741579c\nauthor Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781185989 +0100\ncommitter Hennadii Stepanov <32963518+hebasto@users.noreply.github.com> 1781185989 +0100\n\nci: Add `-DSECP256K1_BUILD_PRECOMPUTED=ON` to CMake jobs\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCgAdFiEE0dvyxLlvLev0wWZUQQEIES5+qB8FAmoqvcUACgkQQQEIES5+\nqB+BtBAAg5XECF2u8hFqiky54Ck+/Ih0otlI6X08P3hn9sr8JFE+v71q/80Xu2JH\n/PyPtgflne7u7GDsIpSvK4h1HrruIhTtqeDLvZ3Cug7mFlxck7qYUEWyH7FT9WjR\n4d5oXATDQxfhTdIKbDRugGFZlM84+1AGIft6kpdZOaXcXFDNVGo4HtesX2B3kXxm\nJFlqmfRN9uWGSlwl1iD7yii3Nd5v46R6pfROTu6K66kXNjCiDKnmCrEOglOPEVwv\ngOhuF1UqbRX0W2lE4qx0Wp6Lxr+3zA+JpRJZ6rRzQVlSG26APby1XcVsVGonB+FX\nZOEO0T1v0hxkwPiY9U5zCWWn46DrDr30cprG6VezPFtITLDAlOpZjkhZ0TnkdjEC\nn9yi7+8Iu6nZwj3FE8lV/CedlKbyf7yKSChrdol3fRNaQvjDQYaPRrh3DYi37E1P\nUY7nNQrOqC6ALybro6BoPJd+DFmbKLv0aX3XP08kNs5pUhXVXC7mGrWanMLZNhK8\n4OJZRHRAkU+fc3J0/zxjTLOhDPXRGzriS3IwMRcDaAk8jV/GN6xGE6Nt/btcO2YR\n2mmd0IHASFCjq5WtyJ1Kda1MhDPJSohRfv5yflAkOBzj0JlJL6r+OAYbqXgyr/Tm\nGeQSeR9jeVlANc39IvF9UVrwmFpHX+L4BnUhAaVGtJ8UTvM5zGM=\n=+ezU\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d36580cdc30b0fbb62201b3f156d8ed38741579c",
+          "sha": "d36580cdc30b0fbb62201b3f156d8ed38741579c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d36580cdc30b0fbb62201b3f156d8ed38741579c"
+        }
+      ],
+      "message": "ci: Add `-DSECP256K1_BUILD_PRECOMPUTED=ON` to CMake jobs",
+      "committer": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-06-11T13:53:09Z"
+      },
+      "author": {
+        "name": "Hennadii Stepanov",
+        "email": "32963518+hebasto@users.noreply.github.com",
+        "date": "2026-06-11T13:53:09Z"
+      },
+      "sha": "9c08b450d7a530082131317f1768f254968bd246"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 26628713925,
+      "node_id": "HRFPE_lADOAP4Jqs7figAtzwAAAAYzMe3F",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26628713925",
+      "actor": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "9c08b450d7a530082131317f1768f254968bd246",
+      "commit_url": "https://api.github.com/repos/hebasto/secp256k1/commits/9c08b450d7a530082131317f1768f254968bd246",
+      "created_at": "2026-06-11T13:53:26Z"
     }
   ],
   "comments": [
@@ -3283,6 +3410,330 @@
       "start_side": "RIGHT",
       "line": 52,
       "original_line": 52,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396070825",
+      "pull_request_review_id": 4476950151,
+      "id": 3396070825,
+      "node_id": "PRRC_kwDOAP4Jqs7Ka-2p",
+      "diff_hunk": "@@ -45,10 +45,22 @@ if(SECP256K1_ENABLE_MODULE_ECDH)\n   set_property(TARGET secp256k1 APPEND PROPERTY PUBLIC_HEADER ${PROJECT_SOURCE_DIR}/include/secp256k1_ecdh.h)\n endif()\n \n-add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL\n-  precomputed_ecmult.c\n-  precomputed_ecmult_gen.c\n-)\n+add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL)\n+if(SECP256K1_BUILD_PRECOMPUTED)\n+  include(Precompute)\n+  precompute(ecmult)\n+  precompute(ecmult_gen)",
+      "path": "src/CMakeLists.txt",
+      "position": 1,
+      "original_position": 12,
+      "commit_id": "80edad3d82b1a5206c5462f3a859ab699b001784",
+      "original_commit_id": "8460c5902cf83d3b83e22021c7d73d6991347464",
+      "in_reply_to_id": 3381852004,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> But do you think some error message like suggested by the LLM makes sense for now?\r\n\r\nDone.",
+      "created_at": "2026-06-11T13:03:59Z",
+      "updated_at": "2026-06-11T13:04:00Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396070825",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396070825"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": 49,
+      "original_start_line": 49,
+      "start_side": "RIGHT",
+      "line": 52,
+      "original_line": 52,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396323085",
+      "pull_request_review_id": 4477230443,
+      "id": 3396323085,
+      "node_id": "PRRC_kwDOAP4Jqs7Kb8cN",
+      "diff_hunk": "@@ -7,7 +7,8 @@\n       \"cacheVariables\": {\n         \"SECP256K1_EXPERIMENTAL\": \"ON\",\n         \"SECP256K1_ENABLE_MODULE_RECOVERY\": \"ON\",\n-        \"SECP256K1_BUILD_EXAMPLES\": \"ON\"\n+        \"SECP256K1_BUILD_EXAMPLES\": \"ON\",\n+        \"SECP256K1_BUILD_PRECOMPUTED\": \"OFF\"",
+      "path": "CMakePresets.json",
+      "position": 1,
+      "original_position": 6,
+      "commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "original_commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: Why not omit this line entirely?",
+      "created_at": "2026-06-11T13:35:37Z",
+      "updated_at": "2026-06-11T13:38:13Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396323085",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396323085"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 11,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396342550",
+      "pull_request_review_id": 4477230443,
+      "id": 3396342550,
+      "node_id": "PRRC_kwDOAP4Jqs7KcBMW",
+      "diff_hunk": "@@ -538,6 +538,10 @@ jobs:\n     name: ${{ matrix.configuration.job_name }}\n     # See: https://github.com/actions/runner-images#available-images.\n     runs-on: windows-2022\n+    defaults:\n+      run:\n+        # Enforce fail-fast behavior for PowerShell.\n+        shell: pwsh -Command \"$PSNativeCommandUseErrorActionPreference = $true; $ErrorActionPreference = 'Stop'; & '{0}'\"",
+      "path": ".github/workflows/ci.yml",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "9c08b450d7a530082131317f1768f254968bd246",
+      "original_commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Shouldn't this be implied according to [the docs](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#exit-codes-and-error-action-preference)?",
+      "created_at": "2026-06-11T13:38:10Z",
+      "updated_at": "2026-06-11T13:38:13Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396342550",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396342550"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": 543,
+      "original_start_line": 543,
+      "start_side": "RIGHT",
+      "line": 544,
+      "original_line": 544,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396483908",
+      "pull_request_review_id": 4477420338,
+      "id": 3396483908,
+      "node_id": "PRRC_kwDOAP4Jqs7KcjtE",
+      "diff_hunk": "@@ -538,6 +538,10 @@ jobs:\n     name: ${{ matrix.configuration.job_name }}\n     # See: https://github.com/actions/runner-images#available-images.\n     runs-on: windows-2022\n+    defaults:\n+      run:\n+        # Enforce fail-fast behavior for PowerShell.\n+        shell: pwsh -Command \"$PSNativeCommandUseErrorActionPreference = $true; $ErrorActionPreference = 'Stop'; & '{0}'\"",
+      "path": ".github/workflows/ci.yml",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "9c08b450d7a530082131317f1768f254968bd246",
+      "original_commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "in_reply_to_id": 3396342550,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> Shouldn't this be implied according to [the docs](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#exit-codes-and-error-action-preference)?\r\n\r\nThe docs state: \"Fail-fast behavior _when possible_.\" Effectively, it works for cmdlets only. Non-zero exit codes from native commands are ignored unless `$PSNativeCommandUseErrorActionPreference` is also set.",
+      "created_at": "2026-06-11T13:55:53Z",
+      "updated_at": "2026-06-11T13:55:54Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396483908",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396483908"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": 543,
+      "original_start_line": 543,
+      "start_side": "RIGHT",
+      "line": 544,
+      "original_line": 544,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396486227",
+      "pull_request_review_id": 4477423037,
+      "id": 3396486227,
+      "node_id": "PRRC_kwDOAP4Jqs7KckRT",
+      "diff_hunk": "@@ -7,7 +7,8 @@\n       \"cacheVariables\": {\n         \"SECP256K1_EXPERIMENTAL\": \"ON\",\n         \"SECP256K1_ENABLE_MODULE_RECOVERY\": \"ON\",\n-        \"SECP256K1_BUILD_EXAMPLES\": \"ON\"\n+        \"SECP256K1_BUILD_EXAMPLES\": \"ON\",\n+        \"SECP256K1_BUILD_PRECOMPUTED\": \"OFF\"",
+      "path": "CMakePresets.json",
+      "position": 1,
+      "original_position": 6,
+      "commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "original_commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "in_reply_to_id": 3396323085,
+      "user": {
+        "login": "hebasto",
+        "id": 32963518,
+        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/hebasto",
+        "html_url": "https://github.com/hebasto",
+        "followers_url": "https://api.github.com/users/hebasto/followers",
+        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
+        "organizations_url": "https://api.github.com/users/hebasto/orgs",
+        "repos_url": "https://api.github.com/users/hebasto/repos",
+        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Thanks! Dropped.",
+      "created_at": "2026-06-11T13:56:11Z",
+      "updated_at": "2026-06-11T13:56:13Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396486227",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396486227"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": null,
+      "original_line": 11,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396501928",
+      "pull_request_review_id": 4477440578,
+      "id": 3396501928,
+      "node_id": "PRRC_kwDOAP4Jqs7KcoGo",
+      "diff_hunk": "@@ -538,6 +538,10 @@ jobs:\n     name: ${{ matrix.configuration.job_name }}\n     # See: https://github.com/actions/runner-images#available-images.\n     runs-on: windows-2022\n+    defaults:\n+      run:\n+        # Enforce fail-fast behavior for PowerShell.\n+        shell: pwsh -Command \"$PSNativeCommandUseErrorActionPreference = $true; $ErrorActionPreference = 'Stop'; & '{0}'\"",
+      "path": ".github/workflows/ci.yml",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "9c08b450d7a530082131317f1768f254968bd246",
+      "original_commit_id": "37152afa0e84d1983404fb57eecfc15a3f82f578",
+      "in_reply_to_id": 3396342550,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Sigh, why can't we just have nice things...",
+      "created_at": "2026-06-11T13:58:07Z",
+      "updated_at": "2026-06-11T13:58:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1791#discussion_r3396501928",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3396501928"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1791"
+        }
+      },
+      "start_line": 543,
+      "original_start_line": 543,
+      "start_side": "RIGHT",
+      "line": 544,
+      "original_line": 544,
       "side": "RIGHT"
     }
   ]
