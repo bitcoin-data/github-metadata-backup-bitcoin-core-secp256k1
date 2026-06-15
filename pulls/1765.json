@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/245160740a4c8f5a908383aa432676a1247b5a0c",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/459a8f912e0d085ab6e0de4e893d16319cd527e8",
     "number": 1765,
     "state": "open",
     "locked": false,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 7 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_silentpayments_recipient_label_create`: given a scan secret key and label integer, calculate the corresponding label tweak and label object\r\n* `secp256k1_silentpayments_recipient_label_serialize`: given a label object, create the corresponding 33-byte serialization\r\n* `secp256k1_silentpayments_recipient_label_parse`: given a 33-byte label representation, create the corresponding label object\r\n* `secp256k1_silentpayments_recipient_create_labeled_spend_pubkey`: given a spend public key and a label object, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_silentpayments_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_silentpayments_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\nFor a higher-level overview on what these functions exactly do, it's suggested to look at a corresponding [Python implementation](https://github.com/theStack/secp256k1lab/blob/add_bip352_module_review_helper/src/secp256k1lab/bip352.py) that was created based on the secp256k1lab project (it passes the test vectors, so this \"executable pseudo-code\" should be correct).\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\n* ~~Recent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.~~ :arrow_right: solved by marking already-found outputs, see https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3577161237 :heavy_check_mark: \r\n* ~~Not providing `prevouts_summary` (de)serialization functionality yet in the API poses the risk that users try to do it anyway by treating the opaque object as \"serialized\". How to cope with that? Is adding a \"don't do this\" comment in API header sufficient?~~ :arrow_right: solved by mentioning a \"don't do this\" comment in the API header (same phrasing as in other modules), see https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3533591506 :heavy_check_mark: ",
+    "body": "### Description\r\n\r\nThis PR implements [BIP352](https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki) with scanning limited to full-nodes. Light-client scanning is planned to be added in a separate PR in the future. The following 7 API functions are currently introduced:\r\n\r\nSender side [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L297-L312)]: \r\n* `secp256k1_silentpayments_sender_create_outputs`: given a list of $n$ secret keys $a_1 ... a_n$, a serialized outpoint, and a list of recipients (each consisting of silent payments scan pubkey and spend pubkey), create the corresponding transaction outputs (x-only public keys) for the sending transaction \r\n\r\nReceiver side, label creation [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L200)]:\r\n* `secp256k1_silentpayments_recipient_label_create`: given a scan secret key and label integer, calculate the corresponding label tweak and label object\r\n* `secp256k1_silentpayments_recipient_label_serialize`: given a label object, create the corresponding 33-byte serialization\r\n* `secp256k1_silentpayments_recipient_label_parse`: given a 33-byte label representation, create the corresponding label object\r\n* `secp256k1_silentpayments_recipient_create_labeled_spend_pubkey`: given a spend public key and a label object, create the corresponding labeled spend public key\r\n\r\nReceiver side, scanning [[BIP description](https://github.com/bitcoin/bips/blob/c9a6ca6297eb8de850f6b64dafb8e60ee9b64d66/bip-0352.mediawiki?plain=1#L334)]: \r\n* `secp256k1_silentpayments_recipient_prevouts_summary_create`: given a list of $n$ public keys $A_1 ... A_n$ and a serialized outpoint, create a `prevouts_summary` object needed for scanning\r\n* `secp256k1_silentpayments_recipient_scan_outputs`: given a `prevouts_summary` object, a recipients scan secret key and spend public key, and the relevant transaction outputs (x-only public keys), scan for outputs belonging to the recipients and and return the tweak(s) needed for spending the output(s). Optionally, a label_lookup callback function can be provided to also scan for labels.\r\n\r\nFor a higher-level overview on what these functions exactly do, it's suggested to look at a corresponding [Python implementation](https://github.com/theStack/secp256k1lab/blob/add_bip352_module_review_helper/src/secp256k1lab/bip352.py) that was created based on the secp256k1lab project (it passes the test vectors, so this \"executable pseudo-code\" should be correct).\r\n\r\n### Changes to the previous take\r\n\r\nBased on the latest state of the previous PR #1698 (take 3), the following changes have been made:\r\n* rebased on master (adapting to the new unit test framework added in #1734; thanks to furszy for his [mini-guide](https://github.com/bitcoin-core/secp256k1/pull/1698#pullrequestreview-3340808550))\r\n* removed functionality that is only relevant for light clients (`_prevout_summary_{parse,serialize}`, `__recipient_create_output_pubkeys`), adapted tests and benchmark accordingly\r\n* adapted examples to have both Bob and Carol do full-node scanning, with a TODO to switch the latter to light-client scanning once available in the future\r\n* addressed various review comments, if still relevant (https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433803533, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433808769, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433811927, https://github.com/bitcoin-core/secp256k1/pull/1698#discussion_r2433817223)\r\n\r\nThe scope reduction isn't immediately visible in commit count (only one commit was _only_ introducing light-client relevant functionality and could be completely removed), but the review burden compared #1698 is still significantly lower in terms of LOC, especially in the receiving commit.\r\n\r\n### Open questions / TODOs\r\n* ~~Recent proposals of reducing the worst-case scanning time (see posts by w0xlt and jonasnick, https://github.com/bitcoin-core/secp256k1/pull/1698#issuecomment-3448610022 ff.) are not taken into account yet.~~ :arrow_right: solved by introducing a per-group recipient limit K_max, see https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3998299873 and https://github.com/bitcoin/bips/pull/2106 :heavy_check_mark: \r\n* ~~Not providing `prevouts_summary` (de)serialization functionality yet in the API poses the risk that users try to do it anyway by treating the opaque object as \"serialized\". How to cope with that? Is adding a \"don't do this\" comment in API header sufficient?~~ :arrow_right: solved by mentioning a \"don't do this\" comment in the API header (same phrasing as in other modules), see https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-3533591506 :heavy_check_mark: ",
     "labels": [
       {
         "id": 4975353639,
@@ -53,11 +53,11 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-06-14T02:49:36Z",
+    "updated_at": "2026-06-15T14:37:24Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "113022ea1a990b13682f3b6c2326afe842c28aee",
+    "merge_commit_sha": "68a724e173c35990514105e198e63313bd0f0238",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -65,7 +65,7 @@
     "head": {
       "label": "theStack:silentpayments_module_fullnode_only",
       "ref": "silentpayments_module_fullnode_only",
-      "sha": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "sha": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-11T15:57:49Z",
+        "pushed_at": "2026-06-15T14:32:56Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -201,7 +201,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "13db747f2b558659b26f8ca3f5ea6e6d34e2054c",
+      "sha": "aea86bc3509f3ceb5c047fe6567bf8910f72a728",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -341,12 +341,12 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 13549,
+    "additions": 13551,
     "deletions": 36,
     "changed_files": 23,
     "commits": 14,
-    "review_comments": 140,
-    "comments": 85
+    "review_comments": 141,
+    "comments": 86
   },
   "events": [
     {
@@ -11797,366 +11797,6 @@
       "sha": "a79c753dd020139fa7beb11eed0f44ffa813176d"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGY0MWE0ZjM4ZjRiOGIyMGRjYzgwZTU5MmIyY2NmNGFhNTU0Y2UxMzU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135",
-      "tree": {
-        "sha": "a5f5d9d0030eaf48fba0905935bf657797755d7d",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a5f5d9d0030eaf48fba0905935bf657797755d7d"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a79c753dd020139fa7beb11eed0f44ffa813176d",
-          "sha": "a79c753dd020139fa7beb11eed0f44ffa813176d",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a79c753dd020139fa7beb11eed0f44ffa813176d"
-        }
-      ],
-      "message": "silentpayments: add examples/silentpayments.c\n\nDemonstrate sending and scanning on full nodes.",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2024-04-15T17:36:29Z"
-      },
-      "sha": "f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDVjNTljYzAyZjdjM2FmYTE4MzE4ZWM4OTgzOTMyYjY1OTA0MGNjNmM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5c59cc02f7c3afa18318ec8983932b659040cc6c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5c59cc02f7c3afa18318ec8983932b659040cc6c",
-      "tree": {
-        "sha": "fd8718313adb2eca5311d6a8b96a5133e6982fdd",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/fd8718313adb2eca5311d6a8b96a5133e6982fdd"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135",
-          "sha": "f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f41a4f38f4b8b20dcc80e592b2ccf4aa554ce135"
-        }
-      ],
-      "message": "silentpayments: add benchmarks for scanning\n\nAdd a benchmark for a full transaction scan, both for the common\ncase and worst-case (full-block sized tx) scenarios.\nOnly benchmarks for scanning are added as this is the most\nperformance critical portion of the protocol.\n\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2024-04-25T17:33:35Z"
-      },
-      "sha": "5c59cc02f7c3afa18318ec8983932b659040cc6c"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGE0MmM4ZTgyZWY5MDgyMTFiYzIzZDQ5Y2Q5M2EzNzg5ZjI5MzU3MGM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a42c8e82ef908211bc23d49cd93a3789f293570c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a42c8e82ef908211bc23d49cd93a3789f293570c",
-      "tree": {
-        "sha": "248836481d5008272ca1c44fbf04eb3a6348bb7e",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/248836481d5008272ca1c44fbf04eb3a6348bb7e"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5c59cc02f7c3afa18318ec8983932b659040cc6c",
-          "sha": "5c59cc02f7c3afa18318ec8983932b659040cc6c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5c59cc02f7c3afa18318ec8983932b659040cc6c"
-        }
-      ],
-      "message": "silentpayments: optimize scanning by using batch inversion\n\nThis improves the worst-case scanning scenario performance by ~2.5x\nand also helps notably in the common case (\"no match\") scenario,\nespecially if the number of outputs is high:\n\nBenchmark results on parent commit (without optimization):\n\nsilentpayments_scan_nomatch_N=2         ,       43.0       ,       43.1       ,       43.1\nsilentpayments_scan_nomatch_N=5         ,       46.8       ,       46.9       ,       46.9\nsilentpayments_scan_nomatch_N=10        ,       53.5       ,       53.6       ,       53.6\nsilentpayments_scan_nomatch_N=100       ,      175.0       ,      178.0       ,      186.0\nsilentpayments_scan_nomatch_N=1000      ,     1425.0       ,     1430.0       ,     1436.0\nsilentpayments_scan_nomatch_N=2323      ,     3251.0       ,     3260.0       ,     3269.0\nsilentpayments_scan_nomatch_N=23250     ,    32039.0       ,    32167.0       ,    32294.0\nsilentpayments_scan_worstcase_K=10      ,   352706.0       ,   352781.0       ,   352872.0\nsilentpayments_scan_worstcase_K=100     ,  3230214.0       ,  3231089.0       ,  3231796.0\nsilentpayments_scan_worstcase_K=1000    , 31401430.0       , 31406989.0       , 31416195.0\nsilentpayments_scan_worstcase_K=2323    , 70759992.0       , 70764742.0       , 70769823.0\n\nBenchmark results on this commit (with optimization):\n\nsilentpayments_scan_nomatch_N=2         ,       42.2       ,       42.2       ,       42.2\nsilentpayments_scan_nomatch_N=5         ,       43.6       ,       43.6       ,       43.7\nsilentpayments_scan_nomatch_N=10        ,       47.1       ,       47.1       ,       47.1\nsilentpayments_scan_nomatch_N=100       ,      101.0       ,      104.0       ,      109.0\nsilentpayments_scan_nomatch_N=1000      ,      654.0       ,      658.0       ,      664.0\nsilentpayments_scan_nomatch_N=2323      ,     1473.0       ,     1476.0       ,     1479.0\nsilentpayments_scan_nomatch_N=23250     ,    14400.0       ,    14412.0       ,    14425.0\nsilentpayments_scan_worstcase_K=10      ,   157215.0       ,   157242.0       ,   157267.0\nsilentpayments_scan_worstcase_K=100     ,  1440043.0       ,  1440081.0       ,  1440106.0\nsilentpayments_scan_worstcase_K=1000    , 13995233.0       , 13995646.0       , 13995923.0\nsilentpayments_scan_worstcase_K=2323    , 31535643.0       , 31538121.0       , 31542702.0",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-02-16T02:30:40Z"
-      },
-      "sha": "a42c8e82ef908211bc23d49cd93a3789f293570c"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGYzYTQ0Y2ZkZTJmYmNiNGU4MjY0YmYyNjdlOTg2ODFjYmRlNDJmYmI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f3a44cfde2fbcb4e8264bf267e98681cbde42fbb",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f3a44cfde2fbcb4e8264bf267e98681cbde42fbb",
-      "tree": {
-        "sha": "ed6a4565118c031de2baed72c0c5e3dab6398056",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ed6a4565118c031de2baed72c0c5e3dab6398056"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a42c8e82ef908211bc23d49cd93a3789f293570c",
-          "sha": "a42c8e82ef908211bc23d49cd93a3789f293570c",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a42c8e82ef908211bc23d49cd93a3789f293570c"
-        }
-      ],
-      "message": "tests: add BIP-352 test vectors\n\nAdd the BIP-352 test vectors. The vectors are generated with a Python script\nthat converts the .json file from the BIP to C code:\n\n$ ./tools/tests_silentpayments_generate.py test_vectors.json > ./src/modules/silentpayments/vectors.h\n\nCo-authored-by: Ron <4712150+macgyver13@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>\nCo-authored-by: Tim Ruffing <1071625+real-or-random@users.noreply.github.com>",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2024-07-02T17:45:43Z"
-      },
-      "sha": "f3a44cfde2fbcb4e8264bf267e98681cbde42fbb"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDZhOGRmOTk0NmI4Nzc4ZjJlM2E4ZGQxOWM2MWJjYmZkMjUyNjc1MjM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6a8df9946b8778f2e3a8dd19c61bcbfd25267523",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6a8df9946b8778f2e3a8dd19c61bcbfd25267523",
-      "tree": {
-        "sha": "696697a3e9698eb6bf4423a51a6fba25142b0eb6",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/696697a3e9698eb6bf4423a51a6fba25142b0eb6"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f3a44cfde2fbcb4e8264bf267e98681cbde42fbb",
-          "sha": "f3a44cfde2fbcb4e8264bf267e98681cbde42fbb",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f3a44cfde2fbcb4e8264bf267e98681cbde42fbb"
-        }
-      ],
-      "message": "tests: add constant time tests\n\nCo-authored-by: Jonas Nick <2582071+jonasnick@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2024-11-07T12:18:59Z"
-      },
-      "sha": "6a8df9946b8778f2e3a8dd19c61bcbfd25267523"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDc4ZTU3MmY2MTYzZWZkYTBlNDI5NzA0MWFkNTkyMzc1ZGQxNDlmYjQ",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/78e572f6163efda0e4297041ad592375dd149fb4",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/78e572f6163efda0e4297041ad592375dd149fb4",
-      "tree": {
-        "sha": "861eb77f70a90b2aa14b92ad2b1ec9928e74de4b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/861eb77f70a90b2aa14b92ad2b1ec9928e74de4b"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6a8df9946b8778f2e3a8dd19c61bcbfd25267523",
-          "sha": "6a8df9946b8778f2e3a8dd19c61bcbfd25267523",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6a8df9946b8778f2e3a8dd19c61bcbfd25267523"
-        }
-      ],
-      "message": "tests: add sha256 tag test\n\nTest midstate tags used in silent payments.",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2025-08-15T08:46:46Z"
-      },
-      "sha": "78e572f6163efda0e4297041ad592375dd149fb4"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDg1YjZmYTRkNTMxYjFlMDg5ZGU0NWIyN2I3Njk4M2QzNTBiZDgyNGY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/85b6fa4d531b1e089de45b27b76983d350bd824f",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/85b6fa4d531b1e089de45b27b76983d350bd824f",
-      "tree": {
-        "sha": "fffe09e057463d5df55e439070597461b46354ce",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/fffe09e057463d5df55e439070597461b46354ce"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/78e572f6163efda0e4297041ad592375dd149fb4",
-          "sha": "78e572f6163efda0e4297041ad592375dd149fb4",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/78e572f6163efda0e4297041ad592375dd149fb4"
-        }
-      ],
-      "message": "ci: enable silentpayments module",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2024-02-22T23:25:41Z"
-      },
-      "sha": "85b6fa4d531b1e089de45b27b76983d350bd824f"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDZiNGY5MjM3MGQxMzlkNTJjNjdmYTBlMDk4NjIwZjFlMmU2MTc1OWU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6b4f92370d139d52c67fa0e098620f1e2e61759e",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6b4f92370d139d52c67fa0e098620f1e2e61759e",
-      "tree": {
-        "sha": "94ab5d25bf1d14f836eb357198348ff9567bd8d2",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/94ab5d25bf1d14f836eb357198348ff9567bd8d2"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/85b6fa4d531b1e089de45b27b76983d350bd824f",
-          "sha": "85b6fa4d531b1e089de45b27b76983d350bd824f",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/85b6fa4d531b1e089de45b27b76983d350bd824f"
-        }
-      ],
-      "message": "docs: update README",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "josibake",
-        "email": "josibake@protonmail.com",
-        "date": "2024-07-12T12:57:54Z"
-      },
-      "sha": "6b4f92370d139d52c67fa0e098620f1e2e61759e"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDI0NTE2MDc0MGE0YzhmNWE5MDgzODNhYTQzMjY3NmExMjQ3YjVhMGM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/245160740a4c8f5a908383aa432676a1247b5a0c",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/245160740a4c8f5a908383aa432676a1247b5a0c",
-      "tree": {
-        "sha": "8f2d196231cd921cecb4a6b8e08f95cbbe33756e",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/8f2d196231cd921cecb4a6b8e08f95cbbe33756e"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/6b4f92370d139d52c67fa0e098620f1e2e61759e",
-          "sha": "6b4f92370d139d52c67fa0e098620f1e2e61759e",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/6b4f92370d139d52c67fa0e098620f1e2e61759e"
-        }
-      ],
-      "message": "silentpayments: skip slow benchmarks for low iters count (<= 2)\n\nThe worst-case scanning benchmarks and the common-case scanning\nbenchmarks with N>10 are relatively slow, leading to signifcantly\nlong run times of CI jobs. Avoid this by skipping these if the\niters count is <= 2 (CI jobs run with SECP256K1_BENCH_ITERS=2).\nThis is the same approach used in the ecmult benchmarks (bench_ecmult).",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-08T15:58:57Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-19T20:29:27Z"
-      },
-      "sha": "245160740a4c8f5a908383aa432676a1247b5a0c"
-    },
-    {
       "event": "head_ref_force_pushed",
       "id": 26479788145,
       "node_id": "HRFPE_lADOAP4Jqs7VEWwNzwAAAAYqUYBx",
@@ -12709,6 +12349,455 @@
       "submitted_at": "2026-06-14T02:49:36Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDE2NjNkYjNiMDY1Nzk5ZDYxMTVkZmEyNTI0ZDI1N2IzNjdjMjEzZDQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1663db3b065799d6115dfa2524d257b367c213d4",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1663db3b065799d6115dfa2524d257b367c213d4",
+      "tree": {
+        "sha": "4e029cdbdf1f0ac035ae9e076a05ed7babd5a702",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4e029cdbdf1f0ac035ae9e076a05ed7babd5a702"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a79c753dd020139fa7beb11eed0f44ffa813176d",
+          "sha": "a79c753dd020139fa7beb11eed0f44ffa813176d",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a79c753dd020139fa7beb11eed0f44ffa813176d"
+        }
+      ],
+      "message": "silentpayments: add examples/silentpayments.c\n\nDemonstrate sending and scanning on full nodes.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:02Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-04-15T17:36:29Z"
+      },
+      "sha": "1663db3b065799d6115dfa2524d257b367c213d4"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQzMzE5ZTcxYjU0ZDIxM2ZiZDdlZDkwNzc1ODM0ZTBkYjJkMzYwMDU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/43319e71b54d213fbd7ed90775834e0db2d36005",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/43319e71b54d213fbd7ed90775834e0db2d36005",
+      "tree": {
+        "sha": "e5e1e4f7292e474b3e4db70f3e62881f68d45166",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/e5e1e4f7292e474b3e4db70f3e62881f68d45166"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1663db3b065799d6115dfa2524d257b367c213d4",
+          "sha": "1663db3b065799d6115dfa2524d257b367c213d4",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1663db3b065799d6115dfa2524d257b367c213d4"
+        }
+      ],
+      "message": "silentpayments: add benchmarks for scanning\n\nAdd a benchmark for a full transaction scan, both for the common\ncase and worst-case (full-block sized tx) scenarios.\nOnly benchmarks for scanning are added as this is the most\nperformance critical portion of the protocol.\n\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-04-25T17:33:35Z"
+      },
+      "sha": "43319e71b54d213fbd7ed90775834e0db2d36005"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQyMGE2YWE1NjYxYzEwODFlYzNmZTYzNjQ2NzRkNjU3NGViZGVhNzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/420a6aa5661c1081ec3fe6364674d6574ebdea72",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/420a6aa5661c1081ec3fe6364674d6574ebdea72",
+      "tree": {
+        "sha": "eb02c153bb277cfc9eeb12bf67b4818d7ba6eea4",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/eb02c153bb277cfc9eeb12bf67b4818d7ba6eea4"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/43319e71b54d213fbd7ed90775834e0db2d36005",
+          "sha": "43319e71b54d213fbd7ed90775834e0db2d36005",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/43319e71b54d213fbd7ed90775834e0db2d36005"
+        }
+      ],
+      "message": "silentpayments: optimize scanning by using batch inversion\n\nThis improves the worst-case scanning scenario performance by ~2.5x\nand also helps notably in the common case (\"no match\") scenario,\nespecially if the number of outputs is high:\n\nBenchmark results on parent commit (without optimization):\n\nsilentpayments_scan_nomatch_N=2         ,       43.0       ,       43.1       ,       43.1\nsilentpayments_scan_nomatch_N=5         ,       46.8       ,       46.9       ,       46.9\nsilentpayments_scan_nomatch_N=10        ,       53.5       ,       53.6       ,       53.6\nsilentpayments_scan_nomatch_N=100       ,      175.0       ,      178.0       ,      186.0\nsilentpayments_scan_nomatch_N=1000      ,     1425.0       ,     1430.0       ,     1436.0\nsilentpayments_scan_nomatch_N=2323      ,     3251.0       ,     3260.0       ,     3269.0\nsilentpayments_scan_nomatch_N=23250     ,    32039.0       ,    32167.0       ,    32294.0\nsilentpayments_scan_worstcase_K=10      ,   352706.0       ,   352781.0       ,   352872.0\nsilentpayments_scan_worstcase_K=100     ,  3230214.0       ,  3231089.0       ,  3231796.0\nsilentpayments_scan_worstcase_K=1000    , 31401430.0       , 31406989.0       , 31416195.0\nsilentpayments_scan_worstcase_K=2323    , 70759992.0       , 70764742.0       , 70769823.0\n\nBenchmark results on this commit (with optimization):\n\nsilentpayments_scan_nomatch_N=2         ,       42.2       ,       42.2       ,       42.2\nsilentpayments_scan_nomatch_N=5         ,       43.6       ,       43.6       ,       43.7\nsilentpayments_scan_nomatch_N=10        ,       47.1       ,       47.1       ,       47.1\nsilentpayments_scan_nomatch_N=100       ,      101.0       ,      104.0       ,      109.0\nsilentpayments_scan_nomatch_N=1000      ,      654.0       ,      658.0       ,      664.0\nsilentpayments_scan_nomatch_N=2323      ,     1473.0       ,     1476.0       ,     1479.0\nsilentpayments_scan_nomatch_N=23250     ,    14400.0       ,    14412.0       ,    14425.0\nsilentpayments_scan_worstcase_K=10      ,   157215.0       ,   157242.0       ,   157267.0\nsilentpayments_scan_worstcase_K=100     ,  1440043.0       ,  1440081.0       ,  1440106.0\nsilentpayments_scan_worstcase_K=1000    , 13995233.0       , 13995646.0       , 13995923.0\nsilentpayments_scan_worstcase_K=2323    , 31535643.0       , 31538121.0       , 31542702.0",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-02-16T02:30:40Z"
+      },
+      "sha": "420a6aa5661c1081ec3fe6364674d6574ebdea72"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGRlODI0OWE5MjYxMmI0OThjMTVhZWJjOGUyOGE2OGE5YTJkYTcyMWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/de8249a92612b498c15aebc8e28a68a9a2da721c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/de8249a92612b498c15aebc8e28a68a9a2da721c",
+      "tree": {
+        "sha": "ecb0f8206ffc2566e6dd2c1d2e670549b17d861c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ecb0f8206ffc2566e6dd2c1d2e670549b17d861c"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/420a6aa5661c1081ec3fe6364674d6574ebdea72",
+          "sha": "420a6aa5661c1081ec3fe6364674d6574ebdea72",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/420a6aa5661c1081ec3fe6364674d6574ebdea72"
+        }
+      ],
+      "message": "tests: add BIP-352 test vectors\n\nAdd the BIP-352 test vectors. The vectors are generated with a Python script\nthat converts the .json file from the BIP to C code:\n\n$ ./tools/tests_silentpayments_generate.py test_vectors.json > ./src/modules/silentpayments/vectors.h\n\nCo-authored-by: Ron <4712150+macgyver13@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>\nCo-authored-by: Tim Ruffing <1071625+real-or-random@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-07-02T17:45:43Z"
+      },
+      "sha": "de8249a92612b498c15aebc8e28a68a9a2da721c"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGJmZDQ4NTg3ZTVmZTVkOTA3ZTY3YzkwNmQ1OWJlMzI3YmMyYzA1NWE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfd48587e5fe5d907e67c906d59be327bc2c055a",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfd48587e5fe5d907e67c906d59be327bc2c055a",
+      "tree": {
+        "sha": "b9abe97e1fd8cc2a96fd697f365ed4bcd4ed5a25",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b9abe97e1fd8cc2a96fd697f365ed4bcd4ed5a25"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/de8249a92612b498c15aebc8e28a68a9a2da721c",
+          "sha": "de8249a92612b498c15aebc8e28a68a9a2da721c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/de8249a92612b498c15aebc8e28a68a9a2da721c"
+        }
+      ],
+      "message": "tests: add constant time tests\n\nCo-authored-by: Jonas Nick <2582071+jonasnick@users.noreply.github.com>\nCo-authored-by: Sebastian Falbesoner <91535+thestack@users.noreply.github.com>",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-11-07T12:18:59Z"
+      },
+      "sha": "bfd48587e5fe5d907e67c906d59be327bc2c055a"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGIyNDhlZmJkOTJiZDdlMWI2MGZlYTM3OTNkMWNlNjRhNTIwZTA4Y2Y",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b248efbd92bd7e1b60fea3793d1ce64a520e08cf",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b248efbd92bd7e1b60fea3793d1ce64a520e08cf",
+      "tree": {
+        "sha": "ffe8628d133ec369727d193cf697dc347e4a7a82",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ffe8628d133ec369727d193cf697dc347e4a7a82"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bfd48587e5fe5d907e67c906d59be327bc2c055a",
+          "sha": "bfd48587e5fe5d907e67c906d59be327bc2c055a",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bfd48587e5fe5d907e67c906d59be327bc2c055a"
+        }
+      ],
+      "message": "tests: add sha256 tag test\n\nTest midstate tags used in silent payments.",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2025-08-15T08:46:46Z"
+      },
+      "sha": "b248efbd92bd7e1b60fea3793d1ce64a520e08cf"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDIwYWVlOWI5YWIxOTE5YzljY2MyZGNjZDQ3NGZmYTQzMTI3MDRjZjk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/20aee9b9ab1919c9ccc2dccd474ffa4312704cf9",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/20aee9b9ab1919c9ccc2dccd474ffa4312704cf9",
+      "tree": {
+        "sha": "caf2ec73526c82088e7e55aebce2d17869ee10a8",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/caf2ec73526c82088e7e55aebce2d17869ee10a8"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b248efbd92bd7e1b60fea3793d1ce64a520e08cf",
+          "sha": "b248efbd92bd7e1b60fea3793d1ce64a520e08cf",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b248efbd92bd7e1b60fea3793d1ce64a520e08cf"
+        }
+      ],
+      "message": "ci: enable silentpayments module",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2024-02-22T23:25:41Z"
+      },
+      "sha": "20aee9b9ab1919c9ccc2dccd474ffa4312704cf9"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ1ZDA0YzRkZjBkNWRlOWVlMTI0MjA2YzZhMmMwZjQ5NGFkYjRlNzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d5d04c4df0d5de9ee124206c6a2c0f494adb4e72",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d5d04c4df0d5de9ee124206c6a2c0f494adb4e72",
+      "tree": {
+        "sha": "b3d5b74c41235d65f9a6e6c556182cef6d41472d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b3d5b74c41235d65f9a6e6c556182cef6d41472d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/20aee9b9ab1919c9ccc2dccd474ffa4312704cf9",
+          "sha": "20aee9b9ab1919c9ccc2dccd474ffa4312704cf9",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/20aee9b9ab1919c9ccc2dccd474ffa4312704cf9"
+        }
+      ],
+      "message": "docs: update README",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "josibake",
+        "email": "josibake@protonmail.com",
+        "date": "2024-07-12T12:57:54Z"
+      },
+      "sha": "d5d04c4df0d5de9ee124206c6a2c0f494adb4e72"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDQ1OWE4ZjkxMmUwZDA4NWFiNmUwZGU0ZTg5M2QxNjMxOWNkNTI3ZTg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/459a8f912e0d085ab6e0de4e893d16319cd527e8",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/459a8f912e0d085ab6e0de4e893d16319cd527e8",
+      "tree": {
+        "sha": "7b198bdde781b4e2ffbc31cf1337526107aeeb9f",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7b198bdde781b4e2ffbc31cf1337526107aeeb9f"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d5d04c4df0d5de9ee124206c6a2c0f494adb4e72",
+          "sha": "d5d04c4df0d5de9ee124206c6a2c0f494adb4e72",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d5d04c4df0d5de9ee124206c6a2c0f494adb4e72"
+        }
+      ],
+      "message": "silentpayments: skip slow benchmarks for low iters count (<= 2)\n\nThe worst-case scanning benchmarks and the common-case scanning\nbenchmarks with N>10 are relatively slow, leading to signifcantly\nlong run times of CI jobs. Avoid this by skipping these if the\niters count is <= 2 (CI jobs run with SECP256K1_BENCH_ITERS=2).\nThis is the same approach used in the ecmult benchmarks (bench_ecmult).",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-15T14:31:06Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-04-19T20:29:27Z"
+      },
+      "sha": "459a8f912e0d085ab6e0de4e893d16319cd527e8"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 26762573464,
+      "node_id": "HRFPE_lADOAP4Jqs7VEWwNzwAAAAY7LHaY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/26762573464",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
+      "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/459a8f912e0d085ab6e0de4e893d16319cd527e8",
+      "created_at": "2026-06-15T14:32:59Z"
+    },
+    {
+      "event": "commented",
+      "id": 4709051556,
+      "node_id": "IC_kwDOAP4Jqs8AAAABGK5spA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4709051556",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-15T14:37:24Z",
+      "updated_at": "2026-06-15T14:37:24Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Thanks for the reviews!\r\n\r\n> The worst-case scanning mitigation in the PR description is stale. It mentions that it is solved by marking already-found outputs, but I believe this was before modifying the BIP with a limited K.\r\n\r\nAdapted the PR description with a link to the [K_max BIP change](https://github.com/bitcoin/bips/pull/2106) and addressed https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3408897107. ([diff](https://github.com/bitcoin-core/secp256k1/compare/245160740a4c8f5a908383aa432676a1247b5a0c..459a8f912e0d085ab6e0de4e893d16319cd527e8))",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#issuecomment-4709051556",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1765"
     }
   ],
   "comments": [
@@ -14719,7 +14808,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 143,
       "original_position": 12,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": null,
       "user": {
@@ -14773,7 +14862,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 359,
       "original_position": 31,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": null,
       "user": {
@@ -14827,7 +14916,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 169,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": null,
       "user": {
@@ -14881,7 +14970,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 409,
       "original_position": 80,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": null,
       "user": {
@@ -14935,7 +15024,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 409,
       "original_position": 80,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638162747,
       "user": {
@@ -14989,7 +15078,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 169,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638157829,
       "user": {
@@ -15043,7 +15132,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 359,
       "original_position": 31,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638145462,
       "user": {
@@ -15097,7 +15186,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 143,
       "original_position": 12,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638141579,
       "user": {
@@ -15151,7 +15240,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 143,
       "original_position": 12,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638141579,
       "user": {
@@ -15205,7 +15294,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 359,
       "original_position": 31,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638145462,
       "user": {
@@ -15259,7 +15348,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 169,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638157829,
       "user": {
@@ -15637,7 +15726,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 160,
       "original_position": 160,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": null,
       "user": {
@@ -15691,7 +15780,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 357,
       "original_position": 342,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": null,
       "user": {
@@ -15745,7 +15834,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 317,
       "original_position": 316,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": null,
       "user": {
@@ -15961,7 +16050,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 317,
       "original_position": 316,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": 2762506274,
       "user": {
@@ -16015,7 +16104,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 357,
       "original_position": 342,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": 2762495463,
       "user": {
@@ -16069,7 +16158,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 160,
       "original_position": 160,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "7ce90dd7525fdc72d8ee0ebf470fa8d3fe0bd601",
       "in_reply_to_id": 2761578265,
       "user": {
@@ -16123,7 +16212,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 419,
       "original_position": 424,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "25980e82651b8bb3316112ada8ddfb9592b69caf",
       "in_reply_to_id": null,
       "user": {
@@ -16285,7 +16374,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 591,
       "original_position": 591,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "25980e82651b8bb3316112ada8ddfb9592b69caf",
       "in_reply_to_id": null,
       "user": {
@@ -16447,7 +16536,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 419,
       "original_position": 424,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "25980e82651b8bb3316112ada8ddfb9592b69caf",
       "in_reply_to_id": 2844505726,
       "user": {
@@ -16501,7 +16590,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 591,
       "original_position": 591,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "25980e82651b8bb3316112ada8ddfb9592b69caf",
       "in_reply_to_id": 2844590301,
       "user": {
@@ -16609,7 +16698,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 366,
       "original_position": 354,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": null,
       "user": {
@@ -16663,7 +16752,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 504,
       "original_position": 490,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": null,
       "user": {
@@ -16717,7 +16806,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 407,
       "original_position": 417,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": null,
       "user": {
@@ -16771,7 +16860,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 470,
       "original_position": 483,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": null,
       "user": {
@@ -16825,7 +16914,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 517,
       "original_position": 518,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": null,
       "user": {
@@ -16879,7 +16968,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 366,
       "original_position": 354,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "81619becbded7050f886cc39347c7b0381c51f06",
       "in_reply_to_id": 2927980205,
       "user": {
@@ -17203,7 +17292,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 233,
       "original_position": 223,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "bc7b6141c9b3ecb6a583478e603b6d5d5bd2479a",
       "in_reply_to_id": null,
       "user": {
@@ -17419,7 +17508,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 233,
       "original_position": 223,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "bc7b6141c9b3ecb6a583478e603b6d5d5bd2479a",
       "in_reply_to_id": 3221589567,
       "user": {
@@ -17581,7 +17670,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 180,
       "original_position": 177,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f2d4bb7bee87b83ef482412135fb2a756d6fccd7",
       "in_reply_to_id": null,
       "user": {
@@ -17635,7 +17724,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 180,
       "original_position": 177,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f2d4bb7bee87b83ef482412135fb2a756d6fccd7",
       "in_reply_to_id": 3229620362,
       "user": {
@@ -17905,7 +17994,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 585,
       "original_position": 136,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "47b481740567712f0d38d3e8183ab1a8a69da6f9",
       "in_reply_to_id": null,
       "user": {
@@ -17959,7 +18048,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 680,
       "original_position": 218,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "47b481740567712f0d38d3e8183ab1a8a69da6f9",
       "in_reply_to_id": null,
       "user": {
@@ -18175,7 +18264,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 585,
       "original_position": 136,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "47b481740567712f0d38d3e8183ab1a8a69da6f9",
       "in_reply_to_id": 3238576148,
       "user": {
@@ -18229,7 +18318,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 680,
       "original_position": 218,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "47b481740567712f0d38d3e8183ab1a8a69da6f9",
       "in_reply_to_id": 3238616034,
       "user": {
@@ -18769,7 +18858,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 160,
       "original_position": 160,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "4663ba1fb918d4ec9b940e013a1cd2595ef785c3",
       "in_reply_to_id": null,
       "user": {
@@ -18823,7 +18912,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 160,
       "original_position": 160,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "4663ba1fb918d4ec9b940e013a1cd2595ef785c3",
       "in_reply_to_id": 3285573698,
       "user": {
@@ -18931,7 +19020,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 169,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "2c073807c3172ec1b6325c78cd78ece458955b6d",
       "in_reply_to_id": 2638157829,
       "user": {
@@ -19039,7 +19128,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 352,
       "original_position": 29,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": null,
       "user": {
@@ -19093,7 +19182,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 362,
       "original_position": 35,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": null,
       "user": {
@@ -19147,7 +19236,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 660,
       "original_position": 69,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "435cb9d3c350e2312233db7b6e13211ee503f951",
       "in_reply_to_id": null,
       "user": {
@@ -19309,7 +19398,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 660,
       "original_position": 69,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "435cb9d3c350e2312233db7b6e13211ee503f951",
       "in_reply_to_id": 3316474157,
       "user": {
@@ -19363,7 +19452,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 362,
       "original_position": 35,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": 3316368117,
       "user": {
@@ -19471,7 +19560,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 352,
       "original_position": 29,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": 3316349550,
       "user": {
@@ -19525,7 +19614,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 362,
       "original_position": 35,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": 3316368117,
       "user": {
@@ -19633,7 +19722,7 @@
       "path": "include/secp256k1_silentpayments.h",
       "position": 352,
       "original_position": 29,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "f0bc2b8ea4c002bcbf49dd7561dcbf5e3a88e93c",
       "in_reply_to_id": 3316349550,
       "user": {
@@ -19687,7 +19776,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 616,
       "original_position": 167,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "40e015ae8c1024d551cdb32ab5cce3b1cbcbc107",
       "in_reply_to_id": null,
       "user": {
@@ -19741,7 +19830,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 634,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "96e3a28a1b3cdb7370dfeaa9fa4d58f0f1c36cde",
       "in_reply_to_id": null,
       "user": {
@@ -19795,7 +19884,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 38,
       "original_position": 30,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "a360c392a01256959bc82432ee9affbbcb1290b9",
       "in_reply_to_id": null,
       "user": {
@@ -19849,7 +19938,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 706,
       "original_position": 52,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "995babd0d485c59fae8b646a1628d75caad65fdf",
       "in_reply_to_id": null,
       "user": {
@@ -19903,7 +19992,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 240,
       "original_position": 233,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "a360c392a01256959bc82432ee9affbbcb1290b9",
       "in_reply_to_id": null,
       "user": {
@@ -19957,7 +20046,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 737,
       "original_position": 263,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "40e015ae8c1024d551cdb32ab5cce3b1cbcbc107",
       "in_reply_to_id": null,
       "user": {
@@ -20011,7 +20100,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 616,
       "original_position": 167,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "40e015ae8c1024d551cdb32ab5cce3b1cbcbc107",
       "in_reply_to_id": 3320389716,
       "user": {
@@ -20065,7 +20154,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 634,
       "original_position": 38,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "96e3a28a1b3cdb7370dfeaa9fa4d58f0f1c36cde",
       "in_reply_to_id": 3320423769,
       "user": {
@@ -20119,7 +20208,7 @@
       "path": "src/modules/silentpayments/main_impl.h",
       "position": 737,
       "original_position": 263,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "40e015ae8c1024d551cdb32ab5cce3b1cbcbc107",
       "in_reply_to_id": 3320562227,
       "user": {
@@ -20225,9 +20314,9 @@
       "node_id": "PRRC_kwDOAP4Jqs7LL6RT",
       "diff_hunk": "@@ -0,0 +1,463 @@\n+/*************************************************************************\n+ * To the extent possible under law, the author(s) have dedicated all    *\n+ * copyright and related and neighboring rights to the software in this  *\n+ * file to the public domain worldwide. This software is distributed     *\n+ * without any warranty. For the CC0 Public Domain Dedication, see       *\n+ * EXAMPLES_COPYING or https://creativecommons.org/publicdomain/zero/1.0 *\n+ *************************************************************************/\n+\n+#include <assert.h>\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#include <secp256k1_extrakeys.h>\n+#include <secp256k1_silentpayments.h>\n+\n+#include \"examples_util.h\"\n+\n+#define N_INPUTS  2\n+#define N_OUTPUTS 3\n+\n+/* Static data for Bob and Carol's Silent Payments addresses */\n+static unsigned char smallest_outpoint[36] = {\n+    0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+    0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+    0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+    0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00\n+};\n+static unsigned char bob_scan_key[32] = {\n+    0xa8, 0x90, 0x54, 0xc9, 0x5b, 0xe3, 0xc3, 0x01,\n+    0x56, 0x65, 0x74, 0xf2, 0xaa, 0x93, 0xad, 0xe0,\n+    0x51, 0x85, 0x09, 0x03, 0xa6, 0x9c, 0xbd, 0xd1,\n+    0xd4, 0x7e, 0xae, 0x26, 0x3d, 0x7b, 0xc0, 0x31\n+};\n+static unsigned char bob_spend_key[32] = {\n+    0x9d, 0x6a, 0xd8, 0x55, 0xce, 0x34, 0x17, 0xef,\n+    0x84, 0xe8, 0x36, 0x89, 0x2e, 0x5a, 0x56, 0x39,\n+    0x2b, 0xfb, 0xa0, 0x5f, 0xa5, 0xd9, 0x7c, 0xce,\n+    0xa3, 0x0e, 0x26, 0x6f, 0x54, 0x0e, 0x08, 0xb3\n+};\n+static unsigned char bob_scan_and_spend_pubkeys[2][33] = {\n+    {\n+        0x02, 0x15, 0x40, 0xae, 0xa8, 0x97, 0x54, 0x7a,\n+        0xd4, 0x39, 0xb4, 0xe0, 0xf6, 0x09, 0xe5, 0xf0,\n+        0xfa, 0x63, 0xde, 0x89, 0xab, 0x11, 0xed, 0xe3,\n+        0x1e, 0x8c, 0xde, 0x4b, 0xe2, 0x19, 0x42, 0x5f, 0x23\n+    },\n+    {\n+        0x02, 0x5c, 0xc9, 0x85, 0x6d, 0x6f, 0x83, 0x75,\n+        0x35, 0x0e, 0x12, 0x39, 0x78, 0xda, 0xac, 0x20,\n+        0x0c, 0x26, 0x0c, 0xb5, 0xb5, 0xae, 0x83, 0x10,\n+        0x6c, 0xab, 0x90, 0x48, 0x4d, 0xcd, 0x8f, 0xcf, 0x36\n+    }\n+};\n+static unsigned char carol_scan_key[32] = {\n+    0x04, 0xb2, 0xa4, 0x11, 0x63, 0x5c, 0x09, 0x77,\n+    0x59, 0xaa, 0xcd, 0x0f, 0x00, 0x5a, 0x4c, 0x82,\n+    0xc8, 0xc9, 0x28, 0x62, 0xc6, 0xfc, 0x28, 0x4b,\n+    0x80, 0xb8, 0xef, 0xeb, 0xc2, 0x0c, 0x3d, 0x17\n+};\n+static unsigned char carol_address[2][33] = {\n+    {\n+        0x03, 0xbb, 0xc6, 0x3f, 0x12, 0x74, 0x5d, 0x3b,\n+        0x9e, 0x9d, 0x24, 0xc6, 0xcd, 0x7a, 0x1e, 0xfe,\n+        0xba, 0xd0, 0xa7, 0xf4, 0x69, 0x23, 0x2f, 0xbe,\n+        0xcf, 0x31, 0xfb, 0xa7, 0xb4, 0xf7, 0xdd, 0xed, 0xa8\n+    },\n+    {\n+        0x03, 0x81, 0xeb, 0x9a, 0x9a, 0x9e, 0xc7, 0x39,\n+        0xd5, 0x27, 0xc1, 0x63, 0x1b, 0x31, 0xb4, 0x21,\n+        0x56, 0x6f, 0x5c, 0x2a, 0x47, 0xb4, 0xab, 0x5b,\n+        0x1f, 0x6a, 0x68, 0x6d, 0xfb, 0x68, 0xea, 0xb7, 0x16\n+    }\n+};\n+\n+/** Labels\n+ *\n+ *  The structs and callback function are implemented here as a demonstration\n+ *  of how the label lookup callback is meant to query a label cache and return\n+ *  the label tweak when a match is found. This is for demonstration purposes\n+ *  only and not optimized. In production, it is expected that the\n+ *  caller will be using a much more performant data structure for storing and\n+ *  querying labels, like e.g. a hash table with O(1) lookup cost.\n+ *\n+ *  Recipients not using labels can ignore these steps and simply pass `NULL`\n+ *  for the label_lookup and label_context arguments:\n+ *\n+ *      secp256k1_silentpayments_recipient_scan_outputs(..., NULL, NULL);\n+ */\n+\n+struct label_cache_entry {\n+    unsigned char label[33];\n+    unsigned char label_tweak[32];\n+};\n+\n+struct labels_cache {\n+    size_t entries_used;\n+    struct label_cache_entry entries[5];\n+};\n+\n+const unsigned char* label_lookup(\n+    const unsigned char* label33,\n+    const void* cache_ptr\n+) {\n+    const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;\n+    size_t i;\n+    for (i = 0; i < cache->entries_used; i++) {\n+        if (memcmp(cache->entries[i].label, label33, 33) == 0) {\n+            return cache->entries[i].label_tweak;\n+        }\n+    }\n+    return NULL;\n+}\n+\n+int main(void) {\n+    unsigned char randomize[32];\n+    unsigned char serialized_xonly[32];\n+    secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\n+    const secp256k1_xonly_pubkey *tx_input_ptrs[N_INPUTS];\n+    secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\n+    secp256k1_xonly_pubkey *tx_output_ptrs[N_OUTPUTS];\n+    secp256k1_silentpayments_found_output found_outputs[N_OUTPUTS];\n+    secp256k1_silentpayments_found_output *found_output_ptrs[N_OUTPUTS];\n+    secp256k1_silentpayments_prevouts_summary prevouts_summary;\n+    secp256k1_pubkey unlabeled_spend_pubkey;\n+    struct labels_cache bob_labels_cache;\n+    unsigned char bob_address[2][33];\n+    int ret;\n+    size_t i;\n+    uint32_t n_found_outputs;\n+\n+    /* Before we can call actual API functions, we need to create a \"context\" */\n+    secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    if (!fill_random(randomize, sizeof(randomize))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return EXIT_FAILURE;\n+    }\n+    /* Randomizing the context is recommended to protect against side-channel\n+     * leakage. See `secp256k1_context_randomize` in secp256k1.h for more\n+     * information about it. This should never fail. */\n+    ret = secp256k1_context_randomize(ctx, randomize);\n+    assert(ret);\n+\n+    /* Set up the pointer arrays. These will be used for sending and scanning. */\n+    for (i = 0; i < N_INPUTS; i++) {\n+        tx_input_ptrs[i] = &tx_inputs[i];\n+    }\n+    for (i = 0; i < N_OUTPUTS; i++) {\n+        tx_output_ptrs[i] = &tx_outputs[i];\n+        found_output_ptrs[i] = &found_outputs[i];\n+    }\n+\n+    /*** Create a labeled Silent Payments address (Bob) ***/\n+    {\n+        size_t len = 33;\n+        secp256k1_silentpayments_label label;\n+        secp256k1_pubkey labeled_spend_pubkey;\n+        unsigned int m = 0;\n+\n+        /* Load Bob's spend public key */\n+        ret = secp256k1_ec_pubkey_parse(ctx,\n+            &unlabeled_spend_pubkey,\n+            bob_scan_and_spend_pubkeys[1],\n+            33\n+        );\n+        assert(ret);\n+        /* Create a (label_tweak, label) pair and add them to the labels cache.\n+         *\n+         * Bob MUST keep track of all of the labels he has used by adding them\n+         * to the labels cache. Otherwise, he will not find outputs sent to his\n+         * labeled addresses when scanning. */\n+        ret = secp256k1_silentpayments_recipient_label_create(ctx,\n+            &label,\n+            bob_labels_cache.entries[0].label_tweak,\n+            bob_scan_key,\n+            m\n+        );\n+        if (!ret) {\n+            printf(\"Something went wrong, event with negligible probability happened.\\n\");\n+            return EXIT_FAILURE;\n+        }\n+        ret = secp256k1_silentpayments_recipient_label_serialize(ctx, bob_labels_cache.entries[0].label, &label);\n+        assert(ret);\n+        bob_labels_cache.entries_used = 1;\n+        /* Now that the labels cache has been updated, Bob creates his labeled\n+         * Silent Payments address and publishes it.",
       "path": "examples/silentpayments.c",
-      "position": 186,
+      "position": 188,
       "original_position": 186,
-      "commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
       "original_commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
       "in_reply_to_id": null,
       "user": {
@@ -20268,7 +20357,61 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 186,
+      "line": 188,
+      "original_line": 186,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3414277925",
+      "pull_request_review_id": 4498351556,
+      "id": 3414277925,
+      "node_id": "PRRC_kwDOAP4Jqs7Lgb8l",
+      "diff_hunk": "@@ -0,0 +1,463 @@\n+/*************************************************************************\n+ * To the extent possible under law, the author(s) have dedicated all    *\n+ * copyright and related and neighboring rights to the software in this  *\n+ * file to the public domain worldwide. This software is distributed     *\n+ * without any warranty. For the CC0 Public Domain Dedication, see       *\n+ * EXAMPLES_COPYING or https://creativecommons.org/publicdomain/zero/1.0 *\n+ *************************************************************************/\n+\n+#include <assert.h>\n+#include <stdio.h>\n+#include <stdlib.h>\n+#include <string.h>\n+\n+#include <secp256k1_extrakeys.h>\n+#include <secp256k1_silentpayments.h>\n+\n+#include \"examples_util.h\"\n+\n+#define N_INPUTS  2\n+#define N_OUTPUTS 3\n+\n+/* Static data for Bob and Carol's Silent Payments addresses */\n+static unsigned char smallest_outpoint[36] = {\n+    0x16, 0x9e, 0x1e, 0x83, 0xe9, 0x30, 0x85, 0x33, 0x91,\n+    0xbc, 0x6f, 0x35, 0xf6, 0x05, 0xc6, 0x75, 0x4c, 0xfe,\n+    0xad, 0x57, 0xcf, 0x83, 0x87, 0x63, 0x9d, 0x3b, 0x40,\n+    0x96, 0xc5, 0x4f, 0x18, 0xf4, 0x00, 0x00, 0x00, 0x00\n+};\n+static unsigned char bob_scan_key[32] = {\n+    0xa8, 0x90, 0x54, 0xc9, 0x5b, 0xe3, 0xc3, 0x01,\n+    0x56, 0x65, 0x74, 0xf2, 0xaa, 0x93, 0xad, 0xe0,\n+    0x51, 0x85, 0x09, 0x03, 0xa6, 0x9c, 0xbd, 0xd1,\n+    0xd4, 0x7e, 0xae, 0x26, 0x3d, 0x7b, 0xc0, 0x31\n+};\n+static unsigned char bob_spend_key[32] = {\n+    0x9d, 0x6a, 0xd8, 0x55, 0xce, 0x34, 0x17, 0xef,\n+    0x84, 0xe8, 0x36, 0x89, 0x2e, 0x5a, 0x56, 0x39,\n+    0x2b, 0xfb, 0xa0, 0x5f, 0xa5, 0xd9, 0x7c, 0xce,\n+    0xa3, 0x0e, 0x26, 0x6f, 0x54, 0x0e, 0x08, 0xb3\n+};\n+static unsigned char bob_scan_and_spend_pubkeys[2][33] = {\n+    {\n+        0x02, 0x15, 0x40, 0xae, 0xa8, 0x97, 0x54, 0x7a,\n+        0xd4, 0x39, 0xb4, 0xe0, 0xf6, 0x09, 0xe5, 0xf0,\n+        0xfa, 0x63, 0xde, 0x89, 0xab, 0x11, 0xed, 0xe3,\n+        0x1e, 0x8c, 0xde, 0x4b, 0xe2, 0x19, 0x42, 0x5f, 0x23\n+    },\n+    {\n+        0x02, 0x5c, 0xc9, 0x85, 0x6d, 0x6f, 0x83, 0x75,\n+        0x35, 0x0e, 0x12, 0x39, 0x78, 0xda, 0xac, 0x20,\n+        0x0c, 0x26, 0x0c, 0xb5, 0xb5, 0xae, 0x83, 0x10,\n+        0x6c, 0xab, 0x90, 0x48, 0x4d, 0xcd, 0x8f, 0xcf, 0x36\n+    }\n+};\n+static unsigned char carol_scan_key[32] = {\n+    0x04, 0xb2, 0xa4, 0x11, 0x63, 0x5c, 0x09, 0x77,\n+    0x59, 0xaa, 0xcd, 0x0f, 0x00, 0x5a, 0x4c, 0x82,\n+    0xc8, 0xc9, 0x28, 0x62, 0xc6, 0xfc, 0x28, 0x4b,\n+    0x80, 0xb8, 0xef, 0xeb, 0xc2, 0x0c, 0x3d, 0x17\n+};\n+static unsigned char carol_address[2][33] = {\n+    {\n+        0x03, 0xbb, 0xc6, 0x3f, 0x12, 0x74, 0x5d, 0x3b,\n+        0x9e, 0x9d, 0x24, 0xc6, 0xcd, 0x7a, 0x1e, 0xfe,\n+        0xba, 0xd0, 0xa7, 0xf4, 0x69, 0x23, 0x2f, 0xbe,\n+        0xcf, 0x31, 0xfb, 0xa7, 0xb4, 0xf7, 0xdd, 0xed, 0xa8\n+    },\n+    {\n+        0x03, 0x81, 0xeb, 0x9a, 0x9a, 0x9e, 0xc7, 0x39,\n+        0xd5, 0x27, 0xc1, 0x63, 0x1b, 0x31, 0xb4, 0x21,\n+        0x56, 0x6f, 0x5c, 0x2a, 0x47, 0xb4, 0xab, 0x5b,\n+        0x1f, 0x6a, 0x68, 0x6d, 0xfb, 0x68, 0xea, 0xb7, 0x16\n+    }\n+};\n+\n+/** Labels\n+ *\n+ *  The structs and callback function are implemented here as a demonstration\n+ *  of how the label lookup callback is meant to query a label cache and return\n+ *  the label tweak when a match is found. This is for demonstration purposes\n+ *  only and not optimized. In production, it is expected that the\n+ *  caller will be using a much more performant data structure for storing and\n+ *  querying labels, like e.g. a hash table with O(1) lookup cost.\n+ *\n+ *  Recipients not using labels can ignore these steps and simply pass `NULL`\n+ *  for the label_lookup and label_context arguments:\n+ *\n+ *      secp256k1_silentpayments_recipient_scan_outputs(..., NULL, NULL);\n+ */\n+\n+struct label_cache_entry {\n+    unsigned char label[33];\n+    unsigned char label_tweak[32];\n+};\n+\n+struct labels_cache {\n+    size_t entries_used;\n+    struct label_cache_entry entries[5];\n+};\n+\n+const unsigned char* label_lookup(\n+    const unsigned char* label33,\n+    const void* cache_ptr\n+) {\n+    const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;\n+    size_t i;\n+    for (i = 0; i < cache->entries_used; i++) {\n+        if (memcmp(cache->entries[i].label, label33, 33) == 0) {\n+            return cache->entries[i].label_tweak;\n+        }\n+    }\n+    return NULL;\n+}\n+\n+int main(void) {\n+    unsigned char randomize[32];\n+    unsigned char serialized_xonly[32];\n+    secp256k1_xonly_pubkey tx_inputs[N_INPUTS];\n+    const secp256k1_xonly_pubkey *tx_input_ptrs[N_INPUTS];\n+    secp256k1_xonly_pubkey tx_outputs[N_OUTPUTS];\n+    secp256k1_xonly_pubkey *tx_output_ptrs[N_OUTPUTS];\n+    secp256k1_silentpayments_found_output found_outputs[N_OUTPUTS];\n+    secp256k1_silentpayments_found_output *found_output_ptrs[N_OUTPUTS];\n+    secp256k1_silentpayments_prevouts_summary prevouts_summary;\n+    secp256k1_pubkey unlabeled_spend_pubkey;\n+    struct labels_cache bob_labels_cache;\n+    unsigned char bob_address[2][33];\n+    int ret;\n+    size_t i;\n+    uint32_t n_found_outputs;\n+\n+    /* Before we can call actual API functions, we need to create a \"context\" */\n+    secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    if (!fill_random(randomize, sizeof(randomize))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return EXIT_FAILURE;\n+    }\n+    /* Randomizing the context is recommended to protect against side-channel\n+     * leakage. See `secp256k1_context_randomize` in secp256k1.h for more\n+     * information about it. This should never fail. */\n+    ret = secp256k1_context_randomize(ctx, randomize);\n+    assert(ret);\n+\n+    /* Set up the pointer arrays. These will be used for sending and scanning. */\n+    for (i = 0; i < N_INPUTS; i++) {\n+        tx_input_ptrs[i] = &tx_inputs[i];\n+    }\n+    for (i = 0; i < N_OUTPUTS; i++) {\n+        tx_output_ptrs[i] = &tx_outputs[i];\n+        found_output_ptrs[i] = &found_outputs[i];\n+    }\n+\n+    /*** Create a labeled Silent Payments address (Bob) ***/\n+    {\n+        size_t len = 33;\n+        secp256k1_silentpayments_label label;\n+        secp256k1_pubkey labeled_spend_pubkey;\n+        unsigned int m = 0;\n+\n+        /* Load Bob's spend public key */\n+        ret = secp256k1_ec_pubkey_parse(ctx,\n+            &unlabeled_spend_pubkey,\n+            bob_scan_and_spend_pubkeys[1],\n+            33\n+        );\n+        assert(ret);\n+        /* Create a (label_tweak, label) pair and add them to the labels cache.\n+         *\n+         * Bob MUST keep track of all of the labels he has used by adding them\n+         * to the labels cache. Otherwise, he will not find outputs sent to his\n+         * labeled addresses when scanning. */\n+        ret = secp256k1_silentpayments_recipient_label_create(ctx,\n+            &label,\n+            bob_labels_cache.entries[0].label_tweak,\n+            bob_scan_key,\n+            m\n+        );\n+        if (!ret) {\n+            printf(\"Something went wrong, event with negligible probability happened.\\n\");\n+            return EXIT_FAILURE;\n+        }\n+        ret = secp256k1_silentpayments_recipient_label_serialize(ctx, bob_labels_cache.entries[0].label, &label);\n+        assert(ret);\n+        bob_labels_cache.entries_used = 1;\n+        /* Now that the labels cache has been updated, Bob creates his labeled\n+         * Silent Payments address and publishes it.",
+      "path": "examples/silentpayments.c",
+      "position": 188,
+      "original_position": 186,
+      "commit_id": "459a8f912e0d085ab6e0de4e893d16319cd527e8",
+      "original_commit_id": "245160740a4c8f5a908383aa432676a1247b5a0c",
+      "in_reply_to_id": 3408897107,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Good catch! Changed the value to m = 1 and added a small comment (and while being at it, adapted the data type to match the API s/unsigned int/uint32_t/).",
+      "created_at": "2026-06-15T14:35:00Z",
+      "updated_at": "2026-06-15T14:35:01Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3414277925",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3414277925"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 188,
       "original_line": 186,
       "side": "RIGHT"
     }
