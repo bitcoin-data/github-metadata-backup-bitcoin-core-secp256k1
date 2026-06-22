@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1878/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1878/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/56707cc0b8aea884c7bc55e9973cd3b4b676976f",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/56e031a14828a3b0e9a0b3d3626ca48e76716d98",
     "number": 1878,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "field: correct `secp256k1_fe_half` doc (output is not normalized)",
+    "title": "field: correct `_fe_half` docs (output is not normalized, input requires magnitude <= 31)",
     "user": {
       "login": "theStack",
       "id": 91535,
@@ -61,11 +61,11 @@
       }
     ],
     "created_at": "2026-06-22T14:40:06Z",
-    "updated_at": "2026-06-22T18:02:59Z",
+    "updated_at": "2026-06-22T22:49:08Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "23b91e077726688c8f8fc202b8a2509f10c1627f",
+    "merge_commit_sha": "c0ad55ff21eff1f7c324a02e5fb6996d167ca767",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -73,7 +73,7 @@
     "head": {
       "label": "theStack:doc-fe_half-fix_output_normalized",
       "ref": "doc-fe_half-fix_output_normalized",
-      "sha": "56707cc0b8aea884c7bc55e9973cd3b4b676976f",
+      "sha": "56e031a14828a3b0e9a0b3d3626ca48e76716d98",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -185,7 +185,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-22T14:27:46Z",
+        "pushed_at": "2026-06-22T22:26:37Z",
         "created_at": "2022-01-27T16:42:12Z",
         "updated_at": "2025-09-14T19:27:22Z",
         "allow_forking": true,
@@ -349,54 +349,14 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 1,
-    "deletions": 1,
+    "additions": 2,
+    "deletions": 2,
     "changed_files": 1,
     "commits": 1,
     "review_comments": 0,
     "comments": 2
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDU2NzA3Y2MwYjhhZWE4ODRjN2JjNTVlOTk3M2NkM2I0YjY3Njk3NmY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/56707cc0b8aea884c7bc55e9973cd3b4b676976f",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/56707cc0b8aea884c7bc55e9973cd3b4b676976f",
-      "tree": {
-        "sha": "75ac0ab93fd8b5600aa1273853ffa89d6c72b33b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/75ac0ab93fd8b5600aa1273853ffa89d6c72b33b"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd0287d650c24dc41e0362675a9f6a49ee952def"
-        }
-      ],
-      "message": "field: correct `secp256k1_fe_half` doc (output is not normalized)",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-22T14:27:35Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-22T14:03:24Z"
-      },
-      "sha": "56707cc0b8aea884c7bc55e9973cd3b4b676976f"
-    },
     {
       "event": "labeled",
       "id": 27050880529,
@@ -594,9 +554,9 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-06-22T18:01:23Z",
-      "updated_at": "2026-06-22T18:02:59Z",
+      "updated_at": "2026-06-22T22:49:08Z",
       "author_association": "CONTRIBUTOR",
-      "body": "> > I took a look at the other field module function docs w.r.t. their normalized/magnitude promises\r\n> \r\n> Thanks! How confident are you that this is the only one (beyond #1877)?\r\n\r\nI was almost about to reply \"quite confident\", but then found another one even within `fe_half`: for the input `r` the implementation checks for magnitude <= 31, which is not documented as requirement:\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/field.h#L326\r\nhttps://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/field_impl.h#L444-L446\r\n\r\nIn this case it's less clear for me on whether the documentation or the implementation needs to be adapted. (When in doubt, keeping the more conservative choice of 31 seems fine though, as I don't think we are close to that magnitude anytime soon, or probably ever; on the other hand it's just noise if it's not really needed).",
+      "body": "> > I took a look at the other field module function docs w.r.t. their normalized/magnitude promises\r\n> \r\n> Thanks! How confident are you that this is the only one (beyond #1877)?\r\n\r\nI was almost about to reply \"quite confident\", but then found another one even within `fe_half`: for the input `r` the implementation checks for magnitude <= 31, which is not documented as requirement:\r\n\r\nhttps://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/field.h#L326\r\nhttps://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/field_impl.h#L444-L446\r\n\r\nIn this case it's less clear for me on whether the documentation or the implementation needs to be adapted. (When in doubt, keeping the more conservative choice of 31 seems fine though, as I don't think we are close to that magnitude anytime soon, or probably ever; on the other hand it's just noise if it's not really needed).\r\n\r\n// EDIT: Decided to keep the current bound and updated the docs to be on the safe side.",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -621,6 +581,112 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1878#issuecomment-4771299970",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1878"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDU2ZTAzMWExNDgyOGEzYjBlOWEwYjNkMzYyNmNhNDhlNzY3MTZkOTg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/56e031a14828a3b0e9a0b3d3626ca48e76716d98",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/56e031a14828a3b0e9a0b3d3626ca48e76716d98",
+      "tree": {
+        "sha": "ac579c0780835621f788f127875588afe826231d",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ac579c0780835621f788f127875588afe826231d"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd0287d650c24dc41e0362675a9f6a49ee952def",
+          "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd0287d650c24dc41e0362675a9f6a49ee952def"
+        }
+      ],
+      "message": "field: correct `_fe_half` docs (output is not normalized, input requires magnitude <= 31)",
+      "committer": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-22T22:18:58Z"
+      },
+      "author": {
+        "name": "Sebastian Falbesoner",
+        "email": "sebastian.falbesoner@gmail.com",
+        "date": "2026-06-22T14:03:24Z"
+      },
+      "sha": "56e031a14828a3b0e9a0b3d3626ca48e76716d98"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 27066079449,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABGTIUCs8AAAAGTUOY2Q",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27066079449",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "56e031a14828a3b0e9a0b3d3626ca48e76716d98",
+      "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/56e031a14828a3b0e9a0b3d3626ca48e76716d98",
+      "created_at": "2026-06-22T22:26:39Z"
+    },
+    {
+      "event": "renamed",
+      "id": 27066092474,
+      "node_id": "RTE_lADOAP4Jqs8AAAABGTIUCs8AAAAGTUPLug",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27066092474",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-22T22:27:06Z",
+      "rename": {
+        "from": "field: correct `secp256k1_fe_half` doc (output is not normalized)",
+        "to": "field: correct `_fe_half` docs (output is not normalized, input requires magnitude <= 31)"
+      }
     }
   ],
   "comments": []
