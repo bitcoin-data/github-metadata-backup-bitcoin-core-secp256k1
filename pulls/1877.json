@@ -43,9 +43,9 @@
     "body": "**Problem:** While reviewing this area with Fable, I noticed that `secp256k1_fe_equal(a, b)` says `b` may have magnitude up to 31, but that boundary does not actually work.\r\nA zero value carried at magnitude 31 can fail the comparison.\r\n\r\n**Alternative:** One possible fix is to lower the documented bound from 31 to 30, which would avoid adding work to `fe_equal`.\r\nI could not make that version produce a useful failing test, because magnitude 31 would become invalid input instead of a case `fe_equal` should handle.\r\n\r\n**Fix:** This keeps the existing documented bound and makes `fe_equal` handle it by normalizing the temporary value before adding `b`.\r\nThe new test compares canonical zero with zero stored at magnitude 31, and fails without the code change.\r\n\r\n**Review help wanted:** I would appreciate review on whether this is a real problem in practice and whether preserving the current bound is the right tradeoff.\r\n",
     "labels": [],
     "created_at": "2026-06-21T12:43:57Z",
-    "updated_at": "2026-06-21T12:43:57Z",
+    "updated_at": "2026-06-22T00:02:13Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "c1df6ac9c4e8e87b0c3391451eec649990ccbe37",
     "assignees": [],
@@ -154,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13838,
+        "size": 13839,
         "default_branch": "master",
         "open_issues_count": 8,
         "is_template": false,
@@ -335,7 +335,7 @@
     "deletions": 0,
     "changed_files": 2,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 0
   },
   "events": [
@@ -378,7 +378,101 @@
         "date": "2026-06-21T11:37:40Z"
       },
       "sha": "c7914b1621fb538b13e8bc18e0d48415f6aaaccf"
+    },
+    {
+      "event": "reviewed",
+      "id": 4540440508,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABDqGfvA",
+      "url": null,
+      "actor": null,
+      "commit_id": "c7914b1621fb538b13e8bc18e0d48415f6aaaccf",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-06-22T00:02:13Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Quite an interesting find. When introducing the boundaries for `fe_equal`, it was apparently overlooked that the `fe_negate` call increases the magnitude of `a` (setting it to `m+1`, i.e. always to 2 in this case), so in light of the following `fe_add` call requirements the correct maximum magnitude for `b` is indeed 30 rather than 31.\n\n> Review help wanted: I would appreciate review on whether this is a real problem in practice and whether preserving the current bound is the right tradeoff.\n\nSeems merely an internal documentation hickup and not a real problem. Given that as of now the maximum magnitude of all `b` passed to `fe_equal` is only 7 [1], I think there is no point to enforce the currently documented bound with modified run-time behavior. Lowering the documented bound to 30 and adapting the check accordingly should be fine.\n\n[1] evaluated with the following hacky patch and running the tests (and assuming that we do cover all relevant production code API paths in our tests):\n```diff --git a/src/field_impl.h b/src/field_impl.h\nindex 7aa7de43..f06753e8 100644\n--- a/src/field_impl.h\n+++ b/src/field_impl.h\n@@ -28,6 +28,13 @@ SECP256K1_INLINE static int secp256k1_fe_equal(const secp256k1_fe *a, const secp\n     SECP256K1_FE_VERIFY(b);\n     SECP256K1_FE_VERIFY_MAGNITUDE(a, 1);\n     SECP256K1_FE_VERIFY_MAGNITUDE(b, 31);\n+#ifdef VERIFY\n+    static int max_b_magnitude = 0;\n+    if (b->magnitude > max_b_magnitude) {\n+        max_b_magnitude = b->magnitude;\n+        printf(\"new max magnitude for b passed to fe_equal: %d\\n\", max_b_magnitude);\n+    }\n+#endif\n \n     secp256k1_fe_negate(&na, a, 1);\n     secp256k1_fe_add(&na, b);\n```",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#pullrequestreview-4540440508",
+      "submitted_at": "2026-06-22T00:02:13Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3449243239",
+      "pull_request_review_id": 4540440508,
+      "id": 3449243239,
+      "node_id": "PRRC_kwDOAP4Jqs7Nl0Zn",
+      "diff_hunk": "@@ -3059,6 +3059,21 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {\n     return secp256k1_fe_equal(&an, &bn);\n }\n \n+static void run_fe_equal_zero_magnitude31(void) {\n+    secp256k1_fe a, b;\n+\n+    secp256k1_fe_set_int(&a, 0);\n+    secp256k1_fe_set_int(&b, 0);\n+    /* Make zero non-canonical so multiplying it can raise its magnitude. */\n+    secp256k1_fe_negate(&b, &b, 0);\n+    /* Scale the zero-valued element to fe_equal's documented b bound. */\n+    secp256k1_fe_mul_int_unchecked(&b, 31);\n+#ifdef VERIFY\n+    CHECK(b.magnitude == 31);\n+#endif\n+    CHECK(secp256k1_fe_equal(&a, &b));\n+}",
+      "path": "src/tests.c",
+      "position": 17,
+      "original_position": 17,
+      "commit_id": "c7914b1621fb538b13e8bc18e0d48415f6aaaccf",
+      "original_commit_id": "c7914b1621fb538b13e8bc18e0d48415f6aaaccf",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Not really sure if we want to introduce those kind of magnitude-boundaries-tests in general (cc @real-or-random, @sipa), but if we do, I'd probably write this one as:\r\n\r\n```c\r\nstatic void run_fe_equal_magnitude_boundaries(void) {\r\n    secp256k1_fe a, b;\r\n\r\n    /* Set up elements with fe_equal's documented a and b magnitude bounds. */\r\n    secp256k1_fe_set_int(&a, 1);\r\n    secp256k1_fe_set_int(&b, 1);\r\n    secp256k1_fe_mul_int(&b, 30);\r\n#ifdef VERIFY\r\n    CHECK(a.magnitude == 1);\r\n    CHECK(b.magnitude == 30);\r\n#endif\r\n    CHECK(!secp256k1_fe_equal(&a, &b));\r\n}\r\n```\r\n\r\n(Fable was very fixated on the zero values; probably to keep the original b value after the multiplication and make fe_equal return 1, but the return value doesn't matter for this test).",
+      "created_at": "2026-06-21T23:46:34Z",
+      "updated_at": "2026-06-22T00:23:01Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#discussion_r3449243239",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3449243239"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
+        }
+      },
+      "start_line": 3062,
+      "original_start_line": 3062,
+      "start_side": "RIGHT",
+      "line": 3075,
+      "original_line": 3075,
+      "side": "RIGHT"
+    }
+  ]
 }
