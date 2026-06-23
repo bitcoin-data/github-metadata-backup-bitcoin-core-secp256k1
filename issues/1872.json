@@ -68,9 +68,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 1,
+    "comments": 2,
     "created_at": "2026-06-16T06:28:37Z",
-    "updated_at": "2026-06-19T05:12:43Z"
+    "updated_at": "2026-06-22T23:55:31Z"
   },
   "events": [
     {
@@ -327,6 +327,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1872#issuecomment-4748688835",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1872"
+    },
+    {
+      "event": "commented",
+      "id": 4774204564,
+      "node_id": "IC_kwDOAP4Jqs8AAAABHJCUlA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4774204564",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-22T23:54:46Z",
+      "updated_at": "2026-06-22T23:55:31Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> I think [#1876](https://github.com/bitcoin-core/secp256k1/pull/1876) somewhat misguided because it adds the warning to almost every function, but it exposes an interesting observation: We have some internal functions which always return 1, e.g., `secp256k1_load_pubkey`. These should probably return `void` instead.\n\nSounds reasonable. Looking at `{_xonly,}_pubkey_load` specifically, most API functions that call it currently check for its return value, but a few also don't (e.g. in [ECDH](https://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/modules/ecdh/main_impl.h#L48) or [`_pubkey_combine`](https://github.com/bitcoin-core/secp256k1/blob/bd0287d650c24dc41e0362675a9f6a49ee952def/src/secp256k1.c#L804)). Not having a return value in the first place would remove the ambiguity and simplify the call-sites a lot.\nOn the other hand, I'm wondering whether this could lead to (indirect) API behavior change. The pubkey loading functions don't directly return 0, but their `ARG_CHECK`s could. If the default illegal_callback is used, then this point is never reached as we crash (via `abort()`), and the behavior is the same before and after the change. If the illegal_callback is set by users to not abort (e.g. just print out a message, or doing nothing), then behavior could change, as we'd currently return from the API functions after failed pubkey loading, whereas after such a change we would continue with a malformed _pubkey object, leading maybe to weird behavior later. But maybe that's too far-fetched and just fine, as the user can't expect a reasonable continuing anyway in that case?\n\n(Thinking of the silentpayments module PR, I'd be honestly very glad if I could just remove the `{_xonly,}_pubkey_load` return value checks; as long as the return value exists that feels wrong though).\n\n> (For API functions, we tend to prefer returning an int, even if it's always 1. I'm not entire sure what the reason is. My best guess is that the idea is that these can be changed to return 0 in some cases without breaking the API. But if that's the reason, then it's a bit questionable because it's still a \"semantic\" break of the API: Callers who didn't check the return value of a function in libsecp256k1 0.x because it was documented to be always 1 have a high change of missing that that function can now return 0 in 0.x+1. Anyway, that's not the topic of this issue.)\n\nHmm that's a very good point. ",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1872#issuecomment-4774204564",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1872"
     }
   ]
