@@ -43,9 +43,9 @@
     "body": "**Problem:** While reviewing this area with Fable, I noticed that `secp256k1_fe_equal(a, b)` documented `b` up to magnitude 31.\r\nReview pointed out that the implementation negates `a` before adding `b`, so the actual internal bound is 30.\r\n\r\n**Fix:** Lower the documented and checked bound to 30.\r\nThis keeps `fe_equal` unchanged at runtime and matches current callers, which use much smaller magnitudes.",
     "labels": [],
     "created_at": "2026-06-21T12:43:57Z",
-    "updated_at": "2026-06-23T21:30:41Z",
+    "updated_at": "2026-06-24T06:53:42Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "3117e6dbd9663a2f84429c7a7b462437325185f8",
     "assignees": [],
@@ -335,7 +335,7 @@
     "deletions": 2,
     "changed_files": 3,
     "commits": 1,
-    "review_comments": 2,
+    "review_comments": 3,
     "comments": 2
   },
   "events": [
@@ -913,6 +913,45 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-06-23T21:30:15Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 4559769245,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABD8iOnQ",
+      "url": null,
+      "actor": null,
+      "commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-06-24T06:53:41Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK mod my suggestion",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#pullrequestreview-4559769245",
+      "submitted_at": "2026-06-24T06:53:41Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
     }
   ],
   "comments": [
@@ -1022,6 +1061,60 @@
       "start_side": "RIGHT",
       "line": null,
       "original_line": 3075,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3465110102",
+      "pull_request_review_id": 4559769245,
+      "id": 3465110102,
+      "node_id": "PRRC_kwDOAP4Jqs7OiWJW",
+      "diff_hunk": "@@ -3059,6 +3059,20 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {\n     return secp256k1_fe_equal(&an, &bn);\n }\n \n+static void run_fe_equal_magnitude_boundaries(void) {\n+    secp256k1_fe a, b;\n+\n+    /* Set up elements with fe_equal's documented a and b magnitude bounds. */\n+    secp256k1_fe_set_int(&a, 1);\n+    secp256k1_fe_set_int(&b, 1);\n+    secp256k1_fe_mul_int(&b, 30);\n+#ifdef VERIFY\n+    CHECK(a.magnitude == 1);\n+    CHECK(b.magnitude == 30);\n+#endif",
+      "path": "src/tests.c",
+      "position": 14,
+      "original_position": 14,
+      "commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "original_commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "```suggestion\n    testutil_random_fe_magnitude(&a, 1);\n    testutil_random_fe_magnitude(&b, 30);\n```",
+      "created_at": "2026-06-24T06:52:59Z",
+      "updated_at": "2026-06-24T06:53:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#discussion_r3465110102",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3465110102"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
+        }
+      },
+      "start_line": 3065,
+      "original_start_line": 3065,
+      "start_side": "RIGHT",
+      "line": 3072,
+      "original_line": 3072,
       "side": "RIGHT"
     }
   ]
