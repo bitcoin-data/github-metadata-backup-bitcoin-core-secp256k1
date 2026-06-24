@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1877/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/76399d8748014267ba78f19b8358c45953618af2",
     "number": 1877,
     "state": "open",
     "locked": false,
@@ -40,14 +40,14 @@
       "name": null,
       "patch_url": null
     },
-    "body": "**Problem:** While reviewing this area with Fable, I noticed that `secp256k1_fe_equal(a, b)` documented `b` up to magnitude 31.\r\nReview pointed out that the implementation negates `a` before adding `b`, so the actual internal bound is 30.\r\n\r\n**Fix:** Lower the documented and checked bound to 30.\r\nThis keeps `fe_equal` unchanged at runtime and matches current callers, which use much smaller magnitudes.",
+    "body": "**Problem:** While reviewing this area with Fable, I noticed that `secp256k1_fe_equal(a, b)` documented `b` up to magnitude 31.\r\nReview pointed out that the implementation negates `a` before adding `b`, so the actual internal bound is 30.\r\n\r\n**Fix:** Lower the documented and checked bound to 30.\r\nThis keeps `fe_equal` unchanged at runtime and matches current callers, which use much smaller magnitudes.\r\n\r\n**Test:** Add a focused test with random field elements whose magnitudes are randomized within the accepted `a <= 1` and `b <= 30` bounds.",
     "labels": [],
     "created_at": "2026-06-21T12:43:57Z",
-    "updated_at": "2026-06-24T06:53:42Z",
+    "updated_at": "2026-06-24T12:57:18Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "3117e6dbd9663a2f84429c7a7b462437325185f8",
+    "merge_commit_sha": "74dc13ce9eb474c93b4f943189b0973bb13d3233",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "l0rinc:l0rinc/fe-equal-magnitude-bound",
       "ref": "l0rinc/fe-equal-magnitude-bound",
-      "sha": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "sha": "76399d8748014267ba78f19b8358c45953618af2",
       "user": {
         "login": "l0rinc",
         "id": 1841944,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-23T21:25:06Z",
+        "pushed_at": "2026-06-24T12:55:42Z",
         "created_at": "2025-09-09T05:01:20Z",
         "updated_at": "2026-06-21T09:08:10Z",
         "allow_forking": true,
@@ -331,11 +331,11 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 17,
+    "additions": 15,
     "deletions": 2,
     "changed_files": 3,
     "commits": 1,
-    "review_comments": 3,
+    "review_comments": 5,
     "comments": 2
   },
   "events": [
@@ -567,46 +567,6 @@
         "from": "field: correct fe_equal's b magnitude bound",
         "to": "field: correct `fe_equal` magnitude bound for `b`"
       }
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDc2NmQ3MGRhZTQ4YzM4YjM3M2VmYTVmOGE1OWY4NGZiYjljNDhhYWM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/766d70dae48c38b373efa5f8a59f84fbb9c48aac",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/766d70dae48c38b373efa5f8a59f84fbb9c48aac",
-      "tree": {
-        "sha": "bca6e0ceb7604fada00354aa3b331f994e4a8515",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/bca6e0ceb7604fada00354aa3b331f994e4a8515"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree bca6e0ceb7604fada00354aa3b331f994e4a8515\nparent bd0287d650c24dc41e0362675a9f6a49ee952def\nauthor Lőrinc <pap.lorinc@gmail.com> 1782041860 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1782249710 -0700\n\nfield: correct fe_equal's b magnitude bound\n\n`secp256k1_fe_equal` negates `a` before adding `b`.\nThat gives the temporary value magnitude 2, and the following field addition requires the input magnitudes to sum to at most 32.\nSo the largest `b` magnitude the implementation can accept is 30, not 31.\n\nLower the documented and checked bound for `b` to 30.\nAdd a focused test for the accepted boundary.\n\nCo-authored-by: Sebastian Falbesoner <sebastian.falbesoner@gmail.com>\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmo6+O4ACgkQZp//D/pH\nenYoqw/+Ka3AShr8EOMl0AcofnGIA6/6/e5iR+r7E81e0y/m1Paj7+XAXCCMFDQ1\nJNYLOnYK8UZCiSuVy4DxVXIIFnM7I19n71dfKFqYhaP5Zx4oYhRirHx9yfxOSzSM\nFJIAWjLkUTGQPR13jvJywQmHBaMSYcWIhOpYaMTfxgOYGuRH8vKfnL0DJ0Ypt/8r\nVouorBZmXqYJEn4q9FFZa2zPt5hOeQYIALgUS9WswzotiVD2JZCtcY/7+1OVYbSk\nt9f7HsqXY/ViyhZu/2neChPOaPePIGIiqM2OQ7yVKMsx1dVVQ+BMl5h/lcS8KA+S\nSRz+ty8Rosy6r0nNpqjNuBxrlt3caEqBESNP7JsLHUDcdZ8IjfmtjO5h8+VeYa7d\nB0dlDvbCh9pBy8RaEdlPmkhVfU+IKR+8E3QDLsJM644puCr4C8Atl//jeVgDFwAP\nSn0iPRmT8PKjq81FBtF/X/moReTujGDUZIEp07bxhHFtC3KQvUCpkYJ23afDdxoi\nUc3bdG7PZI98b1whg9odJT1gu55kKMrUIdLspSsb+7vANzTXRDkEbzLDMCwDfj6+\nTi2JGkfiYb54fln8S0la3jCamTVbzzjg8VScP+ZsiVr9Kp3u5uIdD3A0pfmiySjE\nl5amxYZwG8uJFxl14YPAtvRsQziEV/4WDSAiEKS+RfobA5OWFXU=\n=qGAN\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd0287d650c24dc41e0362675a9f6a49ee952def"
-        }
-      ],
-      "message": "field: correct fe_equal's b magnitude bound\n\n`secp256k1_fe_equal` negates `a` before adding `b`.\nThat gives the temporary value magnitude 2, and the following field addition requires the input magnitudes to sum to at most 32.\nSo the largest `b` magnitude the implementation can accept is 30, not 31.\n\nLower the documented and checked bound for `b` to 30.\nAdd a focused test for the accepted boundary.\n\nCo-authored-by: Sebastian Falbesoner <sebastian.falbesoner@gmail.com>",
-      "committer": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-06-23T21:21:50Z"
-      },
-      "author": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-06-21T11:37:40Z"
-      },
-      "sha": "766d70dae48c38b373efa5f8a59f84fbb9c48aac"
     },
     {
       "event": "head_ref_force_pushed",
@@ -952,6 +912,77 @@
       "submitted_at": "2026-06-24T06:53:41Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc2Mzk5ZDg3NDgwMTQyNjdiYTc4ZjE5YjgzNThjNDU5NTM2MThhZjI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/76399d8748014267ba78f19b8358c45953618af2",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/76399d8748014267ba78f19b8358c45953618af2",
+      "tree": {
+        "sha": "faf0ec3755cbb3a3681b2582e51d9443fae4bd2b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/faf0ec3755cbb3a3681b2582e51d9443fae4bd2b"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree faf0ec3755cbb3a3681b2582e51d9443fae4bd2b\nparent bd0287d650c24dc41e0362675a9f6a49ee952def\nauthor Lőrinc <pap.lorinc@gmail.com> 1782041860 +0200\ncommitter Lőrinc <pap.lorinc@gmail.com> 1782305722 -0700\n\nfield: correct fe_equal's b magnitude bound\n\n`secp256k1_fe_equal` negates `a` before adding `b`.\nThat gives the temporary value magnitude 2, and the following field addition requires the input magnitudes to sum to at most 32.\nSo the largest `b` magnitude the implementation can accept is 30, not 31.\n\nLower the documented and checked bound for `b` to 30.\nAdjust the focused test to use random field elements with randomized magnitudes within the accepted `a <= 1` and `b <= 30` bounds.\n\nCo-authored-by: Sebastian Falbesoner <sebastian.falbesoner@gmail.com>\nCo-authored-by: Tim Ruffing <me@real-or-random.org>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQIzBAABCAAdFiEEqXy8dDLWkKQdUrTAZp//D/pHenYFAmo707oACgkQZp//D/pH\nenY1NA/6AmmM+q7ODF928N6f9lp+mhWeL1OgUtoA9ZVvIRISScsi0YBBjJ/Sk5Uw\n3Cicv0haaaghRgBn76oOA8B72suN3nhj+3itGS1kkIKzqkwYTITjLeZvEJOvzW6B\nDC9KwB37kT6oPTLc+EFvUXlZAhj3HVLPx2+9471Y179k9xVWKLIaFjfAuVr+wK+J\n1P9wSwDHIrSZJZkzjuBaOYop+t4gFlW3OmMVS2RSR9WYXaCiy4VL2lGmMcI0FQVx\nIM2OmhRqAZcaSmadeHIeZc6IcKY5HLe0h5ddYkHIHjtFXKWTRzmxgJQbCEBmnbTJ\ntbaAumyvnRQrRilA6MToj1YmLza/SLjHPocyQ8hVRKyBwfEOUJnzUSqgrcjzUn0E\nO3mzV89ClXklF7kCecQhZTRi4kLQgmOZkXfJcUy7ztWUT9wbnMzSQu4kpDiP8dmo\n0rD5l98rKWapXQy4ZwBbbP8ECnxCOQYJLCAIGSbE9yuu8+bOuT1txDOieCBL0c4p\nHS+sO67y9DOHrbq9mm/RaYcDwhYraTYfSirEmN7Bfs2qrYorONMLbCUbQbJ5k0TK\nVrkdxY5uck1jpON8YE/KuT0DX9aXVptdXcpA3TC8l8k03Fs9m5QIjI3cEKywwhEN\n5upNAjqZP0xK3I9aLRNomRnO0OjGo3UtFAYsNFCpksbbyeRUFu0=\n=4gI4\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd0287d650c24dc41e0362675a9f6a49ee952def",
+          "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd0287d650c24dc41e0362675a9f6a49ee952def"
+        }
+      ],
+      "message": "field: correct fe_equal's b magnitude bound\n\n`secp256k1_fe_equal` negates `a` before adding `b`.\nThat gives the temporary value magnitude 2, and the following field addition requires the input magnitudes to sum to at most 32.\nSo the largest `b` magnitude the implementation can accept is 30, not 31.\n\nLower the documented and checked bound for `b` to 30.\nAdjust the focused test to use random field elements with randomized magnitudes within the accepted `a <= 1` and `b <= 30` bounds.\n\nCo-authored-by: Sebastian Falbesoner <sebastian.falbesoner@gmail.com>\nCo-authored-by: Tim Ruffing <me@real-or-random.org>",
+      "committer": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-06-24T12:55:22Z"
+      },
+      "author": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-06-21T11:37:40Z"
+      },
+      "sha": "76399d8748014267ba78f19b8358c45953618af2"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 27145687052,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABGMTD488AAAAGUgJQDA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27145687052",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "76399d8748014267ba78f19b8358c45953618af2",
+      "commit_url": "https://api.github.com/repos/l0rinc/secp256k1/commits/76399d8748014267ba78f19b8358c45953618af2",
+      "created_at": "2026-06-24T12:55:44Z"
     }
   ],
   "comments": [
@@ -1070,7 +1101,7 @@
       "node_id": "PRRC_kwDOAP4Jqs7OiWJW",
       "diff_hunk": "@@ -3059,6 +3059,20 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {\n     return secp256k1_fe_equal(&an, &bn);\n }\n \n+static void run_fe_equal_magnitude_boundaries(void) {\n+    secp256k1_fe a, b;\n+\n+    /* Set up elements with fe_equal's documented a and b magnitude bounds. */\n+    secp256k1_fe_set_int(&a, 1);\n+    secp256k1_fe_set_int(&b, 1);\n+    secp256k1_fe_mul_int(&b, 30);\n+#ifdef VERIFY\n+    CHECK(a.magnitude == 1);\n+    CHECK(b.magnitude == 30);\n+#endif",
       "path": "src/tests.c",
-      "position": 14,
+      "position": 1,
       "original_position": 14,
       "commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
       "original_commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
@@ -1110,10 +1141,118 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
         }
       },
-      "start_line": 3065,
+      "start_line": null,
       "original_start_line": 3065,
       "start_side": "RIGHT",
-      "line": 3072,
+      "line": null,
+      "original_line": 3072,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3466975816",
+      "pull_request_review_id": 4562047731,
+      "id": 3466975816,
+      "node_id": "PRRC_kwDOAP4Jqs7OpdpI",
+      "diff_hunk": "@@ -3059,6 +3059,20 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {\n     return secp256k1_fe_equal(&an, &bn);\n }\n \n+static void run_fe_equal_magnitude_boundaries(void) {\n+    secp256k1_fe a, b;\n+\n+    /* Set up elements with fe_equal's documented a and b magnitude bounds. */\n+    secp256k1_fe_set_int(&a, 1);\n+    secp256k1_fe_set_int(&b, 1);\n+    secp256k1_fe_mul_int(&b, 30);\n+#ifdef VERIFY\n+    CHECK(a.magnitude == 1);\n+    CHECK(b.magnitude == 30);\n+#endif",
+      "path": "src/tests.c",
+      "position": 1,
+      "original_position": 14,
+      "commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "original_commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "in_reply_to_id": 3465110102,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: If we're setting the magnitudes randomly, it might make sense to do multiple iterations (e.g. `100 * COUNT`, as in `run_fe_mul`) to increase the chance of hitting the 1/30 bounds in a single test run.",
+      "created_at": "2026-06-24T12:14:31Z",
+      "updated_at": "2026-06-24T12:14:32Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#discussion_r3466975816",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3466975816"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 3065,
+      "start_side": "RIGHT",
+      "line": null,
+      "original_line": 3072,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3467228121",
+      "pull_request_review_id": 4562357312,
+      "id": 3467228121,
+      "node_id": "PRRC_kwDOAP4Jqs7OqbPZ",
+      "diff_hunk": "@@ -3059,6 +3059,20 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {\n     return secp256k1_fe_equal(&an, &bn);\n }\n \n+static void run_fe_equal_magnitude_boundaries(void) {\n+    secp256k1_fe a, b;\n+\n+    /* Set up elements with fe_equal's documented a and b magnitude bounds. */\n+    secp256k1_fe_set_int(&a, 1);\n+    secp256k1_fe_set_int(&b, 1);\n+    secp256k1_fe_mul_int(&b, 30);\n+#ifdef VERIFY\n+    CHECK(a.magnitude == 1);\n+    CHECK(b.magnitude == 30);\n+#endif",
+      "path": "src/tests.c",
+      "position": 1,
+      "original_position": 14,
+      "commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "original_commit_id": "766d70dae48c38b373efa5f8a59f84fbb9c48aac",
+      "in_reply_to_id": 3465110102,
+      "user": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Thanks, used `testutil_random_fe_magnitude()` for both operands over `100 * COUNT` iterations.\r\n",
+      "created_at": "2026-06-24T12:57:18Z",
+      "updated_at": "2026-06-24T12:57:18Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1877#discussion_r3467228121",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3467228121"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1877"
+        }
+      },
+      "start_line": null,
+      "original_start_line": 3065,
+      "start_side": "RIGHT",
+      "line": null,
       "original_line": 3072,
       "side": "RIGHT"
     }
