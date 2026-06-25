@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1881/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1881/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/715e954abe77ece9f16955f5ae83191896582aef",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
     "number": 1881,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "tests: Don't pass non-malloc pointer to free()",
+    "title": "tests: Fix GCC 17 snapshot warning",
     "user": {
       "login": "real-or-random",
       "id": 1071625,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "because this invokes UB. This fixes a warning from GCC 17 snapshot.\r\n\r\nAlternative to #1880. I think this is cleaner \r\n - it doesn't recreate the scratch space in the middle of some other tests\r\n - it has an obvious matching (malloc, free) pair \r\n - it additionally checks that only `magic` is accessed ",
+    "body": "Passing a non-malloc pointer to free() would be UB. In this case, the\r\nfree() line is never actually reached (and GCC 17 fails to prove this)\r\nin a correct implementation of secp256k1_scratch_space_destroy(), but\r\nthe test shouldn't rely on the correctness of the tested function.\r\n\r\nAlternative to #1880. I think this is cleaner \r\n - it doesn't recreate the scratch space in the middle of some other tests\r\n - it has an obvious matching (malloc, free) pair \r\n - it additionally checks that only `magic` is accessed ",
     "labels": [
       {
         "id": 79441510,
@@ -61,11 +61,11 @@
       }
     ],
     "created_at": "2026-06-25T09:22:38Z",
-    "updated_at": "2026-06-25T11:03:54Z",
+    "updated_at": "2026-06-25T12:58:51Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "4f252a4d07502672559d6dfa7388dea79e07071a",
+    "merge_commit_sha": "ee0ea2985a9a4178bd542358f1005db534688226",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -73,7 +73,7 @@
     "head": {
       "label": "real-or-random:202606-stack-pointer-free",
       "ref": "202606-stack-pointer-free",
-      "sha": "715e954abe77ece9f16955f5ae83191896582aef",
+      "sha": "9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -185,7 +185,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-06-25T09:20:08Z",
+        "pushed_at": "2026-06-25T12:58:06Z",
         "created_at": "2017-06-07T05:39:43Z",
         "updated_at": "2026-03-03T16:46:10Z",
         "allow_forking": true,
@@ -209,7 +209,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
+      "sha": "9e3a165ad0be46b4b8c1f581e357096fd33dbc46",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -310,7 +310,7 @@
         "watchers_count": 2441,
         "size": 12972,
         "default_branch": "master",
-        "open_issues_count": 155,
+        "open_issues_count": 154,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -353,50 +353,10 @@
     "deletions": 10,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 1,
-    "comments": 1
+    "review_comments": 2,
+    "comments": 4
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDcxNWU5NTRhYmU3N2VjZTlmMTY5NTVmNWFlODMxOTE4OTY1ODJhZWY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/715e954abe77ece9f16955f5ae83191896582aef",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/715e954abe77ece9f16955f5ae83191896582aef",
-      "tree": {
-        "sha": "f74f4ff30c88df1dc415325bd55898a536fec4c4",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f74f4ff30c88df1dc415325bd55898a536fec4c4"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "sha": "bd0287d650c24dc41e0362675a9f6a49ee952def",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/bd0287d650c24dc41e0362675a9f6a49ee952def"
-        }
-      ],
-      "message": "tests: Don't pass non-malloc pointer to free()\n\nbecause this invokes UB. This fixes a warning from GCC 17 snapshot.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-06-25T09:17:24Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-06-25T09:17:24Z"
-      },
-      "sha": "715e954abe77ece9f16955f5ae83191896582aef"
-    },
     {
       "event": "labeled",
       "id": 27187349063,
@@ -562,6 +522,317 @@
       "submitted_at": "2026-06-25T11:03:53Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1881"
+    },
+    {
+      "event": "commented",
+      "id": 4799417049,
+      "node_id": "IC_kwDOAP4Jqs8AAAABHhFK2Q",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4799417049",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-25T12:51:49Z",
+      "updated_at": "2026-06-25T12:51:49Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> (I wonder if strictly speaking the current code is really UB though? The problematic `free` call is never reached, as `_scratch_destroy` with the non-malloc pointer returns early due to invalid magic)\r\n\r\n\r\nOk, sure, you're right. I missed this.\r\n\r\nBut this argument also only holds if the tested code is correct, and the test shouldn't assume this. (Of course, the test may assume that the tested code doesn't invoke UB, because if it does, there's nothing that the can meaningfully do. But at least the test itself shouldn't introduce additional UB.)\r\n",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1881#issuecomment-4799417049",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1881"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 27199798690,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABGqwuac8AAAAGVTv9og",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27199798690",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "ac80792e3e81c4bb4e25702cf86239f4596118ea",
+      "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/ac80792e3e81c4bb4e25702cf86239f4596118ea",
+      "created_at": "2026-06-25T12:56:23Z"
+    },
+    {
+      "event": "renamed",
+      "id": 27199814607,
+      "node_id": "RTE_lADOAP4Jqs8AAAABGqwuac8AAAAGVTw7zw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27199814607",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-25T12:56:47Z",
+      "rename": {
+        "from": "tests: Don't pass non-malloc pointer to free()",
+        "to": "tests: Fix GCC 17 snapshot warning"
+      }
+    },
+    {
+      "event": "commented",
+      "id": 4799463756,
+      "node_id": "IC_kwDOAP4Jqs8AAAABHhIBTA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4799463756",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-25T12:57:34Z",
+      "updated_at": "2026-06-25T12:57:34Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> > (I wonder if strictly speaking the current code is really UB though? The problematic `free` call is never reached, as `_scratch_destroy` with the non-malloc pointer returns early due to invalid magic)\r\n> \r\n> Ok, sure, you're right. I missed this.\r\n\r\nI force-pushed to update the commit message to reflect this. I also changed the PR description accordingly.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1881#issuecomment-4799463756",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1881"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDlkNzU3NjlkZWM0ZmNiNDBlZTdlNDFmNjc0ZjIyZjNmNWU1Y2ZjN2U",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
+      "tree": {
+        "sha": "84e7a1806851f6ce956af21071779cf4240b8d4b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/84e7a1806851f6ce956af21071779cf4240b8d4b"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9e3a165ad0be46b4b8c1f581e357096fd33dbc46",
+          "sha": "9e3a165ad0be46b4b8c1f581e357096fd33dbc46",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9e3a165ad0be46b4b8c1f581e357096fd33dbc46"
+        }
+      ],
+      "message": "tests: Fix GCC 17 snapshot warning\n\nPassing a non-malloc pointer to free() would be UB. In this case, the\nfree() line is never actually reached (and GCC 17 fails to prove this)\nin a correct implementation of secp256k1_scratch_space_destroy(), but\nthe test shouldn't rely on the correctness of the tested function.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2026-06-25T12:57:56Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2026-06-25T09:17:24Z"
+      },
+      "sha": "9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 27199871252,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABGqwuac8AAAAGVT0ZFA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/27199871252",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
+      "commit_url": "https://api.github.com/repos/real-or-random/secp256k1/commits/9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
+      "created_at": "2026-06-25T12:58:08Z"
+    },
+    {
+      "event": "commented",
+      "id": 4799475357,
+      "node_id": "IC_kwDOAP4Jqs8AAAABHhIunQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4799475357",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-06-25T12:58:51Z",
+      "updated_at": "2026-06-25T12:58:51Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "And force-pushed again to rebase on master (to avoid the macOS failure in CI).",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1881#issuecomment-4799475357",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1881"
     }
   ],
   "comments": [
@@ -574,7 +845,7 @@
       "path": "src/tests.c",
       "position": 21,
       "original_position": 21,
-      "commit_id": "715e954abe77ece9f16955f5ae83191896582aef",
+      "commit_id": "9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
       "original_commit_id": "715e954abe77ece9f16955f5ae83191896582aef",
       "in_reply_to_id": null,
       "user": {
@@ -607,6 +878,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3473873979"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1881"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 424,
+      "original_line": 424,
+      "side": "LEFT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3474465822",
+      "pull_request_review_id": 4571020272,
+      "id": 3474465822,
+      "node_id": "PRRC_kwDOAP4Jqs7PGCQe",
+      "diff_hunk": "@@ -412,16 +411,7 @@ static void run_scratch_tests(void) {\n     CHECK_ERROR_VOID(CTX, secp256k1_scratch_apply_checkpoint(&CTX->error_callback, scratch, checkpoint_2)); /* checkpoint_2 is after checkpoint */\n     CHECK_ERROR_VOID(CTX, secp256k1_scratch_apply_checkpoint(&CTX->error_callback, scratch, (size_t) -1)); /* this is just wildly invalid */\n \n-    /* try to use badly initialized scratch space */\n-    secp256k1_scratch_space_destroy(CTX, scratch);\n-    memset(&local_scratch, 0, sizeof(local_scratch));\n-    scratch = &local_scratch;\n-    CHECK_ERROR(CTX, secp256k1_scratch_max_allocation(&CTX->error_callback, scratch, 0));\n-    CHECK_ERROR(CTX, secp256k1_scratch_alloc(&CTX->error_callback, scratch, 500));\n-    CHECK_ERROR_VOID(CTX, secp256k1_scratch_space_destroy(CTX, scratch));\n-\n     /* Test that large integers do not wrap around in a bad way */\n-    scratch = secp256k1_scratch_space_create(CTX, 1000);",
+      "path": "src/tests.c",
+      "position": 21,
+      "original_position": 21,
+      "commit_id": "9d75769dec4fcb40ee7e41f674f22f3f5e5cfc7e",
+      "original_commit_id": "715e954abe77ece9f16955f5ae83191896582aef",
+      "in_reply_to_id": 3473873979,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Yes, we don't need to recreate the scratch because the call `secp256k1_scratch_space_destroy()` in line 416 is also removed.",
+      "created_at": "2026-06-25T12:46:32Z",
+      "updated_at": "2026-06-25T12:46:32Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1881#discussion_r3474465822",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3474465822"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1881"
