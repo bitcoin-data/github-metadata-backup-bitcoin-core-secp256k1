@@ -62,9 +62,9 @@
       }
     ],
     "created_at": "2026-06-29T08:22:33Z",
-    "updated_at": "2026-06-29T15:49:09Z",
+    "updated_at": "2026-06-29T17:26:43Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "453993ab731e6ab15c65fe1a974e88afa174691a",
     "assignees": [],
@@ -172,7 +172,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12983,
+        "size": 12994,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -353,7 +353,7 @@
     "deletions": 0,
     "changed_files": 1,
     "commits": 2,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 2
   },
   "events": [
@@ -622,7 +622,101 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1885#issuecomment-4834420603",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1885"
+    },
+    {
+      "event": "reviewed",
+      "id": 4593994030,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABEdLJLg",
+      "url": null,
+      "actor": null,
+      "commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-06-29T17:26:43Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Concept ACK",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1885#pullrequestreview-4593994030",
+      "submitted_at": "2026-06-29T17:26:43Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1885"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3493552458",
+      "pull_request_review_id": 4593994030,
+      "id": 3493552458,
+      "node_id": "PRRC_kwDOAP4Jqs7QO2FK",
+      "diff_hunk": "@@ -258,7 +260,9 @@ static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, cons\n             secp256k1_gej_add_ge(r, r, &t);\n         }\n         ECMULT_CONST_TABLE_GET_GE(&t, pre_a_lam, bits2);\n+        secp256k1_memclear_explicit(&bits2, sizeof(bits2));\n         secp256k1_gej_add_ge(r, r, &t);\n+        secp256k1_ge_clear(&t);",
+      "path": "src/ecmult_const_impl.h",
+      "position": 22,
+      "original_position": 22,
+      "commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "original_commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: in theory it should be slightly faster to do the stack clearing only once at the last loop iteration (i.e if `group == 0`) rather than repeatedly, but practically even with the current code there seems to be no measurable slow-down compared to master (`bench_ecmult` shows 19.2us for `ecmult_const` for both branches on my machine), so seems fine as-is",
+      "created_at": "2026-06-29T17:26:36Z",
+      "updated_at": "2026-06-29T17:26:43Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1885#discussion_r3493552458",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3493552458"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1885"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 265,
+      "original_line": 265,
+      "side": "RIGHT"
+    }
+  ]
 }
