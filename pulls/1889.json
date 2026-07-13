@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "**Problem:** `secp256k1_fe_impl_get_b32` serializes a normalized 5x52 field element with 32 separate byte assignments.\r\nThey were introduced in [#437](https://github.com/bitcoin-core/secp256k1/pull/437/changes#diff-6e0cae0111d7c054ba27f22399eb4a2ac6c9788ee97da7f9fc5948c63dcf882cL353) to unroll nested nibble loops for performance - at the time, `secp256k1_write_be64` did not exist, so the unrolling was expressed directly.\r\n\r\n**Fix:** Keep the serialization unrolled by packing the limbs into four 64-bit words and reuse `secp256k1_write_be64`, matching the existing [4x64 scalar serializer](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/scalar_4x64_impl.h#L161-L168).\r\nThe serialized output is unchanged for normalized inputs, and benchmarks indicate no measurable performance regression.\r\n\r\nExisting [field conversion and reduced-boundary tests](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/tests.c#L3079-L3173) also compare the serialized bytes directly.",
+    "body": "**Problem:** Both field implementations serialize normalized elements with 32 separate byte assignments in `secp256k1_fe_impl_get_b32`.\r\nThey were introduced in [#437](https://github.com/bitcoin-core/secp256k1/pull/437/changes#diff-6e0cae0111d7c054ba27f22399eb4a2ac6c9788ee97da7f9fc5948c63dcf882cL353) to unroll nested nibble loops for performance.\r\nAt the time, the endian write helpers did not exist, so the unrolling was expressed directly.\r\n\r\n**Fix:** Keep both serializers unrolled by packing the 5x52 limbs into four 64-bit words and the 10x26 limbs into eight 32-bit words, then reuse the corresponding endian write helper.\r\nThis matches the existing [4x64](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/scalar_4x64_impl.h#L161-L168) and [8x32](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/scalar_8x32_impl.h#L195-L206) scalar serializers.\r\nThe serialized output is unchanged for normalized inputs, and benchmarks indicate no measurable performance regression.\r\n\r\n**Testing:** Existing [field conversion and reduced-boundary tests](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/tests.c#L3079-L3173) compare the serialized bytes directly.\r\n[Compiler Explorer](https://godbolt.org/z/nxaKecdxh) compares the exact before and after serializers with GCC 16.1 and Clang 22.1 at `-O2`, in both native and `-m32` modes.\r\n\r\n<details><summary>Benchmarks</summary>\r\n\r\n```bash\r\nfor cc in gcc clang; do \\\r\n  echo; $cc --version | head -1; \\\r\n  CC=$cc cmake -B build-$cc -GNinja -DCMAKE_BUILD_TYPE=Release >/dev/null 2>&1 && \\\r\n  CC=$cc cmake -B build-$cc-10x26 -GNinja -DCMAKE_BUILD_TYPE=Release -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int64 >/dev/null 2>&1 && \\\r\n  for build in build-$cc build-$cc-10x26; do \\\r\n    echo; echo $build; \\\r\n    for rev in ebf594320dc838b9de1abb54d5ba98cef84f4297 e217ead5c46062ecda964ba858f7518b7e3bb5e7; do \\\r\n      git fetch origin -q $rev && git checkout -q $rev && \\\r\n      ninja -C $build bench >/dev/null 2>&1 && \\\r\n      echo $rev && \\\r\n      SECP256K1_BENCH_ITERS=10000 $build/bin/bench; \\\r\n    done; \\\r\n  done; \\\r\ndone\r\n```\r\n\r\n```bash\r\ngcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0\r\n\r\nbuild-gcc\r\nebf594320dc838b9de1abb54d5ba98cef84f4297\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    33.9       ,    34.0       ,    34.0\r\necdsa_sign                    ,    21.6       ,    21.6       ,    21.6\r\nec_keygen                     ,    15.2       ,    15.2       ,    15.3\r\necdh                          ,    33.4       ,    33.5       ,    33.5\r\nschnorrsig_sign               ,    16.1       ,    16.1       ,    16.2\r\nschnorrsig_verify             ,    34.3       ,    34.3       ,    34.4\r\nellswift_encode               ,    16.2       ,    16.2       ,    16.2\r\nellswift_decode               ,     7.21      ,     7.22      ,     7.24\r\nellswift_keygen               ,    31.5       ,    31.5       ,    31.5\r\nellswift_ecdh                 ,    36.0       ,    36.1       ,    36.1\r\ne217ead5c46062ecda964ba858f7518b7e3bb5e7\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    34.0       ,    34.1       ,    34.4\r\necdsa_sign                    ,    21.6       ,    21.6       ,    21.6\r\nec_keygen                     ,    15.3       ,    15.3       ,    15.3\r\necdh                          ,    33.3       ,    33.4       ,    33.6\r\nschnorrsig_sign               ,    16.1       ,    16.1       ,    16.2\r\nschnorrsig_verify             ,    34.4       ,    34.4       ,    34.5\r\nellswift_encode               ,    16.3       ,    16.3       ,    16.3\r\nellswift_decode               ,     7.24      ,     7.24      ,     7.25\r\nellswift_keygen               ,    31.5       ,    31.6       ,    31.7\r\nellswift_ecdh                 ,    36.0       ,    36.1       ,    36.1\r\n\r\nbuild-gcc-10x26\r\nebf594320dc838b9de1abb54d5ba98cef84f4297\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    58.4       ,    58.5       ,    58.5\r\necdsa_sign                    ,    29.7       ,    29.8       ,    29.8\r\nec_keygen                     ,    22.3       ,    22.4       ,    22.5\r\necdh                          ,    56.0       ,    56.1       ,    56.2\r\nschnorrsig_sign               ,    23.4       ,    23.4       ,    23.5\r\nschnorrsig_verify             ,    58.9       ,    59.0       ,    59.1\r\nellswift_encode               ,    22.7       ,    22.7       ,    22.7\r\nellswift_decode               ,    10.8       ,    10.8       ,    10.8\r\nellswift_keygen               ,    45.1       ,    45.2       ,    45.3\r\nellswift_ecdh                 ,    59.6       ,    59.7       ,    59.8\r\ne217ead5c46062ecda964ba858f7518b7e3bb5e7\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    58.5       ,    58.6       ,    58.7\r\necdsa_sign                    ,    29.8       ,    29.8       ,    29.9\r\nec_keygen                     ,    22.3       ,    22.4       ,    22.4\r\necdh                          ,    56.0       ,    56.1       ,    56.4\r\nschnorrsig_sign               ,    23.5       ,    23.5       ,    23.5\r\nschnorrsig_verify             ,    58.9       ,    59.0       ,    59.1\r\nellswift_encode               ,    22.9       ,    22.9       ,    22.9\r\nellswift_decode               ,    10.8       ,    10.8       ,    10.8\r\nellswift_keygen               ,    45.2       ,    45.3       ,    45.4\r\nellswift_ecdh                 ,    59.6       ,    59.8       ,    59.9\r\n\r\nUbuntu clang version 21.1.8 (6ubuntu1)\r\n\r\nbuild-clang\r\nebf594320dc838b9de1abb54d5ba98cef84f4297\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    36.2       ,    36.3       ,    36.7\r\necdsa_sign                    ,    23.1       ,    23.1       ,    23.2\r\nec_keygen                     ,    16.6       ,    16.7       ,    16.7\r\necdh                          ,    35.6       ,    35.7       ,    35.7\r\nschnorrsig_sign               ,    17.6       ,    17.6       ,    17.6\r\nschnorrsig_verify             ,    36.6       ,    36.7       ,    36.9\r\nellswift_encode               ,    16.6       ,    16.6       ,    16.7\r\nellswift_decode               ,     7.28      ,     7.29      ,     7.30\r\nellswift_keygen               ,    33.2       ,    33.2       ,    33.3\r\nellswift_ecdh                 ,    38.5       ,    38.5       ,    38.6\r\ne217ead5c46062ecda964ba858f7518b7e3bb5e7\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    35.5       ,    35.6       ,    35.8\r\necdsa_sign                    ,    23.0       ,    23.1       ,    23.2\r\nec_keygen                     ,    16.6       ,    16.7       ,    16.8\r\necdh                          ,    35.7       ,    35.7       ,    35.8\r\nschnorrsig_sign               ,    17.6       ,    17.6       ,    17.7\r\nschnorrsig_verify             ,    35.9       ,    35.9       ,    36.0\r\nellswift_encode               ,    16.4       ,    16.4       ,    16.4\r\nellswift_decode               ,     7.22      ,     7.22      ,     7.23\r\nellswift_keygen               ,    33.0       ,    33.0       ,    33.1\r\nellswift_ecdh                 ,    38.5       ,    38.6       ,    38.8\r\n\r\nbuild-clang-10x26\r\nebf594320dc838b9de1abb54d5ba98cef84f4297\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    64.2       ,    64.3       ,    64.7\r\necdsa_sign                    ,    33.8       ,    33.9       ,    33.9\r\nec_keygen                     ,    26.3       ,    26.3       ,    26.3\r\necdh                          ,    63.4       ,    63.6       ,    63.8\r\nschnorrsig_sign               ,    27.2       ,    27.3       ,    27.3\r\nschnorrsig_verify             ,    64.5       ,    64.6       ,    64.7\r\nellswift_encode               ,    22.1       ,    22.1       ,    22.1\r\nellswift_decode               ,    10.6       ,    10.6       ,    10.7\r\nellswift_keygen               ,    48.3       ,    48.3       ,    48.5\r\nellswift_ecdh                 ,    67.0       ,    67.0       ,    67.1\r\ne217ead5c46062ecda964ba858f7518b7e3bb5e7\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necdsa_verify                  ,    63.9       ,    64.0       ,    64.3\r\necdsa_sign                    ,    33.8       ,    33.9       ,    34.0\r\nec_keygen                     ,    26.3       ,    26.3       ,    26.3\r\necdh                          ,    62.5       ,    62.5       ,    62.6\r\nschnorrsig_sign               ,    27.2       ,    27.3       ,    27.4\r\nschnorrsig_verify             ,    64.1       ,    64.2       ,    64.2\r\nellswift_encode               ,    22.1       ,    22.2       ,    22.3\r\nellswift_decode               ,    10.6       ,    10.7       ,    10.7\r\nellswift_keygen               ,    48.4       ,    48.4       ,    48.6\r\nellswift_ecdh                 ,    66.2       ,    66.3       ,    66.4\r\n```\r\n</details>\r\n",
     "labels": [
       {
         "id": 5492448291,
@@ -53,9 +53,9 @@
       }
     ],
     "created_at": "2026-07-13T01:28:31Z",
-    "updated_at": "2026-07-13T16:58:57Z",
+    "updated_at": "2026-07-13T17:24:02Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "92feb403d57dfc682001e7b15f75f7ce6c76585b",
     "assignees": [],
@@ -346,7 +346,7 @@
     "changed_files": 2,
     "commits": 1,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -528,6 +528,64 @@
       "commit_id": "e217ead5c46062ecda964ba858f7518b7e3bb5e7",
       "commit_url": "https://api.github.com/repos/l0rinc/secp256k1/commits/e217ead5c46062ecda964ba858f7518b7e3bb5e7",
       "created_at": "2026-07-13T16:58:57Z"
+    },
+    {
+      "event": "commented",
+      "id": 4960708612,
+      "node_id": "IC_kwDOAP4Jqs8AAAABJ65oBA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/4960708612",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-13T17:24:02Z",
+      "updated_at": "2026-07-13T17:24:02Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Done, thanks!\r\nAlso extended the [Godbolt reproducer](https://godbolt.org/z/nxaKecdxh) with the 32-bit version and added the GCC/Clang benchmarks to the description as further proof that it's a safe refactor.",
+      "user": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1889#issuecomment-4960708612",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1889"
     }
   ],
   "comments": []
