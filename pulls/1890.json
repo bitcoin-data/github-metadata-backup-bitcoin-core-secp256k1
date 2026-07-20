@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1890/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1890/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7b47f1ff0183dd797fb37f3f6813e4011970db90",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/b1bc6f3e0cfa2720832442fc934f588bda662d3c",
     "number": 1890,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "nonce: reject maximum RFC6979 attempt",
+    "title": "nonce: terminate RFC6979 loop at UINT_MAX",
     "user": {
       "login": "l0rinc",
       "id": 1841944,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "**Problem:** The RFC6979 nonce callback never returns when called with `UINT_MAX`.\r\nIts unsigned `i <= counter` loop wraps `i` to zero after the last iteration.\r\nThe [public callback type](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/include/secp256k1.h#L88-L102) accepts this value, and both [RFC6979/default callback symbols](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/include/secp256k1.h#L676-L683) can be called directly.\r\nThe [ordinary signing loop](https://github.com/bitcoin-core/secp256k1/blob/ebf594320dc838b9de1abb54d5ba98cef84f4297/src/secp256k1.c#L541-L568) starts at zero and would need `2^32` retries to reach it, so ordinary signing is unaffected in practice.\r\n\r\n**Fix:** Return `0` for `UINT_MAX` before initializing RFC6979 state.\r\nSmaller counters keep their existing behavior.\r\nAdd an edge-case assertion that requires the callback to reject the maximum value instead of hanging.\r\n",
+    "body": "**Problem:** The [public nonce callback](https://github.com/bitcoin-core/secp256k1/blob/8c3e6e6d992456d3b9228305ae84a6703273cf70/include/secp256k1.h#L88-L102) accepts `UINT_MAX`, but `nonce_function_rfc6979_impl` never returns for that attempt.\r\nIts `i <= counter` loop wraps after the final candidate and starts again.\r\n\r\n**Fix:** Generate the candidate before checking whether it is the requested attempt.\r\nThis preserves the result for every `unsigned int` attempt, including `UINT_MAX`, and exits before the index can wrap.",
     "labels": [
       {
         "id": 165017692,
@@ -62,11 +62,11 @@
       }
     ],
     "created_at": "2026-07-14T21:01:31Z",
-    "updated_at": "2026-07-20T20:48:13Z",
+    "updated_at": "2026-07-20T22:38:00Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "1e35f7700e87e6c6ea950cfe75d4a5f540bbdfce",
+    "merge_commit_sha": "3f1ca33c3f76c2a7761ced09e8ab2f3c134aa392",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -74,7 +74,7 @@
     "head": {
       "label": "l0rinc:l0rinc/rfc6979-reject-max-counter",
       "ref": "l0rinc/rfc6979-reject-max-counter",
-      "sha": "7b47f1ff0183dd797fb37f3f6813e4011970db90",
+      "sha": "b1bc6f3e0cfa2720832442fc934f588bda662d3c",
       "user": {
         "login": "l0rinc",
         "id": 1841944,
@@ -173,7 +173,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 15845,
+        "size": 15847,
         "default_branch": "master",
         "open_issues_count": 16,
         "is_template": false,
@@ -186,7 +186,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-07-20T20:02:12Z",
+        "pushed_at": "2026-07-20T22:35:28Z",
         "created_at": "2025-09-09T05:01:20Z",
         "updated_at": "2026-07-20T14:52:12Z",
         "allow_forking": true,
@@ -210,7 +210,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "ebf594320dc838b9de1abb54d5ba98cef84f4297",
+      "sha": "8c3e6e6d992456d3b9228305ae84a6703273cf70",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -350,54 +350,14 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 5,
-    "deletions": 0,
-    "changed_files": 2,
+    "additions": 2,
+    "deletions": 1,
+    "changed_files": 1,
     "commits": 1,
     "review_comments": 1,
-    "comments": 7
+    "comments": 8
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDdiNDdmMWZmMDE4M2RkNzk3ZmIzN2YzZjY4MTNlNDAxMTk3MGRiOTA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7b47f1ff0183dd797fb37f3f6813e4011970db90",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7b47f1ff0183dd797fb37f3f6813e4011970db90",
-      "tree": {
-        "sha": "18727e4bb7fc1ef4e79e98d6a497c50663ee22a2",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/18727e4bb7fc1ef4e79e98d6a497c50663ee22a2"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 18727e4bb7fc1ef4e79e98d6a497c50663ee22a2\nparent ebf594320dc838b9de1abb54d5ba98cef84f4297\nauthor Lőrinc <pap.lorinc@gmail.com> 1784057242 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1784062438 -0700\n\nnonce: reject maximum RFC6979 attempt\n\n`nonce_function_rfc6979_impl` generates one candidate for each value from zero through `counter`.\nWhen `counter == UINT_MAX`, incrementing the unsigned loop counter after the last candidate wraps it to zero, so the loop never terminates.\n\nThe public callback accepts an unsigned attempt, and both exported nonce callback symbols can be called directly with `UINT_MAX`.\nThe default signing loop starts at zero and would need `2^32` consecutive retries to reach it, so ordinary signing is unaffected in practice.\n\nReturn 0 only for the maximum counter before initializing RFC6979 state, leaving smaller counters unchanged.\nAdd an edge-case test that requires this value to be rejected instead of hanging.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCalah5hsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIe5mAEAw2WntELM1vUqY46Qbzcb\nhVsSiieMRc99YEnwvPIwfZgBAJhw9wrggM+5gmKPH5sJaAwGcJ7ru9J0mWqXXVF7\nT4sK\n=K/Qx\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ebf594320dc838b9de1abb54d5ba98cef84f4297",
-          "sha": "ebf594320dc838b9de1abb54d5ba98cef84f4297",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ebf594320dc838b9de1abb54d5ba98cef84f4297"
-        }
-      ],
-      "message": "nonce: reject maximum RFC6979 attempt\n\n`nonce_function_rfc6979_impl` generates one candidate for each value from zero through `counter`.\nWhen `counter == UINT_MAX`, incrementing the unsigned loop counter after the last candidate wraps it to zero, so the loop never terminates.\n\nThe public callback accepts an unsigned attempt, and both exported nonce callback symbols can be called directly with `UINT_MAX`.\nThe default signing loop starts at zero and would need `2^32` consecutive retries to reach it, so ordinary signing is unaffected in practice.\n\nReturn 0 only for the maximum counter before initializing RFC6979 state, leaving smaller counters unchanged.\nAdd an edge-case test that requires this value to be rejected instead of hanging.",
-      "committer": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-14T20:53:58Z"
-      },
-      "author": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-14T19:27:22Z"
-      },
-      "sha": "7b47f1ff0183dd797fb37f3f6813e4011970db90"
-    },
     {
       "event": "commented",
       "id": 5013092203,
@@ -911,6 +871,294 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1890#issuecomment-5027132691",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1890"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGIxYmM2ZjNlMGNmYTI3MjA4MzI0NDJmYzkzNGY1ODhiZGE2NjJkM2M",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b1bc6f3e0cfa2720832442fc934f588bda662d3c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b1bc6f3e0cfa2720832442fc934f588bda662d3c",
+      "tree": {
+        "sha": "488416b2852b9740eca4bacf865a4848305ec0d7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/488416b2852b9740eca4bacf865a4848305ec0d7"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 488416b2852b9740eca4bacf865a4848305ec0d7\nparent 8c3e6e6d992456d3b9228305ae84a6703273cf70\nauthor Lőrinc <pap.lorinc@gmail.com> 1784057242 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1784586803 -0700\n\nnonce: terminate RFC6979 loop at UINT_MAX\n\nThe public nonce callback accepts `UINT_MAX`, but `nonce_function_rfc6979_impl` never returns for that attempt.\nIts `i <= counter` loop wraps after the final candidate and starts again.\n\nGenerate the candidate before checking whether it is the requested attempt.\nThis preserves the result for every `unsigned int` attempt, including `UINT_MAX`, and exits before the index can wrap.\n\nCo-authored-by: Tim Ruffing <me@real-or-random.org>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCal6iMxsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIeVOgD+PcyOabsJmokckpfIBUXB\nmGDhZnWZNezVxbuJdg36ATkBAOm2EXYygzEgYLGbTB71YHRCwLQBSD4YqZpthXQe\nXz8J\n=VFw6\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/8c3e6e6d992456d3b9228305ae84a6703273cf70",
+          "sha": "8c3e6e6d992456d3b9228305ae84a6703273cf70",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/8c3e6e6d992456d3b9228305ae84a6703273cf70"
+        }
+      ],
+      "message": "nonce: terminate RFC6979 loop at UINT_MAX\n\nThe public nonce callback accepts `UINT_MAX`, but `nonce_function_rfc6979_impl` never returns for that attempt.\nIts `i <= counter` loop wraps after the final candidate and starts again.\n\nGenerate the candidate before checking whether it is the requested attempt.\nThis preserves the result for every `unsigned int` attempt, including `UINT_MAX`, and exits before the index can wrap.\n\nCo-authored-by: Tim Ruffing <me@real-or-random.org>",
+      "committer": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-07-20T22:33:23Z"
+      },
+      "author": {
+        "name": "Lőrinc",
+        "email": "pap.lorinc@gmail.com",
+        "date": "2026-07-14T19:27:22Z"
+      },
+      "sha": "b1bc6f3e0cfa2720832442fc934f588bda662d3c"
+    },
+    {
+      "event": "renamed",
+      "id": 28238186553,
+      "node_id": "RTE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyCIOQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238186553",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:33:49Z",
+      "rename": {
+        "from": "nonce: reject maximum RFC6979 attempt",
+        "to": "nonce: terminate RFC6979 loop at UINT_MAX"
+      }
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 28238234988,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyFFbA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238234988",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "b1bc6f3e0cfa2720832442fc934f588bda662d3c",
+      "commit_url": "https://api.github.com/repos/l0rinc/secp256k1/commits/b1bc6f3e0cfa2720832442fc934f588bda662d3c",
+      "created_at": "2026-07-20T22:35:29Z"
+    },
+    {
+      "event": "commented",
+      "id": 5027946894,
+      "node_id": "IC_kwDOAP4Jqs8AAAABK7Bhjg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5027946894",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:38:00Z",
+      "updated_at": "2026-07-20T22:38:00Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Thanks @real-or-random, took your simplified version (as a [for loop](https://github.com/bitcoin-core/secp256k1/compare/7b47f1ff0183dd797fb37f3f6813e4011970db90..b1bc6f3e0cfa2720832442fc934f588bda662d3c#diff-6f71b0372be086d45b4f2740508c03a21835d87008840032fbb767f419fd988aR524-R526) though, to minimize the diff.\r\n\r\n@mnfadel, thanks for the review, but I have to ask: is there a human behind the account? It's fine to use AI assistance, but we prefer talking to humans.",
+      "user": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1890#issuecomment-5027946894",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1890"
+    },
+    {
+      "event": "mentioned",
+      "id": 28238307065,
+      "node_id": "MEE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyJe-Q",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238307065",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:38:02Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 28238307108,
+      "node_id": "SE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyJfJA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238307108",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:38:02Z"
+    },
+    {
+      "event": "mentioned",
+      "id": 28238307167,
+      "node_id": "MEE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyJfXw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238307167",
+      "actor": {
+        "login": "mnfadel",
+        "id": 58558813,
+        "node_id": "MDQ6VXNlcjU4NTU4ODEz",
+        "avatar_url": "https://avatars.githubusercontent.com/u/58558813?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/mnfadel",
+        "html_url": "https://github.com/mnfadel",
+        "followers_url": "https://api.github.com/users/mnfadel/followers",
+        "following_url": "https://api.github.com/users/mnfadel/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/mnfadel/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/mnfadel/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/mnfadel/subscriptions",
+        "organizations_url": "https://api.github.com/users/mnfadel/orgs",
+        "repos_url": "https://api.github.com/users/mnfadel/repos",
+        "events_url": "https://api.github.com/users/mnfadel/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/mnfadel/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:38:02Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 28238307189,
+      "node_id": "SE_lADOAP4Jqs8AAAABI0m2-88AAAAGkyJfdQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28238307189",
+      "actor": {
+        "login": "mnfadel",
+        "id": 58558813,
+        "node_id": "MDQ6VXNlcjU4NTU4ODEz",
+        "avatar_url": "https://avatars.githubusercontent.com/u/58558813?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/mnfadel",
+        "html_url": "https://github.com/mnfadel",
+        "followers_url": "https://api.github.com/users/mnfadel/followers",
+        "following_url": "https://api.github.com/users/mnfadel/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/mnfadel/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/mnfadel/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/mnfadel/subscriptions",
+        "organizations_url": "https://api.github.com/users/mnfadel/orgs",
+        "repos_url": "https://api.github.com/users/mnfadel/repos",
+        "events_url": "https://api.github.com/users/mnfadel/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/mnfadel/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-20T22:38:02Z"
     }
   ],
   "comments": [
@@ -961,10 +1209,10 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1890"
         }
       },
-      "start_line": 527,
+      "start_line": null,
       "original_start_line": 527,
       "start_side": "RIGHT",
-      "line": 529,
+      "line": null,
       "original_line": 529,
       "side": "RIGHT"
     }
