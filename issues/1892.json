@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1892/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1892",
     "number": 1892,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Check invariant that xonly keys have even y",
     "body": "Independently of this PR, I wonder whether creating `secp256k1_xonly_pubkey` instances with underlying odd y coordinates should be generally prevented, since doing so contradicts the definition of x-only pubkeys in the first place (cc @real-or-random @sipa)? E.g. with a VERIFY check like\r\n```diff\r\ndiff --git a/src/modules/extrakeys/main_impl.h b/src/modules/extrakeys/main_impl.h\r\nindex 0c7e266..22bce63 100644\r\n--- a/src/modules/extrakeys/main_impl.h\r\n+++ b/src/modules/extrakeys/main_impl.h\r\n@@ -16,6 +16,13 @@ static SECP256K1_INLINE int secp256k1_xonly_pubkey_load(const secp256k1_context*\r\n }\r\n \r\n static SECP256K1_INLINE void secp256k1_xonly_pubkey_save(secp256k1_xonly_pubkey *pubkey, secp256k1_ge *ge) {\r\n+#ifdef VERIFY\r\n+    /* ensure that the group element's Y coordinate is even */\r\n+    secp256k1_fe y = ge->y;\r\n+    secp256k1_fe_normalize_var(&y);\r\n+    VERIFY_CHECK(!secp256k1_fe_is_odd(&y));\r\n+#endif\r\n+\r\n     secp256k1_pubkey_save((secp256k1_pubkey *) pubkey, ge);\r\n }\r\n \r\n\r\n```\r\n(passes on master, fails only on the silentpayments tests without the proposed patch)\r\n\r\n_Originally posted by @theStack in https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3230439390_\r\n\r\n\r\n---\r\n\r\nI think the answer is yes, we should check this in the tests.",
     "user": {
@@ -60,8 +60,31 @@
     "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 0,
+    "closed_at": "2026-07-21T07:15:55Z",
+    "closed_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "created_at": "2026-07-16T07:31:58Z",
-    "updated_at": "2026-07-16T07:32:09Z"
+    "updated_at": "2026-07-21T07:15:55Z"
   },
   "events": [
     {
@@ -319,6 +342,68 @@
         "name": "tweak/refactor",
         "color": "FBCA04"
       }
+    },
+    {
+      "event": "closed",
+      "id": 28254095526,
+      "node_id": "CE_lADOAP4Jqs8AAAABJAyIkM8AAAAGlBNIpg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28254095526",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "afff8cba00c00b6d1cfa87c80063781539effca1",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/afff8cba00c00b6d1cfa87c80063781539effca1",
+      "created_at": "2026-07-21T07:15:56Z"
+    },
+    {
+      "event": "referenced",
+      "id": 28254897512,
+      "node_id": "REFE_lADOAP4Jqs8AAAABJAyIkM8AAAAGlB-FaA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28254897512",
+      "actor": {
+        "login": "pull[bot]",
+        "id": 39814207,
+        "node_id": "MDM6Qm90Mzk4MTQyMDc=",
+        "avatar_url": "https://avatars.githubusercontent.com/in/12910?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/pull%5Bbot%5D",
+        "html_url": "https://github.com/apps/pull",
+        "followers_url": "https://api.github.com/users/pull%5Bbot%5D/followers",
+        "following_url": "https://api.github.com/users/pull%5Bbot%5D/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/pull%5Bbot%5D/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/pull%5Bbot%5D/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/pull%5Bbot%5D/subscriptions",
+        "organizations_url": "https://api.github.com/users/pull%5Bbot%5D/orgs",
+        "repos_url": "https://api.github.com/users/pull%5Bbot%5D/repos",
+        "events_url": "https://api.github.com/users/pull%5Bbot%5D/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/pull%5Bbot%5D/received_events",
+        "type": "Bot",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "afff8cba00c00b6d1cfa87c80063781539effca1",
+      "commit_url": "https://api.github.com/repos/melG81/secp256k1/commits/afff8cba00c00b6d1cfa87c80063781539effca1",
+      "created_at": "2026-07-21T07:35:24Z"
     }
   ]
 }
