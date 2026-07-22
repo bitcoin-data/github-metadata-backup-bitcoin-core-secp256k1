@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "### Description\n\n`src/ctime_tests.c` currently exercises `secp256k1_schnorrsig_sign32` under Valgrind/CHECKMEM, but does not call the public `secp256k1_schnorrsig_sign_custom` entry point.\n\n`sign_custom` is not only an alias: it accepts optional `extraparams` (including a custom nonce function) and variable message length before calling the shared internal signer. Functional tests cover it, but not under the constant-time CHECKMEM harness.\n\nThis PR adds a minimal direct call to `secp256k1_schnorrsig_sign_custom(..., NULL)` with secret material undefined under CHECKMEM (default nonce path).\n\n### Coverage gap (why)\n\nPlanted local-only synthetic mutations unique to the `sign_custom` entry (secret-dependent branch / secret-dependent static table load that do not change signature output) were **not** detected by the existing ctime suite, but **were** detected after this one-call addition. A constant-work control mutation remained clean.\n\nThis is a **test-coverage** improvement. **No production cryptographic code is modified.** This PR does **not** claim a real production vulnerability in unmodified libsecp256k1.\n\n### Change\n\n- `src/ctime_tests.c` only (+11 lines)\n- No mutation code\n- No new dependencies\n\n### Build / test\n\n```bash\ncmake -B build \\\n  -DSECP256K1_VALGRIND=ON \\\n  -DSECP256K1_BUILD_CTIME_TESTS=ON \\\n  -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \\\n  -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \\\n  -DSECP256K1_ENABLE_MODULE_ECDH=ON \\\n  -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \\\n  -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \\\n  -DSECP256K1_ENABLE_MODULE_MUSIG=ON\ncmake --build build --target ctime_tests\nvalgrind --error-exitcode=42 ./build/bin/ctime_tests\n```\n\nClean upstream + this test: pass (repeated).  \nSynthetic mutations were local-only and are not included in this branch.\n\n### Limitations\n\n- Default nonce path only; a dedicated custom-nonce callback CHECKMEM case can be a follow-up.",
+    "body": "### Description\n\n`src/ctime_tests.c` covers `secp256k1_schnorrsig_sign32` and `secp256k1_schnorrsig_sign_custom` entry points under Valgrind/CHECKMEM.\n\n`sign_custom` accepts optional `extraparams` (including a custom nonce function) and variable-length messages before calling the shared internal signer. Functional tests cover it, but previously it was not tested under the constant-time CHECKMEM harness.\n\nThis PR adds coverage for:\n- `secp256k1_schnorrsig_sign_custom(..., NULL)` (default nonce path, NULL extraparams).\n- Default BIP340 nonce with non-NULL `extraparams.ndata` (auxiliary randomness).\n- The actual custom callback dispatch path via a distinct custom callback function (`nonce_function_custom`) delegating to `secp256k1_nonce_function_bip340`.\n- Variable-length message handling (`sizeof(msg) - 1`) in the custom callback case.\n- Secret-tainted key, keypair, message, and auxiliary data under CHECKMEM.\n\n### Coverage gap (why)\n\nPlanted local-only synthetic mutations (e.g. secret-dependent branch in custom nonce callback, secret-dependent branch on non-NULL auxiliary data) were **not** detected by the existing ctime suite, but **were** detected after these test additions. A constant-work control mutation remained clean.\n\nThis is a **test-coverage** improvement. **No production cryptographic code is modified.** This PR does **not** claim a real production vulnerability in unmodified libsecp256k1.\n\n### Change\n\n- `src/ctime_tests.c` only\n- No mutation code\n- No new dependencies\n\n### Build / test\n\n```bash\ncmake -B build \\\n  -DSECP256K1_VALGRIND=ON \\\n  -DSECP256K1_BUILD_CTIME_TESTS=ON \\\n  -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \\\n  -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \\\n  -DSECP256K1_ENABLE_MODULE_ECDH=ON \\\n  -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \\\n  -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \\\n  -DSECP256K1_ENABLE_MODULE_MUSIG=ON\ncmake --build build --target ctime_tests\nvalgrind --error-exitcode=42 ./build/bin/ctime_tests\n```\n\nClean upstream + this test: pass (repeated).  \nSynthetic mutations were local-only and are not included in this branch.\n",
     "labels": [
       {
         "id": 165017692,
@@ -71,7 +71,7 @@
       }
     ],
     "created_at": "2026-07-17T17:18:23Z",
-    "updated_at": "2026-07-22T13:59:22Z",
+    "updated_at": "2026-07-22T14:00:40Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -181,7 +181,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12993,
+        "size": 12972,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -363,7 +363,7 @@
     "changed_files": 1,
     "commits": 2,
     "review_comments": 1,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -651,6 +651,64 @@
         "date": "2026-07-22T13:58:01Z"
       },
       "sha": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771"
+    },
+    {
+      "event": "commented",
+      "id": 5046962495,
+      "node_id": "IC_kwDOAP4Jqs8AAAABLNKJPw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5046962495",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-22T14:00:40Z",
+      "updated_at": "2026-07-22T14:00:40Z",
+      "author_association": "NONE",
+      "body": "Addressed the review:\n\n- removed the redundant comment;\n- added a distinct custom nonce callback (`nonce_function_custom`) that delegates to `secp256k1_nonce_function_bip340`;\n- exercised the custom callback path with CHECKMEM-undefined secret inputs;\n- added non-NULL auxiliary-data coverage (`extraparams.ndata`);\n- used a variable-length message (`sizeof(msg) - 1`) for the custom path.\n\nValidation:\n- ctime_tests build: pass\n- Valgrind/CHECKMEM clean run: pass (0 errors)\n- CTest test suites (207 tests): pass (100% passed)\n- Local-only secret-branch mutations (custom callback branch and non-NULL aux data branch) were detected by Valgrind (exit code 42) and removed before push\n",
+      "user": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1893#issuecomment-5046962495",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1893"
     }
   ],
   "comments": [
