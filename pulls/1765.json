@@ -62,7 +62,7 @@
       }
     ],
     "created_at": "2025-10-31T12:06:04Z",
-    "updated_at": "2026-07-22T02:11:52Z",
+    "updated_at": "2026-07-22T09:25:31Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -307,8 +307,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1155,
-        "stargazers_count": 2452,
-        "watchers_count": 2452,
+        "stargazers_count": 2453,
+        "watchers_count": 2453,
         "size": 12982,
         "default_branch": "master",
         "open_issues_count": 153,
@@ -324,7 +324,7 @@
         "visibility": "public",
         "pushed_at": "2026-07-21T23:09:53Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-07-21T23:10:06Z",
+        "updated_at": "2026-07-22T06:18:10Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -354,7 +354,7 @@
     "deletions": 36,
     "changed_files": 23,
     "commits": 17,
-    "review_comments": 146,
+    "review_comments": 149,
     "comments": 96
   },
   "events": [
@@ -14085,6 +14085,44 @@
       "submitted_at": "2026-07-22T02:11:52Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+    },
+    {
+      "event": "reviewed",
+      "id": 4752720317,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABG0jBvQ",
+      "url": null,
+      "actor": null,
+      "commit_id": "cea6d114109aff49ce26a9d4e2f8c1106e36f2bc",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-07-22T09:25:10Z",
+      "author_association": "CONTRIBUTOR",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#pullrequestreview-4752720317",
+      "submitted_at": "2026-07-22T09:25:10Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
     }
   ],
   "comments": [
@@ -21960,6 +21998,168 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3625815796"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 107,
+      "original_line": 101,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3628888249",
+      "pull_request_review_id": 4752720317,
+      "id": 3628888249,
+      "node_id": "PRRC_kwDOAP4Jqs7YTHC5",
+      "diff_hunk": "@@ -562,6 +562,44 @@ int secp256k1_silentpayments_recipient_prevouts_summary_create(\n     return 1;\n }\n \n+/* Label scanning involves the transformation from Jacobian (gej) to affine (ge) coordinates\n+ * for serializing label candidates. As this is an expensive operation involving modular\n+ * inversion, we don't do this one by one for each tx output, but collect multiple label\n+ * candidates in Jacobian in order to apply Montgomery's trick for batch inversion (using\n+ * the function `secp256k1_ge_set_all_gej_var`). For transactions with a large number of\n+ * outputs, this speeds up scanning significantly (~2.5x). */\n+enum { LABEL_BATCH_SIZE = 8 }; /* batch size expressed in number of tx outputs */\n+\n+/* Check the label cache for each pair of candidates in a batch.\n+ * Returns the first matching tx output index, or -1 if none has a matching label. */\n+static int secp256k1_silentpayments_check_label_batch(\n+    secp256k1_ge *label_ge,\n+    const unsigned char **label_tweak,\n+    const secp256k1_gej *label_candidates_gej,\n+    size_t n_batch,\n+    size_t j_start,\n+    secp256k1_silentpayments_label_lookup label_lookup,\n+    const void *label_context\n+) {\n+    secp256k1_ge label_candidates_ge[2 * LABEL_BATCH_SIZE];\n+    unsigned char label33[33];\n+    size_t i;\n+\n+    *label_tweak = NULL;\n+    secp256k1_ge_set_all_gej_var(label_candidates_ge, label_candidates_gej, 2 * n_batch);\n+    for (i = 0; i < 2 * n_batch; i++) {\n+        /* Serialize only non-infinity points because candidates are collected only when",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 30,
+      "original_position": 30,
+      "commit_id": "84a02fa989ec7ec984dea12de26859e84511f71d",
+      "original_commit_id": "84a02fa989ec7ec984dea12de26859e84511f71d",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "https://github.com/bitcoin-core/secp256k1/pull/1765/changes/84a02fa989ec7ec984dea12de26859e84511f71d\n\nnit: The \"extract function\" refactor also changed this comment. I liked the previous version of the comment more.\n\"Serialize only non-infinity points because\" doesn't sound like a \"statement + proof\" that only non-infinity to me (which it should be) but more like it documents a deliberate decision to serialize only non-infinity points.\n\nI suggest reverting to the old comment; we could also add a VERIFY_CHECK which makes the intention crystal clear.",
+      "created_at": "2026-07-22T08:55:51Z",
+      "updated_at": "2026-07-22T09:25:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3628888249",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3628888249"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 591,
+      "original_line": 591,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3629066762",
+      "pull_request_review_id": 4752720317,
+      "id": 3629066762,
+      "node_id": "PRRC_kwDOAP4Jqs7YTyoK",
+      "diff_hunk": "@@ -0,0 +1,399 @@\n+#ifndef SECP256K1_SILENTPAYMENTS_H\n+#define SECP256K1_SILENTPAYMENTS_H\n+\n+#include <stdint.h>\n+#include \"secp256k1.h\"\n+#include \"secp256k1_extrakeys.h\"\n+\n+#ifdef __cplusplus\n+extern \"C\" {\n+#endif\n+\n+/** This module provides an implementation for Silent Payments, as specified in\n+ *  BIP352. This particularly involves the creation of input tweak data by\n+ *  summing up secret or public keys and the derivation of a shared secret using\n+ *  Elliptic Curve Diffie-Hellman. Combined are either:\n+ *    - spender's secret keys and recipient's public key (a * B, sender side)\n+ *    - spender's public keys and recipient's secret key (A * b, recipient side)\n+ *  With this result, the necessary key material for ultimately creating/scanning\n+ *  or spending Silent Payments outputs can be determined.\n+ *\n+ *  Note that this module is _not_ a full implementation of BIP352, as it\n+ *  inherently doesn't deal with higher-level concepts like addresses, output\n+ *  script types or transactions. The intent is to provide a module for\n+ *  abstracting away the elliptic-curve operations required for the protocol. For\n+ *  any wallet software already using libsecp256k1, this API should provide all\n+ *  the functions needed for a Silent Payments implementation without requiring\n+ *  any further elliptic-curve operations from the wallet.\n+ */\n+\n+/* Maximum number of Silent Payments recipients per group (i.e.\n+ * recipients sharing the same scan public key) as per BIP-352 */\n+#define SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT 2323\n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public key\n+ *  must be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payments outputs for recipient(s).\n+ *\n+ *  Given a list of n secret keys a_1...a_n (one for each Silent Payments\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs. Inputs with conditional branches or multiple\n+ *  public keys are excluded from Silent Payments eligible inputs; see BIP352\n+ *  for more information.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both Silent Payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment. Determining the smallest outpoint from the list of transaction\n+ *  inputs is the responsibility of the caller. It is strongly recommended\n+ *  that implementations ensure they are doing this correctly by using the\n+ *  test vectors from BIP352.\n+ *\n+ *  When creating more than one generated output, all of the generated outputs\n+ *  MUST be included in the final transaction. Dropping any of the generated\n+ *  outputs from the final transaction may make all or some of the outputs\n+ *  unfindable by the recipient.\n+ *\n+ *  Returns: 1 if creation of outputs was successful.\n+ *           0 on failure. This is expected only with an adversarially chosen\n+ *           recipient spend key. Specifically, failure occurs when:\n+ *             - Input secret keys sum to 0\n+ *               (negligible probability if at least one of the input secret\n+ *               keys is uniformly random and independent of all other keys)\n+ *             - A hash output is not a valid scalar (negligible probability\n+ *               per hash evaluation)\n+ *             - Any group (i.e. recipients sharing the same scan public key) exceeds\n+ *               the protocol limit SECP256K1_SILENTPAYMENTS_RECIPIENT_GROUP_LIMIT\n+ *\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static).\n+ *  Out:   generated_outputs: pointer to an array of pointers to xonly public keys,\n+ *                            one per recipient.\n+ *                            The outputs are ordered to match the original\n+ *                            ordering of the recipient objects, i.e.,\n+ *                            `generated_outputs[0]` is the generated output\n+ *                            for the `secp256k1_silentpayments_recipient` object\n+ *                            with index = 0.\n+ *  In:           recipients: pointer to an array of pointers to Silent Payments\n+ *                            recipients, where each recipient is a scan public\n+ *                            key, a spend public key, and an index indicating\n+ *                            its position in the original ordering. The\n+ *                            recipient array will be grouped by scan public key\n+ *                            in place (as specified in BIP0352), but generated\n+ *                            outputs are saved in the `generated_outputs` array\n+ *                            to match the original ordering (using the index\n+ *                            field). This ensures the caller is able to match\n+ *                            the generated outputs to the correct Silent\n+ *                            Payments addresses. The same recipient can be\n+ *                            passed multiple times to create multiple outputs\n+ *                            for the same recipient.",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 109,
+      "original_position": 109,
+      "commit_id": "cea6d114109aff49ce26a9d4e2f8c1106e36f2bc",
+      "original_commit_id": "cea6d114109aff49ce26a9d4e2f8c1106e36f2bc",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit (related to @stratospher's comment above but different):\r\n\r\nI think the docs could be improved here. The middle part could be mostly ommitted:\r\n - \"The recipient array will be grouped ...\": that's an implementation detail and it provides the caller with a guarantee (that we group the array) which the caller probably doesn't care about\r\n - \"but generated outputs are saved in the `generated_outputs` array  to match the original ordering (using the index field). This ensures [...]\": that's already explained in the docs of `generated_outputs` \r\n\r\nI suggest replacing this entirely middle part with a narrowed guarantee. For example:\r\n\"This function may reorder the pointers to the recipient objects within the array, i.e., after the call (including on failure), the index fields of the recipient objects may no longer correspond to the positions in the array.\" \r\n\r\nAnd I think this is a meaningful guarantee because it tells the user that the array can still be itereated over to catch all recipients, and just the order has been changed. But I don't think the user cares *what* the order is.\r\n\r\nShould this be an \"In/Out\" argument then? I don't know. Probably can't hurt so that the reader catches immediately that the function may write here.",
+      "created_at": "2026-07-22T09:24:57Z",
+      "updated_at": "2026-07-22T09:34:15Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3629066762",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3629066762"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
+        }
+      },
+      "start_line": 97,
+      "original_start_line": 97,
+      "start_side": "RIGHT",
+      "line": 109,
+      "original_line": 109,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3629070333",
+      "pull_request_review_id": 4752938317,
+      "id": 3629070333,
+      "node_id": "PRRC_kwDOAP4Jqs7YTzf9",
+      "diff_hunk": "@@ -25,6 +26,106 @@ extern \"C\" {\n  *  any further elliptic-curve operations from the wallet.\n  */\n \n+\n+/** The data from a single recipient address\n+ *\n+ *  This struct serves as an input argument to `silentpayments_sender_create_outputs`.\n+ *\n+ *  `index` must be set to the position (starting with 0) of this recipient in the\n+ *  `recipients` array passed to `silentpayments_sender_create_outputs`. It is\n+ *  used to map the returned generated outputs back to the original recipient.\n+ *\n+ *  Note:\n+ *  The spend public key named `spend_pubkey` may have been optionally tweaked with\n+ *  a label by the recipient. Whether `spend_pubkey` has actually been tagged with\n+ *  a label is irrelevant for the sender. As a documentation convention in this API,\n+ *  `unlabeled_spend_pubkey` is used to indicate when the unlabeled spend public key\n+ *  must be used.\n+ */\n+typedef struct secp256k1_silentpayments_recipient {\n+    secp256k1_pubkey scan_pubkey;\n+    secp256k1_pubkey spend_pubkey;\n+    size_t index;\n+} secp256k1_silentpayments_recipient;\n+\n+/** Create Silent Payments outputs for recipient(s).\n+ *\n+ *  Given a list of n secret keys a_1...a_n (one for each Silent Payments\n+ *  eligible input to spend), a serialized outpoint, and a list of recipients,\n+ *  create the taproot outputs. Inputs with conditional branches or multiple\n+ *  public keys are excluded from Silent Payments eligible inputs; see BIP352\n+ *  for more information.\n+ *\n+ *  `outpoint_smallest36` refers to the smallest outpoint lexicographically\n+ *  from the transaction inputs (both Silent Payments eligible and non-eligible\n+ *  inputs). This value MUST be the smallest outpoint out of all of the\n+ *  transaction inputs, otherwise the recipient will be unable to find the\n+ *  payment. Determining the smallest outpoint from the list of transaction\n+ *  inputs is the responsibility of the caller. It is strongly recommended\n+ *  that implementations ensure they are doing this correctly by using the\n+ *  test vectors from BIP352.\n+ *\n+ *  When creating more than one generated output, all of the generated outputs\n+ *  MUST be included in the final transaction. Dropping any of the generated\n+ *  outputs from the final transaction may make all or some of the outputs\n+ *  unfindable by the recipient.\n+ *\n+ *  Returns: 1 if creation of outputs was successful.\n+ *           0 on failure. This is expected only with an adversarially chosen\n+ *           recipient spend key. Specifically, failure occurs when:\n+ *             - Input secret keys sum to 0\n+ *               (negligible probability if at least one of the input secret\n+ *               keys is uniformly random and independent of all other keys)\n+ *             - A hash output is not a valid scalar (negligible probability\n+ *               per hash evaluation)\n+ *\n+ *  Args:                ctx: pointer to a context object\n+ *                            (not secp256k1_context_static).\n+ *  Out:   generated_outputs: pointer to an array of pointers to xonly public keys,\n+ *                            one per recipient.\n+ *                            The outputs are ordered to match the original\n+ *                            ordering of the recipient objects, i.e.,\n+ *                            `generated_outputs[0]` is the generated output\n+ *                            for the `secp256k1_silentpayments_recipient` object\n+ *                            with index = 0.\n+ *  In:           recipients: pointer to an array of pointers to Silent Payments\n+ *                            recipients, where each recipient is a scan public\n+ *                            key, a spend public key, and an index indicating\n+ *                            its position in the original ordering. The\n+ *                            recipient array will be grouped by scan public key\n+ *                            in place (as specified in BIP0352), but generated\n+ *                            outputs are saved in the `generated_outputs` array\n+ *                            to match the original ordering (using the index\n+ *                            field). This ensures the caller is able to match\n+ *                            the generated outputs to the correct Silent\n+ *                            Payments addresses. The same recipient can be",
+      "path": "include/secp256k1_silentpayments.h",
+      "position": 107,
+      "original_position": 84,
+      "commit_id": "cea6d114109aff49ce26a9d4e2f8c1106e36f2bc",
+      "original_commit_id": "b97aafd655f50b4c48504458e632c67ebdbb0f50",
+      "in_reply_to_id": 3563547475,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "It's certainly not a blocker but I tend to agree with @stratospher. A natural interpreation of the current wording \"The same recipient can be passed multiple times to create multiple outputs for the same recipient.\" is \"The same recipient *object* can be passed multiple times to create multiple outputs for the same recipient.\" and that's just wrong.\r\n\r\nI suggest something like this: Multiple recipient objects with the same scan public key and/or same spend public key can be passed if they carry a different index.",
+      "created_at": "2026-07-22T09:25:31Z",
+      "updated_at": "2026-07-22T09:25:31Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1765#discussion_r3629070333",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3629070333"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1765"
