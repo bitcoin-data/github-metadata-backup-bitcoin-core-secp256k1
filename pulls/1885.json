@@ -70,7 +70,7 @@
       "number": 10,
       "state": "open",
       "title": "0.7.2",
-      "description": "One month before Bitcoin Core 32.0 feature freeze (see https://github.com/bitcoin/bitcoin/issues/35122)",
+      "description": "~One month before Bitcoin Core 32.0 feature freeze (see https://github.com/bitcoin/bitcoin/issues/35122)~\n\nSilent Payments and SHA256 override",
       "creator": {
         "login": "real-or-random",
         "id": 1071625,
@@ -93,14 +93,14 @@
         "name": null,
         "patch_url": null
       },
-      "open_issues": 4,
+      "open_issues": 5,
       "closed_issues": 0,
       "created_at": "2026-01-30T12:30:13Z",
-      "updated_at": "2026-07-28T07:24:32Z",
-      "due_on": "2026-07-17T00:00:00Z"
+      "updated_at": "2026-07-28T14:29:38Z",
+      "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-06-29T08:22:33Z",
-    "updated_at": "2026-07-28T08:36:43Z",
+    "updated_at": "2026-07-28T14:08:08Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -344,11 +344,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1158,
-        "stargazers_count": 2456,
-        "watchers_count": 2456,
+        "stargazers_count": 2457,
+        "watchers_count": 2457,
         "size": 13025,
         "default_branch": "master",
-        "open_issues_count": 154,
+        "open_issues_count": 155,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -361,7 +361,7 @@
         "visibility": "public",
         "pushed_at": "2026-07-27T07:23:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-07-27T15:46:20Z",
+        "updated_at": "2026-07-28T10:46:01Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -391,7 +391,7 @@
     "deletions": 0,
     "changed_files": 1,
     "commits": 2,
-    "review_comments": 5,
+    "review_comments": 6,
     "comments": 2
   },
   "events": [
@@ -1033,6 +1033,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3664034802"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1885"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 265,
+      "original_line": 265,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3666214666",
+      "pull_request_review_id": 4798148799,
+      "id": 3666214666,
+      "node_id": "PRRC_kwDOAP4Jqs7ahf8K",
+      "diff_hunk": "@@ -258,7 +260,9 @@ static void secp256k1_ecmult_const(secp256k1_gej *r, const secp256k1_ge *a, cons\n             secp256k1_gej_add_ge(r, r, &t);\n         }\n         ECMULT_CONST_TABLE_GET_GE(&t, pre_a_lam, bits2);\n+        secp256k1_memclear_explicit(&bits2, sizeof(bits2));\n         secp256k1_gej_add_ge(r, r, &t);\n+        secp256k1_ge_clear(&t);",
+      "path": "src/ecmult_const_impl.h",
+      "position": 22,
+      "original_position": 22,
+      "commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "original_commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "in_reply_to_id": 3493552458,
+      "user": {
+        "login": "niooss-ledger",
+        "id": 64031241,
+        "node_id": "MDQ6VXNlcjY0MDMxMjQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/64031241?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/niooss-ledger",
+        "html_url": "https://github.com/niooss-ledger",
+        "followers_url": "https://api.github.com/users/niooss-ledger/followers",
+        "following_url": "https://api.github.com/users/niooss-ledger/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/niooss-ledger/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/niooss-ledger/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/niooss-ledger/subscriptions",
+        "organizations_url": "https://api.github.com/users/niooss-ledger/orgs",
+        "repos_url": "https://api.github.com/users/niooss-ledger/repos",
+        "events_url": "https://api.github.com/users/niooss-ledger/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/niooss-ledger/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> When the variable is declared inside the loop, then the C standard is really not clear (to me) about whether the variable will have the same address in every loop iteration. So yes, I see the concern. But do you have evidence that compilers in the real world do such a thing, i.e., allocate variables in different places for each iteration?\r\n\r\nIt appears I have spent a bit too much time analyzing assembly code generated by the Rust compiler (which is in general more complex than code generated for C programs, partly due to the way variables are moved/copied on several stack locations in the same function).\r\n\r\nI have been trying to see how GCC and Clang behave when unrolling loops. It seem they both re-use the same location for local variables, as long as there is no variable-length array involved. Here is some C program I used to try to coerce this corner-case behavior.\r\n\r\n<details>\r\n  <summary>Example of C program I wrote to test this</summary>\r\n\r\n```c\r\n#include <stdio.h>\r\n\r\nvoid * __attribute__((noinline, weak)) do_something_and_get_instruction_pointer(void *p) {\r\n    (void)p;\r\n    return __builtin_return_address(0);\r\n}\r\n\r\n#ifndef __clang__\r\n    // Enable unrolling loops even when compiling with \"gcc -O0\"\r\n    #pragma GCC optimize (\"unroll-loops\")\r\n#endif\r\n\r\nint main(void) {\r\n    unsigned int i;\r\n\r\n#ifdef __clang__\r\n    #pragma clang loop unroll_count(4)\r\n#else\r\n    #pragma GCC unroll 4\r\n#endif\r\n    for (i = 0; i < 16; i++) {\r\n        unsigned int j[2] = {0};\r\n        if (i % 2) {\r\n            j[0] = 1;\r\n        }\r\n        void *ip = do_something_and_get_instruction_pointer(&j);\r\n        printf(\"[main+%#zx] i = %d, j at %p is %u\\n\", (size_t)ip - (size_t)main, i, &j, j[0]);\r\n    }\r\n\r\n    return 0;\r\n}\r\n```\r\n</details>\r\n\r\n> Keep in mind that, in general, nothing is \"sound\" here and all of this stack cleaning is a best-effort thing. The compiler may spill copies of the variable all over the stack if this helps optimizing even with our memclear (as long as it clears the \"official\" one where the address points to).\r\n\r\nI agree, and even though we could check from time to time how the generated assembly code uses the stack, I understand this approach of trying to clear sensitive values is fragile and has to remain best-effort.\r\n\r\n> @niooss-ledger I don't want to pull you into more work. If you want to make these changes, please go ahead. If not, just leave a comment here and I think we can take of it.\r\n\r\nThanks :) As I will soon be on holidays and am a bit uncomfortable to \"push & leave\", feel free to take care of the changes.",
+      "created_at": "2026-07-28T14:08:07Z",
+      "updated_at": "2026-07-28T14:08:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1885#discussion_r3666214666",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3666214666"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1885"
