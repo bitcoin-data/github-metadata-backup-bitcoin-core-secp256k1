@@ -69,7 +69,7 @@
       "node_id": "MI_kwDOAP4Jqs4A3-Md",
       "number": 10,
       "state": "open",
-      "title": "0.7.2",
+      "title": "0.8.0",
       "description": "~One month before Bitcoin Core 32.0 feature freeze (see https://github.com/bitcoin/bitcoin/issues/35122)~\n\nSilent Payments and SHA256 override",
       "creator": {
         "login": "real-or-random",
@@ -96,11 +96,11 @@
       "open_issues": 5,
       "closed_issues": 0,
       "created_at": "2026-01-30T12:30:13Z",
-      "updated_at": "2026-07-28T14:29:38Z",
+      "updated_at": "2026-07-28T15:26:57Z",
       "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-06-29T08:22:33Z",
-    "updated_at": "2026-07-28T14:08:08Z",
+    "updated_at": "2026-07-28T15:22:03Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -391,7 +391,7 @@
     "deletions": 0,
     "changed_files": 1,
     "commits": 2,
-    "review_comments": 6,
+    "review_comments": 7,
     "comments": 2
   },
   "events": [
@@ -1097,6 +1097,60 @@
       "start_side": null,
       "line": 265,
       "original_line": 265,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3666829325",
+      "pull_request_review_id": 4798931556,
+      "id": 3666829325,
+      "node_id": "PRRC_kwDOAP4Jqs7aj2AN",
+      "diff_hunk": "@@ -98,6 +98,7 @@ static void secp256k1_ecmult_const_odd_multiples_table_globalz(secp256k1_ge *pre\n     } \\\n     secp256k1_fe_negate(&neg_y, &(r)->y, 1); \\\n     secp256k1_fe_cmov(&(r)->y, &neg_y, negative); \\\n+    secp256k1_fe_clear(&neg_y); \\",
+      "path": "src/ecmult_const_impl.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "original_commit_id": "3523d434fecd7a9f23057066d14b4373da0bd582",
+      "in_reply_to_id": 3663909161,
+      "user": {
+        "login": "niooss-ledger",
+        "id": 64031241,
+        "node_id": "MDQ6VXNlcjY0MDMxMjQx",
+        "avatar_url": "https://avatars.githubusercontent.com/u/64031241?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/niooss-ledger",
+        "html_url": "https://github.com/niooss-ledger",
+        "followers_url": "https://api.github.com/users/niooss-ledger/followers",
+        "following_url": "https://api.github.com/users/niooss-ledger/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/niooss-ledger/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/niooss-ledger/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/niooss-ledger/subscriptions",
+        "organizations_url": "https://api.github.com/users/niooss-ledger/orgs",
+        "repos_url": "https://api.github.com/users/niooss-ledger/repos",
+        "events_url": "https://api.github.com/users/niooss-ledger/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/niooss-ledger/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Indeed. Looking at the generated assembly code (from `./autogen.sh && ./configure && make` on Ubuntu x86_64), and analyzing function `secp256k1_ecmult_const` from `src/libsecp256k1_la-secp256k1.o`), `index` is actually pushed to a stack location. In Ghidra, it looks like this (when `rsp + 8` is used):\r\n\r\n<img width=\"1556\" height=\"883\" alt=\"image\" src=\"https://github.com/user-attachments/assets/89895ff4-4727-43c0-b965-c1baee84c124\" />\r\n\r\nBut adding `secp256k1_memclear_explicit(&index, sizeof(index));` does not seem to actually clear this copy. Generating the assembly code with `gcc -DPACKAGE_NAME=\\\"libsecp256k1\\\" -DPACKAGE_TARNAME=\\\"libsecp256k1\\\" -DPACKAGE_VERSION=\\\"0.7.2-dev\\\" \"-DPACKAGE_STRING=\\\"libsecp256k1 0.7.2-dev\\\"\" -DPACKAGE_BUGREPORT=\\\"https://github.com/bitcoin-core/secp256k1/issues\\\" -DPACKAGE_URL=\\\"https://github.com/bitcoin-core/secp256k1\\\" -DPACKAGE=\\\"libsecp256k1\\\" -DVERSION=\\\"0.7.2-dev\\\" -DHAVE_STDIO_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_STRINGS_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_UNISTD_H=1 -DSTDC_HEADERS=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\\\".libs/\\\" -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_WAIT_H=1 -DHAVE_UNISTD_H=1 -I. -DUSE_ASM_X86_64=1 -DECMULT_WINDOW_SIZE=15 -DCOMB_BLOCKS=43 -DCOMB_TEETH=6 -DENABLE_MODULE_ELLSWIFT=1 -DENABLE_MODULE_MUSIG=1 -DENABLE_MODULE_SCHNORRSIG=1 -DENABLE_MODULE_EXTRAKEYS=1 -DENABLE_MODULE_ECDH=1 -O2 -std=c89 -pedantic -Wno-long-long -Wnested-externs -Wshadow -Wstrict-prototypes -Wundef -Wno-overlength-strings -Wall -Wno-unused-function -Wextra -Wcast-align -Wcast-align=strict -g -O2 -MT src/libsecp256k1_la-secp256k1.lo -MD -MP -MF src/.deps/libsecp256k1_la-secp256k1.Tpo -c src/secp256k1.c -S -o src/libsecp256k1_la-secp256k1.s` (GCC version `gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0` on Ubuntu 22.04) shows:\r\n\r\n```asm\r\n.LBE54234:\r\n        .loc 26 251 9 view .LVU48389\r\n        movl    %eax, 32(%rsp)                      ; store index to rsp+32\r\n\r\n...\r\n\r\n.LBE54228:\r\n.LBE54236:\r\n        .loc 26 251 9 is_stmt 1 discriminator 3 view .LVU48407\r\n        xorl    %r8d, %r8d\r\n        cmpl    %r12d, 32(%rsp)                     ; compare the index with m\r\n.LBB54238:\r\n        .loc 3 356 44 is_stmt 0 discriminator 3 view .LVU48408\r\n        movq    (%rdx), %r13\r\n.LBE54238:\r\n.LBE54237:\r\n        .loc 26 251 9 discriminator 3 view .LVU48409\r\n        sete    %r8b\r\n\r\n...\r\n\r\n.LBE54245:\r\n.LBE54248:\r\n        .loc 26 251 9 is_stmt 1 discriminator 3 view .LVU48487\r\n        .loc 26 251 9 discriminator 3 view .LVU48488\r\n        cmpl    $16, %r12d\r\n        jne     .L697                                ; end of for (m = 1 ; ...) loop\r\n        movq    %rax, 440(%rsp)\r\n        movq    8(%rsp), %rsi\r\n        movq    (%rsp), %rax\r\n        movq    %r10, 408(%rsp)\r\n        movq    %rbp, 416(%rsp)\r\n        movq    %rax, 368(%rsp)\r\n        .loc 26 251 9 view .LVU48489\r\n.LVL6784:\r\n.LBB54249:\r\n.LBI54249:\r\n        .loc 8 269 30 view .LVU48490\r\n        .loc 8 271 5 view .LVU48491\r\n.LBB54250:\r\n.LBI54250:\r\n        .loc 8 237 30 view .LVU48492\r\n.LBB54251:\r\n        .loc 8 253 5 view .LVU48493\r\n        .loc 8 254 5 is_stmt 0 view .LVU48494\r\n        movq    64(%rsp), %rax\r\n        movq    %r9, 424(%rsp)\r\n        movq    %rbx, 432(%rsp)\r\n        movq    %rsi, 400(%rsp)\r\n        movq    %r11, 392(%rsp)\r\n        movq    %r14, 384(%rsp)\r\n        movq    %r15, 376(%rsp)\r\n        movl    $0, 148(%rsp)                       ; rsp+148 gets cleared, not rsp+32\r\n```\r\n\r\nIt feels a bit weird that GCC is not clearing the right 32-bit stack location, and this might be a bug in an old version of GCC, or an error in my analysis of the assembly code.\r\n\r\nAnyway, I don't have much more time to spend on debugging this and if you want to clear `index`, please go ahead :)",
+      "created_at": "2026-07-28T15:22:03Z",
+      "updated_at": "2026-07-28T15:22:04Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1885#discussion_r3666829325",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3666829325"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1885"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 101,
+      "original_line": 101,
       "side": "RIGHT"
     }
   ]
