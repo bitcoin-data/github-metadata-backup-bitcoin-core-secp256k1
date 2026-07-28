@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1898/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1898/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/0cbecce1bbd1505acbf0dad687a2333757071ca2",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/b561d6c58c541e38433b3475092b6bfacbd952ec",
     "number": 1898,
     "state": "open",
     "locked": false,
@@ -40,14 +40,14 @@
       "name": null,
       "patch_url": null
     },
-    "body": "**Problem:** The Silent Payments ctime test scans without a label callback and uses a scan key that no longer matches its generated output.\r\nIt therefore covers neither a successful scan nor the label-candidate batch path while the scan key is marked undefined.\r\n\r\n**Fix:** Create the scan pubkey from the key used for scanning so the generated output matches, place a nonmatching output before it, and scan with a callback that checks each serialized candidate is defined and counts misses.\r\nThe test now covers a pending label batch flushed before a direct match and a final no-match batch.\r\n\r\n---\r\n\r\nDraft to get conceptual review first to make sure I understood the problem correctly.",
+    "body": "**Problem:** The constant-time test generates an output using one scan key, then mutates the key before scanning, so the scan cannot find it.\r\nIt also passes no label callback, leaving label-candidate serialization and batching unexecuted.\r\nThe test still passes because it only covers the initial shared-secret computation with the undefined scan key.\r\n\r\n**Fix:** Regenerate the output for the actual scan key and prepend a nonmatching output.\r\nUse a callback to check each serialized 33-byte candidate is defined and count misses, and require one direct, unlabeled output match.\r\n\r\n---\r\n\r\nDraft to get conceptual review first to make sure I understood the problem correctly.",
     "labels": [],
     "created_at": "2026-07-27T23:53:06Z",
-    "updated_at": "2026-07-27T23:53:06Z",
+    "updated_at": "2026-07-28T00:49:38Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "e5650a0eb0c6c5e78049ed13cd607915fee3bbe0",
+    "merge_commit_sha": "60eaf474c7fbf9ad6931327cd27ad6fc28012b6a",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "l0rinc:l0rinc/silentpayments-ctime-label-scan",
       "ref": "l0rinc/silentpayments-ctime-label-scan",
-      "sha": "0cbecce1bbd1505acbf0dad687a2333757071ca2",
+      "sha": "b561d6c58c541e38433b3475092b6bfacbd952ec",
       "user": {
         "login": "l0rinc",
         "id": 1841944,
@@ -154,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 17476,
+        "size": 17559,
         "default_branch": "master",
         "open_issues_count": 25,
         "is_template": false,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-07-27T23:44:01Z",
+        "pushed_at": "2026-07-28T00:38:50Z",
         "created_at": "2025-09-09T05:01:20Z",
         "updated_at": "2026-07-27T23:44:05Z",
         "allow_forking": true,
@@ -330,11 +330,11 @@
       }
     },
     "author_association": "CONTRIBUTOR",
-    "draft": false,
+    "draft": true,
     "additions": 27,
     "deletions": 13,
     "changed_files": 1,
-    "commits": 3,
+    "commits": 2,
     "review_comments": 0,
     "comments": 0
   },
@@ -342,22 +342,22 @@
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDIxODUyNGM1MDdmNGJmN2M2YzMzNzFkOGE0YWI4NGFjOWIyMTFkNzc",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/218524c507f4bf7c6c3371d8a4ab84ac9b211d77",
+      "node_id": "C_kwDOAP4JqtoAKGY3ZGU2ZjdiZGZiYjExNTEwMDAxYzU3MTg0ZWM1NzMyY2ZiYTFiYjM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f7de6f7bdfbb11510001c57184ec5732cfba1bb3",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/218524c507f4bf7c6c3371d8a4ab84ac9b211d77",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f7de6f7bdfbb11510001c57184ec5732cfba1bb3",
       "tree": {
-        "sha": "3f540f150b16bcccb9fbe65ef288e51bb5be3592",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/3f540f150b16bcccb9fbe65ef288e51bb5be3592"
+        "sha": "b2845bbb2694f13d2a3366b5745733f61f355bd3",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b2845bbb2694f13d2a3366b5745733f61f355bd3"
       },
       "verification": {
         "verified": true,
         "reason": "valid",
-        "payload": "tree 3f540f150b16bcccb9fbe65ef288e51bb5be3592\nparent 0f6baf319fcae0d7f11a44fc9b4d4899b3f8082a\nauthor Lőrinc <pap.lorinc@gmail.com> 1785191389 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1785191389 -0700\n\ntests: make Silent Payments ctime scan find output\n\nThe ctime scan generates its output for a scan pubkey that no longer matches the key passed to `secp256k1_silentpayments_recipient_scan_outputs`, so the scan finds nothing.\n\nRegenerate the output for the actual scan key and prepend a nonmatching output to exercise scanning past a miss.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCamfb3RsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIcvVwD9GoSKkeXV00Kttx1TWtXf\nOYMywi5r2Q875DlvByTJHYQA/iGSty0of6rqrrasyfHF5CqDaQfiE5AtI2x6upo3\nsPMD\n=VRXv\n-----END PGP SIGNATURE-----"
+        "payload": "tree b2845bbb2694f13d2a3366b5745733f61f355bd3\nparent 0f6baf319fcae0d7f11a44fc9b4d4899b3f8082a\nauthor Lőrinc <pap.lorinc@gmail.com> 1785198593 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1785199072 -0700\n\ntests: make Silent Payments ctime scan find output\n\nThe ctime test marks the scan key undefined, but generates its output for a scan public key created before later key mutations.\nThe scan therefore cannot find that output, leaving the successful-match path untested even though the test passes.\n\nRegenerate the output for the actual scan key and prepend a nonmatching output for the label-batch scenario.\nRemove the earlier scan-public-key creation and sender call because this setup replaces both.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCamf54BsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIe2ugEA8ePENq+GzRzCFZSbkD5U\nxS8+E5cfH+bhvGOi+sqrjg8BAML3MJEPEr0He2FY5pNENUWx4yiqL6q+SPoxZOCf\nEaUI\n=fH1u\n-----END PGP SIGNATURE-----"
       },
       "parents": [
         {
@@ -366,69 +366,29 @@
           "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f6baf319fcae0d7f11a44fc9b4d4899b3f8082a"
         }
       ],
-      "message": "tests: make Silent Payments ctime scan find output\n\nThe ctime scan generates its output for a scan pubkey that no longer matches the key passed to `secp256k1_silentpayments_recipient_scan_outputs`, so the scan finds nothing.\n\nRegenerate the output for the actual scan key and prepend a nonmatching output to exercise scanning past a miss.",
+      "message": "tests: make Silent Payments ctime scan find output\n\nThe ctime test marks the scan key undefined, but generates its output for a scan public key created before later key mutations.\nThe scan therefore cannot find that output, leaving the successful-match path untested even though the test passes.\n\nRegenerate the output for the actual scan key and prepend a nonmatching output for the label-batch scenario.\nRemove the earlier scan-public-key creation and sender call because this setup replaces both.",
       "committer": {
         "name": "Lőrinc",
         "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:29:49Z"
+        "date": "2026-07-28T00:37:52Z"
       },
       "author": {
         "name": "Lőrinc",
         "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:29:49Z"
+        "date": "2026-07-28T00:29:53Z"
       },
-      "sha": "218524c507f4bf7c6c3371d8a4ab84ac9b211d77"
+      "sha": "f7de6f7bdfbb11510001c57184ec5732cfba1bb3"
     },
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDVlM2MxYWNkN2I0ODlkNzcwZTFiYWVhMWYzZjAwMzU5YWQxN2Q1YjE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5e3c1acd7b489d770e1baea1f3f00359ad17d5b1",
+      "node_id": "C_kwDOAP4JqtoAKGI1NjFkNmM1OGM1NDFlMzg0MzNiMzQ3NTA5MmI2YmZhY2JkOTUyZWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b561d6c58c541e38433b3475092b6bfacbd952ec",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5e3c1acd7b489d770e1baea1f3f00359ad17d5b1",
-      "tree": {
-        "sha": "93fa87ae998f13f6d4a0f9e51c46f60a7c054919",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/93fa87ae998f13f6d4a0f9e51c46f60a7c054919"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 93fa87ae998f13f6d4a0f9e51c46f60a7c054919\nparent 218524c507f4bf7c6c3371d8a4ab84ac9b211d77\nauthor Lőrinc <pap.lorinc@gmail.com> 1785190678 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1785191395 -0700\n\ntests: cover Silent Payments label batches\n\nThe ctime scan does not provide a label callback, so it omits candidate serialization and batch lookup coverage.\n\nCount callback misses while checking that every serialized candidate is defined. The six calls cover the pending batch before the direct k=0 match and the final k=1 no-match batch while LABEL_BATCH_SIZE remains at least 2.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCamfb4xsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIdskwD+J6nVwfMdDctK228TYSx/\n8p66BQPzipsCIBUwtwkFG7ABAL2RYLqVO6z/dZlMpYYmjHNYFpuy1cn01BkHkmKP\nEAYD\n=aC6F\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/218524c507f4bf7c6c3371d8a4ab84ac9b211d77",
-          "sha": "218524c507f4bf7c6c3371d8a4ab84ac9b211d77",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/218524c507f4bf7c6c3371d8a4ab84ac9b211d77"
-        }
-      ],
-      "message": "tests: cover Silent Payments label batches\n\nThe ctime scan does not provide a label callback, so it omits candidate serialization and batch lookup coverage.\n\nCount callback misses while checking that every serialized candidate is defined. The six calls cover the pending batch before the direct k=0 match and the final k=1 no-match batch while LABEL_BATCH_SIZE remains at least 2.",
-      "committer": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:29:55Z"
-      },
-      "author": {
-        "name": "Lőrinc",
-        "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:17:58Z"
-      },
-      "sha": "5e3c1acd7b489d770e1baea1f3f00359ad17d5b1"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBjYmVjY2UxYmJkMTUwNWFjYmYwZGFkNjg3YTIzMzM3NTcwNzFjYTI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0cbecce1bbd1505acbf0dad687a2333757071ca2",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0cbecce1bbd1505acbf0dad687a2333757071ca2",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b561d6c58c541e38433b3475092b6bfacbd952ec",
       "tree": {
         "sha": "f5ad49527a0c3498975d8de85c20e781ab7f17cd",
         "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f5ad49527a0c3498975d8de85c20e781ab7f17cd"
@@ -436,28 +396,90 @@
       "verification": {
         "verified": true,
         "reason": "valid",
-        "payload": "tree f5ad49527a0c3498975d8de85c20e781ab7f17cd\nparent 5e3c1acd7b489d770e1baea1f3f00359ad17d5b1\nauthor Lőrinc <pap.lorinc@gmail.com> 1785191610 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1785191610 -0700\n\ntests: cover Silent Payments output match\n\nThe ctime scan does not verify whether it found the generated output.\n\nRequire one direct unlabeled output match so the fixture fails if its scan and output keys diverge.\nRemove the earlier scan-pubkey creation and sender call because their state is overwritten by the matching-output setup before scanning.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCamfcuhsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIf6EQEAlrCByh4NEil0IpV6b8Kl\npDub+Q6LPRgpl6T3e89sBt0BAK039DYPj4/lWNwe9ypZAAFD9FNFDfYw2WmckqZn\nSvEN\n=VPV1\n-----END PGP SIGNATURE-----"
+        "payload": "tree f5ad49527a0c3498975d8de85c20e781ab7f17cd\nparent f7de6f7bdfbb11510001c57184ec5732cfba1bb3\nauthor Lőrinc <pap.lorinc@gmail.com> 1785198598 -0700\ncommitter Lőrinc <pap.lorinc@gmail.com> 1785199072 -0700\n\ntests: cover Silent Payments label scanning\n\nThe ctime test passes no label callback, so label-candidate serialization and batching never run while the scan key is marked undefined.\n\nCheck that every serialized 33-byte candidate is defined, count callback misses, and require one direct unlabeled output match.\nFor `k = 0`, the first output contributes two candidates that flush before the second output matches directly; for `k = 1`, both outputs miss and four candidates flush at the end.\n\nThe six callback calls prove both flush paths execute, `SECP256K1_CHECKMEM_CHECK` proves the candidate bytes are defined, and the result assertions prove the intended direct match is still found.\nThe six-call argument relies on `LABEL_BATCH_SIZE >= 2` (currently 8); at one, the first miss would flush immediately and no longer cover the pre-direct-match flush.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQQiU97U54YbP0PlTVgnCd/LLYEwhwUCamf54BsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQJwnfyy2BMIfRZQEAhmWo6K2r66d9RhKDhuyv\n9axYyQ/OGMlf5QSjH+GWuRUA/0495rH8sLGPVYqIKv5lPArwxlpEInQ2/feCwCPh\ntJEG\n=1/BQ\n-----END PGP SIGNATURE-----"
       },
       "parents": [
         {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5e3c1acd7b489d770e1baea1f3f00359ad17d5b1",
-          "sha": "5e3c1acd7b489d770e1baea1f3f00359ad17d5b1",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5e3c1acd7b489d770e1baea1f3f00359ad17d5b1"
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f7de6f7bdfbb11510001c57184ec5732cfba1bb3",
+          "sha": "f7de6f7bdfbb11510001c57184ec5732cfba1bb3",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f7de6f7bdfbb11510001c57184ec5732cfba1bb3"
         }
       ],
-      "message": "tests: cover Silent Payments output match\n\nThe ctime scan does not verify whether it found the generated output.\n\nRequire one direct unlabeled output match so the fixture fails if its scan and output keys diverge.\nRemove the earlier scan-pubkey creation and sender call because their state is overwritten by the matching-output setup before scanning.",
+      "message": "tests: cover Silent Payments label scanning\n\nThe ctime test passes no label callback, so label-candidate serialization and batching never run while the scan key is marked undefined.\n\nCheck that every serialized 33-byte candidate is defined, count callback misses, and require one direct unlabeled output match.\nFor `k = 0`, the first output contributes two candidates that flush before the second output matches directly; for `k = 1`, both outputs miss and four candidates flush at the end.\n\nThe six callback calls prove both flush paths execute, `SECP256K1_CHECKMEM_CHECK` proves the candidate bytes are defined, and the result assertions prove the intended direct match is still found.\nThe six-call argument relies on `LABEL_BATCH_SIZE >= 2` (currently 8); at one, the first miss would flush immediately and no longer cover the pre-direct-match flush.",
       "committer": {
         "name": "Lőrinc",
         "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:33:30Z"
+        "date": "2026-07-28T00:37:52Z"
       },
       "author": {
         "name": "Lőrinc",
         "email": "pap.lorinc@gmail.com",
-        "date": "2026-07-27T22:33:30Z"
+        "date": "2026-07-28T00:29:58Z"
       },
-      "sha": "0cbecce1bbd1505acbf0dad687a2333757071ca2"
+      "sha": "b561d6c58c541e38433b3475092b6bfacbd952ec"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 28570077683,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABKaDpO88AAAAGpujJ8w",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28570077683",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "b561d6c58c541e38433b3475092b6bfacbd952ec",
+      "commit_url": "https://api.github.com/repos/l0rinc/secp256k1/commits/b561d6c58c541e38433b3475092b6bfacbd952ec",
+      "created_at": "2026-07-28T00:38:51Z"
+    },
+    {
+      "event": "convert_to_draft",
+      "id": 28570088097,
+      "node_id": "CTDE_lADOAP4Jqs8AAAABKaDpO88AAAAGpujyoQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28570088097",
+      "actor": {
+        "login": "l0rinc",
+        "id": 1841944,
+        "node_id": "MDQ6VXNlcjE4NDE5NDQ=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1841944?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/l0rinc",
+        "html_url": "https://github.com/l0rinc",
+        "followers_url": "https://api.github.com/users/l0rinc/followers",
+        "following_url": "https://api.github.com/users/l0rinc/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/l0rinc/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/l0rinc/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/l0rinc/subscriptions",
+        "organizations_url": "https://api.github.com/users/l0rinc/orgs",
+        "repos_url": "https://api.github.com/users/l0rinc/repos",
+        "events_url": "https://api.github.com/users/l0rinc/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/l0rinc/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-28T00:39:13Z"
     }
   ],
   "comments": []
