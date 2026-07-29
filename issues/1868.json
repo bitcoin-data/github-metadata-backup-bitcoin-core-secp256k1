@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1868/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1868",
     "number": 1868,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "Remove SECP256K1_GNUC_PREREQ?",
     "body": "We have a `SECP256K1_GNUC_PREREQ` macro (defined in terms of `__GNUC__` and `__GNUC_MINOR__` for checking gcc versions):\n\n https://github.com/bitcoin-core/secp256k1/blob/0f4a7e6bf9d971addb2b851df7cd2777fc62b212/include/secp256k1.h#L104-L111\n\nCurrent usage in the codebase:\n```\n ❯ git grep _GNUC_\nexamples/examples_util.h:#elif defined(__GNUC__)\ninclude/secp256k1.h:# if !defined(SECP256K1_GNUC_PREREQ)\ninclude/secp256k1.h:#  if defined(__GNUC__)&&defined(__GNUC_MINOR__)\ninclude/secp256k1.h:#   define SECP256K1_GNUC_PREREQ(_maj,_min) \\\ninclude/secp256k1.h: ((__GNUC__<<16)+__GNUC_MINOR__>=((_maj)<<16)+(_min))\ninclude/secp256k1.h:#   define SECP256K1_GNUC_PREREQ(_maj,_min) 0\ninclude/secp256k1.h:#        elif !defined(_WIN32) && defined (__GNUC__) && (__GNUC__ >= 4)\ninclude/secp256k1.h:# if defined(__GNUC__) && SECP256K1_GNUC_PREREQ(3, 4)\ninclude/secp256k1.h:# if !defined(SECP256K1_BUILD) && defined(__GNUC__) && SECP256K1_GNUC_PREREQ(3, 4)\nsrc/checkmem.h:#  elif defined(__GNUC__) && (__GNUC__ >= 15)\nsrc/checkmem.h:#  elif defined(__GNUC__) && (__GNUC__ >= 15)\nsrc/int128_native.h:SECP256K1_GNUC_EXT typedef unsigned __int128 uint128_t;\nsrc/int128_native.h:SECP256K1_GNUC_EXT typedef __int128 int128_t;\nsrc/util.h:#  if SECP256K1_GNUC_PREREQ(2,7)\nsrc/util.h:#if SECP256K1_GNUC_PREREQ(3, 0)\nsrc/util.h:#  if SECP256K1_GNUC_PREREQ(3,0)\nsrc/util.h:#if defined(__GNUC__)\nsrc/util.h:# define SECP256K1_GNUC_EXT __extension__\nsrc/util.h:# define SECP256K1_GNUC_EXT\nsrc/util.h:#elif defined(__GNUC__)\nsrc/util.h:#if (__has_builtin(__builtin_ctz) || SECP256K1_GNUC_PREREQ(3,4))\nsrc/util.h:#if (__has_builtin(__builtin_ctzl) || SECP256K1_GNUC_PREREQ(3,4))\nsrc/util.h:#if (__has_builtin(__builtin_ctzl) || SECP256K1_GNUC_PREREQ(3,4))\nsrc/util.h:#if (__has_builtin(__builtin_ctzll) || SECP256K1_GNUC_PREREQ(3,4))\nsrc/util_local_visibility.h:#if !defined(_WIN32) && defined(__GNUC__) && (__GNUC__ >= 4)\n```\n\n *  It's currently used only for ancient GCC versions (see above). The only check against a contemporary GCC version is in `checkmem.h` but here we don't even use the macro. (#1865 would add a (4, 2) check but I consider this also ancient). If you have an ancient compiler, it's reasonable to except that you're on your own.\n * Contributors apparently don't remember its existence (see the `checkmem.h` case, and also `util_local_visibility.h` and even `secp256k1.h` itself).\n * It's misleading because `__GNUC__` is defined also in Clang. Clang sets `__GNUC__` to 4 and `__GNUC_MINOR__` to 2 (mimicking GCC 4.2) by default for compatibility, regardless of the actual Clang version. Modern Clang (8+) supports `-fgnuc-version=major.minor.patch` to override these values, but that's of no use to us.\n\nI suggest removing the macro and just checking `defined(__GNUC__)` instead (when it comes to ancient versions), or something like `(__GNUC__) && (__GNUC__ >= 15)`, or `__has_builtin` when appropriate (introduced in GCC 10).\n",
     "user": {
@@ -157,15 +157,38 @@
         "name": null,
         "patch_url": null
       },
-      "open_issues": 3,
-      "closed_issues": 0,
+      "open_issues": 1,
+      "closed_issues": 2,
       "created_at": "2026-02-06T10:06:04Z",
-      "updated_at": "2026-07-28T07:27:56Z"
+      "updated_at": "2026-07-29T06:19:11Z"
     },
     "locked": false,
     "comments": 2,
+    "closed_at": "2026-07-29T06:19:11Z",
+    "closed_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "created_at": "2026-06-10T11:27:30Z",
-    "updated_at": "2026-07-28T07:26:56Z"
+    "updated_at": "2026-07-29T06:19:11Z"
   },
   "events": [
     {
@@ -524,6 +547,37 @@
       "milestone": {
         "title": "next breaking release"
       }
+    },
+    {
+      "event": "closed",
+      "id": 28641279015,
+      "node_id": "CE_lADOAP4Jqs8AAAABFANt_s8AAAAGqyc8Jw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28641279015",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-29T06:19:11Z"
     }
   ]
 }
