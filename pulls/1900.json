@@ -108,7 +108,7 @@
       "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-07-29T08:43:05Z",
-    "updated_at": "2026-07-29T17:42:40Z",
+    "updated_at": "2026-07-29T19:06:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -400,7 +400,7 @@
     "deletions": 3,
     "changed_files": 3,
     "commits": 2,
-    "review_comments": 5,
+    "review_comments": 6,
     "comments": 4
   },
   "events": [
@@ -1261,6 +1261,45 @@
       "submitted_at": "2026-07-29T17:42:40Z",
       "state": "APPROVED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1900"
+    },
+    {
+      "event": "reviewed",
+      "id": 4811958914,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABHtCqgg",
+      "url": null,
+      "actor": null,
+      "commit_id": "4147f8bdf628fa95b42adc1d7ce55436eb63861e",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-07-29T19:06:10Z",
+      "author_association": "MEMBER",
+      "body": "ACK 4147f8bdf628fa95b42adc1d7ce55436eb63861e",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1900#pullrequestreview-4811958914",
+      "submitted_at": "2026-07-29T19:06:10Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1900"
     }
   ],
   "comments": [
@@ -1531,6 +1570,60 @@
       "original_start_line": 434,
       "start_side": "RIGHT",
       "line": null,
+      "original_line": 435,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3677286474",
+      "pull_request_review_id": 4811958914,
+      "id": 3677286474,
+      "node_id": "PRRC_kwDOAP4Jqs7bLvBK",
+      "diff_hunk": "@@ -427,6 +427,14 @@ typedef void (*secp256k1_sha256_compression_function)(\n  * specialized implementation. It is NOT meant for replacing SHA256\n  * with a different hash function.\n  *\n+ * Since auxiliary functions exposed by the library via a function\n+ * pointer such as secp256k1_nonce_function_default do not take a\n+ * context object, they will not use the callback when called directly\n+ * from user code. (But they will use the callback when called from\n+ * other library functions that do take a context object, e.g., when\n+ * noncefp==NULL or noncefp==secp256k1_nonce_function_default is passed",
+      "path": "include/secp256k1.h",
+      "position": 18,
+      "original_position": 18,
+      "commit_id": "4147f8bdf628fa95b42adc1d7ce55436eb63861e",
+      "original_commit_id": "4147f8bdf628fa95b42adc1d7ce55436eb63861e",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "small note; this comment kinda assumes `secp256k1_nonce_function_default` will always be equal to the used `secp256k1_nonce_function_rfc6979` (we are using that instead of the default in the first commit).\n\nIt is not really a problem.",
+      "created_at": "2026-07-29T19:02:47Z",
+      "updated_at": "2026-07-29T19:06:10Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1900#discussion_r3677286474",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3677286474"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1900"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 435,
       "original_line": 435,
       "side": "RIGHT"
     }
