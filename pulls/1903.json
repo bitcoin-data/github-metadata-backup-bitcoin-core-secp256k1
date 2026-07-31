@@ -1,23 +1,23 @@
 {
   "type": "pull",
   "pull": {
-    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1883",
-    "id": 3952154333,
-    "node_id": "PR_kwDOAP4Jqs7rkRbd",
-    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1883",
-    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1883.diff",
-    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1883.patch",
-    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1883",
-    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1883/commits",
-    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1883/comments",
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1903",
+    "id": 4179239634,
+    "node_id": "PR_kwDOAP4Jqs75GiLS",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1903",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1903.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1903.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1903",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1903/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1903/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
-    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1883/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/4dedd6effcfda11c0e6e0babd9ae1d2ae3df3260",
-    "number": 1883,
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1903/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/0191fca6ab75ae5b4382635d49d8acdb29f10930",
+    "number": 1903,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "ecmult_gen: add variable-time generator point multiplication (no API behaviour changes yet)",
+    "title": "changelog: add entry for #1821",
     "user": {
       "login": "theStack",
       "id": 91535,
@@ -40,32 +40,70 @@
       "name": null,
       "patch_url": null
     },
-    "body": "The PR is a rebased subset of #1843: it adds a variable-time variant for generator point multiplication, with the idea of enabling potential performance gains for use cases where the scalar isn't treated as secret. The implementation is essentially a copy of the existing `secp256k1_ecmult_gen_gej` function, but with all side-channel mitigations (i.e., constant-time code, random scalar blinding, and memory clearing) removed. The EC point operation calls (addition, doubling) are replaced with their faster variable-time equivalents.\r\n\r\nThe first commit moves the calculation of the `ecmult_gen_scalar_diff` constant (scalar `(2^COMB_BITS - 1) / 2`) from run-time to compile-time, in order to avoid needing a context object and thus enable computing the result statelessly.\r\n\r\nOn my arm64 machine, the variable-time variant is ~86% faster than the constant-time variant (with the default build table size, i.e. ECMULT_GEN_KB=86):\r\n\r\n```\r\n$ ./build/bin/bench_ecmult\r\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\r\n\r\necmult_gen                    ,     9.32      ,     9.35      ,     9.60\r\necmult_gen_var                ,     5.02      ,     5.02      ,     5.02\r\n.....\r\n```\r\nNote that in contrast to #1843, this PR doesn't take use of the new functions in any user-facing code (API functions) yet, to keep discussions about potential behavior changes w.r.t. constant-timing guarantees separated. The only visible change for users after merging this PR would be that the library is a tiny bit larger, as the generated tables now also contain the `ecmult_gen_scalar_diff` constant. On my arm64 machine, this leads to an increase of 56 bytes for the .so file (1392672 bytes master vs. 1392728 bytes PR on a default release build), which I think we can treat as negligible.\r\n\r\nOne relatively obvious scenario where using the variable-time variant would make sense is for verifying P2TR script-paths spends in Bitcoin Core via `secp256k1_xonly_pubkey_tweak_add_check` (see https://github.com/bitcoin-core/secp256k1/pull/1843#issuecomment-4299716270). However, whether to change the behavior of the existing API function or adding a new one (e.g. with `_var` suffix) still has to be decided and might be a topic for a different PR (see https://github.com/bitcoin-core/secp256k1/pull/1843#issuecomment-4325379402). Another scenario could be scanning of Silent Payments, though in this case it has to be carefully evaluated whether it's safe to treat the tweak [t_k](https://github.com/bitcoin/bips/blob/f078d4f5ff70fe2921fd005d799a3d4a8ff7d55c/bip-0352.mediawiki?plain=1#L347-L349) as non-secret.",
+    "body": "Even though #1821 has the \"needs-changelog\" label, it doesn't show up in the search: https://github.com/bitcoin-core/secp256k1/pulls?q=is%3Apr+label%3Aneeds-changelog+is%3Aclosed (probably a bug?). Thanks to @real-or-random for finding this candidate by looking at the commit list manually (which is now also suggested in the release process since #1709).",
     "labels": [
       {
-        "id": 4975389731,
-        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
-        "name": "performance",
-        "description": "",
-        "color": "DE3CCC",
+        "id": 165020207,
+        "node_id": "MDU6TGFiZWwxNjUwMjAyMDc=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/user-documentation",
+        "name": "user-documentation",
+        "description": "user-facing documentation",
+        "color": "C5DEF5",
         "default": false
       }
     ],
-    "created_at": "2026-06-28T23:39:30Z",
-    "updated_at": "2026-07-31T16:49:11Z",
+    "milestone": {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/10",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/milestone/10",
+      "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones/10/labels",
+      "id": 14672669,
+      "node_id": "MI_kwDOAP4Jqs4A3-Md",
+      "number": 10,
+      "state": "open",
+      "title": "0.8.0",
+      "description": "~One month before Bitcoin Core 32.0 feature freeze (see https://github.com/bitcoin/bitcoin/issues/35122)~\n\nSilent Payments and SHA256 override",
+      "creator": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "open_issues": 2,
+      "closed_issues": 7,
+      "created_at": "2026-01-30T12:30:13Z",
+      "updated_at": "2026-07-31T16:17:53Z",
+      "due_on": "2026-08-02T00:00:00Z"
+    },
+    "created_at": "2026-07-31T16:17:03Z",
+    "updated_at": "2026-07-31T16:18:25Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "a2093a6147a44e86286f354d525f37f0e36598df",
+    "merge_commit_sha": "52e168a3718c9638e027830e72d4c0277d28f0a8",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
     "rebaseable": true,
     "head": {
-      "label": "theStack:add-ecmult_gen_var",
-      "ref": "add-ecmult_gen_var",
-      "sha": "4dedd6effcfda11c0e6e0babd9ae1d2ae3df3260",
+      "label": "theStack:changelog_1821",
+      "ref": "changelog_1821",
+      "sha": "0191fca6ab75ae5b4382635d49d8acdb29f10930",
       "user": {
         "login": "theStack",
         "id": 91535,
@@ -201,7 +239,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "b90075a074158da63fe2197601728a86a92a5ff6",
+      "sha": "7fecac74aed8e1fd9078380d67dd04663705c989",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -336,15 +374,15 @@
     },
     "_links": {
       "self": {
-        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1883"
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1903"
       }
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 165,
-    "deletions": 31,
-    "changed_files": 10,
-    "commits": 2,
+    "additions": 3,
+    "deletions": 0,
+    "changed_files": 1,
+    "commits": 1,
     "review_comments": 0,
     "comments": 0
   },
@@ -352,16 +390,16 @@
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGU0NGNiNTNmZDI3NjBkOTVlZWVkMDJiODg4ZDZhNGIwNmQ5YWQ3YmM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc",
+      "node_id": "C_kwDOAP4JqtoAKDAxOTFmY2E2YWI3NWFlNWI0MzgyNjM1ZDQ5ZDhhY2RiMjlmMTA5MzA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0191fca6ab75ae5b4382635d49d8acdb29f10930",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0191fca6ab75ae5b4382635d49d8acdb29f10930",
       "tree": {
-        "sha": "578ec4ae4d83d65dfc765b416fcf176f2336cdd7",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/578ec4ae4d83d65dfc765b416fcf176f2336cdd7"
+        "sha": "4ba0225b0436ef8ff0749eee701e941a5d7bf449",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4ba0225b0436ef8ff0749eee701e941a5d7bf449"
       },
       "verification": {
         "verified": false,
@@ -371,69 +409,91 @@
       },
       "parents": [
         {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/b90075a074158da63fe2197601728a86a92a5ff6",
-          "sha": "b90075a074158da63fe2197601728a86a92a5ff6",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/b90075a074158da63fe2197601728a86a92a5ff6"
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1c2933bb87a090d699ed7d7363a05c0b67b5a125",
+          "sha": "1c2933bb87a090d699ed7d7363a05c0b67b5a125",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1c2933bb87a090d699ed7d7363a05c0b67b5a125"
         }
       ],
-      "message": "ecmult_gen: compute `ecmult_gen_scalar_diff` at compile-time\n\nHaving this available as a global constant allows to introduce an\nalternative `ecmult_gen_gej` function that doesn't need access to\na context, see next commit.\n\nNote that the precomputed constant takes the name of the function that\npreviously generated it at run-time (`secp256k1_ecmult_gen_scalar_diff`),\nwhile the function is now renamed to include the \"compute\" verb\n(`secp256k1_ecmult_gen_compute_scalar_diff`), to match the naming\nof the table generation function.\n\nCan be reviewed with `--color-moved=dimmed-zebra` for easier\nchecking of the move-only parts.",
+      "message": "changelog: add entry for #1821",
       "committer": {
         "name": "Sebastian Falbesoner",
         "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-28T22:25:58Z"
+        "date": "2026-07-31T16:08:28Z"
       },
       "author": {
         "name": "Sebastian Falbesoner",
         "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-08T16:10:50Z"
+        "date": "2026-07-31T15:21:15Z"
       },
-      "sha": "e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc"
+      "sha": "0191fca6ab75ae5b4382635d49d8acdb29f10930"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDRkZWRkNmVmZmNmZGExMWMwZTZlMGJhYmQ5YWUxZDJhZTNkZjMyNjA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/4dedd6effcfda11c0e6e0babd9ae1d2ae3df3260",
-      "actor": null,
+      "event": "mentioned",
+      "id": 28786422061,
+      "node_id": "MEE_lADOAP4Jqs8AAAABK-UKes8AAAAGs83xLQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28786422061",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
       "commit_id": null,
       "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/4dedd6effcfda11c0e6e0babd9ae1d2ae3df3260",
-      "tree": {
-        "sha": "77dcb015732f2088c22e3b8e97f07cdf2f143773",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/77dcb015732f2088c22e3b8e97f07cdf2f143773"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc",
-          "sha": "e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e44cb53fd2760d95eeed02b888d6a4b06d9ad7bc"
-        }
-      ],
-      "message": "ecmult_gen: introduce `secp256k1_ecmult_gen_var_{gej,ge}`\n\nAdd faster variable-time variants for generator point multiplication.\nThis is essentially `ecmult_gen` without side-channel mitigations and\nwithout requiring a context object. Intended for use cases where the\nscalar is not representing sensitive data.\n\nOn my arm64 machine, this is ~86% faster than the constant-time variant\n(with the default build table size, i.e. ECMULT_GEN_KB=86):\n\n```\n$ ./build/bin/bench_ecmult\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)\n\necmult_gen                    ,     9.32      ,     9.35      ,     9.60\necmult_gen_var                ,     5.02      ,     5.02      ,     5.02\n.....\n```",
-      "committer": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-06-28T22:42:02Z"
-      },
-      "author": {
-        "name": "Sebastian Falbesoner",
-        "email": "sebastian.falbesoner@gmail.com",
-        "date": "2026-04-05T00:44:02Z"
-      },
-      "sha": "4dedd6effcfda11c0e6e0babd9ae1d2ae3df3260"
+      "created_at": "2026-07-31T16:17:04Z"
     },
     {
-      "event": "labeled",
-      "id": 28787774452,
-      "node_id": "LE_lADOAP4Jqs8AAAABG_S-CM8AAAAGs-KT9A",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28787774452",
+      "event": "subscribed",
+      "id": 28786422112,
+      "node_id": "SE_lADOAP4Jqs8AAAABK-UKes8AAAAGs83xYA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28786422112",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-31T16:17:04Z"
+    },
+    {
+      "event": "milestoned",
+      "id": 28786458988,
+      "node_id": "MIE_lADOAP4Jqs8AAAABK-UKes8AAAAGs86BbA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28786458988",
       "actor": {
         "login": "theStack",
         "id": 91535,
@@ -458,10 +518,44 @@
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2026-07-31T16:49:11Z",
+      "created_at": "2026-07-31T16:17:53Z",
+      "milestone": {
+        "title": "0.8.0"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 28786482221,
+      "node_id": "LE_lADOAP4Jqs8AAAABK-UKes8AAAAGs87cLQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28786482221",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-07-31T16:18:25Z",
       "label": {
-        "name": "performance",
-        "color": "DE3CCC"
+        "name": "user-documentation",
+        "color": "C5DEF5"
       }
     }
   ],
