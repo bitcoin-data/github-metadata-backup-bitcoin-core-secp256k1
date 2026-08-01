@@ -43,7 +43,7 @@
     "body": "This is something we left for a follow-up in the original PR #1777.\r\n\r\nEssentially, the existing selftest hashes one 63 byte string against a known\r\ndigest. Which catches a compression function that is wrong everywhere,\r\nbut not one that is wrong on multi-block calls, unaligned input, or a state\r\nthat is not the IV.\r\n\r\nThis introduces `secp256k1_sha256_compression_equiv`, which hashes\r\nmessages of various lengths and starting offsets with both the supplied\r\nfunction and the built-in one, and fails if the digest differs.\r\n\r\nThe check runs once during startup, so a faulty compression function\r\nis caught early rather than silently producing incorrect output later.\r\n\r\nMeasured locally, this takes 3.5ms, which should be negligible for any\r\napplication.\r\n\r\nSee the introduced test for a clear view of the bugs this catches.",
     "labels": [],
     "created_at": "2026-07-31T17:03:51Z",
-    "updated_at": "2026-07-31T17:03:51Z",
+    "updated_at": "2026-08-01T09:00:29Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -335,7 +335,7 @@
     "deletions": 1,
     "changed_files": 3,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 3,
     "comments": 0
   },
   "events": [
@@ -378,7 +378,209 @@
         "date": "2026-07-31T16:02:03Z"
       },
       "sha": "fc4f9e9c903845639a117e010b3cf6e2b589c930"
+    },
+    {
+      "event": "reviewed",
+      "id": 4834211088,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABICQ1EA",
+      "url": null,
+      "actor": null,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-08-01T09:00:28Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Concept ACK\n\nHm, it would be great to have this in before the release on Monday evening (UTC).\n\nWe should probably also add a comment to the docs of `secp256k1_context_set_sha256_compression` sayting that this API function will run a cursory test to check that callback behaves as it should, and maybe that it costs ~1 ms on a desktop machine (or whatever the cost is). \n\nIf the \"precomputed\" optimization that I've suggested above is too much of a hassle for now, we could also do this later.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#pullrequestreview-4834211088",
+      "submitted_at": "2026-08-01T09:00:28Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695149390",
+      "pull_request_review_id": 4834211088,
+      "id": 3695149390,
+      "node_id": "PRRC_kwDOAP4Jqs7cP4FO",
+      "diff_hunk": "@@ -137,6 +137,66 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Checks that a caller supplied SHA256 compression function agrees with the built-in\n+ * one. Returns 1 if it does on every input tried here, 0 otherwise.\n+ * Note: This is a smoke test. Passing says nothing about inputs not tried here. */\n+static int secp256k1_sha256_compression_equiv(const secp256k1_sha256_compression_function fn_transform_supplied) {\n+    secp256k1_hash_ctx ctxs[2];\n+    secp256k1_sha256 sha[2];\n+    unsigned char out[2][32];\n+    size_t i, j, k;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, 576      /* 6 to 9 blocks */\n+    };\n+    unsigned char msg[640]; /* Longest message, plus 64 for the shifted starts */\n+\n+    VERIFY_CHECK(fn_transform_supplied != NULL);\n+    /* Nothing to learn from comparing the built-in against itself. */\n+    if (fn_transform_supplied == secp256k1_sha256_transform) {\n+        return 1;\n+    }",
+      "path": "src/hash_impl.h",
+      "position": 30,
+      "original_position": 30,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "original_commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: I think moving this check to the caller will enhance readability.",
+      "created_at": "2026-08-01T08:04:46Z",
+      "updated_at": "2026-08-01T09:00:28Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#discussion_r3695149390",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695149390"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
+        }
+      },
+      "start_line": 164,
+      "original_start_line": 164,
+      "start_side": "RIGHT",
+      "line": 166,
+      "original_line": 166,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695182458",
+      "pull_request_review_id": 4834211088,
+      "id": 3695182458,
+      "node_id": "PRRC_kwDOAP4Jqs7cQAJ6",
+      "diff_hunk": "@@ -137,6 +137,66 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Checks that a caller supplied SHA256 compression function agrees with the built-in\n+ * one. Returns 1 if it does on every input tried here, 0 otherwise.\n+ * Note: This is a smoke test. Passing says nothing about inputs not tried here. */\n+static int secp256k1_sha256_compression_equiv(const secp256k1_sha256_compression_function fn_transform_supplied) {\n+    secp256k1_hash_ctx ctxs[2];\n+    secp256k1_sha256 sha[2];\n+    unsigned char out[2][32];\n+    size_t i, j, k;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, 576      /* 6 to 9 blocks */\n+    };\n+    unsigned char msg[640]; /* Longest message, plus 64 for the shifted starts */\n+\n+    VERIFY_CHECK(fn_transform_supplied != NULL);\n+    /* Nothing to learn from comparing the built-in against itself. */\n+    if (fn_transform_supplied == secp256k1_sha256_transform) {\n+        return 1;\n+    }\n+\n+    secp256k1_hash_ctx_init(&ctxs[0]);\n+    secp256k1_hash_ctx_init(&ctxs[1]);\n+    ctxs[0].fn_sha256_compression = secp256k1_sha256_transform; /* Built-in */\n+    ctxs[1].fn_sha256_compression = fn_transform_supplied;      /* User provided */\n+\n+    /* No two blocks of a message are equal, so a function that doesn't advance the block\n+     * pointer gives a different digest. 251 is prime, so its repeats only line up with\n+     * block starts every 251 blocks; wrapping at 256 would do so every 4. */\n+    for (i = 0; i < sizeof(msg); i++) {\n+        msg[i] = (unsigned char)(i % 251);\n+    }\n+\n+    /* Each round starts one byte further along to check different alignments,\n+     * secp256k1_sha256_write invokes compression directly on input >= 64 bytes */\n+    for (i = 0; i < 64; i++) {",
+      "path": "src/hash_impl.h",
+      "position": 46,
+      "original_position": 46,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "original_commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Checking alignment requirements is a great idea. \n\nBut I think running the entire thing 64 times is overkill. Checking i=0 and i=1 should suffice, no? Any requirement that relies on data being aligned will be violated if the pointer is moved by one. That is, if it works for i=0 and has some alignment requirement, then it certainly won't work for i=1 (and the other way around). \n\n```suggestion\n    /* Pass pointers `msg` and `msg + 1` to compression to catch alignment issues, \n     * secp256k1_sha256_write invokes compression directly on input >= 64 bytes */\n    for (i = 0; i < 2; i++) {\n```",
+      "created_at": "2026-08-01T08:14:51Z",
+      "updated_at": "2026-08-01T09:00:29Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#discussion_r3695182458",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695182458"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
+        }
+      },
+      "start_line": 180,
+      "original_start_line": 180,
+      "start_side": "RIGHT",
+      "line": 182,
+      "original_line": 182,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695286908",
+      "pull_request_review_id": 4834211088,
+      "id": 3695286908,
+      "node_id": "PRRC_kwDOAP4Jqs7cQZp8",
+      "diff_hunk": "@@ -137,6 +137,66 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Checks that a caller supplied SHA256 compression function agrees with the built-in\n+ * one. Returns 1 if it does on every input tried here, 0 otherwise.\n+ * Note: This is a smoke test. Passing says nothing about inputs not tried here. */\n+static int secp256k1_sha256_compression_equiv(const secp256k1_sha256_compression_function fn_transform_supplied) {\n+    secp256k1_hash_ctx ctxs[2];\n+    secp256k1_sha256 sha[2];\n+    unsigned char out[2][32];\n+    size_t i, j, k;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, 576      /* 6 to 9 blocks */\n+    };\n+    unsigned char msg[640]; /* Longest message, plus 64 for the shifted starts */\n+\n+    VERIFY_CHECK(fn_transform_supplied != NULL);\n+    /* Nothing to learn from comparing the built-in against itself. */\n+    if (fn_transform_supplied == secp256k1_sha256_transform) {\n+        return 1;\n+    }\n+\n+    secp256k1_hash_ctx_init(&ctxs[0]);\n+    secp256k1_hash_ctx_init(&ctxs[1]);\n+    ctxs[0].fn_sha256_compression = secp256k1_sha256_transform; /* Built-in */\n+    ctxs[1].fn_sha256_compression = fn_transform_supplied;      /* User provided */",
+      "path": "src/hash_impl.h",
+      "position": 35,
+      "original_position": 35,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "original_commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "\nInstead of running the built-in function, we could also do this:\n - Just run the user-provided function\n - Accumulate all resulting SHA256 outputs into another SHA256 `accum_hash` (again using the built-in function)\n - Compare the output `accum_hash` against a constan, i.e., the precomputed correct value (use debugging macro `PRINT_BUF` to get the value easily)\n\nThis would make it even faster with basically no losses in coverage.  ",
+      "created_at": "2026-08-01T08:55:25Z",
+      "updated_at": "2026-08-01T09:00:29Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#discussion_r3695286908",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695286908"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
+        }
+      },
+      "start_line": 170,
+      "original_start_line": 170,
+      "start_side": "RIGHT",
+      "line": 171,
+      "original_line": 171,
+      "side": "RIGHT"
+    }
+  ]
 }
