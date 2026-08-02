@@ -100,7 +100,7 @@
       "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-07-31T17:03:51Z",
-    "updated_at": "2026-08-01T22:31:00Z",
+    "updated_at": "2026-08-02T00:51:17Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -392,7 +392,7 @@
     "deletions": 1,
     "changed_files": 3,
     "commits": 1,
-    "review_comments": 3,
+    "review_comments": 5,
     "comments": 1
   },
   "events": [
@@ -789,6 +789,114 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695286908"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
+        }
+      },
+      "start_line": 170,
+      "original_start_line": 170,
+      "start_side": "RIGHT",
+      "line": 171,
+      "original_line": 171,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3697093474",
+      "pull_request_review_id": 4836280101,
+      "id": 3697093474,
+      "node_id": "PRRC_kwDOAP4Jqs7cXSti",
+      "diff_hunk": "@@ -137,6 +137,66 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Checks that a caller supplied SHA256 compression function agrees with the built-in\n+ * one. Returns 1 if it does on every input tried here, 0 otherwise.\n+ * Note: This is a smoke test. Passing says nothing about inputs not tried here. */\n+static int secp256k1_sha256_compression_equiv(const secp256k1_sha256_compression_function fn_transform_supplied) {\n+    secp256k1_hash_ctx ctxs[2];\n+    secp256k1_sha256 sha[2];\n+    unsigned char out[2][32];\n+    size_t i, j, k;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, 576      /* 6 to 9 blocks */\n+    };\n+    unsigned char msg[640]; /* Longest message, plus 64 for the shifted starts */\n+\n+    VERIFY_CHECK(fn_transform_supplied != NULL);\n+    /* Nothing to learn from comparing the built-in against itself. */\n+    if (fn_transform_supplied == secp256k1_sha256_transform) {\n+        return 1;\n+    }\n+\n+    secp256k1_hash_ctx_init(&ctxs[0]);\n+    secp256k1_hash_ctx_init(&ctxs[1]);\n+    ctxs[0].fn_sha256_compression = secp256k1_sha256_transform; /* Built-in */\n+    ctxs[1].fn_sha256_compression = fn_transform_supplied;      /* User provided */\n+\n+    /* No two blocks of a message are equal, so a function that doesn't advance the block\n+     * pointer gives a different digest. 251 is prime, so its repeats only line up with\n+     * block starts every 251 blocks; wrapping at 256 would do so every 4. */\n+    for (i = 0; i < sizeof(msg); i++) {\n+        msg[i] = (unsigned char)(i % 251);\n+    }\n+\n+    /* Each round starts one byte further along to check different alignments,\n+     * secp256k1_sha256_write invokes compression directly on input >= 64 bytes */\n+    for (i = 0; i < 64; i++) {",
+      "path": "src/hash_impl.h",
+      "position": 46,
+      "original_position": 46,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "original_commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "in_reply_to_id": 3695182458,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "> But I think running the entire thing 64 times is overkill. Checking i=0 and i=1 should suffice, no? Any requirement that relies on data being aligned will be violated if the pointer is moved by one. That is, if it works for i=0 and has some alignment requirement, then it certainly won't work for i=1 (and the other way around).\r\n\r\nWhat if it is not about expecting data to be aligned, but a fast path that is taken only if a specific alignment is provided. E.g.\r\n\r\n    if (ptr is 16-byte aligned)\r\n        super_fast_path(ptr)   // but this has a bug\r\n    else\r\n        regular_path(ptr)\r\n\r\nThis would not get caught by msg + 1, which is odd, and whether msg catches it is out of our control, as we don't specify any alignment?\r\n\r\nStill, I agree it may be way too far fetched. Let me apply the {0, 1} simplification.",
+      "created_at": "2026-08-02T00:50:38Z",
+      "updated_at": "2026-08-02T00:50:38Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#discussion_r3697093474",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3697093474"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
+        }
+      },
+      "start_line": 180,
+      "original_start_line": 180,
+      "start_side": "RIGHT",
+      "line": 182,
+      "original_line": 182,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3697095843",
+      "pull_request_review_id": 4836282750,
+      "id": 3697095843,
+      "node_id": "PRRC_kwDOAP4Jqs7cXTSj",
+      "diff_hunk": "@@ -137,6 +137,66 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Checks that a caller supplied SHA256 compression function agrees with the built-in\n+ * one. Returns 1 if it does on every input tried here, 0 otherwise.\n+ * Note: This is a smoke test. Passing says nothing about inputs not tried here. */\n+static int secp256k1_sha256_compression_equiv(const secp256k1_sha256_compression_function fn_transform_supplied) {\n+    secp256k1_hash_ctx ctxs[2];\n+    secp256k1_sha256 sha[2];\n+    unsigned char out[2][32];\n+    size_t i, j, k;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, 576      /* 6 to 9 blocks */\n+    };\n+    unsigned char msg[640]; /* Longest message, plus 64 for the shifted starts */\n+\n+    VERIFY_CHECK(fn_transform_supplied != NULL);\n+    /* Nothing to learn from comparing the built-in against itself. */\n+    if (fn_transform_supplied == secp256k1_sha256_transform) {\n+        return 1;\n+    }\n+\n+    secp256k1_hash_ctx_init(&ctxs[0]);\n+    secp256k1_hash_ctx_init(&ctxs[1]);\n+    ctxs[0].fn_sha256_compression = secp256k1_sha256_transform; /* Built-in */\n+    ctxs[1].fn_sha256_compression = fn_transform_supplied;      /* User provided */",
+      "path": "src/hash_impl.h",
+      "position": 35,
+      "original_position": 35,
+      "commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "original_commit_id": "fc4f9e9c903845639a117e010b3cf6e2b589c930",
+      "in_reply_to_id": 3695286908,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Sure, done as suggested",
+      "created_at": "2026-08-02T00:51:17Z",
+      "updated_at": "2026-08-02T00:51:17Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1904#discussion_r3697095843",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3697095843"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1904"
