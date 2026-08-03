@@ -100,7 +100,7 @@
       "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-08-03T12:38:36Z",
-    "updated_at": "2026-08-03T16:23:53Z",
+    "updated_at": "2026-08-03T19:48:36Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -392,7 +392,7 @@
     "deletions": 1,
     "changed_files": 4,
     "commits": 1,
-    "review_comments": 5,
+    "review_comments": 7,
     "comments": 1
   },
   "events": [
@@ -1048,6 +1048,37 @@
       "submitted_at": "2026-08-03T16:23:52Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1905"
+    },
+    {
+      "event": "referenced",
+      "id": 28906438143,
+      "node_id": "REFE_lADOAP4Jqs8AAAABLP7QUM8AAAAGuvU9_w",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/28906438143",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "e0683504d270c501f045dd030be8a4b55b0d4225",
+      "commit_url": "https://api.github.com/repos/theStack/secp256k1/commits/e0683504d270c501f045dd030be8a4b55b0d4225",
+      "created_at": "2026-08-03T18:31:53Z"
     }
   ],
   "comments": [
@@ -1319,6 +1350,114 @@
       "start_side": null,
       "line": 189,
       "original_line": 189,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3707198906",
+      "pull_request_review_id": 4847983223,
+      "id": 3707198906,
+      "node_id": "PRRC_kwDOAP4Jqs7c9126",
+      "diff_hunk": "@@ -137,6 +137,94 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Perform a smoke test on a supplied SHA256 compression function. */\n+static int secp256k1_sha256_smoke_test(const secp256k1_sha256_compression_function fn_compression) {\n+    secp256k1_hash_ctx ctx;\n+    secp256k1_sha256 sha_msg, sha_accum;\n+    unsigned char out[32];\n+    size_t i, j;\n+    size_t alignment, offset;\n+    unsigned char* msg;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    #define LONGEST 576  /* local macro, undef'd below */\n+    static const size_t msg_lens[] = {\n+        0, 1, 28,               /* Shorter than a block, so padding makes up the rest */\n+        55, 56,                 /* Final 0x80 and 8 byte length fit in the last block, and don't */\n+        64, 128, 192, 256, 320, /* 1 to 5 blocks */\n+        384, 448, 512, LONGEST  /* 6 to 9 blocks */\n+    };\n+\n+    /* Max alignment to test; even AVX512 needs at most 64 byte alignment. */\n+    #define MAX_ALIGNMENT 64 /* local macro, undef'd below */\n+    /* sizeof(msg) = length of longest message\n+     *               + 2 * MAX_ALIGNMENT - 1 for the offset in the initial value of m\n+     *               + 2 * MAX_ALIGNMENT - 1 for the offset in the final value of m */\n+    unsigned char msg_buf[LONGEST + 2 * (2 * MAX_ALIGNMENT - 1)];\n+\n+    /* Accumulated digest of every message, hashed with the built-in secp256k1_sha256_transform.\n+     * Note: To regenerate set 'ctx.fn_sha256_compression = secp256k1_sha256_transform' below\n+     * and print the sha_accum digest. */\n+    static const unsigned char accum_expected[32] = {\n+        0x1E, 0x2A, 0xD6, 0x29, 0x16, 0x9D, 0x46, 0xF0,\n+        0xD2, 0x31, 0x94, 0xF0, 0xBC, 0x8C, 0x4B, 0x87,\n+        0x37, 0x68, 0xA0, 0xFB, 0xD2, 0x9E, 0xF6, 0xB9,\n+        0x3E, 0x0C, 0xFA, 0xCE, 0xDE, 0x5F, 0xD3, 0x72,\n+    };\n+    /* The purpose of this VERIFY_CHECK is to make anyone aware that they\n+     * should also change the size of msg_buf when changing the length of the\n+     * longest message. */\n+    VERIFY_CHECK(msg_lens[ARRAY_SIZE(msg_lens) - 1] == 576);\n+\n+    VERIFY_CHECK(fn_compression != NULL);\n+    secp256k1_hash_ctx_init(&ctx);\n+    ctx.fn_sha256_compression = fn_compression;\n+    secp256k1_sha256_initialize(&sha_accum);\n+\n+    /* Make msg a pointer into msg_buf aligned to 2 * MAX_ALIGNMENT boundary. */\n+    offset = ((2 * MAX_ALIGNMENT) - ((uintptr_t)msg_buf % (2 * MAX_ALIGNMENT))) % (2 * MAX_ALIGNMENT);",
+      "path": "src/hash_impl.h",
+      "position": 53,
+      "original_position": 53,
+      "commit_id": "c1c6365d99dea5d6e68f4bd71136424c7e5e5223",
+      "original_commit_id": "c1c6365d99dea5d6e68f4bd71136424c7e5e5223",
+      "in_reply_to_id": 3705136540,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Hm, yes. Almost all architectures have an `uintptr_t`, but some don't.\r\n\r\nThe reason not to provide one is that there is no integer type large enough to hold a pointer value so that it can be converted back without loss. We don't need to conversion back, but we still can't just cast to any unsigned integer type because C99 says: If the result cannot be represented in the integer type, the behavior is undefined. \r\n\r\nWe could ignore the problem and simply require `uintptr_t`. We could wrap the `offset` calculation into a preprocessor check that checks for the presence of the type (`#ifdef UINTPTR_MAX`) and fall back if it's not present (e.g., simply set `offset = 0`, effectively not doing alignment checks) for these rare architectures. \r\n\r\n[1] CHERI archs can't provide it it according to https://www.ralfj.de/blog/2022/04/11/provenance-exposed.html. According to https://www.open-std.org/JTC1/SC22/WG14/www/docs/n2873.htm, there are at least two architectures, but they're not mentioned explicitly in the document.",
+      "created_at": "2026-08-03T19:47:49Z",
+      "updated_at": "2026-08-03T19:47:49Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1905#discussion_r3707198906",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3707198906"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1905"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 189,
+      "original_line": 189,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3707203044",
+      "pull_request_review_id": 4847988119,
+      "id": 3707203044,
+      "node_id": "PRRC_kwDOAP4Jqs7c923k",
+      "diff_hunk": "@@ -137,6 +137,94 @@ static void secp256k1_sha256_transform(uint32_t *state, const unsigned char *blo\n     }\n }\n \n+/* Perform a smoke test on a supplied SHA256 compression function. */\n+static int secp256k1_sha256_smoke_test(const secp256k1_sha256_compression_function fn_compression) {\n+    secp256k1_hash_ctx ctx;\n+    secp256k1_sha256 sha_msg, sha_accum;\n+    unsigned char out[32];\n+    size_t i, j;\n+    size_t alignment, offset;\n+    unsigned char* msg;\n+\n+    /* SHA256 works on 64 byte blocks, secp256k1_sha256_write gives as many blocks\n+     * at once to compression, so the count is what varies here. A SIMD implementation\n+     * typically hashes four or eight at a time, then any left over one by one.\n+     * These lengths cover every number from 1 to 9, which includes counts that\n+     * divide evenly and counts leaving one, two or three over. */\n+    #define LONGEST 576  /* local macro, undef'd below */",
+      "path": "src/hash_impl.h",
+      "position": 18,
+      "original_position": 18,
+      "commit_id": "c1c6365d99dea5d6e68f4bd71136424c7e5e5223",
+      "original_commit_id": "c1c6365d99dea5d6e68f4bd71136424c7e5e5223",
+      "in_reply_to_id": 3705123761,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I tend to think that `enum` is better in this case. I always forget that it's a compile-time constant that can be used in array sizes.",
+      "created_at": "2026-08-03T19:48:36Z",
+      "updated_at": "2026-08-03T19:48:36Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1905#discussion_r3707203044",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3707203044"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1905"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 154,
+      "original_line": 154,
       "side": "RIGHT"
     }
   ]
