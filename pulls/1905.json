@@ -100,7 +100,7 @@
       "due_on": "2026-08-02T00:00:00Z"
     },
     "created_at": "2026-08-03T12:38:36Z",
-    "updated_at": "2026-08-03T15:45:25Z",
+    "updated_at": "2026-08-03T16:23:53Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -1009,6 +1009,45 @@
       "milestone": {
         "title": "0.8.0"
       }
+    },
+    {
+      "event": "reviewed",
+      "id": 4846321225,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABINz-SQ",
+      "url": null,
+      "actor": null,
+      "commit_id": "c1c6365d99dea5d6e68f4bd71136424c7e5e5223",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-08-03T16:23:52Z",
+      "author_association": "MEMBER",
+      "body": "Simple coverage for the introduced changes:\n\n```patch\ndiff --git a/src/tests.c b/src/tests.c\n--- a/src/tests.c\n+++ b/src/tests.c\n@@ -517,12 +517,28 @@\n     s[0] ^= 1;\n }\n \n+/* Wrong when input is 64-byte aligned, like a broken SIMD fast path. */\n+static void sha256_transform_aligned_fail(uint32_t *s, const unsigned char *chunk, size_t blocks) {\n+    int aligned = ((uintptr_t)chunk % 64) == 0;\n+    secp256k1_sha256_transform(s, chunk, blocks);\n+    if (aligned) s[0] ^= 1;\n+}\n+\n+/* Wrong on any unaligned input. */\n+static void sha256_transform_unaligned_fail(uint32_t *s, const unsigned char *chunk, size_t blocks) {\n+    int aligned = ((uintptr_t)chunk % 64) == 0;\n+    secp256k1_sha256_transform(s, chunk, blocks);\n+    if (!aligned) s[0] ^= 1;\n+}\n+\n static void run_sha256_compression_smoke_test_tests(void) {\n     CHECK(secp256k1_sha256_smoke_test(sha256_transform_noadvance) == 0);\n     CHECK(secp256k1_sha256_smoke_test(sha256_transform_short) == 0);\n     CHECK(secp256k1_sha256_smoke_test(sha256_transform_ivreset) == 0);\n     CHECK(secp256k1_sha256_smoke_test(sha256_transform_batch4) == 0);\n     CHECK(secp256k1_sha256_smoke_test(sha256_transform_corrupt) == 0);\n+    CHECK(secp256k1_sha256_smoke_test(sha256_transform_aligned_fail) == 0);\n+    CHECK(secp256k1_sha256_smoke_test(sha256_transform_unaligned_fail) == 0);\n     CHECK(secp256k1_sha256_smoke_test(good_sha256_compression) == 1);\n }\n \n\n```",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1905#pullrequestreview-4846321225",
+      "submitted_at": "2026-08-03T16:23:52Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1905"
     }
   ],
   "comments": [
