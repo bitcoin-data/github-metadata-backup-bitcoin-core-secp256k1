@@ -62,7 +62,7 @@
       }
     ],
     "created_at": "2022-08-21T08:55:46Z",
-    "updated_at": "2026-08-01T09:17:17Z",
+    "updated_at": "2026-08-04T17:41:53Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -305,10 +305,10 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1160,
-        "stargazers_count": 2459,
-        "watchers_count": 2459,
-        "size": 13089,
+        "forks_count": 1161,
+        "stargazers_count": 2462,
+        "watchers_count": 2462,
+        "size": 13110,
         "default_branch": "master",
         "open_issues_count": 149,
         "is_template": false,
@@ -321,9 +321,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-07-31T15:26:10Z",
+        "pushed_at": "2026-08-03T22:01:51Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-07-31T15:31:41Z",
+        "updated_at": "2026-08-04T11:13:22Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -353,7 +353,7 @@
     "deletions": 75,
     "changed_files": 38,
     "commits": 16,
-    "review_comments": 41,
+    "review_comments": 42,
     "comments": 21
   },
   "events": [
@@ -5875,6 +5875,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3695300203"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 114,
+      "original_line": 91,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3714862997",
+      "pull_request_review_id": 4857349071,
+      "id": 3714862997,
+      "node_id": "PRRC_kwDOAP4Jqs7dbE-V",
+      "diff_hunk": "@@ -3,4 +3,139 @@\n \n #include \"../../../include/secp256k1_batch.h\"\n \n+/** Opaque data structure that holds information required for the batch verification.\n+ *\n+ *  Members:\n+ *       data: scratch space object that contains points (_gej) and their\n+ *             respective scalars. To be used in Multi-Scalar Multiplication\n+ *             algorithms such as Strauss and Pippenger.\n+ *    scalars: pointer to scalars allocated on the scratch space.\n+ *     points: pointer to points allocated on the scratch space.\n+ *       sc_g: scalar corresponding to the generator point (G) in Multi-Scalar\n+ *             Multiplication equation.\n+ *     sha256: contains hash of all the inputs (schnorrsig/tweaks) present in\n+ *             the batch object, expect the first input. Used for generating a random secp256k1_scalar\n+ *             for each term added by secp256k1_batch_add_*.\n+ *     sha256: contains hash of all inputs (except the first one) present in the batch.\n+ *             `secp256k1_batch_add_` APIs use these for randomizing the scalar (i.e., multiplying\n+ *             it with a newly generated scalar) before adding it to the batch.\n+ *        len: number of scalar-point pairs present in the batch.\n+ *   capacity: max number of scalar-point pairs that the batch can hold.\n+ *     result: tells whether the given set of inputs (schnorrsigs or tweak checks) is valid\n+ *             or invalid. 1 = valid and 0 = invalid. By default, this is set to 1\n+ *             during batch object creation (i.e., `secp256k1_batch_create`).\n+ *\n+ *  The following struct name is typedef as secp256k1_batch (in include/secp256k1_batch.h).\n+ */\n+struct secp256k1_batch_struct{\n+    secp256k1_scratch *data;\n+    secp256k1_scalar *scalars;\n+    secp256k1_gej *points;\n+    secp256k1_scalar sc_g;\n+    secp256k1_sha256 sha256;\n+    size_t len;\n+    size_t capacity;\n+    int result;\n+};\n+\n+static size_t secp256k1_batch_scratch_size(int max_terms) {\n+    size_t ret = secp256k1_strauss_scratch_size(max_terms) + STRAUSS_SCRATCH_OBJECTS*16;\n+    VERIFY_CHECK(ret != 0);\n+\n+    return ret;\n+}\n+\n+/** Allocates space for `batch->capacity` number of scalars and points on batch\n+ *  object's scratch space */\n+static int secp256k1_batch_scratch_alloc(const secp256k1_callback* error_callback, secp256k1_batch* batch) {\n+    size_t checkpoint = secp256k1_scratch_checkpoint(error_callback, batch->data);\n+    size_t count = batch->capacity;\n+\n+    VERIFY_CHECK(count > 0);\n+\n+    batch->scalars = (secp256k1_scalar*)secp256k1_scratch_alloc(error_callback, batch->data, count*sizeof(secp256k1_scalar));\n+    batch->points = (secp256k1_gej*)secp256k1_scratch_alloc(error_callback, batch->data, count*sizeof(secp256k1_gej));\n+\n+    /* If scalar or point allocation fails, restore scratch space to previous state */\n+    if (batch->scalars == NULL || batch->points == NULL) {\n+        secp256k1_scratch_apply_checkpoint(error_callback, batch->data, checkpoint);\n+        return 0;\n+    }\n+\n+    return 1;\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0340/batch\")||SHA256(\"BIP0340/batch\"). */\n+static void secp256k1_batch_sha256_tagged(secp256k1_sha256 *sha) {\n+    secp256k1_sha256_initialize(sha);\n+    sha->s[0] = 0x79e3e0d2ul;\n+    sha->s[1] = 0x12284f32ul;\n+    sha->s[2] = 0xd7d89e1cul;\n+    sha->s[3] = 0x6491ea9aul;\n+    sha->s[4] = 0xad823b2ful;\n+    sha->s[5] = 0xfacfe0b6ul;\n+    sha->s[6] = 0x342b78baul;\n+    sha->s[7] = 0x12ece87cul;\n+\n+    sha->bytes = 64;\n+}\n+\n+secp256k1_batch* secp256k1_batch_create(const secp256k1_context* ctx, size_t max_terms, const unsigned char *aux_rand16) {\n+    size_t batch_size;\n+    secp256k1_batch* batch;\n+    size_t batch_scratch_size;\n+    unsigned char zeros[16] = {0};\n+\n+    VERIFY_CHECK(ctx != NULL);\n+    ARG_CHECK(max_terms != 0);",
+      "path": "src/modules/batch/main_impl.h",
+      "position": 114,
+      "original_position": 89,
+      "commit_id": "0696ea8084015e7d5420d7f1feb37d2b2e5993de",
+      "original_commit_id": "b966ca08c2ddc3152adcaf3e14fd31e3dce965dc",
+      "in_reply_to_id": 3695300203,
+      "user": {
+        "login": "siv2r",
+        "id": 56887198,
+        "node_id": "MDQ6VXNlcjU2ODg3MTk4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/56887198?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/siv2r",
+        "html_url": "https://github.com/siv2r",
+        "followers_url": "https://api.github.com/users/siv2r/followers",
+        "following_url": "https://api.github.com/users/siv2r/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/siv2r/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/siv2r/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/siv2r/subscriptions",
+        "organizations_url": "https://api.github.com/users/siv2r/orgs",
+        "repos_url": "https://api.github.com/users/siv2r/repos",
+        "events_url": "https://api.github.com/users/siv2r/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/siv2r/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Good idea restricting `max_terms` to at least 2. Batching just one (https://github.com/bitcoin-core/secp256k1/pull/1134#discussion_r952908842) would actually be slower than plain `schnorr_verify`, since we'd be deserializing all the points in the verify equation (regular schnorr doesn't deserialize `R.x`).",
+      "created_at": "2026-08-04T17:41:53Z",
+      "updated_at": "2026-08-04T17:41:53Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1134#discussion_r3714862997",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3714862997"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1134"
