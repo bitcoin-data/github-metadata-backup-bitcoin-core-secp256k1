@@ -41,9 +41,19 @@
       "patch_url": null
     },
     "body": "`ec_privkey_import_der()` in `contrib/lax_der_privatekey_parsing.c` rejects\r\nmalformed encodings through eight structural checks. None of them were\r\nreachable from the test suite: every `return 0` in the function was\r\nuncovered, and only the successful round-trip path was exercised.\r\n\r\nMeasured with `gcc --coverage` + `gcov -b` on `./tests 2`:\r\n\r\n| | lines | branches (taken at least once) |\r\n|---|---|---|\r\n| master | 82.69% | 57.14% |\r\n| this PR | **100%** | **100%** |\r\n\r\nWhat the test does:\r\n\r\n* Mutates every field of an encoding produced by `ec_privkey_export_der()`,\r\n  for both the compressed (1-byte sequence length) and the uncompressed\r\n  (2-byte) layout, and asserts the layout it mutates before mutating it.\r\n* Adds malformed encodings that are *not* truncations of a valid key. A\r\n  truncated valid encoding is always caught by the sequence length check, so\r\n  hand-crafted short encodings are the only way to reach the length checks\r\n  behind it. This includes an indefinite-length sequence (`30 80 ...`) that is\r\n  otherwise well-formed, and a sequence length that exceeds the input.\r\n* Checks that `out32` is cleared whenever no key is extracted.\r\n* Checks the lax behaviour the parser exists for: a key shorter than 32 bytes\r\n  is accepted and left-padded with zeroes.\r\n* Passes the input in a heap buffer of exactly the advertised length, so a\r\n  read past the end is caught by ASan instead of silently succeeding on\r\n  adjacent stack bytes. Four of the bounds checks are only detectable this way.\r\n\r\nI sanity-checked that the test is load-bearing by removing each check in the\r\nparser one at a time: 14 of 16 mutations are detected. The two that are not\r\nare the empty-input check (ASan does not instrument a zero-size allocation)\r\nand the `if (privkey[1])` guard added in #879 (a zero-length `memcpy` from an\r\nout-of-bounds pointer is UB but invisible to every sanitizer).\r\n\r\nWhile writing this I also confirmed that the existing bounds checks form\r\npointers such as `privkey + len` outside the caller's object before comparing\r\nthem, which is UB in a strict reading of the standard and is not caught by\r\nASan/UBSan (including `-fsanitize=pointer-overflow`). That is a separate\r\nconcern and is addressed by @l0rinc; the `{0x30, 0x82, 0xff, 0xff}` vector\r\nhere is a regression test for it. This PR does not change the parser.\r\n\r\nI am aware of #781. If the lax DER helpers are eventually removed these tests\r\ngo with them; until then `contrib/` is inside the coverage target described in\r\nCONTRIBUTING.md, and this file had the largest gap in it.\r\n\r\n",
-    "labels": [],
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      }
+    ],
     "created_at": "2026-07-22T20:00:45Z",
-    "updated_at": "2026-08-07T04:52:29Z",
+    "updated_at": "2026-08-14T11:13:09Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -286,12 +296,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1160,
-        "stargazers_count": 2462,
-        "watchers_count": 2462,
+        "forks_count": 1164,
+        "stargazers_count": 2473,
+        "watchers_count": 2473,
         "size": 13222,
         "default_branch": "master",
-        "open_issues_count": 150,
+        "open_issues_count": 153,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -304,7 +314,7 @@
         "visibility": "public",
         "pushed_at": "2026-08-04T21:17:19Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-08-07T02:50:54Z",
+        "updated_at": "2026-08-13T17:43:59Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -687,6 +697,41 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-08-07T04:52:30Z"
+    },
+    {
+      "event": "labeled",
+      "id": 29454391816,
+      "node_id": "LE_lADOAP4Jqs8AAAABJzQaFc8AAAAG255aCA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/29454391816",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-08-14T11:13:09Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
     }
   ],
   "comments": []
