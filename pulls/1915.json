@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2026-08-15T11:07:53Z",
-    "updated_at": "2026-08-15T12:39:03Z",
+    "updated_at": "2026-08-15T13:05:23Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 3,
     "commits": 1,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -423,6 +423,64 @@
         "name": "tweak/refactor",
         "color": "FBCA04"
       }
+    },
+    {
+      "event": "commented",
+      "id": 5302361039,
+      "node_id": "IC_kwDOAP4Jqs8AAAABPAubzw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5302361039",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-08-15T13:05:23Z",
+      "updated_at": "2026-08-15T13:05:23Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "\r\nI agree that these helpers should not be specific to musig, so Concept ACK on moving them out. But the question is where to move them.\r\n\r\nI had never considered the purpose of `eckey` before. What distinguishes an \"EC (pub)key\" from a \"group element\" in terms of implementation? If anything at all -- and I believe this was the intent of the author -- then precisely that a pubkey is *not infinity*. And indeed, all the functions in `eckey` follow this rule. It's somehow the internal backend for the `secp256k1_pubkey` type. \r\n\r\nSo in some sense, `eckey` is a very wrong place for these functions to end up. (Moreover, in musig, these ges are not really \"keys\".) But I totally see your reasoning, namely that the other (de)serialization functions are there.  \r\n\r\nBut if not `eckey`, what should we do instead? Making a `eckey_ext`? This seems overkill. \r\n\r\nI think one way out is to move all (de)serialization functions to `group`. In the end, the difference between a group element and a key is not that big. The only restriction is that the input of serialization may not be infinity, but we have other functions in `group` with this restriction. (We could additionally rename `eckey` to something which describes the remains more meaningfully, e.g., `pubkey_tweak`, but I'm not sure if it's worth the hassle.) \r\n\r\nAlternatively, we could make separate `group_ser` module, but this feels also a bit unnatural to me.  ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1915#issuecomment-5302361039",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1915"
     }
   ],
   "comments": []
