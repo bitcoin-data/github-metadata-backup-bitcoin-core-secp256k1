@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1915/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1915/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7f7d071ad63efbf0f0144591d82ff10d8a88d29b",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/103289a1b4cfd476dbed65808ed5596d1359dc89",
     "number": 1915,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "refactor: Move extended eckey helpers from musig to eckey",
+    "title": "refactor: Move (de)ser helpers from musig and eckey to group",
     "user": {
       "login": "fjahr",
       "id": 1322187,
@@ -53,11 +53,11 @@
       }
     ],
     "created_at": "2026-08-15T11:07:53Z",
-    "updated_at": "2026-08-15T13:05:23Z",
+    "updated_at": "2026-08-16T16:45:47Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "1cee48a4cc265cd3c5c6b4bef742217f9bc1c15c",
+    "merge_commit_sha": "ead2e464bf3de9a29ce65db3fc12313efa17ff79",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -65,7 +65,7 @@
     "head": {
       "label": "fjahr:2026-08-eckey-helper",
       "ref": "2026-08-eckey-helper",
-      "sha": "7f7d071ad63efbf0f0144591d82ff10d8a88d29b",
+      "sha": "103289a1b4cfd476dbed65808ed5596d1359dc89",
       "user": {
         "login": "fjahr",
         "id": 1322187,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-08-15T12:20:21Z",
+        "pushed_at": "2026-08-16T16:44:55Z",
         "created_at": "2019-07-22T22:39:26Z",
         "updated_at": "2019-07-22T22:39:29Z",
         "allow_forking": true,
@@ -201,7 +201,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "687155df6b76f1da1639a6f0923b69e6beaa3a09",
+      "sha": "439278a649d3099d62dde966a76dc04aaca7ccb3",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -300,9 +300,9 @@
         "forks_count": 1164,
         "stargazers_count": 2473,
         "watchers_count": 2473,
-        "size": 13222,
+        "size": 13414,
         "default_branch": "master",
-        "open_issues_count": 154,
+        "open_issues_count": 153,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -313,9 +313,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-08-04T21:17:19Z",
+        "pushed_at": "2026-08-16T11:03:01Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-08-13T17:43:59Z",
+        "updated_at": "2026-08-16T11:03:12Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -341,54 +341,14 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 32,
-    "deletions": 29,
-    "changed_files": 3,
-    "commits": 1,
+    "additions": 108,
+    "deletions": 101,
+    "changed_files": 10,
+    "commits": 2,
     "review_comments": 0,
     "comments": 1
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDdmN2QwNzFhZDYzZWZiZjBmMDE0NDU5MWQ4MmZmMTBkOGE4OGQyOWI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7f7d071ad63efbf0f0144591d82ff10d8a88d29b",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7f7d071ad63efbf0f0144591d82ff10d8a88d29b",
-      "tree": {
-        "sha": "d3a31f762f6bc419b80bec586ef8315844354e56",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d3a31f762f6bc419b80bec586ef8315844354e56"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree d3a31f762f6bc419b80bec586ef8315844354e56\nparent 687155df6b76f1da1639a6f0923b69e6beaa3a09\nauthor Fabian Jahr <fjahr@protonmail.com> 1757454700 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1786791275 +0200\n\nrefactor: Move parsing helpers from musig to eckey\n\nThe naming of these functions suggested they should be moved to group.h\nbut this didn't seem practical since these functions depended on eckey.h\ninternally which is higher level than group.h.\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJPBAABCgA5FiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmqARWsbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEPE9Hp2JB5jNSFkQAISO8XNkl2yfLcDLyOOG\nA7duNL8HSJWr/Q3yDLbByoD6yJG1lTt1W9rvjl1OVufSJn14mbILF+XX6fJOUmg1\ntIgDk6tkGf/cv93py5ZMNBfZBTWKb5MEhv01cLwTBEmyb7ANOit0YRZBp0oV2pDC\nQCTwzpEDQqisaUsoLM/fAjtfsIEogadhi317PfG0KAbD5TEeONlo2bIjpXw3Fkez\n92+KegoIckXB/Y6nxBQx3mwchnF/M9vrX9LoZ7OQqhuqumr2e7qZUfgpDYyipjio\n+VUrNKXR8Ws8HJh1m9syfdLog34JtCpPmMpm/9DKTza3/qShsf6b9uQchAv0IwS9\ngB8YzGPA6NC+B5OSTjh0hV8AFj4b0E0rmMHc2jjEeq4bCvJc4cC+ocqFMd9YSYxN\n48z2GYBcDDK0Y3hM1CvAzcNwNCG44WOP7TYV1S8CW3Ng5LJ6BwunZW4OkMB5WaiE\nDGBkUHeEfLV4hmWuY74C30rNL2KClY3XpGsdMKVgvkS3lhtC/0G/jYyy5Slmjybd\nq543RA5cq/c7COb7f5IfxeNjPSzZknYAY1QqXdLToIpCsn6alDpH5tBNPLt6pDxw\nTb4EQY7uOXRFm2HMgsEctVtR7hfNkDV9RmRTvSn8rDKEb6SpbPRS7NRVRz7GRLPz\n9OKN41Gk4iKbEFlXE4pmaShE\n=XoUG\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/687155df6b76f1da1639a6f0923b69e6beaa3a09",
-          "sha": "687155df6b76f1da1639a6f0923b69e6beaa3a09",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/687155df6b76f1da1639a6f0923b69e6beaa3a09"
-        }
-      ],
-      "message": "refactor: Move parsing helpers from musig to eckey\n\nThe naming of these functions suggested they should be moved to group.h\nbut this didn't seem practical since these functions depended on eckey.h\ninternally which is higher level than group.h.",
-      "committer": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2026-08-15T10:54:35Z"
-      },
-      "author": {
-        "name": "Fabian Jahr",
-        "email": "fjahr@protonmail.com",
-        "date": "2025-09-09T21:51:40Z"
-      },
-      "sha": "7f7d071ad63efbf0f0144591d82ff10d8a88d29b"
-    },
     {
       "event": "labeled",
       "id": 29499201171,
@@ -481,6 +441,152 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1915#issuecomment-5302361039",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1915"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDI1NzdmYjE4ODhjMDIxNzUyZGM2ZWRiZmE2ZGYzMjE2ZGFhOWNjYjE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2577fb1888c021752dc6edbfa6df3216daa9ccb1",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2577fb1888c021752dc6edbfa6df3216daa9ccb1",
+      "tree": {
+        "sha": "5d094f3f9be8c0b1405348d1dd5c8100af83a383",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5d094f3f9be8c0b1405348d1dd5c8100af83a383"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 5d094f3f9be8c0b1405348d1dd5c8100af83a383\nparent 687155df6b76f1da1639a6f0923b69e6beaa3a09\nauthor Fabian Jahr <fjahr@protonmail.com> 1786897799 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1786897861 +0200\n\nrefactor: Move pubkey parsing and serialization from eckey to group\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJPBAABCgA5FiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmqB5cUbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEPE9Hp2JB5jNj04P/jO5vhqmuqsxTOUorCLK\nqTFX+46Nx08w/9pFPdb+o3YDdESTrnB5zKxx5Dl6EHSHYNAawgWbqE3T4Y8khJqw\n4gkkFG1fEGTzTN22rYicOfuq971jsp03w2ceo92OcNbL4/L+XdS1VyuN+jsYlcaW\n9Rp8auLnUue9Czwlw/iDWsfxKLeffp7B3U9s4Ecc5WL+25XItOgqnRjvXMAO+gb9\n3duSd7/5NNhk65uP6T+vHgyFsOHWQKaHlK7ROKBzORTKGSE58P4H6Z03cMMo6ajM\nX2Ggg1Z8UDw2VWGENA4IL4UDzfH1u0MkwmMLSTTZKJNMnWW94IQChGsdXI00L//o\nKhGrIcr3xOG4s6pD0ErxpYQKZRsI5+/7xYdXf83VVRICvgZe8+OodURsZtvxAqRR\n2AEPQzAJhG5wNg7j1aB8FGrJ61OP45eq9zwxnvDyQkAkd0+o9p5CpYR270Sl/ZfH\n67GgzkxH62W4MO5PLrbD/oZWEMOlv2mwT678RfiI76uaQpcqnxI9CHh4n1UOPJeT\n1o/eIo89pMDBDAm7DRsTJuR2R/R3s+IiBaOqeUyjWB3zDt9SSq7aukBpvs/u8i5i\n9+6P+twezJNxi2J2tvb27O90UO8CuF3ITDdjHFgDnoxbhhydJqod2ojU2RduYxXc\nBWM1sNiIxMAhe+LKbWftEZhw\n=GL0o\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/687155df6b76f1da1639a6f0923b69e6beaa3a09",
+          "sha": "687155df6b76f1da1639a6f0923b69e6beaa3a09",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/687155df6b76f1da1639a6f0923b69e6beaa3a09"
+        }
+      ],
+      "message": "refactor: Move pubkey parsing and serialization from eckey to group",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2026-08-16T16:31:01Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2026-08-16T16:29:59Z"
+      },
+      "sha": "2577fb1888c021752dc6edbfa6df3216daa9ccb1"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDEwMzI4OWExYjRjZmQ0NzZkYmVkNjU4MDhlZDU1OTZkMTM1OWRjODk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/103289a1b4cfd476dbed65808ed5596d1359dc89",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/103289a1b4cfd476dbed65808ed5596d1359dc89",
+      "tree": {
+        "sha": "b20c7b169ca37b488b6527b731bfecaed9a509d5",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b20c7b169ca37b488b6527b731bfecaed9a509d5"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree b20c7b169ca37b488b6527b731bfecaed9a509d5\nparent 2577fb1888c021752dc6edbfa6df3216daa9ccb1\nauthor Fabian Jahr <fjahr@protonmail.com> 1786898040 +0200\ncommitter Fabian Jahr <fjahr@protonmail.com> 1786898040 +0200\n\nrefactor: Move parsing helpers from musig to group\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\nComment: GPGTools - https://gpgtools.org\n\niQJPBAABCgA5FiEEtFq20ghhrCHSdrgm8T0enYkHmM0FAmqB5ngbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEPE9Hp2JB5jNbzMP/jOjwhBhu1EhiZIaQSvz\ncu26NK4Ikt5ldNwXrkupPYTXdS+ylsGJRtHoMB5DIvn9iQoMH936ypP+JVAFjVHG\nJeXX11Pl7VHu0PqOu6aVc6in1ACiOt39wf+JmDndcRvUXgt0exa06sqkNM2Yzuxs\n11yiCOCF2q701CfWO2L4T3glCujSRNgXovUi38UHFLHzDSC8It7BidijL5M0YDy7\nAx9jGL6CbomYkaKcOFEJORxc9ErBr/xhSwdJCD9cmGIx5khZldaDk0wxXr5Jb3Ae\nfYdVKyEIpRVUWyKDmkDhnDipisRllTMSrqm3DvyYwahGJZBSBrJnua+3ko60Lh+C\ntpiknvKiOxX6ZebfhpMMh9+pOJzlHI93DuLUWs+LKEjlipzc4hzPqqBZPNupyQKh\nusP9ZBlW6zGtr2E+ObgxYuSDMFGru//LU0lerMGB1LQPFrdhJ9mR94cMkA8fDNua\nYI6NP+qLqvu6OyxiR7eD1wnHdFiVw84NuzRypSawc0mB36nqLy5gW5eHQ1kCyh3f\nEbu89aRsFcfZZFdCLuJj5svjt238Go8i9DdcF/4RJyEvvzmzfGLwDoXF+LbOgn14\nVnct9vYXLjYvei0HTwU31Y6mLUy45+6I7X520vWrXM5gEKDDIBPCWMI3aAW1EwKs\nWTA/Qh3m+4fkdddQrRVnMzrW\n=r+qF\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2577fb1888c021752dc6edbfa6df3216daa9ccb1",
+          "sha": "2577fb1888c021752dc6edbfa6df3216daa9ccb1",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2577fb1888c021752dc6edbfa6df3216daa9ccb1"
+        }
+      ],
+      "message": "refactor: Move parsing helpers from musig to group",
+      "committer": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2026-08-16T16:34:00Z"
+      },
+      "author": {
+        "name": "Fabian Jahr",
+        "email": "fjahr@protonmail.com",
+        "date": "2026-08-16T16:34:00Z"
+      },
+      "sha": "103289a1b4cfd476dbed65808ed5596d1359dc89"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 29526948801,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABM4FmkM8AAAAG3_F7wQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/29526948801",
+      "actor": {
+        "login": "fjahr",
+        "id": 1322187,
+        "node_id": "MDQ6VXNlcjEzMjIxODc=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1322187?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fjahr",
+        "html_url": "https://github.com/fjahr",
+        "followers_url": "https://api.github.com/users/fjahr/followers",
+        "following_url": "https://api.github.com/users/fjahr/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fjahr/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fjahr/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fjahr/subscriptions",
+        "organizations_url": "https://api.github.com/users/fjahr/orgs",
+        "repos_url": "https://api.github.com/users/fjahr/repos",
+        "events_url": "https://api.github.com/users/fjahr/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fjahr/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "103289a1b4cfd476dbed65808ed5596d1359dc89",
+      "commit_url": "https://api.github.com/repos/fjahr/secp256k1/commits/103289a1b4cfd476dbed65808ed5596d1359dc89",
+      "created_at": "2026-08-16T16:44:56Z"
+    },
+    {
+      "event": "renamed",
+      "id": 29526965291,
+      "node_id": "RTE_lADOAP4Jqs8AAAABM4FmkM8AAAAG3_G8Kw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/29526965291",
+      "actor": {
+        "login": "fjahr",
+        "id": 1322187,
+        "node_id": "MDQ6VXNlcjEzMjIxODc=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1322187?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fjahr",
+        "html_url": "https://github.com/fjahr",
+        "followers_url": "https://api.github.com/users/fjahr/followers",
+        "following_url": "https://api.github.com/users/fjahr/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fjahr/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fjahr/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fjahr/subscriptions",
+        "organizations_url": "https://api.github.com/users/fjahr/orgs",
+        "repos_url": "https://api.github.com/users/fjahr/repos",
+        "events_url": "https://api.github.com/users/fjahr/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fjahr/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-08-16T16:45:47Z",
+      "rename": {
+        "from": "refactor: Move extended eckey helpers from musig to eckey",
+        "to": "refactor: Move (de)ser helpers from musig and eckey to group"
+      }
     }
   ],
   "comments": []
