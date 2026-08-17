@@ -62,9 +62,9 @@
       }
     ],
     "created_at": "2026-08-17T12:41:23Z",
-    "updated_at": "2026-08-17T12:57:02Z",
+    "updated_at": "2026-08-17T13:33:37Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "cc62d6754e4fff984700ce8ed4f4570f1ed5bf72",
     "assignees": [],
@@ -173,7 +173,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13838,
+        "size": 13869,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -186,7 +186,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-08-17T12:39:08Z",
+        "pushed_at": "2026-08-17T13:35:03Z",
         "created_at": "2019-07-22T22:39:26Z",
         "updated_at": "2019-07-22T22:39:29Z",
         "allow_forking": true,
@@ -355,7 +355,7 @@
     "changed_files": 13,
     "commits": 2,
     "review_comments": 0,
-    "comments": 0
+    "comments": 1
   },
   "events": [
     {
@@ -507,6 +507,64 @@
         "name": "build",
         "color": "2F66C4"
       }
+    },
+    {
+      "event": "commented",
+      "id": 5316755975,
+      "node_id": "IC_kwDOAP4Jqs8AAAABPOdCBw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5316755975",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-08-17T13:33:37Z",
+      "updated_at": "2026-08-17T13:33:37Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "There are a few things to note here:\r\n\r\n### Do We Want to Provide More Guarantees than malloc/free?\r\n\r\nThe docs added in the current version of the PR say that the semantics should be the same as malloc/free. This can be quite demanding if you don't have a full version of malloc available. \r\n\r\nWe could provide more guarantees for specific use cases. For example, have a SECP256K1_SIMPLE_MALLOC and guarantee that all frees will be in a row (so a simple bump allocator can be used). SECP256K1_SIMPLE_MALLOC could just be defined as SECP256K1_MALLOC. I wonder if this is overkill, but providing such guarantees for SECP256K1_MALLOC in general may bite us in the future. \r\n\r\nAnother subtle detail is that `free(NULL)` is guaranteed to be a noop, but this is exactly the kind of thing that a caller may get wrong, so maybe we should simply avoid calling free on NULL pointers.\r\n\r\n### New Approach for Overrides\r\n\r\nOne thing to note here is that diverges from our previous approach of overriding functions that we used for external error callbacks: requiring the user to set a flag macro such as `USE_EXTERNAL_DEFAULT_CALLBACKS` and provide some symbols at link time (https://github.com/bitcoin-core/secp256k1/pull/595/)  \r\n\r\nWhen I worked on #595, the approach in this PR (namely simply using macro for the function call) didn't occur to me. I only saw this later in another crypto library (I can't remember which one). \r\n\r\nI think the two approaches functionally equivalent but I believe this one here is more straight-forward and a bit more convenient to use (in particular if you can pass `-include` to the compiler). So if others agree with this assessment, we could use this one here also for the external callbacks and deprecate `USE_EXTERNAL_DEFAULT_CALLBACKS`. Or we stick with the `USE_` approach if we find that nicer (or simply good enough not to bother with changing approaches).\r\n\r\nWe want more overrides in the futures, e.g., a compile-time override for SHA256, and potentially overrides for `fprintf` and `abort` that are more fine-grained than overriding the entire external callback. So it's probably good to pick a good \"design\" now.   \r\n\r\n### What If You Really Don't Have malloc?\r\n\r\nWe also need to deal with this situation (probably in a separate PR). There should probably be a macro `SECP256K1_HAS_MALLOC` or `SECP256K1_NO_MALLOC`. Now that I write this, I realize it's actually almost exactly https://github.com/bitcoin-core/secp256k1/issues/1095, so we should pick up the work on that again.",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1917#issuecomment-5316755975",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1917"
     }
   ],
   "comments": []
