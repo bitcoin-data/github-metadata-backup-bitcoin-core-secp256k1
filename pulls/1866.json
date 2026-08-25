@@ -62,9 +62,9 @@
       }
     ],
     "created_at": "2026-06-09T17:44:40Z",
-    "updated_at": "2026-08-25T10:57:10Z",
+    "updated_at": "2026-08-25T18:56:34Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "b1f2551cc33876f76806524102234c68614f504f",
     "assignees": [],
@@ -173,7 +173,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 12911,
+        "size": 12707,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -354,7 +354,7 @@
     "deletions": 0,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 1,
+    "review_comments": 2,
     "comments": 2
   },
   "events": [
@@ -824,6 +824,44 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1866#issuecomment-5409377482",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1866"
+    },
+    {
+      "event": "reviewed",
+      "id": 5022763072,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABK2FIQA",
+      "url": null,
+      "actor": null,
+      "commit_id": "6ccc27b7a3a4b5c18776952c9fdce7b7a7f1479c",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-08-25T18:56:34Z",
+      "author_association": "MEMBER",
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1866#pullrequestreview-5022763072",
+      "submitted_at": "2026-08-25T18:56:34Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1866"
     }
   ],
   "comments": [
@@ -879,6 +917,60 @@
       "start_side": null,
       "line": null,
       "original_line": 625,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3856232699",
+      "pull_request_review_id": 5022763072,
+      "id": 3856232699,
+      "node_id": "PRRC_kwDOAP4Jqs7l2XD7",
+      "diff_hunk": "@@ -608,6 +609,206 @@ static void sha256_tag_test(void) {\n     }\n }\n \n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_pubkey_agg)\n+static void musig_pubkey_agg_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_keyagg_cache cache_default, cache_custom;\n+    const unsigned char sk[32] = {1};\n+    secp256k1_pubkey pk;\n+    const secp256k1_pubkey *pks[1];\n+\n+    CHECK(secp256k1_ec_pubkey_create(ctx, &pk, sk) == 1);\n+    pks[0] = &pk;\n+\n+    /* Default behavior. No ctx-provided SHA256 compression */\n+    CHECK(secp256k1_musig_pubkey_agg(ctx, NULL, &cache_default, pks, 1) == 1);\n+    CHECK(!sha256_musig_pubkey_agg_called);\n+\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_pubkey_agg;\n+    CHECK(secp256k1_musig_pubkey_agg(ctx, NULL, &cache_custom, pks, 1) == 1);\n+    CHECK(sha256_musig_pubkey_agg_called);\n+    /* Outputs must differ if custom compression was used */\n+    CHECK(secp256k1_memcmp_var(cache_default.data, cache_custom.data, sizeof(cache_default.data)) != 0);\n+\n+    secp256k1_context_destroy(ctx);\n+}\n+\n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_nonce_gen)\n+static void musig_nonce_gen_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_secnonce secnonce;\n+    secp256k1_musig_pubnonce pubnonce_default, pubnonce_custom;\n+    const unsigned char sk[32] = {1};\n+    unsigned char secrand[32] = {1};\n+    secp256k1_pubkey pk;\n+\n+    CHECK(secp256k1_ec_pubkey_create(ctx, &pk, sk) == 1);\n+\n+    /* Default behavior. No ctx-provided SHA256 compression */\n+    CHECK(secp256k1_musig_nonce_gen(ctx, &secnonce, &pubnonce_default, secrand, sk, &pk, NULL, NULL, NULL) == 1);\n+    CHECK(!sha256_musig_nonce_gen_called);\n+\n+    /* Restore secrand: nonce_gen zeroes it to prevent reuse, but a second call is required */\n+    secrand[0] = 1;\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_nonce_gen;\n+    CHECK(secp256k1_musig_nonce_gen(ctx, &secnonce, &pubnonce_custom, secrand, sk, &pk, NULL, NULL, NULL) == 1);\n+    CHECK(sha256_musig_nonce_gen_called);\n+    /* Outputs must differ if custom compression was used */\n+    CHECK(secp256k1_memcmp_var(pubnonce_default.data, pubnonce_custom.data, sizeof(pubnonce_default.data)) != 0);\n+\n+    secp256k1_context_destroy(ctx);\n+}\n+\n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_nonce_gen_counter)\n+static void musig_nonce_gen_counter_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_secnonce secnonce;\n+    secp256k1_musig_pubnonce pubnonce_default, pubnonce_custom;\n+    const unsigned char sk[32] = {1};\n+    secp256k1_keypair keypair;\n+\n+    CHECK(secp256k1_keypair_create(ctx, &keypair, sk) == 1);\n+\n+    /* Default behavior. No ctx-provided SHA256 compression */\n+    CHECK(secp256k1_musig_nonce_gen_counter(ctx, &secnonce, &pubnonce_default, 0, &keypair, NULL, NULL, NULL) == 1);\n+    CHECK(!sha256_musig_nonce_gen_counter_called);\n+\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_nonce_gen_counter;\n+    CHECK(secp256k1_musig_nonce_gen_counter(ctx, &secnonce, &pubnonce_custom, 0, &keypair, NULL, NULL, NULL) == 1);\n+    CHECK(sha256_musig_nonce_gen_counter_called);\n+    /* Outputs must differ if custom compression was used */\n+    CHECK(secp256k1_memcmp_var(pubnonce_default.data, pubnonce_custom.data, sizeof(pubnonce_default.data)) != 0);\n+\n+    secp256k1_context_destroy(ctx);\n+}\n+\n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_nonce_process)\n+static void musig_nonce_process_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_session session_default, session_custom;\n+    const unsigned char sk[32] = {1};\n+    const unsigned char msg32[32] = {1};\n+    unsigned char secrand[32] = {1};\n+    secp256k1_pubkey pk;\n+    const secp256k1_pubkey *pks[1];\n+    secp256k1_musig_keyagg_cache keyagg_cache;\n+    secp256k1_musig_secnonce secnonce;\n+    secp256k1_musig_pubnonce pubnonce;\n+    const secp256k1_musig_pubnonce *pubnonce_ptr[1];\n+    secp256k1_musig_aggnonce aggnonce;\n+\n+    CHECK(secp256k1_ec_pubkey_create(ctx, &pk, sk) == 1);\n+    pks[0] = &pk;\n+    CHECK(secp256k1_musig_pubkey_agg(ctx, NULL, &keyagg_cache, pks, 1) == 1);\n+    pubnonce_ptr[0] = &pubnonce;\n+    CHECK(secp256k1_musig_nonce_gen(ctx, &secnonce, &pubnonce, secrand, sk, &pk, NULL, NULL, NULL) == 1);\n+    CHECK(secp256k1_musig_nonce_agg(ctx, &aggnonce, pubnonce_ptr, 1) == 1);\n+\n+    /* Default behavior. No ctx-provided SHA256 compression */\n+    CHECK(secp256k1_musig_nonce_process(ctx, &session_default, &aggnonce, msg32, &keyagg_cache) == 1);\n+    CHECK(!sha256_musig_nonce_process_called);\n+\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_nonce_process;\n+    CHECK(secp256k1_musig_nonce_process(ctx, &session_custom, &aggnonce, msg32, &keyagg_cache) == 1);\n+    CHECK(sha256_musig_nonce_process_called);\n+    /* Outputs must differ if custom compression was used */\n+    CHECK(secp256k1_memcmp_var(session_default.data, session_custom.data, sizeof(session_default.data)) != 0);\n+\n+    secp256k1_context_destroy(ctx);\n+}\n+\n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_partial_sign)\n+static void musig_partial_sign_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_partial_sig partial_sig_default, partial_sig_custom;\n+    const unsigned char sk[32] = {1};\n+    const unsigned char msg32[32] = {1};\n+    unsigned char secrand[32] = {1};\n+    secp256k1_keypair keypair;\n+    secp256k1_pubkey pk;\n+    const secp256k1_pubkey *pks[1];\n+    secp256k1_musig_keyagg_cache keyagg_cache;\n+    secp256k1_musig_secnonce secnonce, secnonce_tmp;\n+    secp256k1_musig_pubnonce pubnonce;\n+    const secp256k1_musig_pubnonce *pubnonce_ptr[1];\n+    secp256k1_musig_aggnonce aggnonce;\n+    secp256k1_musig_session session;\n+\n+    CHECK(secp256k1_keypair_create(ctx, &keypair, sk) == 1);\n+    CHECK(secp256k1_keypair_pub(ctx, &pk, &keypair) == 1);\n+    pks[0] = &pk;\n+    CHECK(secp256k1_musig_pubkey_agg(ctx, NULL, &keyagg_cache, pks, 1) == 1);\n+    pubnonce_ptr[0] = &pubnonce;\n+    CHECK(secp256k1_musig_nonce_gen(ctx, &secnonce, &pubnonce, secrand, sk, &pk, NULL, NULL, NULL) == 1);\n+    CHECK(secp256k1_musig_nonce_agg(ctx, &aggnonce, pubnonce_ptr, 1) == 1);\n+    CHECK(secp256k1_musig_nonce_process(ctx, &session, &aggnonce, msg32, &keyagg_cache) == 1);\n+    /* partial_sign zeroes the secnonce to prevent reuse, so keep a copy for the second call */\n+    memcpy(&secnonce_tmp, &secnonce, sizeof(secnonce_tmp));\n+\n+    /* Default behavior. No ctx-provided SHA256 compression */\n+    CHECK(secp256k1_musig_partial_sign(ctx, &partial_sig_default, &secnonce, &keypair, &keyagg_cache, &session) == 1);\n+    CHECK(!sha256_musig_partial_sign_called);\n+\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_partial_sign;\n+    CHECK(secp256k1_musig_partial_sign(ctx, &partial_sig_custom, &secnonce_tmp, &keypair, &keyagg_cache, &session) == 1);\n+    CHECK(sha256_musig_partial_sign_called);\n+    /* Outputs must differ if custom compression was used */\n+    CHECK(secp256k1_memcmp_var(partial_sig_default.data, partial_sig_custom.data, sizeof(partial_sig_default.data)) != 0);\n+\n+    secp256k1_context_destroy(ctx);\n+}\n+\n+DEFINE_SHA256_TRANSFORM_PROBE(sha256_musig_partial_sig_verify)\n+static void musig_partial_sig_verify_ctx_sha256(void) {\n+    /* Check ctx-provided SHA256 compression override takes effect */\n+    secp256k1_context *ctx = secp256k1_context_clone(CTX);\n+    secp256k1_musig_partial_sig partial_sig;\n+    const unsigned char sk[32] = {1};\n+    const unsigned char msg32[32] = {1};\n+    unsigned char secrand[32] = {1};\n+    secp256k1_keypair keypair;\n+    secp256k1_pubkey pk;\n+    const secp256k1_pubkey *pks[1];\n+    secp256k1_musig_keyagg_cache keyagg_cache;\n+    secp256k1_musig_secnonce secnonce;\n+    secp256k1_musig_pubnonce pubnonce;\n+    const secp256k1_musig_pubnonce *pubnonce_ptr[1];\n+    secp256k1_musig_aggnonce aggnonce;\n+    secp256k1_musig_session session;\n+\n+    CHECK(secp256k1_keypair_create(ctx, &keypair, sk) == 1);\n+    CHECK(secp256k1_keypair_pub(ctx, &pk, &keypair) == 1);\n+    pks[0] = &pk;\n+    CHECK(secp256k1_musig_pubkey_agg(ctx, NULL, &keyagg_cache, pks, 1) == 1);\n+    pubnonce_ptr[0] = &pubnonce;\n+    CHECK(secp256k1_musig_nonce_gen(ctx, &secnonce, &pubnonce, secrand, sk, &pk, NULL, NULL, NULL) == 1);\n+    CHECK(secp256k1_musig_nonce_agg(ctx, &aggnonce, pubnonce_ptr, 1) == 1);\n+    CHECK(secp256k1_musig_nonce_process(ctx, &session, &aggnonce, msg32, &keyagg_cache) == 1);\n+    CHECK(secp256k1_musig_partial_sign(ctx, &partial_sig, &secnonce, &keypair, &keyagg_cache, &session) == 1);\n+\n+    /* Default behavior. No ctx-provided SHA256 compression: the partial sig verifies */\n+    CHECK(secp256k1_musig_partial_sig_verify(ctx, &partial_sig, &pubnonce, &pk, &keyagg_cache, &session) == 1);\n+    CHECK(!sha256_musig_partial_sig_verify_called);\n+\n+    /* Override SHA256 compression directly, bypassing the ctx setter sanity checks.\n+     * The KeyAgg coefficient now differs, so verifying the same partial sig fails. */\n+    ctx->hash_ctx.fn_sha256_compression = sha256_musig_partial_sig_verify;\n+    CHECK(secp256k1_musig_partial_sig_verify(ctx, &partial_sig, &pubnonce, &pk, &keyagg_cache, &session) == 0);\n+    CHECK(sha256_musig_partial_sig_verify_called);\n+\n+    secp256k1_context_destroy(ctx);\n+}",
+      "path": "src/modules/musig/tests_impl.h",
+      "position": 249,
+      "original_position": 249,
+      "commit_id": "6ccc27b7a3a4b5c18776952c9fdce7b7a7f1479c",
+      "original_commit_id": "6ccc27b7a3a4b5c18776952c9fdce7b7a7f1479c",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "furszy",
+        "id": 5377650,
+        "node_id": "MDQ6VXNlcjUzNzc2NTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/5377650?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/furszy",
+        "html_url": "https://github.com/furszy",
+        "followers_url": "https://api.github.com/users/furszy/followers",
+        "following_url": "https://api.github.com/users/furszy/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/furszy/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/furszy/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/furszy/subscriptions",
+        "organizations_url": "https://api.github.com/users/furszy/orgs",
+        "repos_url": "https://api.github.com/users/furszy/repos",
+        "events_url": "https://api.github.com/users/furszy/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/furszy/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "These two tests can be merged, they share the same setup. You can just call the first sign function, then set the `called` flag to false and call the verify one.\r\n\r\nAnd you could apply the same concept for the others as well. Merging `sha256_musig_nonce_process` within this shouldn't be hard either.",
+      "created_at": "2026-08-25T18:55:15Z",
+      "updated_at": "2026-08-25T18:56:59Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1866#discussion_r3856232699",
+      "author_association": "MEMBER",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3856232699"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1866"
+        }
+      },
+      "start_line": 728,
+      "original_start_line": 728,
+      "start_side": "RIGHT",
+      "line": 810,
+      "original_line": 810,
       "side": "RIGHT"
     }
   ]
