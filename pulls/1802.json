@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2026-01-15T01:39:55Z",
-    "updated_at": "2026-08-26T00:09:18Z",
+    "updated_at": "2026-08-26T13:20:23Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -302,7 +302,7 @@
         "watchers_count": 2477,
         "size": 13250,
         "default_branch": "master",
-        "open_issues_count": 154,
+        "open_issues_count": 155,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -345,7 +345,7 @@
     "deletions": 19,
     "changed_files": 15,
     "commits": 5,
-    "review_comments": 28,
+    "review_comments": 29,
     "comments": 11
   },
   "events": [
@@ -3625,6 +3625,60 @@
       "start_side": "RIGHT",
       "line": 107,
       "original_line": 107,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3863123200",
+      "pull_request_review_id": 5030876236,
+      "id": 3863123200,
+      "node_id": "PRRC_kwDOAP4Jqs7mQpUA",
+      "diff_hunk": "@@ -0,0 +1,236 @@\n+/***********************************************************************\n+ * Distributed under the MIT software license, see the accompanying    *\n+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*\n+ ***********************************************************************/\n+\n+#ifndef SECP256K1_MODULE_DLEQ_MAIN_H\n+#define SECP256K1_MODULE_DLEQ_MAIN_H\n+\n+#include \"../../../include/secp256k1.h\"\n+#include \"../../../include/secp256k1_dleq.h\"\n+#include \"../../hash.h\"\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/aux\")||SHA256(\"BIP0374/aux\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged_aux(secp256k1_sha256 *sha) {\n+    static const uint32_t midstate[8] = {\n+        0x48479343ul, 0xa9eb648cul, 0x58952fe4ul, 0x4772d3b2ul,\n+        0x977ab0a0ul, 0xcb8e2740ul, 0x60bb4b81ul, 0x68a41b66ul\n+    };\n+    secp256k1_sha256_initialize_midstate(sha, 64, midstate);\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/nonce\")||SHA256(\"BIP0374/nonce\"). */\n+static void secp256k1_nonce_function_bip374_sha256_tagged(secp256k1_sha256 *sha) {\n+    static const uint32_t midstate[8] = {\n+        0xa810fc87ul, 0x3b4a4d2aul, 0xe302cfb4ul, 0x322df1a0ul,\n+        0xd2e7fb82ul, 0x7808570dul, 0x9c33e0cdul, 0x2dfbf7f6ul\n+    };\n+    secp256k1_sha256_initialize_midstate(sha, 64, midstate);\n+}\n+\n+/* Initializes SHA256 with fixed midstate. This midstate was computed by applying\n+ * SHA256 to SHA256(\"BIP0374/challenge\")||SHA256(\"BIP0374/challenge\"). */\n+static void secp256k1_dleq_sha256_tagged(secp256k1_sha256 *sha) {\n+    static const uint32_t midstate[8] = {\n+        0x24f1c9c7ul, 0xd1538c75ul, 0xc9874ae8ul, 0x6566de76ul,\n+        0x487843c9ul, 0xc13d8026ul, 0x39a2f3eful, 0x2ad0fcb3ul\n+    };\n+    secp256k1_sha256_initialize_midstate(sha, 64, midstate);\n+}\n+\n+static void secp256k1_dleq_hash_point(const secp256k1_hash_ctx *hash_ctx, secp256k1_sha256 *sha, secp256k1_ge *p) {\n+    unsigned char buf[33];\n+    secp256k1_ge_serialize_ext33(buf, p);\n+    secp256k1_sha256_write(hash_ctx, sha, buf, 33);\n+}\n+\n+static void secp256k1_nonce_function_dleq(const secp256k1_hash_ctx *hash_ctx, unsigned char *nonce32, const unsigned char *msg, size_t msglen, const unsigned char *key32, const unsigned char *aux_rand32, const unsigned char *m) {\n+    secp256k1_sha256 sha;\n+    unsigned char masked_key[32];\n+    int i;\n+\n+    if (aux_rand32 != NULL) {\n+        secp256k1_nonce_function_bip374_sha256_tagged_aux(&sha);\n+        secp256k1_sha256_write(hash_ctx, &sha, aux_rand32, 32);\n+        secp256k1_sha256_finalize(hash_ctx, &sha, masked_key);\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] ^= key32[i];\n+        }\n+    } else {\n+        /* Precomputed TaggedHash(\"BIP0374/aux\", 0x0000...00); */\n+        static const unsigned char ZERO_MASK[32] = {\n+            38, 255, 199, 133, 21, 94, 75, 99,\n+            18, 166, 0, 53, 197, 146, 253, 84,\n+            197, 228, 235, 145, 124, 59, 203, 21,\n+            66, 88, 250, 253, 207, 123, 43, 55\n+        };\n+        for (i = 0; i < 32; i++) {\n+            masked_key[i] = key32[i] ^ ZERO_MASK[i];\n+        }\n+    }\n+\n+    secp256k1_nonce_function_bip374_sha256_tagged(&sha);\n+    /* Hash masked-key||msg||m using the tagged hash as defined in BIP0374\n+     * Note: msg contains the serialized points A||C (66 bytes) */\n+    secp256k1_sha256_write(hash_ctx, &sha, masked_key, 32);\n+    secp256k1_sha256_write(hash_ctx, &sha, msg, msglen);\n+    if (m != NULL) {\n+        secp256k1_sha256_write(hash_ctx, &sha, m, 32);\n+    }\n+    secp256k1_sha256_finalize(hash_ctx, &sha, nonce32);\n+    secp256k1_sha256_clear(&sha);\n+    secp256k1_memclear_explicit(masked_key, sizeof(masked_key));\n+}\n+\n+/* Generates a nonce as defined in BIP0374 */\n+static int secp256k1_dleq_nonce(const secp256k1_hash_ctx *hash_ctx, secp256k1_scalar *k, const unsigned char *a32, const unsigned char *A_33, const unsigned char *C_33, const unsigned char *aux_rand32, const unsigned char *m) {\n+    unsigned char buf[66];\n+    unsigned char nonce[32];\n+    int ret;\n+\n+    memcpy(buf, A_33, 33);\n+    memcpy(buf + 33, C_33, 33);\n+    secp256k1_nonce_function_dleq(hash_ctx, nonce, buf, 66, a32, aux_rand32, m);\n+\n+    secp256k1_scalar_set_b32(k, nonce, NULL);\n+    ret = !secp256k1_scalar_is_zero(k);\n+\n+    secp256k1_memclear_explicit(nonce, sizeof(nonce));\n+    return ret;\n+}\n+\n+/* Generates a challenge as defined in BIP0374 */\n+static void secp256k1_dleq_challenge(const secp256k1_hash_ctx *hash_ctx, secp256k1_scalar *e, secp256k1_ge *B, secp256k1_ge *R1, secp256k1_ge *R2, secp256k1_ge *A, secp256k1_ge *C, const unsigned char *m) {",
+      "path": "src/modules/dleq/main_impl.h",
+      "position": 105,
+      "original_position": 105,
+      "commit_id": "2b8d0093f30ae13c5a1476a3a08a68748ace33f1",
+      "original_commit_id": "2b8d0093f30ae13c5a1476a3a08a68748ace33f1",
+      "in_reply_to_id": 3854306082,
+      "user": {
+        "login": "macgyver13",
+        "id": 4712150,
+        "node_id": "MDQ6VXNlcjQ3MTIxNTA=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/4712150?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/macgyver13",
+        "html_url": "https://github.com/macgyver13",
+        "followers_url": "https://api.github.com/users/macgyver13/followers",
+        "following_url": "https://api.github.com/users/macgyver13/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/macgyver13/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/macgyver13/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/macgyver13/subscriptions",
+        "organizations_url": "https://api.github.com/users/macgyver13/orgs",
+        "repos_url": "https://api.github.com/users/macgyver13/repos",
+        "events_url": "https://api.github.com/users/macgyver13/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/macgyver13/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I like this suggestion. Both `secp256k1_dleq_prove_internal` and `secp256k1_dleq_verify_internal` have `s` before `e`. I was on the fence about changing these in the last round but think it makes sense here too. Will push in next update.",
+      "created_at": "2026-08-26T13:20:22Z",
+      "updated_at": "2026-08-26T13:20:23Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1802#discussion_r3863123200",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3863123200"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1802"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 105,
+      "original_line": 105,
       "side": "RIGHT"
     }
   ]
