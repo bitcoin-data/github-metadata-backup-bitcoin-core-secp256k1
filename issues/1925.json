@@ -40,9 +40,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 0,
+    "comments": 1,
     "created_at": "2026-08-27T17:34:41Z",
-    "updated_at": "2026-08-28T13:09:47Z"
+    "updated_at": "2026-08-28T17:37:17Z"
   },
   "events": [
     {
@@ -168,6 +168,64 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-08-27T17:34:43Z"
+    },
+    {
+      "event": "commented",
+      "id": 5455732772,
+      "node_id": "IC_kwDOAP4Jqs8AAAABRS_gJA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5455732772",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-08-28T17:36:56Z",
+      "updated_at": "2026-08-28T17:37:17Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Quickly dropping an alternative API idea here, tailored for the \"host verifies SP outputs created by hardware wallet\" use-case described above; I think we could achieve this with only two new functions:\n```\ntypedef struct secp256k1_silentpayments_proof_entry {\n    unsigned char scan_pubkey[33]; /* in BIP-375: PSBT_GLOBAL_SP_{ECDH_SHARE,DLEQ} <keydata> */\n    unsigned char ecdh_share[33];  /* in BIP-375: PSBT_GLOBAL_SP_ECDH_SHARE <valuedata> */\n    unsigned char dleq_proof[64];  /* in BIP-375: PSBT_GLOBAL_SP_DLEQ <valuedata> */\n} secp256k1_silentpayments_proof_entry;\n\nint secp256k1_silentpayments_sender_create_outputs_with_proofs(\n    const secp256k1_context *ctx,\n    secp256k1_xonly_pubkey **generated_outputs,\n    secp256k1_silentpayments_proof_entry **generated_proof_entries,\n    size_t *n_proof_entries,\n    const secp256k1_silentpayments_recipient **recipients,\n    size_t n_recipients,\n    const unsigned char *outpoint_smallest36,\n    const secp256k1_keypair * const *keypairs,\n    size_t n_keypairs,\n    const unsigned char * const *seckeys,\n    size_t n_seckeys\n);\n/* TODO: could allow user to pass in auxrand32 for DLEQ proof creation (as per BIP-374) */\n\nint secp256k1_silentpayments_sender_verify_created_outputs_with_proofs(\n    const secp256k1_context *ctx,\n    const secp256k1_xonly_pubkey * const *created_outputs,\n    const secp256k1_silentpayments_proof_entry * const *created_proof_entries,\n    size_t n_proof_entries,\n    const secp256k1_silentpayments_recipient **recipients,\n    size_t n_recipients,\n    const secp256k1_silentpayments_prevouts_summary *prevouts_summary\n);\n/* TODO: instead of prevouts_summary, could still pass in the smallest outpoint and the \n         two (x-only) public key lists (more parameters, but symmetric to the function above\n         and only one function call needed on the host side) */\n```\nThat would make it quite easy to use I think. The drawback of the verify function is that it does many things under the hood (DLEQ verification, outputs re-creation, comparing expected and re-created outputs) and the result is only binary. This could be very annoying at least during development, if something fails and one has no idea what exact step went wrong.",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1925#issuecomment-5455732772",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1925"
     }
   ]
 }
