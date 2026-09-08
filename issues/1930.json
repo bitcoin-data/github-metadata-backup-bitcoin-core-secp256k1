@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1930/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1930",
     "number": 1930,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "silentpayments: NULL requirement for empty key arrays (inconsistency between API docs and ARG_CHECKs)",
     "body": "In the silentpayments API, the following functions take two lists of keys as input (each represented as \"pointer to array of pointers\" and \"size\" parameters, i.e. four parameters in total):\n* `_silentpayments_sender_create_outputs` (secret keys: parameters `keypairs`/`n_keypairs`, `seckeys`/`n_seckeys`)\n* `_silentpayments_recipient_prevouts_summary_create` (public keys: `xonly_pubkeys`/`n_xonly_pubkeys`, `pubkeys`/`n_pubkeys`)\n\nThe public header docs state that the \"pointer to array of pointers\" parameters each _\"can be NULL\"_ if no such inputs are provided. However, the ARG_CHECKs currently are more strict and require the pointer parameter to be NULL if the size is zero, i.e. _\"must be NULL\"_ would be more appropriate.\n\nOne obvious way to fix this inconsistency is to just adapt the docs to match the code accordingly, e.g.: https://github.com/theStack/secp256k1/commit/1f0a8bfe9bab4e4a268757a66e0f4ee8c1d601f0\n\nAlternatively, I wonder if dropping this \"must be NULL\" requirement would also be an option (which AFAICT would be backwards-compatible) , as I think enforcing it doesn't have much value and is in the end just making things slightly more inconvenient for the user, forcing them to use conditional constructs like `keys_size == 0 ? NULL : keys_ptrs` for the call-sites. This would be a bit of a larger patch as both the ARG_CHECKs within the functions and the tests have to be adapted though, see https://github.com/bitcoin-core/secp256k1/compare/master...theStack:secp256k1:sp-keylists-drop-NULL-requirement.\n\nNoticed while reviewing Bitcoin Core [PR #35301](https://github.com/bitcoin/bitcoin/pull/35301), where the requirement is currently not met, even though the CI is green (background: the C++ standard doesn't guarantee that `.data()` on an empty `std::vector` instance returns `nullptr`, see https://en.cppreference.com/cpp/container/vector/data: _\"If `size()` is 0, `data()` may or may not return a null pointer.\"_).",
     "user": {
@@ -50,8 +50,31 @@
     "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 2,
+    "closed_at": "2026-09-08T11:14:56Z",
+    "closed_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "created_at": "2026-09-07T04:08:36Z",
-    "updated_at": "2026-09-07T20:57:37Z"
+    "updated_at": "2026-09-08T11:14:56Z"
   },
   "events": [
     {
@@ -274,6 +297,68 @@
         "name": "bug",
         "color": "fc2929"
       }
+    },
+    {
+      "event": "closed",
+      "id": 30750234233,
+      "node_id": "CE_lADOAP4Jqs8AAAABQBJDDs8AAAAHKNtWeQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30750234233",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "978d3fa7f91996f7782db2cc4d112615ac93c867",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/978d3fa7f91996f7782db2cc4d112615ac93c867",
+      "created_at": "2026-09-08T11:14:56Z"
+    },
+    {
+      "event": "referenced",
+      "id": 30750767223,
+      "node_id": "REFE_lADOAP4Jqs8AAAABQBJDDs8AAAAHKON4dw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30750767223",
+      "actor": {
+        "login": "pull[bot]",
+        "id": 39814207,
+        "node_id": "MDM6Qm90Mzk4MTQyMDc=",
+        "avatar_url": "https://avatars.githubusercontent.com/in/12910?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/pull%5Bbot%5D",
+        "html_url": "https://github.com/apps/pull",
+        "followers_url": "https://api.github.com/users/pull%5Bbot%5D/followers",
+        "following_url": "https://api.github.com/users/pull%5Bbot%5D/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/pull%5Bbot%5D/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/pull%5Bbot%5D/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/pull%5Bbot%5D/subscriptions",
+        "organizations_url": "https://api.github.com/users/pull%5Bbot%5D/orgs",
+        "repos_url": "https://api.github.com/users/pull%5Bbot%5D/repos",
+        "events_url": "https://api.github.com/users/pull%5Bbot%5D/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/pull%5Bbot%5D/received_events",
+        "type": "Bot",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "978d3fa7f91996f7782db2cc4d112615ac93c867",
+      "commit_url": "https://api.github.com/repos/StemmlerSisters/secp256k1/commits/978d3fa7f91996f7782db2cc4d112615ac93c867",
+      "created_at": "2026-09-08T11:24:12Z"
     }
   ]
 }
