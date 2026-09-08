@@ -53,9 +53,9 @@
       }
     ],
     "created_at": "2026-09-04T03:07:13Z",
-    "updated_at": "2026-09-08T16:32:51Z",
+    "updated_at": "2026-09-08T17:30:02Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "2789052e0fc3813b421973d0c080a9be00d56daa",
     "assignees": [],
@@ -164,7 +164,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 67116,
+        "size": 67117,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -298,8 +298,8 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1167,
-        "stargazers_count": 2482,
-        "watchers_count": 2482,
+        "stargazers_count": 2483,
+        "watchers_count": 2483,
         "size": 13165,
         "default_branch": "master",
         "open_issues_count": 158,
@@ -315,7 +315,7 @@
         "visibility": "public",
         "pushed_at": "2026-09-08T11:14:55Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-09-08T11:16:16Z",
+        "updated_at": "2026-09-08T17:12:41Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -345,7 +345,7 @@
     "deletions": 16,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 4,
+    "review_comments": 5,
     "comments": 0
   },
   "events": [
@@ -710,6 +710,60 @@
       "start_side": null,
       "line": 780,
       "original_line": 779,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3960562870",
+      "pull_request_review_id": 5144983401,
+      "id": 3960562870,
+      "node_id": "PRRC_kwDOAP4Jqs7sEWS2",
+      "diff_hunk": "@@ -760,34 +760,23 @@ int secp256k1_silentpayments_recipient_scan_outputs(\n             }\n         }\n         if (found_idx != -1) {\n+            secp256k1_scalar final_tweak_scalar = t_k_scalar;\n             found_outputs[k]->output = *tx_outputs[found_idx];\n-            secp256k1_scalar_get_b32(found_outputs[k]->tweak, &t_k_scalar);\n             /* Clear the t_k_scalar since we no longer need it and leaking this value would\n              * break indistinguishability of the transaction. */\n             secp256k1_scalar_clear(&t_k_scalar);\n             if (label_tweak != NULL) {\n+                secp256k1_scalar label_tweak_scalar;\n                 found_outputs[k]->found_with_label = 1;\n-                /* This is extremely unlikely to fail in that it can only really happen if label_tweak\n-                 * is the negation of the shared secret tweak. But since both tweak and label_tweak are\n-                 * created by hashing data, practically speaking this would only happen if an attacker\n-                 * tricked us into using a particular label_tweak (deviating from the protocol).\n-                 * Note that this call could also fail due to a malformed label_tweak data from the\n-                 * label cache, but we generally assume the passed in data is created using the API\n-                 * functions and thus have already been checked for correctness.\n-                 *\n-                 * Furthermore, although technically a failure for ec_seckey_tweak_add, this is not treated\n-                 * as a failure for Silent Payments because the output is still spendable with just the\n-                 * spend secret key. We set `tweak = 0` for this case.\n-                 */\n-                if (!secp256k1_ec_seckey_tweak_add(ctx, found_outputs[k]->tweak, label_tweak)) {\n-                    memset(found_outputs[k]->tweak, 0, 32);\n-                }\n+                secp256k1_scalar_set_b32(&label_tweak_scalar, label_tweak, NULL);\n+                secp256k1_scalar_add(&final_tweak_scalar, &final_tweak_scalar, &label_tweak_scalar);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 85,
+      "original_position": 29,
+      "commit_id": "11e9c6ede7f0e68e42aa7cd018702bcf88e48ca8",
+      "original_commit_id": "12d0d3b0708b38c6a5523bbaccdbb88dcce162eb",
+      "in_reply_to_id": 3950521404,
+      "user": {
+        "login": "nymius",
+        "id": 155548262,
+        "node_id": "U_kgDOCUV6Zg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/155548262?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/nymius",
+        "html_url": "https://github.com/nymius",
+        "followers_url": "https://api.github.com/users/nymius/followers",
+        "following_url": "https://api.github.com/users/nymius/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/nymius/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/nymius/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/nymius/subscriptions",
+        "organizations_url": "https://api.github.com/users/nymius/orgs",
+        "repos_url": "https://api.github.com/users/nymius/repos",
+        "events_url": "https://api.github.com/users/nymius/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/nymius/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "It's fine for me.",
+      "created_at": "2026-09-08T17:30:02Z",
+      "updated_at": "2026-09-08T17:30:02Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1929#discussion_r3960562870",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3960562870"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1929"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 772,
+      "original_line": 772,
       "side": "RIGHT"
     }
   ]
