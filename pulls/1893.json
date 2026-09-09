@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1893/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1893/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/38255a943f09831c7615bad854e9b827f6c994fa",
     "number": 1893,
     "state": "open",
     "locked": false,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "### Description\n\n`src/ctime_tests.c` covers `secp256k1_schnorrsig_sign32` and `secp256k1_schnorrsig_sign_custom` entry points under Valgrind/CHECKMEM.\n\n`sign_custom` accepts optional `extraparams` (including a custom nonce function) and variable-length messages before calling the shared internal signer. Functional tests cover it, but previously it was not tested under the constant-time CHECKMEM harness.\n\nThis PR adds coverage for:\n- `secp256k1_schnorrsig_sign_custom(..., NULL)` (default nonce path, NULL extraparams).\n- Default BIP340 nonce with non-NULL `extraparams.ndata` (auxiliary randomness).\n- The actual custom callback dispatch path via a distinct custom callback function (`nonce_function_custom`) delegating to `secp256k1_nonce_function_bip340`.\n- Variable-length message handling (`sizeof(msg) - 1`) in the custom callback case.\n- Secret-tainted key, keypair, message, and auxiliary data under CHECKMEM.\n\n### Coverage gap (why)\n\nPlanted local-only synthetic mutations (e.g. secret-dependent branch in custom nonce callback, secret-dependent branch on non-NULL auxiliary data) were **not** detected by the existing ctime suite, but **were** detected after these test additions. A constant-work control mutation remained clean.\n\nThis is a **test-coverage** improvement. **No production cryptographic code is modified.** This PR does **not** claim a real production vulnerability in unmodified libsecp256k1.\n\n### Change\n\n- `src/ctime_tests.c` only\n- No mutation code\n- No new dependencies\n\n### Build / test\n\n```bash\ncmake -B build \\\n  -DSECP256K1_VALGRIND=ON \\\n  -DSECP256K1_BUILD_CTIME_TESTS=ON \\\n  -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \\\n  -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \\\n  -DSECP256K1_ENABLE_MODULE_ECDH=ON \\\n  -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \\\n  -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \\\n  -DSECP256K1_ENABLE_MODULE_MUSIG=ON\ncmake --build build --target ctime_tests\nvalgrind --error-exitcode=42 ./build/bin/ctime_tests\n```\n\nClean upstream + this test: pass (repeated).  \nSynthetic mutations were local-only and are not included in this branch.\n",
+    "body": "### Description\n\n`src/ctime_tests.c` covers `secp256k1_schnorrsig_sign32` and `secp256k1_schnorrsig_sign_custom` entry points under Valgrind/CHECKMEM.\n\n`secp256k1_schnorrsig_sign_custom` accepts optional `extraparams`, including a custom nonce function, before calling the shared internal signer. Functional tests cover this API, but previously it was not exercised under the constant-time CHECKMEM harness.\n\nThis PR adds coverage for:\n\n- `secp256k1_schnorrsig_sign_custom(..., NULL)` using the default nonce path with NULL extraparams.\n- The default BIP340 nonce function with non-NULL `extraparams.ndata`.\n- The custom nonce callback dispatch path via a distinct `nonce_function_custom` callback that delegates to `secp256k1_nonce_function_bip340`.\n- Secret key material and keypair state under CHECKMEM for these signing paths.\n\nMessage and auxiliary data are not treated as secret inputs in these tests.\n\n### Coverage gap\n\nThe existing constant-time test suite exercised `secp256k1_schnorrsig_sign32`, but did not exercise the public `secp256k1_schnorrsig_sign_custom` entry point and its custom nonce callback dispatch path under CHECKMEM.\n\nLocal synthetic mutations were used during development to verify that the added coverage reaches these paths. These mutations are not included in this branch.\n\nThis is a test-coverage improvement. No production cryptographic code is modified, and this PR does not claim a production vulnerability in unmodified libsecp256k1.\n\n### Change\n\n- `src/ctime_tests.c` only\n- No production code changes\n- No new dependencies\n\n### Build / test\n\n```sh\ncmake -B build \\\n  -DSECP256K1_VALGRIND=ON \\\n  -DSECP256K1_BUILD_CTIME_TESTS=ON \\\n  -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \\\n  -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON\n\ncmake --build build --parallel\nctest --test-dir build --output-on-failure\nvalgrind --error-exitcode=42 ./build/bin/ctime_tests\n```\n\nLocal validation after addressing review feedback:\n\n- 207/207 CTest tests passed.\n- `ctime_tests` passed under Valgrind.\n- Valgrind reported `ERROR SUMMARY: 0 errors`.\n- Valgrind process exited with code 0.\r\n",
     "labels": [
       {
         "id": 165017692,
@@ -71,11 +71,11 @@
       }
     ],
     "created_at": "2026-07-17T17:18:23Z",
-    "updated_at": "2026-09-09T07:07:13Z",
+    "updated_at": "2026-09-09T08:11:55Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "53ee5bb52d118ff54de8ee56c0fc582376653cb4",
+    "merge_commit_sha": "b549aef7a21b9a8f21b0183425f8cf7f438a158f",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -83,7 +83,7 @@
     "head": {
       "label": "Yudis-bit:yudis/ctime-cover-schnorrsig-sign-custom",
       "ref": "yudis/ctime-cover-schnorrsig-sign-custom",
-      "sha": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
+      "sha": "38255a943f09831c7615bad854e9b827f6c994fa",
       "user": {
         "login": "Yudis-bit",
         "id": 85178972,
@@ -194,7 +194,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-07-22T13:59:21Z",
+        "pushed_at": "2026-09-09T08:06:08Z",
         "created_at": "2026-07-17T16:49:58Z",
         "updated_at": "2026-07-17T16:49:58Z",
         "allow_forking": true,
@@ -218,7 +218,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53",
+      "sha": "978d3fa7f91996f7782db2cc4d112615ac93c867",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -319,7 +319,7 @@
         "watchers_count": 2483,
         "size": 13165,
         "default_branch": "master",
-        "open_issues_count": 159,
+        "open_issues_count": 158,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -330,9 +330,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-09-08T11:14:55Z",
+        "pushed_at": "2026-09-09T08:10:01Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-09-08T17:12:41Z",
+        "updated_at": "2026-09-09T08:11:46Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -358,7 +358,7 @@
     },
     "author_association": "NONE",
     "draft": false,
-    "additions": 64,
+    "additions": 41,
     "deletions": 0,
     "changed_files": 1,
     "commits": 2,
@@ -366,46 +366,6 @@
     "comments": 2
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGM2NGM0NzdiMDk1ZDliNGM5YWNkZjYyNTg3NWQ2ZjlkODFkZWY1N2U",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c64c477b095d9b4c9acdf625875d6f9d81def57e",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c64c477b095d9b4c9acdf625875d6f9d81def57e",
-      "tree": {
-        "sha": "448a87d6c52869c5a07e8d9bf4eaf56e76f5794b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/448a87d6c52869c5a07e8d9bf4eaf56e76f5794b"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53",
-          "sha": "11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53"
-        }
-      ],
-      "message": "test: cover schnorrsig_sign_custom in constant-time tests\n\nCall secp256k1_schnorrsig_sign_custom with CHECKMEM-undefined secrets\nso the public sign_custom entry point is exercised under Valgrind, not\nonly schnorrsig_sign32.",
-      "committer": {
-        "name": "Yudistira Putra",
-        "email": "85178972+Yudis-bit@users.noreply.github.com",
-        "date": "2026-07-17T17:27:39Z"
-      },
-      "author": {
-        "name": "Yudistira Putra",
-        "email": "85178972+Yudis-bit@users.noreply.github.com",
-        "date": "2026-07-17T17:27:39Z"
-      },
-      "sha": "c64c477b095d9b4c9acdf625875d6f9d81def57e"
-    },
     {
       "event": "head_ref_force_pushed",
       "id": 28133927907,
@@ -611,46 +571,6 @@
         "name": "tweak/refactor",
         "color": "FBCA04"
       }
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDgxZTQzNGYxYWZhODFkYmRkZWZlNWZlMGU4YWMzYjE4ZjJlNzk3NzE",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
-      "tree": {
-        "sha": "ed5874e01e39f3de8689e6c53793ca7488dc4616",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ed5874e01e39f3de8689e6c53793ca7488dc4616"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/c64c477b095d9b4c9acdf625875d6f9d81def57e",
-          "sha": "c64c477b095d9b4c9acdf625875d6f9d81def57e",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/c64c477b095d9b4c9acdf625875d6f9d81def57e"
-        }
-      ],
-      "message": "test: cover custom Schnorr nonce callback in ctime tests\n\nExercise schnorrsig_sign_custom with non-NULL auxiliary data and\nwith a distinct custom nonce callback under CHECKMEM.\n\nThe callback delegates to the BIP340 nonce function so the custom\ndispatch path is tested without introducing an unsafe test nonce.\nUse a variable-length message for the custom callback case.",
-      "committer": {
-        "name": "Yudistira Putra",
-        "email": "85178972+Yudis-bit@users.noreply.github.com",
-        "date": "2026-07-22T13:58:01Z"
-      },
-      "author": {
-        "name": "Yudistira Putra",
-        "email": "85178972+Yudis-bit@users.noreply.github.com",
-        "date": "2026-07-22T13:58:01Z"
-      },
-      "sha": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771"
     },
     {
       "event": "commented",
@@ -1082,6 +1002,156 @@
       "submitted_at": "2026-09-09T07:06:52Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1893"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDJhMzc4MGQ3M2ZmY2NlZGE1ZmExMTNiNWE2Y2EzOGZiMjM2Y2E1MWI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2a3780d73ffcceda5fa113b5a6ca38fb236ca51b",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2a3780d73ffcceda5fa113b5a6ca38fb236ca51b",
+      "tree": {
+        "sha": "cc2fb14bcc6f506710abe052e64aa008124dd27a",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/cc2fb14bcc6f506710abe052e64aa008124dd27a"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53",
+          "sha": "11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/11dad6d06c0ea8fd6d9d423d32bddd18b70b8b53"
+        }
+      ],
+      "message": "test: cover schnorrsig_sign_custom in constant-time tests",
+      "committer": {
+        "name": "Yudistira Putra",
+        "email": "pyudistira519@gmail.com",
+        "date": "2026-09-09T07:31:00Z"
+      },
+      "author": {
+        "name": "Yudistira Putra",
+        "email": "pyudistira519@gmail.com",
+        "date": "2026-09-09T07:31:00Z"
+      },
+      "sha": "2a3780d73ffcceda5fa113b5a6ca38fb236ca51b"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDM4MjU1YTk0M2YwOTgzMWM3NjE1YmFkODU0ZTliODI3ZjZjOTk0ZmE",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/38255a943f09831c7615bad854e9b827f6c994fa",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/38255a943f09831c7615bad854e9b827f6c994fa",
+      "tree": {
+        "sha": "b6eac0f6642e70b5e80e09c35b960e4f382b16d8",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/b6eac0f6642e70b5e80e09c35b960e4f382b16d8"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2a3780d73ffcceda5fa113b5a6ca38fb236ca51b",
+          "sha": "2a3780d73ffcceda5fa113b5a6ca38fb236ca51b",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2a3780d73ffcceda5fa113b5a6ca38fb236ca51b"
+        }
+      ],
+      "message": "test: cover custom Schnorr nonce callback in ctime tests\n\nExercise schnorrsig_sign_custom with non-NULL auxiliary data and with a distinct custom nonce callback under CHECKMEM. The callback delegates to the BIP340 nonce function so the custom dispatch path is tested without introducing an unsafe test nonce.",
+      "committer": {
+        "name": "Yudistira Putra",
+        "email": "pyudistira519@gmail.com",
+        "date": "2026-09-09T07:40:15Z"
+      },
+      "author": {
+        "name": "Yudistira Putra",
+        "email": "pyudistira519@gmail.com",
+        "date": "2026-09-09T07:40:15Z"
+      },
+      "sha": "38255a943f09831c7615bad854e9b827f6c994fa"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 30812467254,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABJNyN088AAAAHLJDwNg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30812467254",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "38255a943f09831c7615bad854e9b827f6c994fa",
+      "commit_url": "https://api.github.com/repos/Yudis-bit/secp256k1/commits/38255a943f09831c7615bad854e9b827f6c994fa",
+      "created_at": "2026-09-09T08:06:10Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 5151483117,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABMw1k7Q",
+      "url": null,
+      "actor": null,
+      "commit_id": "38255a943f09831c7615bad854e9b827f6c994fa",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-09-09T08:08:14Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "utACK 38255a943f09831c7615bad854e9b827f6c994fa",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1893#pullrequestreview-5151483117",
+      "submitted_at": "2026-09-09T08:08:14Z",
+      "state": "APPROVED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1893"
     }
   ],
   "comments": [
@@ -1146,7 +1216,7 @@
       "node_id": "PRRC_kwDOAP4Jqs7sXbLr",
       "diff_hunk": "@@ -45,6 +45,30 @@\n # pragma GCC diagnostic warning \"-Wunused-function\"\n #endif\n \n+#ifdef ENABLE_MODULE_SCHNORRSIG\n+static int nonce_function_custom(\n+    unsigned char *nonce32,\n+    const unsigned char *msg,\n+    size_t msglen,\n+    const unsigned char *key32,\n+    const unsigned char *xonly_pk32,\n+    const unsigned char *algo,\n+    size_t algolen,\n+    void *data\n+) {\n+    return secp256k1_nonce_function_bip340(\n+        nonce32,\n+        msg,\n+        msglen,\n+        key32,\n+        xonly_pk32,\n+        algo,\n+        algolen,\n+        data\n+    );",
       "path": "src/ctime_tests.c",
-      "position": 24,
+      "position": 1,
       "original_position": 24,
       "commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
       "original_commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
@@ -1186,10 +1256,10 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1893"
         }
       },
-      "start_line": 49,
+      "start_line": null,
       "original_start_line": 49,
       "start_side": "RIGHT",
-      "line": 68,
+      "line": null,
       "original_line": 68,
       "side": "RIGHT"
     },
@@ -1200,7 +1270,7 @@
       "node_id": "PRRC_kwDOAP4Jqs7sXc4V",
       "diff_hunk": "@@ -190,7 +218,6 @@ static void run_tests(secp256k1_context *ctx, unsigned char *key) {\n     SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n     CHECK(ret == 1);\n \n-    /* Also cover the public sign_custom entry point (default nonce path). */",
       "path": "src/ctime_tests.c",
-      "position": 46,
+      "position": 1,
       "original_position": 46,
       "commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
       "original_commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
@@ -1243,7 +1313,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 193,
+      "line": null,
       "original_line": 193,
       "side": "LEFT"
     },
@@ -1254,7 +1324,7 @@
       "node_id": "PRRC_kwDOAP4Jqs7sXih4",
       "diff_hunk": "@@ -189,6 +217,42 @@ static void run_tests(secp256k1_context *ctx, unsigned char *key) {\n     ret = secp256k1_schnorrsig_sign32(ctx, sig, msg, &keypair, NULL);\n     SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n     CHECK(ret == 1);\n+\n+    SECP256K1_CHECKMEM_UNDEFINE(key, 32);\n+    ret = secp256k1_keypair_create(ctx, &keypair, key);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair));\n+    SECP256K1_CHECKMEM_UNDEFINE(msg, 32);\n+    ret = secp256k1_schnorrsig_sign_custom(ctx, sig, msg, 32, &keypair, NULL);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+\n+    extraparams.noncefp = NULL;\n+    extraparams.ndata = aux_rand;\n+    SECP256K1_CHECKMEM_UNDEFINE(key, 32);\n+    ret = secp256k1_keypair_create(ctx, &keypair, key);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair));\n+    SECP256K1_CHECKMEM_UNDEFINE(msg, 32);\n+    SECP256K1_CHECKMEM_UNDEFINE(aux_rand, sizeof(aux_rand));",
       "path": "src/ctime_tests.c",
-      "position": 65,
+      "position": 1,
       "original_position": 65,
       "commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
       "original_commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
@@ -1294,10 +1364,10 @@
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1893"
         }
       },
-      "start_line": 238,
+      "start_line": null,
       "original_start_line": 238,
       "start_side": "RIGHT",
-      "line": 239,
+      "line": null,
       "original_line": 239,
       "side": "RIGHT"
     },
@@ -1308,7 +1378,7 @@
       "node_id": "PRRC_kwDOAP4Jqs7sXjze",
       "diff_hunk": "@@ -189,6 +217,42 @@ static void run_tests(secp256k1_context *ctx, unsigned char *key) {\n     ret = secp256k1_schnorrsig_sign32(ctx, sig, msg, &keypair, NULL);\n     SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n     CHECK(ret == 1);\n+\n+    SECP256K1_CHECKMEM_UNDEFINE(key, 32);\n+    ret = secp256k1_keypair_create(ctx, &keypair, key);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair));\n+    SECP256K1_CHECKMEM_UNDEFINE(msg, 32);\n+    ret = secp256k1_schnorrsig_sign_custom(ctx, sig, msg, 32, &keypair, NULL);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+\n+    extraparams.noncefp = NULL;\n+    extraparams.ndata = aux_rand;\n+    SECP256K1_CHECKMEM_UNDEFINE(key, 32);\n+    ret = secp256k1_keypair_create(ctx, &keypair, key);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair));\n+    SECP256K1_CHECKMEM_UNDEFINE(msg, 32);\n+    SECP256K1_CHECKMEM_UNDEFINE(aux_rand, sizeof(aux_rand));\n+    ret = secp256k1_schnorrsig_sign_custom(ctx, sig, msg, 32, &keypair, &extraparams);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+\n+    extraparams.noncefp = nonce_function_custom;\n+    extraparams.ndata = aux_rand;\n+    SECP256K1_CHECKMEM_UNDEFINE(key, 32);\n+    ret = secp256k1_keypair_create(ctx, &keypair, key);\n+    SECP256K1_CHECKMEM_DEFINE(&ret, sizeof(ret));\n+    CHECK(ret == 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair));\n+    SECP256K1_CHECKMEM_UNDEFINE(msg, sizeof(msg) - 1);\n+    SECP256K1_CHECKMEM_UNDEFINE(aux_rand, sizeof(aux_rand));\n+    ret = secp256k1_schnorrsig_sign_custom(ctx, sig, msg, sizeof(msg) - 1, &keypair, &extraparams);",
       "path": "src/ctime_tests.c",
-      "position": 79,
+      "position": 1,
       "original_position": 79,
       "commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
       "original_commit_id": "81e434f1afa81dbddefe5fe0e8ac3b18f2e79771",
@@ -1351,7 +1421,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 253,
+      "line": null,
       "original_line": 253,
       "side": "RIGHT"
     }
