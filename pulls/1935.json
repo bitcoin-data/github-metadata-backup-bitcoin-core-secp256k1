@@ -41,11 +41,29 @@
       "patch_url": null
     },
     "body": "\r\nThe hardcoded scalars_near_split_bounds array didn't match its documented formula (a*LAMBDA + (ORDER+b)/2) % ORDER. All 20 entries were off in the same 32-bit window, likely a transcription error.\r\nAs a result the vectors only reached ~126-bit outputs through secp256k1_scalar_split_lambda instead of the intended ~127-128-bit boundary, so the case they exist to test was never exercised.\r\n\r\nGenerate the values at runtime from the formula via fill_scalars_near_split_bounds(), called at each of the three sites\r\nthat use the array, instead of hardcoding them. This removes the possibility of the array drifting from its formula again.\r\n\r\nVerified the generated values reach within 1-2 units of the true k1_bound/k2_bound from the split_lambda_verify proof, confirming the existing a/b ranges are sufficient.\r\n\r\nFixes #1920.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 79441510,
+        "node_id": "MDU6TGFiZWw3OTQ0MTUxMA==",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/bug",
+        "name": "bug",
+        "color": "fc2929",
+        "default": true
+      },
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      }
+    ],
     "created_at": "2026-09-09T19:49:16Z",
-    "updated_at": "2026-09-09T19:49:16Z",
+    "updated_at": "2026-09-10T06:46:46Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "96f22900deaf6e4e856fc3b26e9fbe692c1aadb0",
     "assignees": [],
@@ -153,7 +171,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13165,
+        "size": 13159,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -334,7 +352,7 @@
     "deletions": 23,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 2,
     "comments": 0
   },
   "events": [
@@ -377,7 +395,295 @@
         "date": "2026-09-09T19:42:55Z"
       },
       "sha": "d45d1a0eee2b77e865928e815ce40eb689b0a46a"
+    },
+    {
+      "event": "reviewed",
+      "id": 5163570676,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABM8XV9A",
+      "url": null,
+      "actor": null,
+      "commit_id": "d45d1a0eee2b77e865928e815ce40eb689b0a46a",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-09-10T06:46:14Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Thanks for picking that work up!",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1935#pullrequestreview-5163570676",
+      "submitted_at": "2026-09-10T06:46:14Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1935"
+    },
+    {
+      "event": "labeled",
+      "id": 30881505933,
+      "node_id": "LE_lADOAP4Jqs8AAAABQhsPxs8AAAAHMK5ijQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30881505933",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-10T06:46:22Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 30881505983,
+      "node_id": "LE_lADOAP4Jqs8AAAABQhsPxs8AAAAHMK5ivw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30881505983",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-10T06:46:22Z",
+      "label": {
+        "name": "tweak/refactor",
+        "color": "FBCA04"
+      }
+    },
+    {
+      "event": "unlabeled",
+      "id": 30881510069,
+      "node_id": "UNLE_lADOAP4Jqs8AAAABQhsPxs8AAAAHMK5ytQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30881510069",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-10T06:46:27Z",
+      "label": {
+        "name": "tweak/refactor",
+        "color": "FBCA04"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 30881525756,
+      "node_id": "LE_lADOAP4Jqs8AAAABQhsPxs8AAAAHMK6v_A",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/30881525756",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-10T06:46:46Z",
+      "label": {
+        "name": "bug",
+        "color": "fc2929"
+      }
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3976262122",
+      "pull_request_review_id": 5163570676,
+      "id": 3976262122,
+      "node_id": "PRRC_kwDOAP4Jqs7tAPHq",
+      "diff_hunk": "@@ -4644,29 +4644,32 @@ static void test_point_times_order(const secp256k1_gej *point) {\n  * - For a in [-2, -1, 0, 1, 2]:\n  *   - For b in [-3, -1, 1, 3]:\n  *     - Output (a*LAMBDA + (ORDER+b)/2) % ORDER\n+ *\n+ * Generated at runtime by fill_scalars_near_split_bounds() rather than hardcoded.\n  */\n-static const secp256k1_scalar scalars_near_split_bounds[20] = {\n-    SECP256K1_SCALAR_CONST(0xd938a566, 0x7f479e3e, 0xb5b3c7fa, 0xefdb3749, 0x3aa0585c, 0xc5ea2367, 0xe1b660db, 0x0209e6fc),\n-    SECP256K1_SCALAR_CONST(0xd938a566, 0x7f479e3e, 0xb5b3c7fa, 0xefdb3749, 0x3aa0585c, 0xc5ea2367, 0xe1b660db, 0x0209e6fd),\n-    SECP256K1_SCALAR_CONST(0xd938a566, 0x7f479e3e, 0xb5b3c7fa, 0xefdb3749, 0x3aa0585c, 0xc5ea2367, 0xe1b660db, 0x0209e6fe),\n-    SECP256K1_SCALAR_CONST(0xd938a566, 0x7f479e3e, 0xb5b3c7fa, 0xefdb3749, 0x3aa0585c, 0xc5ea2367, 0xe1b660db, 0x0209e6ff),\n-    SECP256K1_SCALAR_CONST(0x2c9c52b3, 0x3fa3cf1f, 0x5ad9e3fd, 0x77ed9ba5, 0xb294b893, 0x3722e9a5, 0x00e698ca, 0x4cf7632d),\n-    SECP256K1_SCALAR_CONST(0x2c9c52b3, 0x3fa3cf1f, 0x5ad9e3fd, 0x77ed9ba5, 0xb294b893, 0x3722e9a5, 0x00e698ca, 0x4cf7632e),\n-    SECP256K1_SCALAR_CONST(0x2c9c52b3, 0x3fa3cf1f, 0x5ad9e3fd, 0x77ed9ba5, 0xb294b893, 0x3722e9a5, 0x00e698ca, 0x4cf7632f),\n-    SECP256K1_SCALAR_CONST(0x2c9c52b3, 0x3fa3cf1f, 0x5ad9e3fd, 0x77ed9ba5, 0xb294b893, 0x3722e9a5, 0x00e698ca, 0x4cf76330),\n-    SECP256K1_SCALAR_CONST(0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xd576e735, 0x57a4501d, 0xdfe92f46, 0x681b209f),\n-    SECP256K1_SCALAR_CONST(0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xd576e735, 0x57a4501d, 0xdfe92f46, 0x681b20a0),\n-    SECP256K1_SCALAR_CONST(0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xd576e735, 0x57a4501d, 0xdfe92f46, 0x681b20a1),\n-    SECP256K1_SCALAR_CONST(0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xd576e735, 0x57a4501d, 0xdfe92f46, 0x681b20a2),\n-    SECP256K1_SCALAR_CONST(0xd363ad4c, 0xc05c30e0, 0xa5261c02, 0x88126459, 0xf85915d7, 0x7825b696, 0xbeebc5c2, 0x833ede11),\n-    SECP256K1_SCALAR_CONST(0xd363ad4c, 0xc05c30e0, 0xa5261c02, 0x88126459, 0xf85915d7, 0x7825b696, 0xbeebc5c2, 0x833ede12),\n-    SECP256K1_SCALAR_CONST(0xd363ad4c, 0xc05c30e0, 0xa5261c02, 0x88126459, 0xf85915d7, 0x7825b696, 0xbeebc5c2, 0x833ede13),\n-    SECP256K1_SCALAR_CONST(0xd363ad4c, 0xc05c30e0, 0xa5261c02, 0x88126459, 0xf85915d7, 0x7825b696, 0xbeebc5c2, 0x833ede14),\n-    SECP256K1_SCALAR_CONST(0x26c75a99, 0x80b861c1, 0x4a4c3805, 0x1024c8b4, 0x704d760e, 0xe95e7cd3, 0xde1bfdb1, 0xce2c5a42),\n-    SECP256K1_SCALAR_CONST(0x26c75a99, 0x80b861c1, 0x4a4c3805, 0x1024c8b4, 0x704d760e, 0xe95e7cd3, 0xde1bfdb1, 0xce2c5a43),\n-    SECP256K1_SCALAR_CONST(0x26c75a99, 0x80b861c1, 0x4a4c3805, 0x1024c8b4, 0x704d760e, 0xe95e7cd3, 0xde1bfdb1, 0xce2c5a44),\n-    SECP256K1_SCALAR_CONST(0x26c75a99, 0x80b861c1, 0x4a4c3805, 0x1024c8b4, 0x704d760e, 0xe95e7cd3, 0xde1bfdb1, 0xce2c5a45)\n-};\n+static secp256k1_scalar scalars_near_split_bounds[20];",
+      "path": "src/tests.c",
+      "position": 29,
+      "original_position": 29,
+      "commit_id": "d45d1a0eee2b77e865928e815ce40eb689b0a46a",
+      "original_commit_id": "d45d1a0eee2b77e865928e815ce40eb689b0a46a",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "This should not be static at the file level. The function should take an out param `scalars20` ",
+      "created_at": "2026-09-10T06:44:46Z",
+      "updated_at": "2026-09-10T06:46:14Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1935#discussion_r3976262122",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3976262122"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1935"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 4650,
+      "original_line": 4650,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3976269472",
+      "pull_request_review_id": 5163570676,
+      "id": 3976269472,
+      "node_id": "PRRC_kwDOAP4Jqs7tAQ6g",
+      "diff_hunk": "@@ -4644,29 +4644,32 @@ static void test_point_times_order(const secp256k1_gej *point) {\n  * - For a in [-2, -1, 0, 1, 2]:\n  *   - For b in [-3, -1, 1, 3]:\n  *     - Output (a*LAMBDA + (ORDER+b)/2) % ORDER\n+ *\n+ * Generated at runtime by fill_scalars_near_split_bounds() rather than hardcoded.",
+      "path": "src/tests.c",
+      "position": 5,
+      "original_position": 5,
+      "commit_id": "d45d1a0eee2b77e865928e815ce40eb689b0a46a",
+      "original_commit_id": "d45d1a0eee2b77e865928e815ce40eb689b0a46a",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "This comment is a typical AI comment that should be dropped. It will confuse any reader who isn't aware of the history will wonder what it's supposed to convey.",
+      "created_at": "2026-09-10T06:45:57Z",
+      "updated_at": "2026-09-10T06:46:14Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1935#discussion_r3976269472",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/3976269472"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1935"
+        }
+      },
+      "start_line": 4647,
+      "original_start_line": 4647,
+      "start_side": "RIGHT",
+      "line": 4648,
+      "original_line": 4648,
+      "side": "RIGHT"
+    }
+  ]
 }
