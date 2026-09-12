@@ -43,7 +43,7 @@
     "body": "Refs #1001, building on #1923.\n\nGroup operations currently inherit coordinate metadata that can be tighter than their advertised bounds, so successful VERIFY tests can depend on the caller that constructed a point. Require complete `ge`/`gej` inputs to have exactly the affine `(4,3)` or Jacobian `(4,4,1)` magnitude bounds, and publish those bounds at complete outputs after checking the original metadata and actual field limbs. This makes checking each operation against its declared input bounds sufficient, provided its reachable paths are exercised.\n\nThe contract also fixes `normalized = 0`: preserving an accidentally normalized input/output would leave the same dependence between callers. That deliberately extends the magnitude-only proposal and requires explicit normalization before parity, serialization and zero checks in several modules. Multiplication tables normalize where a tighter field bound is needed, and complete points are published after direct coordinate construction and the final Z adjustments; partial scratch values and failed parse outputs remain outside the complete-point contract, and clearing still wipes all bytes. Boxed bare-field arithmetic is deferred.\n\nThe `group_magnitude`, `group_magnitude_tables` and `group_magnitude_reject` test targets exercise physical representations and unchanged values/limbs, infinity, aliasing, conversions, parsing, serialization, clearing, signed table selection, and rejection of invalid input/output metadata. On POSIX/VERIFY builds, the 26 rejection cases include actual limbs inconsistent with their original claims, so relaxing metadata cannot hide invalid fields; initialized infinity coordinates are checked for exact zero limbs.\n\nValidation of the final source tree:\n\n- ARM64 Clang, default backend, all modules/examples: 242/242 tests at 64 iterations, with `-Werror -pedantic-errors`.\n- Native x86_64 Clang: upstream `ci/ci.sh` with int128, assembly, all modules/examples, 64 iterations, warnings as errors, symbol checking, benchmark smoke tests, Valgrind ctime checks, and byte-identical regenerated precomputation/test vectors.\n- Native x86_64 int64/10x26, ASan+UBSan, no assembly: 240/240 tests at 16 iterations.\n- Fresh LLVM instrumentation preserving VERIFY: 150/150 instrumented changed production lines; 152/152 group branch outcomes after merging matching locations across VERIFY/noverify/exhaustive binaries and filtering assertion/preprocessor/void lines. Raw `group_impl.h` coverage is 99.66% lines and 71.24% branches; the filtered count is not raw branch coverage.\n- Additional local parent/patch differential checks: 1,030 keygen/ECDSA/recovery/Schnorr cases and 256 expanded module scenarios plus tweak boundaries, byte-identical across parent Release, patch Release and patched int64 ASan/UBSan builds. The expanded corpus covers ECDH, ElligatorSwift, extrakeys, MuSig and Silent Payments. Mutation checks also exercise the sensitivity of the new assertions.\n\nThe subprocess rejection tests require POSIX `fork`; they are not enabled on every platform.\n\nNative x86_64, AMD EPYC 9R14, Ubuntu 24.04, Clang 18 Release with x86_64 assembly: ten alternating parent/patch pairs, 10,000 iterations per internal sample. Medians of reported round averages, in microseconds:\n\n| Operation | Parent | Patch | Change |\n|---|---:|---:|---:|\n| ecdh | 35.1 | 35.3 | +0.57% |\n| ellswift_ecdh | 38 | 38.3 | +0.79% |\n| ellswift_encode | 17.6 | 17.6 | +0.00% |\n| ellswift_decode | 7.78 | 7.77 | -0.13% |\n| ellswift_keygen | 34.4 | 34.4 | +0.00% |\n| ec_keygen | 16.8 | 16.8 | +0.00% |\n| ecdsa_sign | 22.7 | 22.7 | +0.00% |\n| ecdsa_verify | 36.6 | 36.7 | +0.27% |\n| ecdsa_recover | 37.8 | 37.9 | +0.26% |\n| schnorrsig_sign | 17.8 | 17.8 | +0.00% |\n| schnorrsig_verify | 37.1 | 37.2 | +0.27% |\n\nECDH and ElligatorSwift ECDH show small measured increases; this is not a zero-overhead claim. The measurements are specific to this configuration, with finite sampling and rounded benchmark output.\n\n<details>\n<summary>Reproduction commands</summary>\n\nAll modules are enabled (including optional recovery). The ordinary suite and the focused new tests can be run with:\n\n```sh\ncmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \\\n  -DCMAKE_C_FLAGS='-Werror -pedantic-errors' \\\n  -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON\ncmake --build build -j2\nSECP256K1_TEST_ITERS=64 ctest --test-dir build --output-on-failure\nbuild/bin/tests --target=group_magnitude --target=group_magnitude_tables \\\n  --target=group_magnitude_reject --iterations=16\n```\n\nFor the 10x26 sanitizer configuration, additionally select `SECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int64`, `SECP256K1_ASM=OFF`, `SECP256K1_BUILD_CTIME_TESTS=OFF`, and append `-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer` to `CMAKE_C_FLAGS`.\n\nThe native benchmarks use identical Clang Release configurations on parent and patch, with `SECP256K1_ASM=x86_64` and recovery enabled. Run ten pairs, alternating which revision runs first:\n\n```sh\nSECP256K1_BENCH_ITERS=10000 build/bin/bench ecdh ellswift keygen sign verify recover\n```\n\nEach invocation performs ten internal samples per operation. Results in the table are medians of the ten reported round averages; the machine ran no other validation work during measurement.\n\n</details>\n\nOne behavior difference for corrupted opaque pubkeys outside the API contract: an X storage value equal to the field modulus now invokes the illegal-argument callback instead of passing the old zero check.\n\nImplementation and validation used AI assistance under human direction; the checks reported here were executed, and are finite evidence rather than a proof of correctness or constant-time behavior on every platform.\n",
     "labels": [],
     "created_at": "2026-09-11T04:48:34Z",
-    "updated_at": "2026-09-11T23:34:16Z",
+    "updated_at": "2026-09-12T11:05:43Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -335,7 +335,7 @@
     "changed_files": 18,
     "commits": 1,
     "review_comments": 0,
-    "comments": 1
+    "comments": 2
   },
   "events": [
     {
@@ -434,6 +434,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1936#issuecomment-5641838241",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1936"
+    },
+    {
+      "event": "commented",
+      "id": 5645496225,
+      "node_id": "IC_kwDOAP4Jqs8AAAABUH9voQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5645496225",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-12T11:05:43Z",
+      "updated_at": "2026-09-12T11:05:43Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "> This PR description is very unclear to me-- from the text I can't tell what it's doing, why, and why it has a runtime cost.\r\n\r\nSecond this. (I can mostly follow but that's only because I wrote up the idea in #1001.)  \r\n\r\nAlso, putting everything in a single commit makes it even harder for a reviewer to follow. I have a local WIP branch that does roughly the same (maybe a bit more and/or more sophisticated), and I think it will end up having about 10 small commits. ",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1936#issuecomment-5645496225",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1936"
     }
   ],
