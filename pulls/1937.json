@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1937/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1937/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/28feff63b7851fd7c671d1c838d810471f61fc86",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
     "number": 1937,
     "state": "open",
     "locked": false,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "### Motivation & Context\nIn PR #1931, tests were added to ensure that an invalid plain secret key (`seckeys`) is rejected even when passed alongside a valid one, exercising the early return in the `seckeys` loop.\n\nHowever, the equivalent loop for Taproot keypairs (`keypairs` in `secp256k1_silentpayments_sender_create_outputs`, `src/modules/silentpayments/main_impl.h:245-258`) currently only tests passing a single invalid keypair (`t` of length 1 at line 276).\n\n### Changes\nThis PR adds test coverage ensuring that an invalid Taproot keypair is properly rejected when passed alongside a valid one (`t2[2]`). The invalid keypair is tested in both positions (first and second index) so that neither the first nor the last keypair is skipped by the check, symmetrically matching the plain secret key test added in #1931.\n",
+    "body": "Add coverage for an invalid Taproot keypair passed alongside a valid one, following the plain secret key tests in #1931.\n\nBoth orderings are tested. The invalid-first case catches a missing early return in the keypair loop: the valid keypair leaves a nonzero sum, so the subsequent zero-sum check would not catch the failure.\n",
     "labels": [
       {
         "id": 165017692,
@@ -62,11 +62,11 @@
       }
     ],
     "created_at": "2026-09-11T09:53:33Z",
-    "updated_at": "2026-09-14T13:39:00Z",
+    "updated_at": "2026-09-15T08:26:07Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "316a5ac960abd2b3a38404bbf3cd80b182dd4110",
+    "merge_commit_sha": "c5abb9f9ca1af371b642ef8472ca89836b159c74",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -74,7 +74,7 @@
     "head": {
       "label": "Yudis-bit:test-silentpayments-invalid-keypair-alongside-valid",
       "ref": "test-silentpayments-invalid-keypair-alongside-valid",
-      "sha": "28feff63b7851fd7c671d1c838d810471f61fc86",
+      "sha": "ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
       "user": {
         "login": "Yudis-bit",
         "id": 85178972,
@@ -185,7 +185,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-09-11T09:43:29Z",
+        "pushed_at": "2026-09-15T08:24:49Z",
         "created_at": "2026-07-17T16:49:58Z",
         "updated_at": "2026-09-09T09:05:33Z",
         "allow_forking": true,
@@ -305,9 +305,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1168,
-        "stargazers_count": 2484,
-        "watchers_count": 2484,
+        "forks_count": 1169,
+        "stargazers_count": 2483,
+        "watchers_count": 2483,
         "size": 13193,
         "default_branch": "master",
         "open_issues_count": 157,
@@ -323,7 +323,7 @@
         "visibility": "public",
         "pushed_at": "2026-09-11T07:24:57Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-09-14T11:49:56Z",
+        "updated_at": "2026-09-15T07:58:06Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -352,8 +352,8 @@
     "additions": 14,
     "deletions": 0,
     "changed_files": 1,
-    "commits": 1,
-    "review_comments": 2,
+    "commits": 3,
+    "review_comments": 3,
     "comments": 2
   },
   "events": [
@@ -720,6 +720,231 @@
       "submitted_at": "2026-09-14T13:39:00Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1937"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGEwNDRhZGViNzYyYjAzNjE0NTc3ZjY0ZjUxOGEyZjI5YWIyNWQyNWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a044adeb762b03614577f64f518a2f29ab25d25c",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a044adeb762b03614577f64f518a2f29ab25d25c",
+      "tree": {
+        "sha": "860f94d093e3674ad034a681fc8eb6e5e12ec084",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/860f94d093e3674ad034a681fc8eb6e5e12ec084"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/28feff63b7851fd7c671d1c838d810471f61fc86",
+          "sha": "28feff63b7851fd7c671d1c838d810471f61fc86",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/28feff63b7851fd7c671d1c838d810471f61fc86"
+        }
+      ],
+      "message": "tests: clarify invalid-first keypair rationale",
+      "committer": {
+        "name": "Yudis-bit",
+        "email": "yudis.bit@gmail.com",
+        "date": "2026-09-15T08:23:45Z"
+      },
+      "author": {
+        "name": "Yudis-bit",
+        "email": "yudis.bit@gmail.com",
+        "date": "2026-09-15T08:23:45Z"
+      },
+      "sha": "a044adeb762b03614577f64f518a2f29ab25d25c"
+    },
+    {
+      "event": "review_requested",
+      "id": 31158113477,
+      "node_id": "RRE_lADOAP4Jqs8AAAABQzuFUM8AAAAHQSsUxQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/31158113477",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-15T08:24:05Z",
+      "requested_reviewer": {
+        "login": "Copilot",
+        "id": 175728472,
+        "node_id": "BOT_kgDOCnlnWA",
+        "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Copilot",
+        "html_url": "https://github.com/apps/copilot-pull-request-reviewer",
+        "followers_url": "https://api.github.com/users/Copilot/followers",
+        "following_url": "https://api.github.com/users/Copilot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Copilot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Copilot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Copilot/subscriptions",
+        "organizations_url": "https://api.github.com/users/Copilot/orgs",
+        "repos_url": "https://api.github.com/users/Copilot/repos",
+        "events_url": "https://api.github.com/users/Copilot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Copilot/received_events",
+        "type": "Bot",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "review_requester": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      }
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGNhNmI0YTJlZmMwNGMxYWY4MmNhNjQwYzVkMmQ2NDY4ZjNjNWJhYmM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
+      "tree": {
+        "sha": "a06c21477ec7316b642c6f92c0b84e9d92c8faec",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/a06c21477ec7316b642c6f92c0b84e9d92c8faec"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a044adeb762b03614577f64f518a2f29ab25d25c",
+          "sha": "a044adeb762b03614577f64f518a2f29ab25d25c",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a044adeb762b03614577f64f518a2f29ab25d25c"
+        }
+      ],
+      "message": "tests: match keypair pointer declaration style",
+      "committer": {
+        "name": "Yudis-bit",
+        "email": "yudis.bit@gmail.com",
+        "date": "2026-09-15T08:24:34Z"
+      },
+      "author": {
+        "name": "Yudis-bit",
+        "email": "yudis.bit@gmail.com",
+        "date": "2026-09-15T08:24:34Z"
+      },
+      "sha": "ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc"
+    },
+    {
+      "event": "copilot_work_started",
+      "id": 31158141849,
+      "node_id": "CWSE_lADOAP4Jqs8AAAABQzuFUM8AAAAHQSuDmQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/31158141849",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-15T08:24:35Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 5207476864,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABNmPKgA",
+      "url": null,
+      "actor": null,
+      "commit_id": "a044adeb762b03614577f64f518a2f29ab25d25c",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-09-15T08:26:07Z",
+      "author_association": "NONE",
+      "body": "### 🟢 Approval recommended\n\nNo blocking issues were identified.\n\n<details>\n<summary>Pull request overview</summary>\n\nAdds silent-payments sender test coverage for rejecting invalid Taproot keypairs mixed with valid keypairs.\n\n**Changes:**\n- Tests both valid/invalid keypair orderings.\n- Verifies invalid keypairs trigger rejection.\n</details>\n\n<details>\n<summary>File summaries</summary>\n\n| File | Description |\r\n|---|---|\r\n| `src/modules/silentpayments/tests_impl.h` | Adds mixed-validity Taproot keypair rejection tests. |\n</details>\n\n<details>\n<summary>Review details</summary>\n\n- **Files reviewed:** 1/1 changed files\n- **Comments generated:** 0\n- **Review effort level:** Lite\n</details>\n\n---\n\n💡 <a href=\"/bitcoin-core/secp256k1/new/master?filename=.github/skills/code-review/SKILL.md\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Add a `code-review` agent skill</a> or configure MCP servers for context-aware, tailored reviews. <a href=\"https://docs.github.com/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review?tool=webui#mcp-servers-and-agent-skills\" class=\"Link--inTextBlock\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more in the docs.</a>",
+      "user": {
+        "login": "Copilot",
+        "id": 175728472,
+        "node_id": "BOT_kgDOCnlnWA",
+        "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Copilot",
+        "html_url": "https://github.com/apps/copilot-pull-request-reviewer",
+        "followers_url": "https://api.github.com/users/Copilot/followers",
+        "following_url": "https://api.github.com/users/Copilot/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Copilot/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Copilot/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Copilot/subscriptions",
+        "organizations_url": "https://api.github.com/users/Copilot/orgs",
+        "repos_url": "https://api.github.com/users/Copilot/repos",
+        "events_url": "https://api.github.com/users/Copilot/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Copilot/received_events",
+        "type": "Bot",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1937#pullrequestreview-5207476864",
+      "submitted_at": "2026-09-15T08:26:07Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1937"
     }
   ],
   "comments": [
@@ -732,7 +957,7 @@
       "path": "src/modules/silentpayments/tests_impl.h",
       "position": 4,
       "original_position": 4,
-      "commit_id": "28feff63b7851fd7c671d1c838d810471f61fc86",
+      "commit_id": "ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
       "original_commit_id": "28feff63b7851fd7c671d1c838d810471f61fc86",
       "in_reply_to_id": null,
       "user": {
@@ -784,9 +1009,9 @@
       "node_id": "PRRC_kwDOAP4Jqs7uwvfB",
       "diff_hunk": "@@ -295,6 +295,20 @@ static void test_send_api(void) {\n         p2[0] = secp256k1_group_order_bytes;\n         CHECK(secp256k1_silentpayments_sender_create_outputs(CTX, op, rp, 2, SMALLEST_OUTPOINT, NULL, 0, p2, 2) == 0);\n     }\n+    /* Check that an invalid keypair is caught even when it is passed alongside a valid one.\n+     * The invalid keypair is tested in both positions so that neither the first nor the\n+     * last keypair is skipped by the check. */\n+    {\n+        secp256k1_keypair valid_keypair;\n+        const secp256k1_keypair *t2[2];",
       "path": "src/modules/silentpayments/tests_impl.h",
-      "position": 9,
+      "position": 1,
       "original_position": 9,
-      "commit_id": "28feff63b7851fd7c671d1c838d810471f61fc86",
+      "commit_id": "a044adeb762b03614577f64f518a2f29ab25d25c",
       "original_commit_id": "28feff63b7851fd7c671d1c838d810471f61fc86",
       "in_reply_to_id": null,
       "user": {
@@ -827,8 +1052,62 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 303,
+      "line": null,
       "original_line": 303,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4013549201",
+      "pull_request_review_id": 5207465793,
+      "id": 4013549201,
+      "node_id": "PRRC_kwDOAP4Jqs7vOeaR",
+      "diff_hunk": "@@ -295,6 +295,20 @@ static void test_send_api(void) {\n         p2[0] = secp256k1_group_order_bytes;\n         CHECK(secp256k1_silentpayments_sender_create_outputs(CTX, op, rp, 2, SMALLEST_OUTPOINT, NULL, 0, p2, 2) == 0);\n     }\n+    /* Check that an invalid keypair is caught even when it is passed alongside a valid one.",
+      "path": "src/modules/silentpayments/tests_impl.h",
+      "position": 4,
+      "original_position": 4,
+      "commit_id": "ca6b4a2efc04c1af82ca640c5d2d6468f3c5babc",
+      "original_commit_id": "28feff63b7851fd7c671d1c838d810471f61fc86",
+      "in_reply_to_id": 4005734270,
+      "user": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Reworded the comment in a044ade to explain the invalid-first case, and updated the PR description to match. Also applied the const placement suggestion in ca6b4a2.",
+      "created_at": "2026-09-15T08:25:08Z",
+      "updated_at": "2026-09-15T08:25:08Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1937#discussion_r4013549201",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4013549201"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1937"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 298,
+      "original_line": 298,
       "side": "RIGHT"
     }
   ]
