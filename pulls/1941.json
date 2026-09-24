@@ -41,11 +41,30 @@
       "patch_url": null
     },
     "body": "`include/secp256k1.h` says a constructed context can be used from multiple threads simultaneously, but nothing in the repo tests this. The unit test runner parallelizes with `fork()`, so no test ever runs threads.\r\n\r\nThis adds `thread_tests`, which starts 4 threads on one randomized context. Each thread clones the context and then calls the API of every enabled module: ECDSA, ECDH, recovery, extrakeys, schnorrsig, musig, ellswift and silentpayments. Verification calls use `secp256k1_context_static`, since callers share that between threads too.\r\n\r\nThe test is meant to run under a race detector such as `Helgrind` or `ThreadSanitizer`, which reports any write to shared state from a call that takes a const context.\r\n\r\nBuild:\r\n- New options `--enable-thread-tests` and `SECP256K1_BUILD_THREAD_TESTS`. They default to on when tests are enabled and `pthreads` are available. Configure fails if they are requested explicitly and pthreads are missing.\r\n- Only `thread_tests` links against `pthreads`. The library does not.\r\n- On `MinGW` the test links statically, so it doesn't need the `winpthreads` DLL at runtime. Without that it fails under wine. `MSVC` has no `pthreads`, so the test is off there. (I haven't tested it on Windows).\r\n\r\nCI:\r\n- `ci.sh` jobs pass `--enable-thread-tests=yes`.\r\n- Where `Valgrind` is enabled, `ci.sh` also runs `thread_tests` under `Helgrind`, next to the existing `Valgrind` run of `ctime_tests`. That covers x86_64, i686 and arm64 Linux without a new job.\r\n- The `ASan` job now sets `WITH_VALGRIND: 'no'`, since `Valgrind` can't run `ASan` binaries.\r\n\r\nFollow-ups:\r\n\r\nThese are left out to keep this PR small:\r\n\r\n- Run the test with a custom SHA256 compression function set through `secp256k1_context_set_sha256_compression`. Apart from the callbacks, that's the only runtime state a context holds, and the test currently only uses the default.\r\n- Add a `TSan` job if the library ever uses atomics, for example for lazy initialization. `Helgrind` and `DRD` report false positives on atomics that aren't annotated, and `TSan` handles them correctly.\r\n- Test the read-write lock pattern that `secp256k1.h` recommends for re-randomizing a shared context: one thread calls `secp256k1_context_randomize` under the write lock while the others sign under read locks.\r\n- Call the remaining 16 const-context functions. They are all parse, serialize or convert helpers, such as `secp256k1_ecdsa_signature_parse_compact` and the musig nonce and partial signature (de)serializers.\r\n- Exercise error paths by passing invalid inputs, such as an out-of-range secret key or a bad pubkey encoding, so that failing calls also run concurrently.\r\n\r\n| I wrote this with help from Claude Code, and I've gone through all of it myself.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      },
+      {
+        "id": 4975353639,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI3fJw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/feature",
+        "name": "feature",
+        "description": "",
+        "color": "731E95",
+        "default": false
+      }
+    ],
     "created_at": "2026-09-24T01:39:43Z",
-    "updated_at": "2026-09-24T01:51:35Z",
+    "updated_at": "2026-09-24T13:23:07Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "ced2aee2eae5157bbeb5616bfe42cee990b1f782",
     "assignees": [],
@@ -489,6 +508,76 @@
       "commit_id": "b4e9cb6d6f83614324fcc0b3abc6a18bcde6b781",
       "commit_url": "https://api.github.com/repos/erickcestari/secp256k1/commits/b4e9cb6d6f83614324fcc0b3abc6a18bcde6b781",
       "created_at": "2026-09-24T01:51:35Z"
+    },
+    {
+      "event": "labeled",
+      "id": 31759415778,
+      "node_id": "LE_lADOAP4Jqs8AAAABS4G-388AAAAHZQI54g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/31759415778",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-24T13:23:07Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
+    },
+    {
+      "event": "labeled",
+      "id": 31759415850,
+      "node_id": "LE_lADOAP4Jqs8AAAABS4G-388AAAAHZQI6Kg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/31759415850",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-24T13:23:07Z",
+      "label": {
+        "name": "feature",
+        "color": "731E95"
+      }
     }
   ],
   "comments": []
