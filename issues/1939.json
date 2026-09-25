@@ -10,8 +10,8 @@
     "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1939/events",
     "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1939",
     "number": 1939,
-    "state": "open",
-    "state_reason": null,
+    "state": "closed",
+    "state_reason": "completed",
     "title": "unit_test : help text says unknown args are \"ignored\" but they cause EXIT_FAILURE",
     "body": "The help text in `src/unit_test.c` states:\n\n> Unknown arguments are reported but ignored.\n\nHowever, `parse_arg()` returns `-1` when it encounters an unknown key:\n\n```c\n/* Unknown key: report just so typos don't silently pass. */\nfprintf(stderr, \"Unknown argument '-%s=%s'\\n\", key, value);\nreturn -1;\n```\n\nThis propagates through `read_args()` and causes `tf_init()` to return `EXIT_FAILURE`, terminating the program before any tests run.\n\nWindows/MSVC build):\n\n```\n> tests.exe --typo=1\nUnknown argument '-typo=1'\n> echo $LASTEXITCODE\n1\n```\n\nvs. a valid argument, which runs normally:\n\n```\n> tests.exe -i=1\n...\nTotal execution time: 38.234 seconds\n> echo $LASTEXITCODE\n0\n```\n\nGiven the comment in `parse_arg()` (\"report just so typos don't silently pass\"), the fail-fast behavior looks intentional — in which case the fix\nis just updating the help text. But I wanted to check before opening a PR: should the **documentation** be corrected to match the actual\n(fail-fast) behavior, or should the **behavior** be changed to match the documented \"ignored\" claim.",
     "user": {
@@ -41,8 +41,31 @@
     "author_association": "CONTRIBUTOR",
     "locked": false,
     "comments": 1,
+    "closed_at": "2026-09-25T08:31:39Z",
+    "closed_by": {
+      "login": "real-or-random",
+      "id": 1071625,
+      "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/real-or-random",
+      "html_url": "https://github.com/real-or-random",
+      "followers_url": "https://api.github.com/users/real-or-random/followers",
+      "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+      "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+      "repos_url": "https://api.github.com/users/real-or-random/repos",
+      "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
     "created_at": "2026-09-21T06:40:48Z",
-    "updated_at": "2026-09-22T16:32:02Z"
+    "updated_at": "2026-09-25T08:31:39Z"
   },
   "events": [
     {
@@ -137,6 +160,37 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1939#issuecomment-5780192151",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1939"
+    },
+    {
+      "event": "closed",
+      "id": 31821668914,
+      "node_id": "CE_lADOAP4Jqs8AAAABSTwups8AAAAHaLgiMg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/31821668914",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "9495f867e724bc2aae37e3d8c350be0954c767b2",
+      "commit_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits/9495f867e724bc2aae37e3d8c350be0954c767b2",
+      "created_at": "2026-09-25T08:31:39Z"
     }
   ]
 }
