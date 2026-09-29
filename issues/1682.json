@@ -12,7 +12,7 @@
     "number": 1682,
     "state": "open",
     "state_reason": null,
-    "title": "Performance regression in `scalar_mul` with Clang and `x86_64` assembly enabled",
+    "title": "Clang beats handwritten `x86_64` assembly for `scalar_mul` ",
     "body": "On Ubuntu 25.04:\n```\n$ ./build_clang17_0_6_asm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0319    ,     0.0345    ,     0.0569 \nfield_mul                     ,     0.0173    ,     0.0173    ,     0.0175\n$ ./build_clang17_0_6_noasm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0266    ,     0.0268    ,     0.0275 \nfield_mul                     ,     0.0173    ,     0.0174    ,     0.0177\n```\n```\n$ ./build_clang18_1_8_asm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0336    ,     0.0345    ,     0.0357 \nfield_mul                     ,     0.0170    ,     0.0171    ,     0.0172\n$ ./build_clang18_1_8_noasm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0266    ,     0.0267    ,     0.0271 \nfield_mul                     ,     0.0170    ,     0.0171    ,     0.0174\n```\n```\n$ ./build_clang19_1_7_asm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0329    ,     0.0330    ,     0.0331 \nfield_mul                     ,     0.0166    ,     0.0167    ,     0.0171 \n$ ./build_clang19_1_7_noasm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0270    ,     0.0270    ,     0.0271 \nfield_mul                     ,     0.0167    ,     0.0167    ,     0.0169 \n```\n```\n$ ./build_clang20_1_2_asm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0330    ,     0.0343    ,     0.0447 \nfield_mul                     ,     0.0164    ,     0.0170    ,     0.0214 \n$ ./build_clang20_1_2_noasm/bin/bench_internal mul\nBenchmark                     ,    Min(us)    ,    Avg(us)    ,    Max(us)    \n\nscalar_mul                    ,     0.0269    ,     0.0270    ,     0.0271 \nfield_mul                     ,     0.0165    ,     0.0165    ,     0.0166 \n```",
     "user": {
       "login": "hebasto",
@@ -50,9 +50,9 @@
     "assignees": [],
     "author_association": "MEMBER",
     "locked": false,
-    "comments": 3,
+    "comments": 4,
     "created_at": "2025-06-05T14:18:38Z",
-    "updated_at": "2025-06-05T20:26:01Z"
+    "updated_at": "2026-09-29T07:36:03Z"
   },
   "events": [
     {
@@ -263,6 +263,99 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1682#issuecomment-2946085672",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1682"
+    },
+    {
+      "event": "commented",
+      "id": 5885785536,
+      "node_id": "IC_kwDOAP4Jqs8AAAABXtH1wA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5885785536",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-29T07:35:06Z",
+      "updated_at": "2026-09-29T07:35:06Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Am I right that there's no \"regression\" in the normal meaning of the word here (i.e., something which was fast on previous library or compiler versions became slower)? It's just that the Clang's code became faster, and it's faster than the ASM. (Let me edit the title.)",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1682#issuecomment-5885785536",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1682"
+    },
+    {
+      "event": "renamed",
+      "id": 32059227656,
+      "node_id": "RTE_lADOAP4Jqs66DYDlzwAAAAd24P4I",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32059227656",
+      "actor": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-09-29T07:36:03Z",
+      "rename": {
+        "from": "Performance regression in `scalar_mul` with Clang and `x86_64` assembly enabled",
+        "to": "Clang beats handwritten `x86_64` assembly for `scalar_mul` "
+      }
     }
   ]
 }
