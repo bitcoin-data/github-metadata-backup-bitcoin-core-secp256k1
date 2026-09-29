@@ -62,9 +62,9 @@
       }
     ],
     "created_at": "2026-09-29T07:25:26Z",
-    "updated_at": "2026-09-29T07:25:26Z",
+    "updated_at": "2026-09-29T14:55:43Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "dbbb5838986a5c051738e1cbdda1ac602b84c949",
     "assignees": [],
@@ -173,7 +173,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 17066,
+        "size": 17075,
         "default_branch": "master",
         "open_issues_count": 1,
         "is_template": false,
@@ -309,7 +309,7 @@
         "forks_count": 1173,
         "stargazers_count": 2484,
         "watchers_count": 2484,
-        "size": 13199,
+        "size": 13206,
         "default_branch": "master",
         "open_issues_count": 164,
         "is_template": false,
@@ -354,7 +354,7 @@
     "deletions": 10,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 0
   },
   "events": [
@@ -467,7 +467,101 @@
         "name": "meta/development",
         "color": "E2E0F5"
       }
+    },
+    {
+      "event": "reviewed",
+      "id": 5353997450,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABPx-Eig",
+      "url": null,
+      "actor": null,
+      "commit_id": "af52718c1d871b5e2448d50863beae940c92d0aa",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-09-29T14:55:43Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "As someone not so familiar with this code, I found this clearer. It's nice that it state the check xr + n >= p is required for correctness and not just an optimization.",
+      "user": {
+        "login": "ViniciusCestarii",
+        "id": 124843824,
+        "node_id": "U_kgDOB3D3MA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/124843824?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ViniciusCestarii",
+        "html_url": "https://github.com/ViniciusCestarii",
+        "followers_url": "https://api.github.com/users/ViniciusCestarii/followers",
+        "following_url": "https://api.github.com/users/ViniciusCestarii/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/ViniciusCestarii/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/ViniciusCestarii/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/ViniciusCestarii/subscriptions",
+        "organizations_url": "https://api.github.com/users/ViniciusCestarii/orgs",
+        "repos_url": "https://api.github.com/users/ViniciusCestarii/repos",
+        "events_url": "https://api.github.com/users/ViniciusCestarii/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/ViniciusCestarii/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1949#pullrequestreview-5353997450",
+      "submitted_at": "2026-09-29T14:55:43Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1949"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4134611402",
+      "pull_request_review_id": 5353997450,
+      "id": 4134611402,
+      "node_id": "PRRC_kwDOAP4Jqs72cSnK",
+      "diff_hunk": "@@ -242,29 +242,32 @@ static int secp256k1_ecdsa_sig_verify(const secp256k1_scalar *sigr, const secp25\n      *  in xr. Naively, we would extract the x coordinate from pr (requiring a inversion modulo p),\n      *  compute the remainder modulo n, and compare it to xr. However:\n      *\n-     *        xr == X(pr) mod n\n-     *    <=> exists h. (xr + h * n < p && xr + h * n == X(pr))\n+     *        xr == X(pr) (mod n)\n+     *    <=> exists h. xr + h * n == X(pr)\n      *    [Since 2 * n > p, h can only be 0 or 1]\n+     *    <=> (xr == X(pr)) || (xr + n == X(pr))\n+     *    [Since X(pr) < p, the second equality implies xr + n < p]\n      *    <=> (xr == X(pr)) || (xr + n < p && xr + n == X(pr))\n-     *    [In Jacobian coordinates, X(pr) is pr.x / pr.z^2 mod p]\n-     *    <=> (xr == pr.x / pr.z^2 mod p) || (xr + n < p && xr + n == pr.x / pr.z^2 mod p)\n-     *    [Multiplying both sides of the equations by pr.z^2 mod p]\n-     *    <=> (xr * pr.z^2 mod p == pr.x) || (xr + n < p && (xr + n) * pr.z^2 mod p == pr.x)\n+     *    [Now both sides of each equality are in [0, p), so we can compare them modulo p\n+     *     instead. In Jacobian coordinates, X(pr) is pr.x / pr.z^2]\n+     *    <=> (xr == pr.x / pr.z^2 (mod p)) || (xr + n < p && xr + n == pr.x / pr.z^2 (mod p))\n+     *    [Multiplying both sides of the equalities by pr.z^2]",
+      "path": "src/ecdsa_impl.h",
+      "position": 19,
+      "original_position": 19,
+      "commit_id": "af52718c1d871b5e2448d50863beae940c92d0aa",
+      "original_commit_id": "af52718c1d871b5e2448d50863beae940c92d0aa",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "ViniciusCestarii",
+        "id": 124843824,
+        "node_id": "U_kgDOB3D3MA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/124843824?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/ViniciusCestarii",
+        "html_url": "https://github.com/ViniciusCestarii",
+        "followers_url": "https://api.github.com/users/ViniciusCestarii/followers",
+        "following_url": "https://api.github.com/users/ViniciusCestarii/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/ViniciusCestarii/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/ViniciusCestarii/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/ViniciusCestarii/subscriptions",
+        "organizations_url": "https://api.github.com/users/ViniciusCestarii/orgs",
+        "repos_url": "https://api.github.com/users/ViniciusCestarii/repos",
+        "events_url": "https://api.github.com/users/ViniciusCestarii/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/ViniciusCestarii/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: since the previous step introduced (mod p), these are congruences now\n```suggestion\n     *    [Multiplying both sides of the congruences by pr.z^2]\n```",
+      "created_at": "2026-09-29T14:25:59Z",
+      "updated_at": "2026-09-29T14:55:43Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1949#discussion_r4134611402",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4134611402"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1949"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 254,
+      "original_line": 254,
+      "side": "RIGHT"
+    }
+  ]
 }
