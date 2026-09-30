@@ -1,23 +1,23 @@
 {
   "type": "pull",
   "pull": {
-    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1943",
-    "id": 4647256056,
-    "node_id": "PR_kwDOAP4Jqs8AAAABFP9_-A",
-    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1943",
-    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1943.diff",
-    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1943.patch",
-    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1943",
-    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1943/commits",
-    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1943/comments",
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1950",
+    "id": 4693276245,
+    "node_id": "PR_kwDOAP4Jqs8AAAABF722VQ",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1950",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1950.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1950.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1950",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1950/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1950/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
-    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1943/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/0f03931e5b66db7ba429095d5fac9cb7b6d7fb30",
-    "number": 1943,
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1950/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/00a051ac3d626a8e5ba32070bd2c084fe2e0fb19",
+    "number": 1950,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "tests: silentpayments: cover labeled output beyond the first label batch",
+    "title": "tests: silentpayments: check found outputs are distinct in vector tests",
     "user": {
       "login": "ViniciusCestarii",
       "id": 124843824,
@@ -40,41 +40,22 @@
       "name": null,
       "patch_url": null
     },
-    "body": "`secp256k1_silentpayments_check_label_batch` maps a candidate index within a batch back to a tx output index via `j_start + i / 2`. In the first batch j_start == 0, so an incorrect mapping is indistinguishable from the correct one. The only existing test with labeled outputs past the first batch is the K_max test vector, which only checks the number of found outputs. For example, this mutant survives the current tests:\r\n\r\n```diff\r\ndiff --git a/src/modules/silentpayments/main_impl.h b/src/modules/silentpayments/main_impl.h\r\nindex 0ea3ee1..533be40 100644\r\n--- a/src/modules/silentpayments/main_impl.h\r\n+++ b/src/modules/silentpayments/main_impl.h\r\n@@ -589,7 +589,7 @@ static int secp256k1_silentpayments_check_label_batch(\r\n         *label_tweak = label_lookup(label33, label_context);\r\n         if (*label_tweak != NULL) {\r\n             *label_ge = label_candidates_ge[i];\r\n-            return (int)(j_start + i / 2);\r\n+            return (int)((j_start + i) / 2);\r\n         }\r\n     }\r\n     return -1;\r\n```\r\n\r\nThis PR adds `test_recipient_scan_label_batch_index`. It puts LABEL_BATCH_SIZE non-matching outputs before a labeled output, so the match lands in the second batch.",
-    "labels": [
-      {
-        "id": 165017692,
-        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
-        "name": "assurance",
-        "description": "",
-        "color": "A6DF3D",
-        "default": false
-      },
-      {
-        "id": 5492448291,
-        "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/tweak/refactor",
-        "name": "tweak/refactor",
-        "description": "",
-        "color": "FBCA04",
-        "default": false
-      }
-    ],
-    "created_at": "2026-09-26T13:19:31Z",
-    "updated_at": "2026-09-30T16:48:25Z",
+    "body": "[Suggested](https://github.com/bitcoin-core/secp256k1/pull/1943#issuecomment-5902032203) by @theStack: add a new check on silent payments vector tests: if N outputs are found, ensure they all have distinct x-only pubkeys.\r\n\r\nThis catches the mutant from #1943 (`j_start + i / 2` -> `(j_start + i) / 2` in `secp256k1_silentpayments_check_label_batch`), which maps several matches to the same tx output and previously went undetected.",
+    "labels": [],
+    "created_at": "2026-09-30T16:34:26Z",
+    "updated_at": "2026-09-30T16:34:26Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "746e08cbff3dda34e73ddc289223c1980516b567",
+    "merge_commit_sha": "5ce46d36db4d3aab1b508c8b1870649ae39c33fb",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
     "rebaseable": true,
     "head": {
-      "label": "ViniciusCestarii:silentpayments-label",
-      "ref": "silentpayments-label",
-      "sha": "0f03931e5b66db7ba429095d5fac9cb7b6d7fb30",
+      "label": "ViniciusCestarii:sp-test-vector-distinct-outputs",
+      "ref": "sp-test-vector-distinct-outputs",
+      "sha": "00a051ac3d626a8e5ba32070bd2c084fe2e0fb19",
       "user": {
         "login": "ViniciusCestarii",
         "id": 124843824,
@@ -210,7 +191,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "f14d2992585b4ae3aaf3441b35a93339eb6ce1d9",
+      "sha": "4a264a935a45f4dbbede2bde58d4665749a3d09d",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -345,64 +326,64 @@
     },
     "_links": {
       "self": {
-        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1943"
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1950"
       }
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 59,
+    "additions": 6,
     "deletions": 0,
     "changed_files": 1,
     "commits": 1,
     "review_comments": 0,
-    "comments": 2
+    "comments": 0
   },
   "events": [
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDBmMDM5MzFlNWI2NmRiN2JhNDI5MDk1ZDVmYWM5Y2I3YjZkN2ZiMzA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/0f03931e5b66db7ba429095d5fac9cb7b6d7fb30",
+      "node_id": "C_kwDOAP4JqtoAKDAwYTA1MWFjM2Q2MjZhOGU1YmEzMjA3MGJkMmMwODRmZTJlMGZiMTk",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/00a051ac3d626a8e5ba32070bd2c084fe2e0fb19",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/0f03931e5b66db7ba429095d5fac9cb7b6d7fb30",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/00a051ac3d626a8e5ba32070bd2c084fe2e0fb19",
       "tree": {
-        "sha": "ed1bd1af989f35e2bb636b585d6eaf700d07ce29",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ed1bd1af989f35e2bb636b585d6eaf700d07ce29"
+        "sha": "6c3f667984a97c00fe6dae2935dbb28c8c94ed31",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6c3f667984a97c00fe6dae2935dbb28c8c94ed31"
       },
       "verification": {
         "verified": true,
         "reason": "valid",
-        "payload": "tree ed1bd1af989f35e2bb636b585d6eaf700d07ce29\nparent 9701113f31ac50896be970031d26746a426dc3ca\nauthor ViniciusCestarii <viniciuscestari01@gmail.com> 1790427782 -0300\ncommitter ViniciusCestarii <viniciuscestari01@gmail.com> 1790427782 -0300\n\ntests: silentpayments: cover labeled output beyond the first label batch\n",
-        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgY7NROixtPE3hjThUiBvdMFhx+5\nJyj1M7a6RXrjRGqmMAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQFUBZukDeLeDIkzHSCfxa4Ta2Y0fSj9jpUtkGkFn3gGgbI9R+3K8IuejPeOtWjIyKI\n8k7zPiEEccAt5WTwVvdwU=\n-----END SSH SIGNATURE-----"
+        "payload": "tree 6c3f667984a97c00fe6dae2935dbb28c8c94ed31\nparent f14d2992585b4ae3aaf3441b35a93339eb6ce1d9\nauthor ViniciusCestarii <viniciuscestari01@gmail.com> 1790780444 -0300\ncommitter ViniciusCestarii <viniciuscestari01@gmail.com> 1790780454 -0300\n\ntests: silentpayments: check found outputs are distinct in vector tests\n\nSuggested by theStack in #1943.\n",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgY7NROixtPE3hjThUiBvdMFhx+5\nJyj1M7a6RXrjRGqmMAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQI1m94wcqclqLNK0lHy5daxGJ77ehegaPXdbh03jVxCAk+vUvgqCgQCRiRGNkejeYr\n/gedd644dI8hqYdl37TQA=\n-----END SSH SIGNATURE-----"
       },
       "parents": [
         {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/9701113f31ac50896be970031d26746a426dc3ca",
-          "sha": "9701113f31ac50896be970031d26746a426dc3ca",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/9701113f31ac50896be970031d26746a426dc3ca"
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f14d2992585b4ae3aaf3441b35a93339eb6ce1d9",
+          "sha": "f14d2992585b4ae3aaf3441b35a93339eb6ce1d9",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f14d2992585b4ae3aaf3441b35a93339eb6ce1d9"
         }
       ],
-      "message": "tests: silentpayments: cover labeled output beyond the first label batch",
+      "message": "tests: silentpayments: check found outputs are distinct in vector tests\n\nSuggested by theStack in #1943.",
       "committer": {
         "name": "ViniciusCestarii",
         "email": "viniciuscestari01@gmail.com",
-        "date": "2026-09-26T13:03:02Z"
+        "date": "2026-09-30T15:00:54Z"
       },
       "author": {
         "name": "ViniciusCestarii",
         "email": "viniciuscestari01@gmail.com",
-        "date": "2026-09-26T13:03:02Z"
+        "date": "2026-09-30T15:00:44Z"
       },
-      "sha": "0f03931e5b66db7ba429095d5fac9cb7b6d7fb30"
+      "sha": "00a051ac3d626a8e5ba32070bd2c084fe2e0fb19"
     },
     {
-      "event": "commented",
-      "id": 5902032203,
-      "node_id": "IC_kwDOAP4Jqs8AAAABX8ndSw",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5902032203",
+      "event": "mentioned",
+      "id": 32183132609,
+      "node_id": "MEE_lADOAP4Jqs8AAAABUMDI0M8AAAAHfkOhwQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32183132609",
       "actor": {
         "login": "theStack",
         "id": 91535,
@@ -427,11 +408,14 @@
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2026-09-30T01:05:47Z",
-      "updated_at": "2026-09-30T01:05:47Z",
-      "author_association": "CONTRIBUTOR",
-      "body": "Nice finding, Concept ACK\r\n\r\n> None of the existing tests put a labeled output past the first batch\r\n\r\nThere is [one BIP-352 test vector](https://github.com/bitcoin-core/secp256k1/blob/2b4a7b906f1da8c4592ab5562faddac971327fbc/src/modules/silentpayments/bip352_send_and_receive_test_vectors.json#L3324) where 2323 tx outputs are labeled matches and findings in higher batches (j_start > 0) occur, so an incorrect tx output index calculation with the mutant patch in the PR description is at least already exercised. But it unfortunately remains undetected, as the checking is not very thorough for this one, [only the number of found outputs is verified and nothing else](https://github.com/bitcoin-core/secp256k1/blob/2b4a7b906f1da8c4592ab5562faddac971327fbc/src/modules/silentpayments/tests_impl.h#L909). Maybe we could do something like \"if there are N matches, ensure that those are all with different output x-only pubkeys\". This would have caught this issue I think, as with the mutant patch several matches map to the same tx outputs. Ideas welcome (could be in a different PR though).",
-      "user": {
+      "created_at": "2026-09-30T16:34:28Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 32183132698,
+      "node_id": "SE_lADOAP4Jqs8AAAABUMDI0M8AAAAHfkOiGg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32183132698",
+      "actor": {
         "login": "theStack",
         "id": 91535,
         "node_id": "MDQ6VXNlcjkxNTM1",
@@ -453,136 +437,9 @@
         "name": null,
         "patch_url": null
       },
-      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1943#issuecomment-5902032203",
-      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1943"
-    },
-    {
-      "event": "labeled",
-      "id": 32144122952,
-      "node_id": "LE_lADOAP4Jqs8AAAABTXHeks8AAAAHe_BkSA",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32144122952",
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2026-09-30T07:28:58Z",
-      "label": {
-        "name": "assurance",
-        "color": "A6DF3D"
-      }
-    },
-    {
-      "event": "labeled",
-      "id": 32144123002,
-      "node_id": "LE_lADOAP4Jqs8AAAABTXHeks8AAAAHe_Bkeg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32144123002",
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2026-09-30T07:28:58Z",
-      "label": {
-        "name": "tweak/refactor",
-        "color": "FBCA04"
-      }
-    },
-    {
-      "event": "commented",
-      "id": 5915708778,
-      "node_id": "IC_kwDOAP4Jqs8AAAABYJqNag",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5915708778",
-      "actor": {
-        "login": "ViniciusCestarii",
-        "id": 124843824,
-        "node_id": "U_kgDOB3D3MA",
-        "avatar_url": "https://avatars.githubusercontent.com/u/124843824?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/ViniciusCestarii",
-        "html_url": "https://github.com/ViniciusCestarii",
-        "followers_url": "https://api.github.com/users/ViniciusCestarii/followers",
-        "following_url": "https://api.github.com/users/ViniciusCestarii/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/ViniciusCestarii/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/ViniciusCestarii/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/ViniciusCestarii/subscriptions",
-        "organizations_url": "https://api.github.com/users/ViniciusCestarii/orgs",
-        "repos_url": "https://api.github.com/users/ViniciusCestarii/repos",
-        "events_url": "https://api.github.com/users/ViniciusCestarii/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/ViniciusCestarii/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2026-09-30T16:48:25Z",
-      "updated_at": "2026-09-30T16:48:25Z",
-      "author_association": "CONTRIBUTOR",
-      "body": "I opened PR https://github.com/bitcoin-core/secp256k1/pull/1950 and confirmed that the [suggested](https://github.com/bitcoin-core/secp256k1/pull/1943#issuecomment-5902032203) new check on test vectors of silent payments does capture the mutant described here. \r\n\r\nIs this PR still necessary? This one checks for exacts outputs and is more explicit about testing the even and the odd candidate slots because it scans with p and -p.",
-      "user": {
-        "login": "ViniciusCestarii",
-        "id": 124843824,
-        "node_id": "U_kgDOB3D3MA",
-        "avatar_url": "https://avatars.githubusercontent.com/u/124843824?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/ViniciusCestarii",
-        "html_url": "https://github.com/ViniciusCestarii",
-        "followers_url": "https://api.github.com/users/ViniciusCestarii/followers",
-        "following_url": "https://api.github.com/users/ViniciusCestarii/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/ViniciusCestarii/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/ViniciusCestarii/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/ViniciusCestarii/subscriptions",
-        "organizations_url": "https://api.github.com/users/ViniciusCestarii/orgs",
-        "repos_url": "https://api.github.com/users/ViniciusCestarii/repos",
-        "events_url": "https://api.github.com/users/ViniciusCestarii/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/ViniciusCestarii/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
-      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1943#issuecomment-5915708778",
-      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1943"
+      "created_at": "2026-09-30T16:34:28Z"
     }
   ],
   "comments": []
