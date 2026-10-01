@@ -1,23 +1,23 @@
 {
   "type": "pull",
   "pull": {
-    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1951",
-    "id": 4705198419,
-    "node_id": "PR_kwDOAP4Jqs8AAAABGHOhUw",
-    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1951",
-    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1951.diff",
-    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1951.patch",
-    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1951",
-    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1951/commits",
-    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1951/comments",
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1952",
+    "id": 4705983124,
+    "node_id": "PR_kwDOAP4Jqs8AAAABGH-alA",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1952",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1952.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1952.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1952",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1952/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1952/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
-    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1951/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/a2d5d5b1177a80fc541b6d003bf43cb291521376",
-    "number": 1951,
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1952/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/20fcbae2197486b5dce996eb246677c2c7b73595",
+    "number": 1952,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "scalar: Make 4x64 C code competitive with x86_64 asm, disable asm by default",
+    "title": "util: make STATIC_ASSERT usable at file scope",
     "user": {
       "login": "real-or-random",
       "id": 1071625,
@@ -40,26 +40,8 @@
       "name": null,
       "patch_url": null
     },
-    "body": "With recent Clang versions, the C implementation of the 4x64 scalar multiplication is about as fast as the x86_64 assembly (#1682, #1945). With GCC, it is considerably slower: in the benchmark below, it is 17–20% slower than the assembly on a P-core. GCC compiles the carry handling of the accumulator macros into code that saves carries in registers (`setc`) and adds them separately, instead of emitting add-with-carry (`adc`) chains.\r\n\r\nThis PR changes the C code so that it is about as fast as the assembly with GCC 14 and newer and faster with Clang, and then disables the assembly by default:\r\n\r\n- **scalar: Use a 128-bit accumulator in 4x64 C code.** The lower 128 bits of the 192-bit accumulator `(c0,c1,c2)` are kept in a `secp256k1_uint128`, and carries are computed by two new int128 functions, `secp256k1_u128_accum_mul_carry` and `secp256k1_u128_accum_u64_carry`. The native implementation uses `__builtin_add_overflow` on 128-bit values, for which GCC 14 and newer emit `adc` chains. Without the builtin, and in the struct implementation, the carries are computed on 64-bit halves as before.\r\n- **scalar: Force inlining of 4x64 mul_512 and reduce_512.** Without inlining, the speed of GCC's code depends on incidental details of the source, such as whether an expression is written directly or comes from an inline function: this changes the operand order of the 128-bit additions in GCC's intermediate representation.[^1] With inlining, GCC generates the same code independently of these details, and Clang can schedule across the boundary between multiplication and reduction.\r\n- **build: Disable x86_64 assembly by default.** The assembly remains available via `--with-asm=x86_64` (Autotools) and `-DSECP256K1_ASM=x86_64` (CMake), or via `auto`. Since the field assembly was removed earlier, the option only affects scalar multiplication.\r\n\r\nGCC 13 is still somewhat common, e.g., it's in Ubuntu LTS 24.04. Once it's no longer widespread, we could remove the assembly entirely.\r\n\r\n### Benchmarks\r\n\r\n`bench_internal scalar_mul` measures the latency of a chain of dependent scalar multiplications. The setup was an **Intel i7-1260P** with turbo disabled, with the process pinned to a P-core (Golden Cove) or an E-core (Gracemont). The tables show the median time in µs over 15 interleaved runs. Percentages are relative to the assembly built with the same compiler. \r\n\r\nP-core:\r\n\r\n| Compiler | asm | C (master) | C (this PR) |\r\n|---|---|---|---|\r\n| GCC 13.5 | 0.0549 | 0.0661 (+20%) | 0.0650 (+18%) |\r\n| GCC 14.4 | 0.0548 | 0.0654 (+19%) | 0.0551 (+1%) |\r\n| GCC 16.2 | 0.0541 | 0.0634 (+17%) | 0.0556 (+3%) |\r\n| Clang 18.1 | 0.0558 | 0.0563 (+1%) | 0.0459 (−18%) |\r\n| Clang 22.1 | 0.0531 | 0.0573 (+8%) | 0.0474 (−11%) |\r\n\r\nE-core:\r\n\r\n| Compiler | asm | C (master) | C (this PR) |\r\n|---|---|---|---|\r\n| GCC 13.5 | 0.1050 | 0.0991 (−6%) | 0.1160 (+10%) |\r\n| GCC 14.4 | 0.1050 | 0.0999 (−5%) | 0.1010 (−4%) |\r\n| GCC 16.2 | 0.1050 | 0.0988 (−6%) | 0.1020 (−3%) |\r\n| Clang 18.1 | 0.1070 | 0.0934 (−13%) | 0.0873 (−18%) |\r\n| Clang 22.1 | 0.1030 | 0.0929 (−10%) | 0.0885 (−14%) |\r\n\r\nWith GCC 14 and newer, the C code in this PR is within 3% of the assembly on the P-core and faster than it on the E-core. With Clang 18 and 22, it is 11–18% faster than the assembly on both core types.\r\n\r\nGCC 13 does not benefit from this PR, because it lacks GCC 14's improvements in compiling add-with-carry. On the P-core, the C code is still 18% slower than the assembly. On the E-core, it is 17% slower than the C code on master. The CHANGELOG entry notes that the assembly may still be noticeably faster with GCC 13 or older. Bitcoin Core's release binaries are built with GCC 14 for Linux and Windows and with Clang 19 for macOS.\r\n\r\nBuilds with the int128 struct implementation (e.g., MSVC) use the same carry computation as before, and their speed is unchanged.\r\n\r\n\r\n### Call for benchmarks\r\n\r\nBenchmarks on other CPUs, in particular AMD, would be welcome.\r\n\r\n\r\n[^1]: Claude Opus 5.5 claims that it found three GCC missed-optimization bugs here. I may or may not report them upstream, but this shows why other projects such as fiat-crypto, OpenSSL, ... either get a performance hit or, like us, resorted to inline asm to convince GCC to output proper `adc` chains. While there's proper pattern recognition for corresponding plain C code, some later optimization passes apparently kill its finding, and the resulting binary still doesn't use proper `adc` chains. Happy to share the details upfront here if you're interested.",
+    "body": "Replace the switch-based STATIC_ASSERT, which is a statement and thus only usable inside functions, with a declaration-like macro. It uses _Static_assert in C11 mode and, as an extension, with GCC >= 4.6 and Clang in pre-C11 modes. Other compilers fall back to declaring an extern array whose size is negative if the assertion fails.\r\n\r\nSince STATIC_ASSERT now expands to a declaration, move its use in secp256k1_ge_impl_to_bytes before VERIFY_CHECK to avoid mixing declarations and code, which C89 forbids.",
     "labels": [
-      {
-        "id": 4975362431,
-        "node_id": "LA_kwDOAP4Jqs8AAAABKI4Bfw",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/build",
-        "name": "build",
-        "description": "",
-        "color": "2F66C4",
-        "default": false
-      },
-      {
-        "id": 4975389731,
-        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
-        "name": "performance",
-        "description": "",
-        "color": "DE3CCC",
-        "default": false
-      },
       {
         "id": 5492448291,
         "node_id": "LA_kwDOAP4Jqs8AAAABR2AcIw",
@@ -68,22 +50,31 @@
         "description": "",
         "color": "FBCA04",
         "default": false
+      },
+      {
+        "id": 5922723218,
+        "node_id": "LA_kwDOAP4Jqs8AAAABYQWVkg",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/meta/development",
+        "name": "meta/development",
+        "description": "processes, conventions, developer documentation, etc.",
+        "color": "E2E0F5",
+        "default": false
       }
     ],
-    "created_at": "2026-10-01T14:40:00Z",
-    "updated_at": "2026-10-01T15:30:40Z",
+    "created_at": "2026-10-01T15:41:11Z",
+    "updated_at": "2026-10-01T15:44:37Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "99ef9b791e74dab7791a77c651b46402fad5ea90",
+    "merge_commit_sha": "61538c6ba04c58c34da05d00795093ec5d0fbe92",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
     "rebaseable": true,
     "head": {
-      "label": "real-or-random:worktree-scalar-asm",
-      "ref": "worktree-scalar-asm",
-      "sha": "a2d5d5b1177a80fc541b6d003bf43cb291521376",
+      "label": "real-or-random:worktree-better-static-assert",
+      "ref": "worktree-better-static-assert",
+      "sha": "20fcbae2197486b5dce996eb246677c2c7b73595",
       "user": {
         "login": "real-or-random",
         "id": 1071625,
@@ -354,32 +345,32 @@
     },
     "_links": {
       "self": {
-        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1951"
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1952"
       }
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 172,
+    "additions": 55,
     "deletions": 63,
-    "changed_files": 8,
-    "commits": 3,
+    "changed_files": 3,
+    "commits": 2,
     "review_comments": 0,
-    "comments": 1
+    "comments": 0
   },
   "events": [
     {
       "event": "committed",
       "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDczOTg4ZjQyZWYxMDA5ZDYyNWE3NTY2ZTRmYmU4NjVkNjQwZDk3NDg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/73988f42ef1009d625a7566e4fbe865d640d9748",
+      "node_id": "C_kwDOAP4JqtoAKDdkNTMxMDliODVlY2Y5NzVlYmU0NDI1YmQ2OTJlZDAxYmMyZWJhODc",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7d53109b85ecf975ebe4425bd692ed01bc2eba87",
       "actor": null,
       "commit_id": null,
       "commit_url": null,
       "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/73988f42ef1009d625a7566e4fbe865d640d9748",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7d53109b85ecf975ebe4425bd692ed01bc2eba87",
       "tree": {
-        "sha": "37d21ceeb213137b78bdc2e8848e70c122283e91",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/37d21ceeb213137b78bdc2e8848e70c122283e91"
+        "sha": "c4c5e9c3a64e06dcc332338209129850fbeb340a",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/c4c5e9c3a64e06dcc332338209129850fbeb340a"
       },
       "verification": {
         "verified": false,
@@ -389,109 +380,29 @@
       },
       "parents": [
         {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2b4a7b906f1da8c4592ab5562faddac971327fbc",
-          "sha": "2b4a7b906f1da8c4592ab5562faddac971327fbc",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2b4a7b906f1da8c4592ab5562faddac971327fbc"
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2365dc6455edc8ac435389b1800dd71dab842153",
+          "sha": "2365dc6455edc8ac435389b1800dd71dab842153",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2365dc6455edc8ac435389b1800dd71dab842153"
         }
       ],
-      "message": "scalar: Use a 128-bit accumulator in 4x64 C code\n\nKeep the lower 128 bits of the 192-bit accumulator (c0,c1,c2) in a\nsecp256k1_uint128 and compute carries with the new int128 functions\nsecp256k1_u128_accum_mul_carry and secp256k1_u128_accum_u64_carry.\n\nWith the previous code, GCC materializes carries in registers (setc)\ninstead of emitting add-with-carry chains. This is because some of\nGCC's tree-level optimizations break the chains, e.g., by folding\nadditions that provably cannot overflow or by combining sums of carry\nbits. The native int128 implementation of the new functions uses\n__builtin_add_overflow on 128-bit values, which GCC splits into 64-bit\noperations only after these optimizations, so both GCC and Clang emit\nadd/adc/adc $0 sequences similar to the handwritten assembly.\n\nWithout __builtin_add_overflow, the native implementation falls back to\ncomputing carries on 64-bit halves, because computing them via 128-bit\ncomparisons can result in branches. The struct implementation uses the\nsame carry handling as the previous portable scalar code.\n\nThe x86_64 assembly remains available via USE_ASM_X86_64.",
+      "message": "util: make STATIC_ASSERT usable at file scope\n\nReplace the switch-based STATIC_ASSERT, which is a statement and thus\nonly usable inside functions, with a declaration-like macro. It uses\n_Static_assert in C11 mode and, as an extension, with GCC >= 4.6 and\nClang in pre-C11 modes. Other compilers fall back to declaring an\nextern array whose size is negative if the assertion fails.\n\nSince STATIC_ASSERT now expands to a declaration, move its use in\nsecp256k1_ge_impl_to_bytes before VERIFY_CHECK to avoid mixing\ndeclarations and code, which C89 forbids.",
       "committer": {
         "name": "Tim Ruffing",
         "email": "me@real-or-random.org",
-        "date": "2026-10-01T13:41:16Z"
+        "date": "2026-10-01T15:40:27Z"
       },
       "author": {
         "name": "Tim Ruffing",
         "email": "me@real-or-random.org",
-        "date": "2026-10-01T12:07:15Z"
+        "date": "2026-10-01T15:27:23Z"
       },
-      "sha": "73988f42ef1009d625a7566e4fbe865d640d9748"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGRhODZkNzRlNjQyYWVlMDA3NTgyMjI0NDI4NDRiYTg4YzY0MDc0OTU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/da86d74e642aee00758222442844ba88c6407495",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/da86d74e642aee00758222442844ba88c6407495",
-      "tree": {
-        "sha": "5e7a5ebbb840c4129c055b2b40673b59524d77d2",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5e7a5ebbb840c4129c055b2b40673b59524d77d2"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/73988f42ef1009d625a7566e4fbe865d640d9748",
-          "sha": "73988f42ef1009d625a7566e4fbe865d640d9748",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/73988f42ef1009d625a7566e4fbe865d640d9748"
-        }
-      ],
-      "message": "scalar: Force inlining of 4x64 mul_512 and reduce_512\n\nWithout inlining, GCC generates slower code for the 128-bit accumulator\nin secp256k1_scalar_mul_512, depending on details such as how the\naccumulator is updated in the extract macro. With both functions\ninlined into secp256k1_scalar_mul, GCC generates the same code\nindependently of these details. Clang benefits from scheduling across\nthe boundary between multiplication and reduction.\n\nIn a scalar_mul latency benchmark (bench_internal) on an Alder Lake\nP-core, this is 4% faster with GCC and 10% faster with Clang.",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-10-01T13:41:19Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-10-01T12:07:20Z"
-      },
-      "sha": "da86d74e642aee00758222442844ba88c6407495"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGEyZDVkNWIxMTc3YTgwZmM1NDFiNmQwMDNiZjQzY2IyOTE1MjEzNzY",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/a2d5d5b1177a80fc541b6d003bf43cb291521376",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/a2d5d5b1177a80fc541b6d003bf43cb291521376",
-      "tree": {
-        "sha": "cf1e90329a1ac871b1416e972c7c02a752bf923b",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/cf1e90329a1ac871b1416e972c7c02a752bf923b"
-      },
-      "verification": {
-        "verified": false,
-        "reason": "unsigned",
-        "payload": null,
-        "signature": null
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/da86d74e642aee00758222442844ba88c6407495",
-          "sha": "da86d74e642aee00758222442844ba88c6407495",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/da86d74e642aee00758222442844ba88c6407495"
-        }
-      ],
-      "message": "build: Disable x86_64 assembly by default\n\nWith GCC 14 or newer and with Clang, the C implementation of scalar\nmultiplication is now about as fast as the x86_64 assembly or faster.\nIn a scalar_mul latency benchmark on Alder Lake, the C code is within\n3% of the assembly on a P-core with GCC 14.4 and 16.2, faster on an\nE-core with these compilers, and 11-18% faster with Clang 18 and 22.\n\nThe assembly remains available via --with-asm=x86_64 (Autotools) and\n-DSECP256K1_ASM=x86_64 (CMake), or via \"auto\".",
-      "committer": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-10-01T13:41:19Z"
-      },
-      "author": {
-        "name": "Tim Ruffing",
-        "email": "me@real-or-random.org",
-        "date": "2026-10-01T12:07:23Z"
-      },
-      "sha": "a2d5d5b1177a80fc541b6d003bf43cb291521376"
+      "sha": "7d53109b85ecf975ebe4425bd692ed01bc2eba87"
     },
     {
       "event": "labeled",
-      "id": 32261429710,
-      "node_id": "LE_lADOAP4Jqs8AAAABUZmkes8AAAAHgu5Zzg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32261429710",
+      "id": 32266061742,
+      "node_id": "LE_lADOAP4Jqs8AAAABUaedxM8AAAAHgzUHrg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32266061742",
       "actor": {
         "login": "real-or-random",
         "id": 1071625,
@@ -516,104 +427,34 @@
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2026-10-01T14:45:27Z",
-      "label": {
-        "name": "build",
-        "color": "2F66C4"
-      }
-    },
-    {
-      "event": "labeled",
-      "id": 32261429766,
-      "node_id": "LE_lADOAP4Jqs8AAAABUZmkes8AAAAHgu5aBg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32261429766",
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2026-10-01T14:45:27Z",
-      "label": {
-        "name": "performance",
-        "color": "DE3CCC"
-      }
-    },
-    {
-      "event": "labeled",
-      "id": 32261429843,
-      "node_id": "LE_lADOAP4Jqs8AAAABUZmkes8AAAAHgu5aUw",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32261429843",
-      "actor": {
-        "login": "real-or-random",
-        "id": 1071625,
-        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/real-or-random",
-        "html_url": "https://github.com/real-or-random",
-        "followers_url": "https://api.github.com/users/real-or-random/followers",
-        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
-        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
-        "repos_url": "https://api.github.com/users/real-or-random/repos",
-        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
-      },
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": "2026-10-01T14:45:27Z",
+      "created_at": "2026-10-01T15:41:13Z",
       "label": {
         "name": "tweak/refactor",
         "color": "FBCA04"
       }
     },
     {
-      "event": "commented",
-      "id": 5934691206,
-      "node_id": "IC_kwDOAP4Jqs8AAAABYbwzhg",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5934691206",
+      "event": "labeled",
+      "id": 32266062176,
+      "node_id": "LE_lADOAP4Jqs8AAAABUaedxM8AAAAHgzUJYA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32266062176",
       "actor": {
-        "login": "hebasto",
-        "id": 32963518,
-        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
-        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
         "gravatar_id": "",
-        "url": "https://api.github.com/users/hebasto",
-        "html_url": "https://github.com/hebasto",
-        "followers_url": "https://api.github.com/users/hebasto/followers",
-        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
-        "organizations_url": "https://api.github.com/users/hebasto/orgs",
-        "repos_url": "https://api.github.com/users/hebasto/repos",
-        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/hebasto/received_events",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
         "type": "User",
         "site_admin": false,
         "name": null,
@@ -621,34 +462,51 @@
       },
       "commit_id": null,
       "commit_url": null,
-      "created_at": "2026-10-01T15:30:40Z",
-      "updated_at": "2026-10-01T15:30:40Z",
-      "author_association": "MEMBER",
-      "body": "Concept ACK.",
-      "user": {
-        "login": "hebasto",
-        "id": 32963518,
-        "node_id": "MDQ6VXNlcjMyOTYzNTE4",
-        "avatar_url": "https://avatars.githubusercontent.com/u/32963518?v=4",
-        "gravatar_id": "",
-        "url": "https://api.github.com/users/hebasto",
-        "html_url": "https://github.com/hebasto",
-        "followers_url": "https://api.github.com/users/hebasto/followers",
-        "following_url": "https://api.github.com/users/hebasto/following%7B/other_user%7D",
-        "gists_url": "https://api.github.com/users/hebasto/gists%7B/gist_id%7D",
-        "starred_url": "https://api.github.com/users/hebasto/starred%7B/owner%7D%7B/repo%7D",
-        "subscriptions_url": "https://api.github.com/users/hebasto/subscriptions",
-        "organizations_url": "https://api.github.com/users/hebasto/orgs",
-        "repos_url": "https://api.github.com/users/hebasto/repos",
-        "events_url": "https://api.github.com/users/hebasto/events%7B/privacy%7D",
-        "received_events_url": "https://api.github.com/users/hebasto/received_events",
-        "type": "User",
-        "site_admin": false,
-        "name": null,
-        "patch_url": null
+      "created_at": "2026-10-01T15:41:13Z",
+      "label": {
+        "name": "meta/development",
+        "color": "E2E0F5"
+      }
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDIwZmNiYWUyMTk3NDg2YjVkY2U5OTZlYjI0NjY3N2MyYzdiNzM1OTU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/20fcbae2197486b5dce996eb246677c2c7b73595",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/20fcbae2197486b5dce996eb246677c2c7b73595",
+      "tree": {
+        "sha": "5c2e5f08b084b1fa5e45b2a9f9c095c3e4b7882e",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/5c2e5f08b084b1fa5e45b2a9f9c095c3e4b7882e"
       },
-      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1951#issuecomment-5934691206",
-      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1951"
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7d53109b85ecf975ebe4425bd692ed01bc2eba87",
+          "sha": "7d53109b85ecf975ebe4425bd692ed01bc2eba87",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7d53109b85ecf975ebe4425bd692ed01bc2eba87"
+        }
+      ],
+      "message": "assumptions: move static assertions to file scope\n\nNow that STATIC_ASSERT can be used at file scope, the\nsecp256k1_assumption_checker function, which existed only to provide a\nfunction context for the assertions, is no longer needed.",
+      "committer": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2026-10-01T15:44:02Z"
+      },
+      "author": {
+        "name": "Tim Ruffing",
+        "email": "me@real-or-random.org",
+        "date": "2026-10-01T15:44:02Z"
+      },
+      "sha": "20fcbae2197486b5dce996eb246677c2c7b73595"
     }
   ],
   "comments": []
