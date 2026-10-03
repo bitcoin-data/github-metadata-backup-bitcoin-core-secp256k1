@@ -40,9 +40,9 @@
     "assignees": [],
     "author_association": "CONTRIBUTOR",
     "locked": false,
-    "comments": 3,
+    "comments": 4,
     "created_at": "2026-08-27T17:34:41Z",
-    "updated_at": "2026-09-04T22:34:10Z"
+    "updated_at": "2026-10-03T18:31:02Z"
   },
   "events": [
     {
@@ -465,6 +465,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1925#issuecomment-5547208334",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1925"
+    },
+    {
+      "event": "commented",
+      "id": 5972190328,
+      "node_id": "IC_kwDOAP4Jqs8AAAABY_hkeA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/5972190328",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-03T18:30:13Z",
+      "updated_at": "2026-10-03T18:31:02Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Calculating `(input_hash * a_sum) * B_scan` first and then multiplying by `input_hash^-1` to recover `C_sum` requires two EC multiplications plus one scalar inversion. Directly calculating `C_sum = a_sum * B_scan` and then `S = input_hash * C_sum` takes the same two EC multiplications without the inversion.\n\nMore importantly, the inversion workaround only applies when a single entity controls all private keys (`PSBT_GLOBAL_SP_ECDH_SHARE`). In multi-signer transactions with `PSBT_IN_SP_ECDH_SHARE`, each signer only has access to its own `a_i` and does not know `a_sum`. Signer `i` can only compute `C_i = a_i * B_scan` and prove DLEQ on `(G, A_i, B_scan, C_i)`.\n\nSeparating the API into role-oriented primitives resolves both cases without disturbing the existing fast-path:\n\n- Keep `secp256k1_silentpayments_sender_create_outputs` as the monolithic fast-path for software wallets that do not need proofs (1 EC mult per scan key).\n- Add an ECDH share generation primitive for signers:\n  `secp256k1_silentpayments_ecdh_share_create(ctx, ecdh_share, proof64, keypair, scan_pubkey, aux_rand)`\n  This handles odd-Y negation, derives `C_i = a_i * B_scan`, and calls `secp256k1_dleq_prove`.\n- Add an output generator from shares:\n  `secp256k1_silentpayments_create_outputs_from_shares(ctx, outputs, ecdh_shares, n_shares, recipients, n_recipients, outpoint_smallest, input_pubkeys, n_input_pubkeys)`\n  This combines the shares `C_sum = sum(C_i)`, scales by `input_hash` to yield `S = input_hash * C_sum`, and derives each recipient's outputs.\n\nOn the question of `prevouts_summary`: dropping the `recipient_` prefix to make `secp256k1_silentpayments_prevouts_summary_create` role-neutral makes sense because `input_hash` and `A_sum` depend strictly on tx inputs, not on sender vs recipient role. For proof entries, passing `secp256k1_pubkey` for `ecdh_share` alongside raw 64-byte DLEQ proofs avoids introducing another opaque type when `secp256k1_dleq` already uses 64-byte buffers.",
+      "user": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/issues/1925#issuecomment-5972190328",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1925"
     }
   ]
