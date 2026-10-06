@@ -41,11 +41,21 @@
       "patch_url": null
     },
     "body": "This PR builds on top of #1951 (following the observation in https://github.com/bitcoin-core/secp256k1/pull/1951#issuecomment-5966873374). Only the last two commits are new.\n\nIn `secp256k1_scalar_reduce_512`, all limb multiplications involve either `SECP256K1_N_C_0` (`0x402da1732fc9bebf`, ~0.251 * 2^64) or `SECP256K1_N_C_1` (`0x4551231950b75fc4`, ~0.271 * 2^64). Because both constants have bit 63 cleared and their sum is ~0.522 * 2^64, the accumulator across both reduction phases peaks at a little over 0.52 * 2^128 (`0x857ec48c80811e84ffffffffffffffff`) under worst-case 512-bit inputs. It never overflows 128 bits, so the carry into `c2` is always zero.\n\nSwitching `reduce_512` to use `muladd_fast`, `sumadd_fast`, and `extract_fast` allows eliminating `c2` there entirely. The 128-bit macros (`init`, `muladd_fast`, `sumadd_fast`, `extract_fast`) are decoupled from `c2` to operate solely on `acc`, leaving `c2` strictly for the 192-bit accumulator in `mul_512`. The now-unused `sumadd` macro is also dropped.\n\nAdditionally, the branchless 258-to-256 tail from #453 is integrated into `reduce_512` using `secp256k1_uint128` primitives, shared across both the portable C and x86_64 assembly paths. This eliminates the duplicate assembly Phase 3 and the conditional branch in `secp256k1_scalar_reduce`, reducing total lines by 21 while maintaining a single 128-bit accumulator across the entire function.\n",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975389731,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
+        "name": "performance",
+        "description": "",
+        "color": "DE3CCC",
+        "default": false
+      }
+    ],
     "created_at": "2026-10-03T23:07:01Z",
-    "updated_at": "2026-10-06T10:21:06Z",
+    "updated_at": "2026-10-06T12:15:17Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "c4be1f3109cf15c4e399ad0733643b17ca90e390",
     "assignees": [],
@@ -1093,6 +1103,41 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1954#issuecomment-6014205788",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1954"
+    },
+    {
+      "event": "labeled",
+      "id": 32596518079,
+      "node_id": "LE_lADOAP4Jqs8AAAABU2noXs8AAAAHludkvw",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32596518079",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-06T12:15:17Z",
+      "label": {
+        "name": "performance",
+        "color": "DE3CCC"
+      }
     }
   ],
   "comments": []
