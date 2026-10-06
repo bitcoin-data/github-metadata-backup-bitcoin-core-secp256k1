@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1954/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1954/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/06ef94a621238ee74320925713c11a23f78c2e63",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/e282b488b8d94a0e9ca786eb1eb7fabeca7a6772",
     "number": 1954,
     "state": "open",
     "locked": false,
@@ -43,11 +43,11 @@
     "body": "This PR builds on top of #1951 (following the observation in https://github.com/bitcoin-core/secp256k1/pull/1951#issuecomment-5966873374). Only the last commit is new.\n\nIn `secp256k1_scalar_reduce_512`, all limb multiplications involve either `SECP256K1_N_C_0` (`0x402da1732fc9bebf`, ~0.251 * 2^64) or `SECP256K1_N_C_1` (`0x551231950b75fc44`, ~0.332 * 2^64). Because both constants have bit 63 cleared and their sum is ~0.583 * 2^64, the accumulator across both reduction phases peaks at `0x953fd3083b3fbb04ffffffffffffffff` (~0.583 * 2^128) under worst-case 512-bit inputs. It never overflows 128 bits, so the carry into `c2` is always zero.\n\nSwitching `reduce_512` to use `muladd_fast`, `sumadd_fast`, and `extract_fast` allows eliminating `c2` there entirely. The 128-bit macros (`init`, `muladd_fast`, `sumadd_fast`, `extract_fast`) are decoupled from `c2` to operate solely on `acc`, leaving `c2` strictly for the 192-bit accumulator in `mul_512`. The now-unused `sumadd` macro is also dropped.\n",
     "labels": [],
     "created_at": "2026-10-03T23:07:01Z",
-    "updated_at": "2026-10-04T08:31:28Z",
+    "updated_at": "2026-10-06T06:25:38Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "3ceace2e986ce827ab02e1373965b5380726078c",
+    "merge_commit_sha": "99fa00ff12e331bb0964b19280a379090b0e359f",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "Yudis-bit:scalar_reduce_c2",
       "ref": "scalar_reduce_c2",
-      "sha": "06ef94a621238ee74320925713c11a23f78c2e63",
+      "sha": "e282b488b8d94a0e9ca786eb1eb7fabeca7a6772",
       "user": {
         "login": "Yudis-bit",
         "id": 85178972,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-03T23:06:29Z",
+        "pushed_at": "2026-10-06T06:22:49Z",
         "created_at": "2026-07-17T16:49:58Z",
         "updated_at": "2026-10-03T06:42:56Z",
         "allow_forking": true,
@@ -287,9 +287,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1171,
-        "stargazers_count": 2486,
-        "watchers_count": 2486,
+        "forks_count": 1170,
+        "stargazers_count": 2487,
+        "watchers_count": 2487,
         "size": 13354,
         "default_branch": "master",
         "open_issues_count": 160,
@@ -305,7 +305,7 @@
         "visibility": "public",
         "pushed_at": "2026-10-03T11:44:53Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-10-04T06:41:35Z",
+        "updated_at": "2026-10-04T11:48:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -331,12 +331,12 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 194,
-    "deletions": 93,
+    "additions": 241,
+    "deletions": 164,
     "changed_files": 8,
-    "commits": 4,
+    "commits": 5,
     "review_comments": 0,
-    "comments": 3
+    "comments": 4
   },
   "events": [
     {
@@ -785,6 +785,104 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1954#issuecomment-5978130286",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1954"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGUyODJiNDg4YjhkOTRhMGU5Y2E3ODZlYjFlYjdmYWJlY2E3YTY3NzI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e282b488b8d94a0e9ca786eb1eb7fabeca7a6772",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e282b488b8d94a0e9ca786eb1eb7fabeca7a6772",
+      "tree": {
+        "sha": "07d20e20bdca6a32dfd497bc7dec05e8ac87acfd",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/07d20e20bdca6a32dfd497bc7dec05e8ac87acfd"
+      },
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "payload": null,
+        "signature": null
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/06ef94a621238ee74320925713c11a23f78c2e63",
+          "sha": "06ef94a621238ee74320925713c11a23f78c2e63",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/06ef94a621238ee74320925713c11a23f78c2e63"
+        }
+      ],
+      "message": "scalar: Use branchless 258-bit to 256-bit reduction in 4x64 reduce_512\n\nReplace the 258-to-256-bit reduction and conditional overflow reduction\nwith the branchless sequence from PR 453.\n\nBy pre-incrementing p4, an extra SECP256K1_N_C is folded into the scalar.\nBecause X < 2N for any 258-bit intermediate in reduce_512, the resulting\ncarry out of limb 3 is strictly bounded to {0, 1} and acts as a\ncanonicality selector.\n\nDecrementing p4 converts carry 0 into UINT64_MAX (adding N in the recovery\npass) and carry 1 into 0 (no correction needed).\n\nThe recovery pass and limb assignments are shared between the x86_64\nassembly and portable C paths using secp256k1_uint128, eliminating inline\nassembly Phase 3 and secp256k1_scalar_reduce entirely.",
+      "committer": {
+        "name": "Yudistira Putra",
+        "email": "85178972+Yudis-bit@users.noreply.github.com",
+        "date": "2026-10-06T06:14:36Z"
+      },
+      "author": {
+        "name": "Yudistira Putra",
+        "email": "85178972+Yudis-bit@users.noreply.github.com",
+        "date": "2026-10-06T06:14:36Z"
+      },
+      "sha": "e282b488b8d94a0e9ca786eb1eb7fabeca7a6772"
+    },
+    {
+      "event": "commented",
+      "id": 6010678662,
+      "node_id": "IC_kwDOAP4Jqs8AAAABZkOthg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/6010678662",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-06T06:25:38Z",
+      "updated_at": "2026-10-06T06:25:38Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Pushed commit e282b48 integrating the branchless 258-to-256 tail from #453 into `secp256k1_scalar_reduce_512`, expressed using `secp256k1_uint128` primitives and shared across both the portable C and x86_64 assembly paths. This eliminates the duplicate assembly Phase 3 and the conditional branch in `secp256k1_scalar_reduce`, reducing total lines by 24 while maintaining a single 128-bit accumulator across the entire function.\n\nAlgebraic soundness holds unconditionally over all 512-bit inputs. Since `p4 <= 2` after Phase 2, the intermediate scalar `X = p0..p3 + p4 * SECP256K1_N_C` is strictly bounded by `2^256 + 2 * (2^128 + 2^32 + 977) < 2N`. Folding an extra `SECP256K1_N_C` via `++p4` yields `X' = X + SECP256K1_N_C = 2^256 + (X - N)`. For `N <= X < 2N`, `X'` overflows bit 256, leaving the low 256 bits already canonical in `[0, N)` with a carry of 1. Decrementing `p4` yields mask 0, turning the recovery accumulation into a no-op. For `0 <= X < N`, no overflow occurs, carry is 0, decrementing `p4` yields `UINT64_MAX`, and accumulating `N` restores canonical `X` with a final carry of 1 canceling `p4` (`acc + p4 == 0`).\n\nSMT QF_BV formal verification confirms unsat across all four reduction invariant queries, while negative control mutants (omitted increment, inverted mask, 32-bit truncated mask) emit expected sat counterexamples. Disassembly of the generated binary confirms a purely straight-line sequence with zero conditional branches (`je`, `jne`, `jb`). Serialized `__rdtscp` benchmarks over 100,000 iterations clock `scalar_mul` at 182 cycles on portable C and 208 cycles on assembly on AMD Zen, capturing the latency gain without register spilling.\n",
+      "user": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1954#issuecomment-6010678662",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1954"
     }
   ],
