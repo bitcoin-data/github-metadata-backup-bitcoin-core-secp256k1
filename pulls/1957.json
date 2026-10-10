@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1957/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1957/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/44499b22793abddf7c2bdd854dea04048ae6d782",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7ba9a8516bb5e557c242e7c74f794621ddc99883",
     "number": 1957,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "test: fuzz nonce retries and verification at infinity",
+    "title": "test: fuzz paths that random inputs almost never reach",
     "user": {
       "login": "fametrano",
       "id": 3296421,
@@ -40,14 +40,14 @@
       "name": null,
       "patch_url": null
     },
-    "body": "Based on #1956; only the last two commits are new. Random inputs almost never reach two paths: the retry loop in ECDSA signing, because RFC6979 practically never returns an invalid nonce, and the rejection in ECDSA and Schnorr verification when the computed point is infinity. The first commit signs in the `ecdsa` and `recovery` targets with a nonce function that first returns 0 or a value above n, or fails at a chosen attempt, and checks that signing fails exactly when the nonce function does; `schnorrsig` gets such nonces too, checked only as far as its header documents. The second commit builds the key or signature that makes verification compute infinity, and checks that it is rejected. Both techniques come from @erickcestari's [diffsecp](https://github.com/erickcestari/diffsecp).\n\nWith `-seed=1 -runs=20000`, the retry loop runs 12.7k times in `ecdsa` and 18.3k in `recovery`, and the ECDSA and Schnorr infinity rejections 3.2k and 7.4k times; on #1956 all four are 0. Breaking each path on purpose, by stopping at an invalid nonce or accepting at infinity, makes the targets fail.\n\n*Assisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.*\n",
+    "body": "Based on #1956; only the last three commits are new. Random inputs almost never reach three paths: the retry loop in ECDSA signing, because RFC6979 practically never returns an invalid nonce; the rejection in ECDSA and Schnorr verification when the computed point is infinity; and silent payments output creation for a spend key of minus the output tweak. The first commit signs in the `ecdsa` and `recovery` targets with a nonce function that first returns 0 or a value above n, or fails at a chosen attempt, and checks that signing fails exactly when the nonce function does; `schnorrsig` gets such nonces too, checked only as far as its header documents. The second commit builds the key or signature that makes verification compute infinity, and checks that it is rejected. Both techniques come from @erickcestari's [diffsecp](https://github.com/erickcestari/diffsecp). The third commit, as @Yudis-bit suggested on #1956, sometimes sets the spend key to minus the tweak, checks that output creation fails as documented and that the target's fallback then works, and moves the sent output among the decoys.\n\nWith `-seed=1 -runs=20000`, the retry loop in `ecdsa` and `recovery`, both infinity rejections and the silent payments fallback each run thousands of times; on #1956 all five are 0. Breaking each path on purpose, by stopping at an invalid nonce, accepting at infinity or creating an output for minus the tweak, makes the targets fail.\n\n*Assisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.*\n",
     "labels": [],
     "created_at": "2026-10-10T14:54:10Z",
-    "updated_at": "2026-10-10T14:54:10Z",
+    "updated_at": "2026-10-10T19:08:41Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "53bdc62b00199995b5ef34eed6481055d1feae56",
+    "merge_commit_sha": "33c81f771078b435d090bed0ddedb98a6e429b87",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "fametrano:fuzz-nonce-retry-infinity",
       "ref": "fuzz-nonce-retry-infinity",
-      "sha": "44499b22793abddf7c2bdd854dea04048ae6d782",
+      "sha": "7ba9a8516bb5e557c242e7c74f794621ddc99883",
       "user": {
         "login": "fametrano",
         "id": 3296421,
@@ -154,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13375,
+        "size": 13385,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-10T14:54:04Z",
+        "pushed_at": "2026-10-10T19:05:26Z",
         "created_at": "2016-03-28T19:44:17Z",
         "updated_at": "2016-03-28T19:44:19Z",
         "allow_forking": true,
@@ -331,10 +331,10 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 1233,
+    "additions": 1264,
     "deletions": 1,
     "changed_files": 24,
-    "commits": 11,
+    "commits": 12,
     "review_comments": 0,
     "comments": 0
   },
@@ -840,6 +840,143 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-10-10T14:54:12Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDdiYTlhODUxNmJiNWU1NTdjMjQyZTdjNzRmNzk0NjIxZGRjOTk4ODM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7ba9a8516bb5e557c242e7c74f794621ddc99883",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7ba9a8516bb5e557c242e7c74f794621ddc99883",
+      "tree": {
+        "sha": "93e06697391f85d0f4aed22ade96ff5ce9ca41fc",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/93e06697391f85d0f4aed22ade96ff5ce9ca41fc"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 93e06697391f85d0f4aed22ade96ff5ce9ca41fc\nparent 44499b22793abddf7c2bdd854dea04048ae6d782\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791649667 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791649667 +0200\n\ntest: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKZ4MbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FML8QAKTlk8IfgZVmsnjkkfG+\nLDv3Qy/vEbrubS1frAhOwKfbzPQcL30HQaln2BrSkMN4MDsBYrFKJud1kbhnFWqj\nuOOvESnUlz6z+PJxiWnszZteinLRjKqM7E2dRGBoREnZT9H7fp3P8hUpvEFGSZZB\n9lV7y7srWEgRpl7ZFVMmU97AjcIteMA5RGSnf0SFFdA9lEIlvBjjYLIRDmLJTSuE\nOjpqAzOevzbbPSENp63qZUSom2fHXJ6znYlNS1i99qpQy14ivwRol/Y16olwsy6X\nhgHbzSyiUpwdhx2SQNQfltMcnSOGMHL904i8tErOrb7VXUJfNgtpn9wo9E6R1+vG\nP7W1u8PnjoC9s60PSaX5nZyx1HiBg98CaiJxVnQWYDcSeu+zo/IECBUffOypcmWd\nHq3tsMZ+bPZbxJkOYRQYAy1QtGreXsarrWWzLu+sHnZYeez10t/VUlE0qXoeom+L\nXXjDO7h8Rl43xe1TAwCR/5ro6bWoiKqApHkv9dtbUaClpqA3w7lcyx/zN/8bVVc/\nHI/kHEmVEYXX4XAvH4aw6xlLhHhU5fcADa0jXBfbavK7VgVkSigHXgQdrkXxCGus\nn4zrk+SXTeHtZauvj5UeV6rYPcoZptJIvRKZoTBlrkxaMnUGlRyx5QMnzuQbpYsH\noei/ZcTqQjb+mxvOvGIlhQtV\n=mO/Y\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/44499b22793abddf7c2bdd854dea04048ae6d782",
+          "sha": "44499b22793abddf7c2bdd854dea04048ae6d782",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/44499b22793abddf7c2bdd854dea04048ae6d782"
+        }
+      ],
+      "message": "test: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T16:27:47Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T16:27:47Z"
+      },
+      "sha": "7ba9a8516bb5e557c242e7c74f794621ddc99883"
+    },
+    {
+      "event": "renamed",
+      "id": 32954373074,
+      "node_id": "RTE_lADOAP4Jqs8AAAABWT_3O88AAAAHrDvT0g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32954373074",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-10T19:08:41Z",
+      "rename": {
+        "from": "test: fuzz nonce retries and verification at infinity",
+        "to": "test: fuzz paths that random inputs almost never reach"
+      }
+    },
+    {
+      "event": "mentioned",
+      "id": 32954384517,
+      "node_id": "MEE_lADOAP4Jqs8AAAABWT_3O88AAAAHrDwAhQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32954384517",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-10T19:09:02Z"
+    },
+    {
+      "event": "subscribed",
+      "id": 32954384579,
+      "node_id": "SE_lADOAP4Jqs8AAAABWT_3O88AAAAHrDwAww",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32954384579",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-10T19:09:02Z"
     }
   ],
   "comments": []
