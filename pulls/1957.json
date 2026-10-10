@@ -12,7 +12,7 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1957/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1957/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/7ba9a8516bb5e557c242e7c74f794621ddc99883",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/5de46b118af215ff302a02141e7158c3e12c1943",
     "number": 1957,
     "state": "open",
     "locked": false,
@@ -43,11 +43,11 @@
     "body": "Based on #1956; only the last three commits are new. Random inputs almost never reach three paths: the retry loop in ECDSA signing, because RFC6979 practically never returns an invalid nonce; the rejection in ECDSA and Schnorr verification when the computed point is infinity; and silent payments output creation for a spend key of minus the output tweak. The first commit signs in the `ecdsa` and `recovery` targets with a nonce function that first returns 0 or a value above n, or fails at a chosen attempt, and checks that signing fails exactly when the nonce function does; `schnorrsig` gets such nonces too, checked only as far as its header documents. The second commit builds the key or signature that makes verification compute infinity, and checks that it is rejected. Both techniques come from @erickcestari's [diffsecp](https://github.com/erickcestari/diffsecp). The third commit, as @Yudis-bit suggested on #1956, sometimes sets the spend key to minus the tweak, checks that output creation fails as documented and that the target's fallback then works, and moves the sent output among the decoys.\n\nWith `-seed=1 -runs=20000`, the retry loop in `ecdsa` and `recovery`, both infinity rejections and the silent payments fallback each run thousands of times; on #1956 all five are 0. Breaking each path on purpose, by stopping at an invalid nonce, accepting at infinity or creating an output for minus the tweak, makes the targets fail.\n\n*Assisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.*\n",
     "labels": [],
     "created_at": "2026-10-10T14:54:10Z",
-    "updated_at": "2026-10-10T19:08:41Z",
+    "updated_at": "2026-10-10T21:41:52Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "33c81f771078b435d090bed0ddedb98a6e429b87",
+    "merge_commit_sha": "2245b4235b37629f47ade2518c1acd43c7c2011a",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -55,7 +55,7 @@
     "head": {
       "label": "fametrano:fuzz-nonce-retry-infinity",
       "ref": "fuzz-nonce-retry-infinity",
-      "sha": "7ba9a8516bb5e557c242e7c74f794621ddc99883",
+      "sha": "5de46b118af215ff302a02141e7158c3e12c1943",
       "user": {
         "login": "fametrano",
         "id": 3296421,
@@ -154,7 +154,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13385,
+        "size": 13391,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -167,7 +167,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-10T19:05:26Z",
+        "pushed_at": "2026-10-10T21:41:51Z",
         "created_at": "2016-03-28T19:44:17Z",
         "updated_at": "2016-03-28T19:44:19Z",
         "allow_forking": true,
@@ -331,10 +331,10 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 1264,
+    "additions": 1270,
     "deletions": 1,
     "changed_files": 24,
-    "commits": 12,
+    "commits": 13,
     "review_comments": 0,
     "comments": 0
   },
@@ -700,86 +700,6 @@
       "sha": "fec3ea735a75fd1b882d628205bec786a785c9dc"
     },
     {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKGUwZTgxNTI4NTc3YjcxYTY4MjdhYTc2NGNkZDE2MzhhYTMwYmQzMWI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e0e81528577b71a6827aa764cdd1638aa30bd31b",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e0e81528577b71a6827aa764cdd1638aa30bd31b",
-      "tree": {
-        "sha": "0603c15972e14f19ad82a35cb3170bf42cda1e69",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/0603c15972e14f19ad82a35cb3170bf42cda1e69"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 0603c15972e14f19ad82a35cb3170bf42cda1e69\nparent fec3ea735a75fd1b882d628205bec786a785c9dc\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791640535 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791642828 +0200\n\ntest: fuzz signing with nonce functions that force retries\n\nRFC6979 practically never returns a nonce that signing must reject, so\nthe retry loop in ECDSA signing is not reached by the fuzz targets. The\necdsa and recovery targets now sign with a nonce function whose first\nattempts return 0 or a value >= n, and which can fail at a chosen\nattempt; later attempts use RFC6979. They check what the headers\ndocument: attempt counts the previous calls, algo16 is NULL, and\nsigning fails exactly when the nonce function does. A signature that\nis created verifies, or recovers the signing key.\n\nThe schnorrsig nonce function has no attempt argument, and the header\ndoes not say what signing does with a nonce of 0 or >= n. The\nschnorrsig target signs with a nonce function returning such a nonce, or\nfailing, and checks only what is documented: a failing nonce function\nmakes signing fail, a created signature verifies, and the function\nreceives the x-only key of its secret key.\n\nThe technique follows Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKTMwbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FzBcQAKZXbNJBm0XGg6n/NwQv\nuMtsm4wmIoYExSH8D3OW2Tl4baVk5lQpk1EZtdxfPf/GPKy0BbGzc4nwLMxPPE6h\njMwd62fLUv6T4jBYqzV5G782g0OZJhEj7QR/cjGuK8x4KCmDYE8HjwAKhhBzQO2T\nEreKlpDEltai+l1/xiHvRBlzoM5kJ+GJLYQodOwGx0eikttLRBkrFLabyxTDW2NK\na4XCYzFzhfajeeiBQUXvjPzIdHKVV1FQ3oOpH+Z+OEWndc0rOU4cZgLFeSgDp03y\nbG9Z+LWg0/LWfiMtuGo5lOEV88LDAk0vfrC8v8QBF7wZsc0RErIyTTDSf8lwat4Z\nHe36uFw+ZwUKGmPBWrHHdeOvfHAfttdnHn6JgNFjbI+A6WCsIGvIe+XURYUISesG\nxsoHn4bW4SW1Rx2yekm7Sl5qDGtUCWL537IH0BYUk/87D/EFtvDGuKs6iSxYtBDx\ncw5KwXAhmGpP4YSLpkXW7S1WOtyNz+fiHMZFHF/EmCCR/No7WmkVuTMc9sRGbY2D\nEPKqzKBxPBkOtslOQMbz4OHwus3NczfaMDXa4dak5P2M6trgFEs/pAnTwh8ur33G\nce555r+kGEDnmr80avBKrW3h1JVHjAdguVaxJ0Xzs2NBbcBwtvxmfIDErtoF9rFH\nG8szK4wbf5PntrpKajUk63A4\n=r80a\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fec3ea735a75fd1b882d628205bec786a785c9dc",
-          "sha": "fec3ea735a75fd1b882d628205bec786a785c9dc",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fec3ea735a75fd1b882d628205bec786a785c9dc"
-        }
-      ],
-      "message": "test: fuzz signing with nonce functions that force retries\n\nRFC6979 practically never returns a nonce that signing must reject, so\nthe retry loop in ECDSA signing is not reached by the fuzz targets. The\necdsa and recovery targets now sign with a nonce function whose first\nattempts return 0 or a value >= n, and which can fail at a chosen\nattempt; later attempts use RFC6979. They check what the headers\ndocument: attempt counts the previous calls, algo16 is NULL, and\nsigning fails exactly when the nonce function does. A signature that\nis created verifies, or recovers the signing key.\n\nThe schnorrsig nonce function has no attempt argument, and the header\ndoes not say what signing does with a nonce of 0 or >= n. The\nschnorrsig target signs with a nonce function returning such a nonce, or\nfailing, and checks only what is documented: a failing nonce function\nmakes signing fail, a created signature verifies, and the function\nreceives the x-only key of its secret key.\n\nThe technique follows Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
-      "committer": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T14:33:48Z"
-      },
-      "author": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T13:55:35Z"
-      },
-      "sha": "e0e81528577b71a6827aa764cdd1638aa30bd31b"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDQ0NDk5YjIyNzkzYWJkZGY3YzJiZGQ4NTRkZWEwNDA0OGFlNmQ3ODI",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/44499b22793abddf7c2bdd854dea04048ae6d782",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/44499b22793abddf7c2bdd854dea04048ae6d782",
-      "tree": {
-        "sha": "ef1ae330cfd8505282b2aa1dceb2ed5c0fa56027",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/ef1ae330cfd8505282b2aa1dceb2ed5c0fa56027"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree ef1ae330cfd8505282b2aa1dceb2ed5c0fa56027\nparent e0e81528577b71a6827aa764cdd1638aa30bd31b\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791640568 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791642842 +0200\n\ntest: fuzz verification where the computed point is infinity\n\nRandom keys and signatures practically never make verification compute\nthe point at infinity, so its rejection is not reached by the fuzz\ntargets. The targets now build the key or signature that leads there,\nusing internal functions only to construct the inputs:\n\n- ecdsa: for a signature (r, s) and message hash z, the key\n  Q = -(z/r)*G makes u1*G + u2*Q infinity. No signer holding -z/r can\n  produce (r, s), since s would be 0, so verification must fail.\n- schnorrsig: for a key with secret d and a fuzzed r, s = e*d makes\n  R = s*G - e*P infinity, which BIP-340 verification rejects.\n\nBoth constructions follow Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKTNobFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/Fow8P/ji0ckq3wd/vI5JJDSL6\n1tH3YOAaWp1/K9aHi995Ou5dL4XUpvX6hmFOMjsU7NabhAdYMhrXFujF3wEGQebp\nWz3ItjOb3bM399rxQdXOP7HobFMolyNxjGjrbvZxeuuqEnM4T1HyAzPBZjrzo0QP\n5wzUu3gRXJDHaA8ExUSgUpAKuWo5/BXSkRW2SqZYEWsoWyGeaHTnjZOAdS47u8mp\njNMWOOveTWApcwv1iQzkJPtjwWIh3T37JX5PamNba7Ln8a7uYBuFNNbefkWPSqlM\nYcYzUWDmHT+qTGpZ9Rv4XsJhNallP/B73LcWrrV4bTmQSvVBqY0yVFqBnZYqFWHp\njJvcGfS/dftZ20Lt6trEBMf/9Jb6PuP+GX/BdsXATVvaWaXrRlR397jjD5qUFSyZ\nF1r3RlTannPG8yrfTrQ8cb3IEZ2+/6stMlLstQpajhxL7FyGsrOb7n7PgH6ztMDC\nFHM5d6Y5/9I1pvb/zlF5kuVhciCB40DzApY6ypi56UVDUxB8Nfrcx8+b7j9DKiC3\n9wwOCJBS2KP0V+FoiX8KddLyOesB1b60uKai8FIu7R4hSFH7y1rogpsefaaSDbU+\nGk+88PzazlUWVuJZ+ULnprd07EjdrCvWN5/GaCxM6egAq3ltPqsMMuvkJbTDoIgG\nWCbm7BrCIkdq+pYtLeMjWECu\n=YZTD\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e0e81528577b71a6827aa764cdd1638aa30bd31b",
-          "sha": "e0e81528577b71a6827aa764cdd1638aa30bd31b",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e0e81528577b71a6827aa764cdd1638aa30bd31b"
-        }
-      ],
-      "message": "test: fuzz verification where the computed point is infinity\n\nRandom keys and signatures practically never make verification compute\nthe point at infinity, so its rejection is not reached by the fuzz\ntargets. The targets now build the key or signature that leads there,\nusing internal functions only to construct the inputs:\n\n- ecdsa: for a signature (r, s) and message hash z, the key\n  Q = -(z/r)*G makes u1*G + u2*Q infinity. No signer holding -z/r can\n  produce (r, s), since s would be 0, so verification must fail.\n- schnorrsig: for a key with secret d and a fuzzed r, s = e*d makes\n  R = s*G - e*P infinity, which BIP-340 verification rejects.\n\nBoth constructions follow Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
-      "committer": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T14:34:02Z"
-      },
-      "author": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T13:56:08Z"
-      },
-      "sha": "44499b22793abddf7c2bdd854dea04048ae6d782"
-    },
-    {
       "event": "mentioned",
       "id": 32945465920,
       "node_id": "MEE_lADOAP4Jqs8AAAABWT_3O88AAAAHq7PqQA",
@@ -840,46 +760,6 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-10-10T14:54:12Z"
-    },
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDdiYTlhODUxNmJiNWU1NTdjMjQyZTdjNzRmNzk0NjIxZGRjOTk4ODM",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/7ba9a8516bb5e557c242e7c74f794621ddc99883",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/7ba9a8516bb5e557c242e7c74f794621ddc99883",
-      "tree": {
-        "sha": "93e06697391f85d0f4aed22ade96ff5ce9ca41fc",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/93e06697391f85d0f4aed22ade96ff5ce9ca41fc"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 93e06697391f85d0f4aed22ade96ff5ce9ca41fc\nparent 44499b22793abddf7c2bdd854dea04048ae6d782\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791649667 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791649667 +0200\n\ntest: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKZ4MbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FML8QAKTlk8IfgZVmsnjkkfG+\nLDv3Qy/vEbrubS1frAhOwKfbzPQcL30HQaln2BrSkMN4MDsBYrFKJud1kbhnFWqj\nuOOvESnUlz6z+PJxiWnszZteinLRjKqM7E2dRGBoREnZT9H7fp3P8hUpvEFGSZZB\n9lV7y7srWEgRpl7ZFVMmU97AjcIteMA5RGSnf0SFFdA9lEIlvBjjYLIRDmLJTSuE\nOjpqAzOevzbbPSENp63qZUSom2fHXJ6znYlNS1i99qpQy14ivwRol/Y16olwsy6X\nhgHbzSyiUpwdhx2SQNQfltMcnSOGMHL904i8tErOrb7VXUJfNgtpn9wo9E6R1+vG\nP7W1u8PnjoC9s60PSaX5nZyx1HiBg98CaiJxVnQWYDcSeu+zo/IECBUffOypcmWd\nHq3tsMZ+bPZbxJkOYRQYAy1QtGreXsarrWWzLu+sHnZYeez10t/VUlE0qXoeom+L\nXXjDO7h8Rl43xe1TAwCR/5ro6bWoiKqApHkv9dtbUaClpqA3w7lcyx/zN/8bVVc/\nHI/kHEmVEYXX4XAvH4aw6xlLhHhU5fcADa0jXBfbavK7VgVkSigHXgQdrkXxCGus\nn4zrk+SXTeHtZauvj5UeV6rYPcoZptJIvRKZoTBlrkxaMnUGlRyx5QMnzuQbpYsH\noei/ZcTqQjb+mxvOvGIlhQtV\n=mO/Y\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/44499b22793abddf7c2bdd854dea04048ae6d782",
-          "sha": "44499b22793abddf7c2bdd854dea04048ae6d782",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/44499b22793abddf7c2bdd854dea04048ae6d782"
-        }
-      ],
-      "message": "test: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
-      "committer": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T16:27:47Z"
-      },
-      "author": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-10T16:27:47Z"
-      },
-      "sha": "7ba9a8516bb5e557c242e7c74f794621ddc99883"
     },
     {
       "event": "renamed",
@@ -977,6 +857,197 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-10-10T19:09:02Z"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDI2YjkyMjRkNTQxODM5YWJiNjA4MWZmYmIyYjZkYzVhNDE4ODBjMTY",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26b9224d541839abb6081ffbb2b6dc5a41880c16",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26b9224d541839abb6081ffbb2b6dc5a41880c16",
+      "tree": {
+        "sha": "7ac2e146bea426cf6c999e559a4b187c6e30d650",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/7ac2e146bea426cf6c999e559a4b187c6e30d650"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 7ac2e146bea426cf6c999e559a4b187c6e30d650\nparent fec3ea735a75fd1b882d628205bec786a785c9dc\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791664785 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791666100 +0200\n\ntest: tighten fuzz checks after review\n\nfuzz_check_bool checks that a library function returns 0 or 1, as the\nAPI documents.\n\nPublic keys parsed from raw input, compressed and uncompressed, must\nserialize back to the input, with a hybrid 0x06/0x07 prefix as 0x04.\nThis catches a parser that accepts a non-canonical encoding.\n\nRaw 32-byte input also checks that ec_pubkey_create and\nec_seckey_verify accept the same secret keys.\n\nThe startup check now runs the consume helpers on secret key 1 and the\ngenerator, instead of the library's parsers, which the unit tests\ncover. It aborts on a harness bug like the one in #744's\nconsume_pubkey, which copied the x coordinate over the prefix byte.\n\nSuggested by erickcestari in #1956.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKp7QbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FnLEP/j457JVN+bOlYIXgAbdo\nIh38Ejh4NPxJRsQfA1isWL/DLVovUEFk0yIzNggajbKlRWz4vxDwJim+D7J+VWMh\nosX9/VF0MQCSWaND7EVOhQmBwTJpjoUTxl2vajVZmB0KFQ3+bxKZbHnDCdFsbt15\nbPp0XcSICjzK86I0WO5oa7elTMyY+GI6X5r907BjbkT9nDsZ4KYd2099Dt1mHcpZ\n8x8fxyeAwpyHKv+BTvf7e93mOBtOmH5sctu/H18Iy13n7Z+156OsEzqktNIwHL8M\n5oKrp9pZCpSLn5OnUja2Xr+PuxlzqJCsX/VjCN/mS6CRdSZvx/6txJxa3VpULhPh\ng20fM6HXDSADV+hH7kzFhQFnNZLF6/nMmTnUkSbMZGwX7jjki1NGVgHvDlCKUSO7\nYiOJfhYQJCWKVNGlfHXPgwr/PBNSuvPXM0Y05S2mWjnDzWcMjboJw6rEV7Iw5n8p\nVAsJKYXpMjDXPlbOhAeRfo6B1CgTPYCBetRGDceRsTGdr8PaSfGZJ9tBKMBUWmJz\n2dWhnArsdJhCpeIy9X5i52kah6rrjP3p0ndb2rddTlEvBhrt6Q6472t+tCCxCX3a\ngsQPeLwDOST1gDM0ISYp3yMs2YunkgouZrqBHsW1DvOBHxGFNIHhfxV6UsgGGErp\nNducf7RKTqh8TPJpi3WxVh3T\n=Y74I\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/fec3ea735a75fd1b882d628205bec786a785c9dc",
+          "sha": "fec3ea735a75fd1b882d628205bec786a785c9dc",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/fec3ea735a75fd1b882d628205bec786a785c9dc"
+        }
+      ],
+      "message": "test: tighten fuzz checks after review\n\nfuzz_check_bool checks that a library function returns 0 or 1, as the\nAPI documents.\n\nPublic keys parsed from raw input, compressed and uncompressed, must\nserialize back to the input, with a hybrid 0x06/0x07 prefix as 0x04.\nThis catches a parser that accepts a non-canonical encoding.\n\nRaw 32-byte input also checks that ec_pubkey_create and\nec_seckey_verify accept the same secret keys.\n\nThe startup check now runs the consume helpers on secret key 1 and the\ngenerator, instead of the library's parsers, which the unit tests\ncover. It aborts on a harness bug like the one in #744's\nconsume_pubkey, which copied the x coordinate over the prefix byte.\n\nSuggested by erickcestari in #1956.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T21:01:40Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T20:39:45Z"
+      },
+      "sha": "26b9224d541839abb6081ffbb2b6dc5a41880c16"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDY4YWI5ZTU0NzYwNGVmMzBjNGFlNGJiMzc4OTJmZTljNGJlMzRlOGU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/68ab9e547604ef30c4ae4bb37892fe9c4be34e8e",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/68ab9e547604ef30c4ae4bb37892fe9c4be34e8e",
+      "tree": {
+        "sha": "9a670f8f736414f6c959bae12dde37bde4ed54d3",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9a670f8f736414f6c959bae12dde37bde4ed54d3"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 9a670f8f736414f6c959bae12dde37bde4ed54d3\nparent 26b9224d541839abb6081ffbb2b6dc5a41880c16\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791640535 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791666809 +0200\n\ntest: fuzz signing with nonce functions that force retries\n\nRFC6979 practically never returns a nonce that signing must reject, so\nthe retry loop in ECDSA signing is not reached by the fuzz targets. The\necdsa and recovery targets now sign with a nonce function whose first\nattempts return 0 or a value >= n, and which can fail at a chosen\nattempt; later attempts use RFC6979. They check what the headers\ndocument: attempt counts the previous calls, algo16 is NULL, and\nsigning fails exactly when the nonce function does. A signature that\nis created verifies, or recovers the signing key.\n\nThe schnorrsig nonce function has no attempt argument, and the header\ndoes not say what signing does with a nonce of 0 or >= n. The\nschnorrsig target signs with a nonce function returning such a nonce, or\nfailing, and checks only what is documented: a failing nonce function\nmakes signing fail, a created signature verifies, and the function\nreceives the x-only key of its secret key.\n\nThe technique follows Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKqnkbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FNsMP/A+0z9mtW/oF+p0vaSiZ\nWtauA4FyIlIefWQ1pEP2weAN6/434dTPfP3s9VlfCwz5SR76JbsRJPBtrh4Kk6Kd\n+o/kS0GNPJYd9ojcnDw5wF1OGdYkfoRXjldgsfNfFWNEzEsVEK+wvGDLBPAtA8Fm\nQsl010FyZ8cGnlDyGUcObntb3SAu421Ap5AarPCarLwTyPKoZ9eq7cVDCVN9OtP7\nHp8rdSqATBZbC6rxctoezP9prmpApLM+iofmmZ0E33mK8bBUyA2nOuhYWus05Own\ndrewbTS/k3Nx/9LzzMATjUenymWCaWj7r54eT51VYo4JLNFQJYr7nrHaUByU8/KO\nkDggHg9T7m8urKy/4hNML33pKOeh+NND2LnyZ8/PKWDTULgJJAFO/Tw08GhjrJdA\nEf1kOW62V4Cfo95fGcSFDIlcoRAPNqsAKY3DfODJ+r0jRrNG+9FH7Gsry1cfq+QI\nOwbCr+GAxu6sKURIgMuutObhSdtr3JD+CETcgfVM/MFbKI5gkKx9UeeYnij5a6m5\nYtd6lLs6kVvMwmEukrCRtbsqwAsJdOX5szyoD+aHp6GCg8cYKXOId4xFInfVTPOB\nOpA9VDQlaAZrL94lYQ6org3VFNpsiXiqkCdswj7eefL9vbW7iU5dWxnfMcreDD41\nchAs0h15JKMV81ScmaL6i4tT\n=5BuW\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/26b9224d541839abb6081ffbb2b6dc5a41880c16",
+          "sha": "26b9224d541839abb6081ffbb2b6dc5a41880c16",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/26b9224d541839abb6081ffbb2b6dc5a41880c16"
+        }
+      ],
+      "message": "test: fuzz signing with nonce functions that force retries\n\nRFC6979 practically never returns a nonce that signing must reject, so\nthe retry loop in ECDSA signing is not reached by the fuzz targets. The\necdsa and recovery targets now sign with a nonce function whose first\nattempts return 0 or a value >= n, and which can fail at a chosen\nattempt; later attempts use RFC6979. They check what the headers\ndocument: attempt counts the previous calls, algo16 is NULL, and\nsigning fails exactly when the nonce function does. A signature that\nis created verifies, or recovers the signing key.\n\nThe schnorrsig nonce function has no attempt argument, and the header\ndoes not say what signing does with a nonce of 0 or >= n. The\nschnorrsig target signs with a nonce function returning such a nonce, or\nfailing, and checks only what is documented: a failing nonce function\nmakes signing fail, a created signature verifies, and the function\nreceives the x-only key of its secret key.\n\nThe technique follows Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T21:13:29Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T13:55:35Z"
+      },
+      "sha": "68ab9e547604ef30c4ae4bb37892fe9c4be34e8e"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGY3MDBjMzU0NjEwYzBkZTU5ODUyODcyODIxMzNhYzZhNzg4MWIxZTg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f700c354610c0de5985287282133ac6a7881b1e8",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f700c354610c0de5985287282133ac6a7881b1e8",
+      "tree": {
+        "sha": "f12672933aa4528344290b1f5dad51a51c3b8069",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/f12672933aa4528344290b1f5dad51a51c3b8069"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree f12672933aa4528344290b1f5dad51a51c3b8069\nparent 68ab9e547604ef30c4ae4bb37892fe9c4be34e8e\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791640568 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791666809 +0200\n\ntest: fuzz verification where the computed point is infinity\n\nRandom keys and signatures practically never make verification compute\nthe point at infinity, so its rejection is not reached by the fuzz\ntargets. The targets now build the key or signature that leads there,\nusing internal functions only to construct the inputs:\n\n- ecdsa: for a signature (r, s) and message hash z, the key\n  Q = -(z/r)*G makes u1*G + u2*Q infinity. No signer holding -z/r can\n  produce (r, s), since s would be 0, so verification must fail.\n- schnorrsig: for a key with secret d and a fuzzed r, s = e*d makes\n  R = s*G - e*P infinity, which BIP-340 verification rejects.\n\nBoth constructions follow Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKqnkbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/FnFwQAJkKDOc84Yp8FEaMNaim\nDX1FeI1lDIx3k8iMaas1cUZqFSIvp8exyj3iAXqnWOTUfvnelSt56fzc6aM6pSlK\nYTIV5G9Pq0aW6ono9HBzB1q7EGMeC30eKVfHjGZ4T+nHMfuKdLhiJsYH4neBHZoL\n8OinxwylGQif1YF5eiw/xOnXE4Gy2/IPcF2uBTJKEuT/xsyTiDpUqPFlybFeWW5u\n6d5c3+khes/2Aeyx32pHFcbwVRSairKd2mQSb2kiGYjcS5VFZ4riP6FOjCwyUCVP\nRcM3E9lBo59OLN2OG8F1kQNJGoUV4YpMh4NjnIgfNamlRqsyaLuMlA/f2XSTKyh0\n65tMRYCtI3mQTevpnsCdnN6Rdiq2pikX2NsmaQ/45ezhAiclrAA1pQ68WeqOoGAo\nHN/hFgunAMTJlRZMSR1+7GNPUKHMqYKwQ314w9JxWyQ0TVmdH5xRbAJR6guRhTqg\nsspeWupOxqXAjsJp7u3XPNhFJcoG/Prx5s0wQ1gOdzLVjiy7dvlyTSQlNy/hpbpp\n9A5/DsjPQ56WVxHYudo3HUIMDfgnIxm5/00oKVd6K/IRZseNrMjRAGIcbcBxFOvh\ntiL6bBEQRjG2+XTDAsKd9boMY3tknwglMJpOMai77PyJgRnloAT+UbD87wLZ33EU\nrFjKBXz01bxzdS5avG6nH1jx\n=8JV5\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/68ab9e547604ef30c4ae4bb37892fe9c4be34e8e",
+          "sha": "68ab9e547604ef30c4ae4bb37892fe9c4be34e8e",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/68ab9e547604ef30c4ae4bb37892fe9c4be34e8e"
+        }
+      ],
+      "message": "test: fuzz verification where the computed point is infinity\n\nRandom keys and signatures practically never make verification compute\nthe point at infinity, so its rejection is not reached by the fuzz\ntargets. The targets now build the key or signature that leads there,\nusing internal functions only to construct the inputs:\n\n- ecdsa: for a signature (r, s) and message hash z, the key\n  Q = -(z/r)*G makes u1*G + u2*Q infinity. No signer holding -z/r can\n  produce (r, s), since s would be 0, so verification must fail.\n- schnorrsig: for a key with secret d and a fuzzed r, s = e*d makes\n  R = s*G - e*P infinity, which BIP-340 verification rejects.\n\nBoth constructions follow Erick Cestari's diffsecp\n(https://github.com/erickcestari/diffsecp, src/targets/ecdsa.c and\nsrc/targets/schnorrsig.c at c9776c4, MIT).\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T21:13:29Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T13:56:08Z"
+      },
+      "sha": "f700c354610c0de5985287282133ac6a7881b1e8"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDVkZTQ2YjExOGFmMjE1ZmYzMDJhMDIxNDFlNzE1OGMzZTEyYzE5NDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/5de46b118af215ff302a02141e7158c3e12c1943",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/5de46b118af215ff302a02141e7158c3e12c1943",
+      "tree": {
+        "sha": "6eb09348514ef63d3400b72db3c2cbe2f7e2a67c",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/6eb09348514ef63d3400b72db3c2cbe2f7e2a67c"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 6eb09348514ef63d3400b72db3c2cbe2f7e2a67c\nparent f700c354610c0de5985287282133ac6a7881b1e8\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1791649667 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1791666820 +0200\n\ntest: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niQJPBAABCAA5FiEEsRUSBAxuhte14D3RTXHtOpqO38UFAmrKqoQbFIAAAAAABAAO\nbWFudTIsMi41KzEuMTIsMCwzAAoJEE1x7Tqajt/F1uQQAJJ0RCE+Iwgx1+juzJrr\nHKxL1RrPJgOf3rqQ4FxuZje/EknHEyLmsU5YL46hhfSY7n9AD5ygT3VDYZ9a4GsR\nk/AmdqD8rZ09h4LB8QSkXCQiCMOVC7nV64wg/ontCIeYwWew/bUAWkGnz9vluimL\nx4ooUUmtY8vV20JMRhyRr4o0xWLDWbC7YSFUmoUlnWiE1vhzlbu7k685ZTGkfJOy\nR7hm4Yo3CiIxHt2CTml6wc5OL1p0+IOMoIejnoZxRdr+Xs5hwBqR1EyWp0ZBYrWn\n35ahjlMyZvYX3a7SRdb2HvK5PVTWY3MuK3oSBaPSssfMmMmztO3w7wMCOso4+jw7\nyPdXQqxrPKl662J7hrKXRsEFmzZclDhpAeIvQwXm91KgcRSyR0ixVbDEOKi83ned\nXOItPfOhx5sMzM1bsHCCnS0QZnmc6w7SyjQuvpZ2DV9h9WqACf/V4V984GAmf/Co\nnJXdmctwTnVu66ThYik21NfNaz07b3RXi3mntakBtsG5Fq1yvFjCs0h8QTFvViIF\n3x9rQYlGf/sDa9UhIwhQwI4UZ25rvfLbi0LSvDlhx3qoZLpR7R5g2zuslegRkU63\nrfyqmTf0gnkGXj7iTJQnEZzlqIgnGTvuXQ4C3qNxPjW65yEOfx1HmW0c/WX6dz0A\njpR1cjPwAXDE8jCXPDyra5qX\n=u3bq\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f700c354610c0de5985287282133ac6a7881b1e8",
+          "sha": "f700c354610c0de5985287282133ac6a7881b1e8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f700c354610c0de5985287282133ac6a7881b1e8"
+        }
+      ],
+      "message": "test: fuzz silent payments with a spend key of minus the tweak\n\ncreate_outputs fails for a recipient spend key of -t, where t is the\noutput tweak, because the output would be infinity. A fuzzed spend key\npractically never is -t, so the target's fallback for that case was\nnever reached. The target now sometimes sets the spend key to -t, built\nwith internal functions only, and checks that create_outputs returns 0,\nas its header documents for an invalid output public key. The fallback\nthen runs.\n\nIt also moves the sent output to a position chosen by the fuzz input,\namong the decoys.\n\nBoth follow Yudis-bit's suggestion in\nhttps://github.com/bitcoin-core/secp256k1/pull/1956#issuecomment-6099025547.\n\nAssisted-by: my usual tools (LLM, Internet, computer). Mistakes are mine.\nSigned-off-by: Ferdinando Ametrano <ferdinando@ametrano.net>",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T21:13:40Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-10T16:27:47Z"
+      },
+      "sha": "5de46b118af215ff302a02141e7158c3e12c1943"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 32959527296,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABWT_3O88AAAAHrIp5gA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/32959527296",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "5de46b118af215ff302a02141e7158c3e12c1943",
+      "commit_url": "https://api.github.com/repos/fametrano/secp256k1/commits/5de46b118af215ff302a02141e7158c3e12c1943",
+      "created_at": "2026-10-10T21:41:52Z"
     }
   ],
   "comments": []
