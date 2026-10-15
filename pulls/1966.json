@@ -43,7 +43,7 @@
     "body": "Schnorr signing and 4x64 scalar multiplication leave local temporaries uncleared after their\nlast use. These temporaries can retain information from which the secret key can be recovered\nif an attacker can read the residual memory.\n\n- Clear the Schnorr signing accumulator `e` after its final use. On success it holds the public\n  signature scalar, but with a valid keypair and a failing nonce callback or a nonce that\n  reduces to zero, signing continues with the dummy nonce `k = 1`. The signature output is\n  erased on failure while `e` retains `1 + challenge * sk` modulo the group order. Given the\n  message and public key, this value permits key recovery when the challenge is nonzero.\n- Clear the 4x64 scalar multiplication buffer `l[8]` immediately after reduction. It contains\n  the full 512-bit product and is separate from the signing accumulator. During ordinary\n  successful Schnorr signing, it can retain `challenge * sk`, which also permits key recovery\n  given the public nonzero challenge.\n\nBoth commits use the existing compiler-resistant clearing primitives. The accumulator change\napplies across scalar backends; the multiplication-buffer change is specific to 4x64.\n",
     "labels": [],
     "created_at": "2026-10-14T18:38:42Z",
-    "updated_at": "2026-10-15T08:47:08Z",
+    "updated_at": "2026-10-15T09:19:10Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -335,7 +335,7 @@
     "changed_files": 2,
     "commits": 2,
     "review_comments": 0,
-    "comments": 4
+    "comments": 5
   },
   "events": [
     {
@@ -648,6 +648,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1966#issuecomment-6188179999",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1966"
+    },
+    {
+      "event": "commented",
+      "id": 6188745250,
+      "node_id": "IC_kwDOAP4Jqs8AAAABcODCIg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/6188745250",
+      "actor": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-15T09:19:10Z",
+      "updated_at": "2026-10-15T09:19:10Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Even with minimal store overhead on arm64, wiping `l` does not establish a security boundary. In optimized builds, `scalar_mul` inlines both multiplication and reduction into a frame where intermediate limbs, carries, and reduction temporaries spill across multiple stack slots and volatile registers (`r8-r15` on x86_64, `x0-x30` on arm64). Zeroing the 64-byte `l` array leaves those spilled temporaries and register state unscrubbed on return, while the caller still holds both inputs and the reduced output.\n\nInner-loop primitives cannot clean registers or caller frames, and they have no way to distinguish secret scalars from purely public ones in verification and ecmult. That is why libsecp256k1 enforces secret zeroization at the caller boundary—where the confidentiality context is actually known, as commit 1 does for `e`. Adding partial scratch zeroing inside arithmetic primitives introduces compiler barriers and maintenance baggage without providing real stack sanitization.\n\nCommit 1 is a clean, genuine fix; dropping commit 2 keeps the library's layer boundaries intact.\n",
+      "user": {
+        "login": "Yudis-bit",
+        "id": 85178972,
+        "node_id": "MDQ6VXNlcjg1MTc4OTcy",
+        "avatar_url": "https://avatars.githubusercontent.com/u/85178972?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Yudis-bit",
+        "html_url": "https://github.com/Yudis-bit",
+        "followers_url": "https://api.github.com/users/Yudis-bit/followers",
+        "following_url": "https://api.github.com/users/Yudis-bit/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/Yudis-bit/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/Yudis-bit/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/Yudis-bit/subscriptions",
+        "organizations_url": "https://api.github.com/users/Yudis-bit/orgs",
+        "repos_url": "https://api.github.com/users/Yudis-bit/repos",
+        "events_url": "https://api.github.com/users/Yudis-bit/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/Yudis-bit/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1966#issuecomment-6188745250",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1966"
     }
   ],
