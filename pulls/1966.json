@@ -41,9 +41,19 @@
       "patch_url": null
     },
     "body": "Schnorr signing and 4x64 scalar multiplication leave local temporaries uncleared after their\nlast use. These temporaries can retain information from which the secret key can be recovered\nif an attacker can read the residual memory.\n\n- Clear the Schnorr signing accumulator `e` after its final use. On success it holds the public\n  signature scalar, but with a valid keypair and a failing nonce callback or a nonce that\n  reduces to zero, signing continues with the dummy nonce `k = 1`. The signature output is\n  erased on failure while `e` retains `1 + challenge * sk` modulo the group order. Given the\n  message and public key, this value permits key recovery when the challenge is nonzero.\n- Clear the 4x64 scalar multiplication buffer `l[8]` immediately after reduction. It contains\n  the full 512-bit product and is separate from the signing accumulator. During ordinary\n  successful Schnorr signing, it can retain `challenge * sk`, which also permits key recovery\n  given the public nonzero challenge.\n\nBoth commits use the existing compiler-resistant clearing primitives. The accumulator change\napplies across scalar backends; the multiplication-buffer change is specific to 4x64.\n",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975380966,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5J5g",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/side-channel",
+        "name": "side-channel",
+        "description": "",
+        "color": "F9D0C4",
+        "default": false
+      }
+    ],
     "created_at": "2026-10-14T18:38:42Z",
-    "updated_at": "2026-10-15T09:19:10Z",
+    "updated_at": "2026-10-16T03:59:47Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -302,7 +312,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-12T20:09:56Z",
+        "pushed_at": "2026-10-16T01:04:57Z",
         "created_at": "2014-02-08T17:30:06Z",
         "updated_at": "2026-10-14T19:31:27Z",
         "allow_forking": true,
@@ -707,6 +717,41 @@
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1966#issuecomment-6188745250",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1966"
+    },
+    {
+      "event": "labeled",
+      "id": 33406973464,
+      "node_id": "LE_lADOAP4Jqs8AAAABXOV2q88AAAAHxzX2GA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/33406973464",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-16T03:59:47Z",
+      "label": {
+        "name": "side-channel",
+        "color": "F9D0C4"
+      }
     }
   ],
   "comments": []
