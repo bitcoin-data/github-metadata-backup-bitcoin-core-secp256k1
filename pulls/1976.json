@@ -1,0 +1,584 @@
+{
+  "type": "pull",
+  "pull": {
+    "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1976",
+    "id": 4965512103,
+    "node_id": "PR_kwDOAP4Jqs8AAAABJ_ezpw",
+    "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1976",
+    "diff_url": "https://github.com/bitcoin-core/secp256k1/pull/1976.diff",
+    "patch_url": "https://github.com/bitcoin-core/secp256k1/pull/1976.patch",
+    "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1976",
+    "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1976/commits",
+    "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1976/comments",
+    "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
+    "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1976/comments",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/d8e64d05ba021c812c9330a3849a889c64312ebe",
+    "number": 1976,
+    "state": "open",
+    "locked": false,
+    "maintainer_can_modify": true,
+    "title": "silentpayments: add scanning function that takes the labels as an array",
+    "user": {
+      "login": "fametrano",
+      "id": 3296421,
+      "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/fametrano",
+      "html_url": "https://github.com/fametrano",
+      "followers_url": "https://api.github.com/users/fametrano/followers",
+      "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+      "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+      "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+      "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+      "organizations_url": "https://api.github.com/users/fametrano/orgs",
+      "repos_url": "https://api.github.com/users/fametrano/repos",
+      "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+      "received_events_url": "https://api.github.com/users/fametrano/received_events",
+      "type": "User",
+      "site_admin": false,
+      "name": null,
+      "patch_url": null
+    },
+    "body": "With a label lookup, `secp256k1_silentpayments_recipient_scan_outputs` does two point additions and two lookups for every output of the transaction, even when the recipient scans only for the change label. A transaction with 2323 outputs that does not pay the recipient takes 0.86 ms to scan, against 25 µs for one with 2 outputs. One that pays the recipient in all 2323 outputs, the K_max limit, takes about a second, because the outputs are walked again for every k.\n\nThis PR adds `secp256k1_silentpayments_recipient_scan_outputs_with_labels`, which takes the labels as an array instead of a callback. For each k it adds every label to the candidate output and compares the result with the outputs, so its point additions grow with the number of labels, not with the number of outputs. It returns the same outputs, tweaks and labels as `scan_outputs`, also on malformed transactions, and the tests check that. `scan_outputs` does not change: the first commit only moves its setup into helpers that both functions use.\n\nI measured both functions on the same transactions with an out-of-tree harness, using a hash table as the label lookup (Apple M5, best of 3 to 7 runs), and can share it. The in-tree nomatch benchmark at 2323 outputs agrees: about 880 µs and 30 µs.\n\n| transaction | labels | `scan_outputs` | `_with_labels` |\n|---|---:|---:|---:|\n| 2 outputs, no payment | 1 / 10 / 100 | 25 / 25 / 26 µs | 24 / 26 / 43 µs |\n| 2323 outputs, no payment | 1 / 10 | 858 / 858 µs | 28 / 37 µs |\n| 2323 outputs, all to the recipient (the K_max limit) | 1 / 10 / 100 / 1000 | 1.0 s | 0.027 / 0.040 / 0.18–0.44 / 1.52 s |\n| 23255 outputs, last 2323 to the recipient (non-standard, loaded machine) | 1 | 18.7 s | 76 ms |\n\n#1792 proposed this approach as the only scanning function. It was closed because K_max bounded the worst case it was meant to fix, and #1799 found that a cost growing with the number of labels outweighed its simpler API. jonasnick wrote there that \"in the long run we should have both the BIP approach and the labelset approach\". Now that #1765 has merged the BIP approach, this adds the other one as a second function, so recipients with many labels keep the callback and no label limit is needed. Each function takes the labels once, unlike the hybrid prototype, and the outputs keep their order, unlike in #1792, so the lowest index still wins as in #1765. The cost is one more public function and one struct.\n\nThis does not help a recipient with many labels. At 2323 outputs all paying the recipient, `scan_outputs` is faster from about 650 labels. This PR conflicts with #1912 and #1914, and I will rebase on whichever merges first.\n",
+    "labels": [],
+    "created_at": "2026-10-22T09:57:18Z",
+    "updated_at": "2026-10-22T09:57:18Z",
+    "mergeable": true,
+    "mergeable_state": "unstable",
+    "merged": false,
+    "merge_commit_sha": "788073f733d322d13e65147ceba03ecf5647a5cf",
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "rebaseable": true,
+    "head": {
+      "label": "fametrano:sp-scan-with-labels",
+      "ref": "sp-scan-with-labels",
+      "sha": "d8e64d05ba021c812c9330a3849a889c64312ebe",
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 54918812,
+        "node_id": "MDEwOlJlcG9zaXRvcnk1NDkxODgxMg==",
+        "name": "secp256k1",
+        "full_name": "fametrano/secp256k1",
+        "owner": {
+          "login": "fametrano",
+          "id": 3296421,
+          "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+          "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/fametrano",
+          "html_url": "https://github.com/fametrano",
+          "followers_url": "https://api.github.com/users/fametrano/followers",
+          "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+          "organizations_url": "https://api.github.com/users/fametrano/orgs",
+          "repos_url": "https://api.github.com/users/fametrano/repos",
+          "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/fametrano/received_events",
+          "type": "User",
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/fametrano/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": true,
+        "url": "https://api.github.com/repos/fametrano/secp256k1",
+        "archive_url": "https://api.github.com/repos/fametrano/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/fametrano/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/fametrano/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/fametrano/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/fametrano/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/fametrano/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/fametrano/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/fametrano/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/fametrano/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/fametrano/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/fametrano/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/fametrano/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/fametrano/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/fametrano/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/fametrano/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/fametrano/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/fametrano/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/fametrano/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/fametrano/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/fametrano/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/fametrano/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/fametrano/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/fametrano/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/fametrano/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/fametrano/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/fametrano/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/fametrano/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/fametrano/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/fametrano/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:fametrano/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/fametrano/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/fametrano/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/fametrano/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/fametrano/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/fametrano/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/fametrano/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/fametrano/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/fametrano/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/fametrano/secp256k1/hooks",
+        "svn_url": "https://github.com/fametrano/secp256k1",
+        "language": "C",
+        "forks_count": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "size": 13315,
+        "default_branch": "master",
+        "open_issues_count": 0,
+        "is_template": false,
+        "topics": [],
+        "has_issues": false,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": false,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2026-10-22T09:55:49Z",
+        "created_at": "2016-03-28T19:44:17Z",
+        "updated_at": "2016-03-28T19:44:19Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "base": {
+      "label": "bitcoin-core:master",
+      "ref": "master",
+      "sha": "e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+      "user": {
+        "login": "bitcoin-core",
+        "id": 13464320,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+        "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/bitcoin-core",
+        "html_url": "https://github.com/bitcoin-core",
+        "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+        "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+        "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+        "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+        "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+        "type": "Organization",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "repo": {
+        "id": 16648618,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNjY0ODYxOA==",
+        "name": "secp256k1",
+        "full_name": "bitcoin-core/secp256k1",
+        "owner": {
+          "login": "bitcoin-core",
+          "id": 13464320,
+          "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDY0MzIw",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13464320?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/bitcoin-core",
+          "html_url": "https://github.com/bitcoin-core",
+          "followers_url": "https://api.github.com/users/bitcoin-core/followers",
+          "following_url": "https://api.github.com/users/bitcoin-core/following%7B/other_user%7D",
+          "gists_url": "https://api.github.com/users/bitcoin-core/gists%7B/gist_id%7D",
+          "starred_url": "https://api.github.com/users/bitcoin-core/starred%7B/owner%7D%7B/repo%7D",
+          "subscriptions_url": "https://api.github.com/users/bitcoin-core/subscriptions",
+          "organizations_url": "https://api.github.com/users/bitcoin-core/orgs",
+          "repos_url": "https://api.github.com/users/bitcoin-core/repos",
+          "events_url": "https://api.github.com/users/bitcoin-core/events%7B/privacy%7D",
+          "received_events_url": "https://api.github.com/users/bitcoin-core/received_events",
+          "type": "Organization",
+          "site_admin": false,
+          "name": null,
+          "patch_url": null
+        },
+        "private": false,
+        "html_url": "https://github.com/bitcoin-core/secp256k1",
+        "description": "Optimized C library for EC operations on curve secp256k1",
+        "fork": false,
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1",
+        "archive_url": "https://api.github.com/repos/bitcoin-core/secp256k1/%7Barchive_format%7D%7B/ref%7D",
+        "assignees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/assignees%7B/user%7D",
+        "blobs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/blobs%7B/sha%7D",
+        "branches_url": "https://api.github.com/repos/bitcoin-core/secp256k1/branches%7B/branch%7D",
+        "collaborators_url": "https://api.github.com/repos/bitcoin-core/secp256k1/collaborators%7B/collaborator%7D",
+        "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/comments%7B/number%7D",
+        "commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/commits%7B/sha%7D",
+        "compare_url": "https://api.github.com/repos/bitcoin-core/secp256k1/compare/%7Bbase%7D...%7Bhead%7D",
+        "contents_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contents/%7B+path%7D",
+        "contributors_url": "https://api.github.com/repos/bitcoin-core/secp256k1/contributors",
+        "deployments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/deployments",
+        "downloads_url": "https://api.github.com/repos/bitcoin-core/secp256k1/downloads",
+        "events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/events",
+        "forks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/forks",
+        "git_commits_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits%7B/sha%7D",
+        "git_refs_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/refs%7B/sha%7D",
+        "git_tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/tags%7B/sha%7D",
+        "git_url": "git://github.com/bitcoin-core/secp256k1.git",
+        "issue_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments%7B/number%7D",
+        "issue_events_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events%7B/number%7D",
+        "issues_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues%7B/number%7D",
+        "keys_url": "https://api.github.com/repos/bitcoin-core/secp256k1/keys%7B/key_id%7D",
+        "labels_url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels%7B/name%7D",
+        "languages_url": "https://api.github.com/repos/bitcoin-core/secp256k1/languages",
+        "merges_url": "https://api.github.com/repos/bitcoin-core/secp256k1/merges",
+        "milestones_url": "https://api.github.com/repos/bitcoin-core/secp256k1/milestones%7B/number%7D",
+        "notifications_url": "https://api.github.com/repos/bitcoin-core/secp256k1/notifications%7B?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls%7B/number%7D",
+        "releases_url": "https://api.github.com/repos/bitcoin-core/secp256k1/releases%7B/id%7D",
+        "ssh_url": "git@github.com:bitcoin-core/secp256k1.git",
+        "stargazers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/stargazers",
+        "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/%7Bsha%7D",
+        "subscribers_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscribers",
+        "subscription_url": "https://api.github.com/repos/bitcoin-core/secp256k1/subscription",
+        "tags_url": "https://api.github.com/repos/bitcoin-core/secp256k1/tags",
+        "teams_url": "https://api.github.com/repos/bitcoin-core/secp256k1/teams",
+        "trees_url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees%7B/sha%7D",
+        "clone_url": "https://github.com/bitcoin-core/secp256k1.git",
+        "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
+        "svn_url": "https://github.com/bitcoin-core/secp256k1",
+        "language": "C",
+        "forks_count": 1175,
+        "stargazers_count": 2495,
+        "watchers_count": 2495,
+        "size": 13242,
+        "default_branch": "master",
+        "open_issues_count": 174,
+        "is_template": false,
+        "topics": [],
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "has_downloads": false,
+        "archived": false,
+        "disabled": false,
+        "visibility": "public",
+        "pushed_at": "2026-10-19T23:08:05Z",
+        "created_at": "2014-02-08T17:30:06Z",
+        "updated_at": "2026-10-21T10:43:50Z",
+        "allow_forking": true,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "node_id": "MDc6TGljZW5zZTEz",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "html_url": null,
+          "description": null,
+          "implementation": null,
+          "permissions": null,
+          "conditions": null,
+          "limitations": null,
+          "body": null,
+          "featured": null
+        }
+      }
+    },
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1976"
+      }
+    },
+    "author_association": "CONTRIBUTOR",
+    "draft": false,
+    "additions": 967,
+    "deletions": 49,
+    "changed_files": 7,
+    "commits": 6,
+    "review_comments": 0,
+    "comments": 0
+  },
+  "events": [
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDczODY3NTI2NzEwNmI5MWRkOTA3MGEwMGMyMDE4MjVkZDI0NDBjNjQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/738675267106b91dd9070a00c201825dd2440c64",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/738675267106b91dd9070a00c201825dd2440c64",
+      "tree": {
+        "sha": "82e56ffb663efeca021188ccf44ce65daf1a4ced",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/82e56ffb663efeca021188ccf44ce65daf1a4ced"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 82e56ffb663efeca021188ccf44ce65daf1a4ced\nparent e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792654755 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662744 +0200\n\nsilentpayments: factor out scan setup and output tweaking\n\nMove the argument checks, the shared secret creation and the\ncalculation of t_k and unlabeled_output out of\n`_recipient_scan_outputs` into helper functions, so that a second\nscanning function can share them.\n\nNo behavior change: the checks run in the same order and the same\nvalues are cleared on every return path.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2BsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyCoYwD+Pti2S1HQi7griQJnIi1f\nFpCXgbZLSJ3iw2xXMbBbaUwBAKMl4vGE2lf6brtYgGxBY7ZQHlDKKZRzxJNjJnxf\nJxcA\n=GDoU\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+          "sha": "e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8"
+        }
+      ],
+      "message": "silentpayments: factor out scan setup and output tweaking\n\nMove the argument checks, the shared secret creation and the\ncalculation of t_k and unlabeled_output out of\n`_recipient_scan_outputs` into helper functions, so that a second\nscanning function can share them.\n\nNo behavior change: the checks run in the same order and the same\nvalues are cleared on every return path.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:24Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T07:39:15Z"
+      },
+      "sha": "738675267106b91dd9070a00c201825dd2440c64"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGY0ZGE2OTYzN2U5OTlhYzEzNGY3MjkzMDQ4MGRkZmRmYWE0OWU2MDM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f4da69637e999ac134f72930480ddfdfaa49e603",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f4da69637e999ac134f72930480ddfdfaa49e603",
+      "tree": {
+        "sha": "d69f78a7862c4af339de015625987b506f8e0a2b",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/d69f78a7862c4af339de015625987b506f8e0a2b"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree d69f78a7862c4af339de015625987b506f8e0a2b\nparent 738675267106b91dd9070a00c201825dd2440c64\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792655281 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662745 +0200\n\nsilentpayments: add API function for scanning with a list of labels\n\nAdd `secp256k1_silentpayments_recipient_scan_outputs_with_labels`. It\ntakes the labels as an array of label entries (label and label tweak)\ninstead of a label lookup callback, and finds the same outputs as\n`_recipient_scan_outputs`.\n\nFor each k it adds every label to unlabeled_output and compares the x\ncoordinates of the results with the tx outputs. This costs one point\naddition per label instead of two per tx output, and needs no label\nlookups. It needs no sorting, no scratch space and no heap allocation,\nand it does not modify its inputs.\n\nThe results match those of `_recipient_scan_outputs` also for malformed\ntransactions: the tx output with the lowest index wins, then a direct\nmatch over a label match, then the label candidate with even Y over the\none with odd Y.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2RsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyB3ygD+PzZhASCbPoiimpVMbRWC\nB2dryEdD1nklGIv76GhPpH4BAMp7XHt/bxSaFFIN6DZr0PnsnT4EdVvKJFsUaEv/\n4bgK\n=KFzi\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/738675267106b91dd9070a00c201825dd2440c64",
+          "sha": "738675267106b91dd9070a00c201825dd2440c64",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/738675267106b91dd9070a00c201825dd2440c64"
+        }
+      ],
+      "message": "silentpayments: add API function for scanning with a list of labels\n\nAdd `secp256k1_silentpayments_recipient_scan_outputs_with_labels`. It\ntakes the labels as an array of label entries (label and label tweak)\ninstead of a label lookup callback, and finds the same outputs as\n`_recipient_scan_outputs`.\n\nFor each k it adds every label to unlabeled_output and compares the x\ncoordinates of the results with the tx outputs. This costs one point\naddition per label instead of two per tx output, and needs no label\nlookups. It needs no sorting, no scratch space and no heap allocation,\nand it does not modify its inputs.\n\nThe results match those of `_recipient_scan_outputs` also for malformed\ntransactions: the tx output with the lowest index wins, then a direct\nmatch over a label match, then the label candidate with even Y over the\none with odd Y.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:25Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T07:48:01Z"
+      },
+      "sha": "f4da69637e999ac134f72930480ddfdfaa49e603"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDY3YzJkYjcyZDhhNjE2YjBmMThmZmMxYzMxOTI0MTFiMmJlYWQ4ODg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/67c2db72d8a616b0f18ffc1c3192411b2bead888",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/67c2db72d8a616b0f18ffc1c3192411b2bead888",
+      "tree": {
+        "sha": "1469890cd31c26b81b700fc7cbf532410345a224",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/1469890cd31c26b81b700fc7cbf532410345a224"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 1469890cd31c26b81b700fc7cbf532410345a224\nparent f4da69637e999ac134f72930480ddfdfaa49e603\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792655594 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662745 +0200\n\nsilentpayments: test scanning with a list of labels against the callback\n\nCheck that `_recipient_scan_outputs_with_labels` returns the same found\noutputs, tweaks and labels as `_recipient_scan_outputs` with a label\nlookup over the same labels.\n\nThe cases are the BIP352 receiving test vectors with the tx outputs in\ngiven, reversed and shuffled order; malformed transactions in every\noutput order, including a labeled match before a direct one; outputs\nthat match two labels; and random transactions with up to 40 labels.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2RsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyAreQEAtppcjQMkVX7L/+giolGZ\nti9oJQNludaOsmxurxxnyVQA/2bMvYcch0Z0FtMgwZCAZQXAyJJieE61I7Zhn/9i\n62UJ\n=PCEH\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/f4da69637e999ac134f72930480ddfdfaa49e603",
+          "sha": "f4da69637e999ac134f72930480ddfdfaa49e603",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/f4da69637e999ac134f72930480ddfdfaa49e603"
+        }
+      ],
+      "message": "silentpayments: test scanning with a list of labels against the callback\n\nCheck that `_recipient_scan_outputs_with_labels` returns the same found\noutputs, tweaks and labels as `_recipient_scan_outputs` with a label\nlookup over the same labels.\n\nThe cases are the BIP352 receiving test vectors with the tx outputs in\ngiven, reversed and shuffled order; malformed transactions in every\noutput order, including a labeled match before a direct one; outputs\nthat match two labels; and random transactions with up to 40 labels.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:25Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T07:53:14Z"
+      },
+      "sha": "67c2db72d8a616b0f18ffc1c3192411b2bead888"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDc5Yjc3YTA4MjU2YmU0NTNkZGQwMTAzY2JiM2M5MDgyZjk2NjU1MjA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/79b77a08256be453ddd0103cbb3c9082f9665520",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/79b77a08256be453ddd0103cbb3c9082f9665520",
+      "tree": {
+        "sha": "9f0c15fc0030b8d027a832367dee29e1213fa9fd",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/9f0c15fc0030b8d027a832367dee29e1213fa9fd"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 9f0c15fc0030b8d027a832367dee29e1213fa9fd\nparent 67c2db72d8a616b0f18ffc1c3192411b2bead888\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792656666 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662745 +0200\n\nsilentpayments: add benchmarks for scanning with a list of labels\n\nRun each scanning benchmark also with\n`_recipient_scan_outputs_with_labels`, on the same transactions and\nwith the same label. The new benchmarks are\n`silentpayments_scan_list_nomatch_N=...` and\n`silentpayments_scan_list_worstcase_K=...`.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2RsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyC70gEAkVqt5i4hHBaClTDrSWEa\nmM3/AVwwgDmalupnGOelTvUBAO02O4UJ65kyavEOSDIhz0vAAnKtVsp+4UDwDqup\nOHcM\n=2mTo\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/67c2db72d8a616b0f18ffc1c3192411b2bead888",
+          "sha": "67c2db72d8a616b0f18ffc1c3192411b2bead888",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/67c2db72d8a616b0f18ffc1c3192411b2bead888"
+        }
+      ],
+      "message": "silentpayments: add benchmarks for scanning with a list of labels\n\nRun each scanning benchmark also with\n`_recipient_scan_outputs_with_labels`, on the same transactions and\nwith the same label. The new benchmarks are\n`silentpayments_scan_list_nomatch_N=...` and\n`silentpayments_scan_list_worstcase_K=...`.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:25Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T08:11:06Z"
+      },
+      "sha": "79b77a08256be453ddd0103cbb3c9082f9665520"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDcwYWI4OTFkNGMyMDM5MDlkYjUxNzc1NGYwYTA3ZGZiYmUyNDdiZGI",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/70ab891d4c203909db517754f0a07dfbbe247bdb",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/70ab891d4c203909db517754f0a07dfbbe247bdb",
+      "tree": {
+        "sha": "4e631d9db64c358718def89d4d57e01bb1d6a984",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/4e631d9db64c358718def89d4d57e01bb1d6a984"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 4e631d9db64c358718def89d4d57e01bb1d6a984\nparent 79b77a08256be453ddd0103cbb3c9082f9665520\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792656746 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662745 +0200\n\nsilentpayments: add ctime-tests for scanning with a list of labels\n\nScan with the secret scan key and a label entry whose label is public\nand whose label tweak is secret. This also covers the overflow check on\neach label tweak.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2RsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyCK1wD+PrUaQDD+4LUUExRMA4k4\nVYHSTPgVuZB6aUGtItNAagYA/0MzCdccz0u/2sx96NJXHmEmr0J7FKNtnKQToXx4\nOpsJ\n=uV7i\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/79b77a08256be453ddd0103cbb3c9082f9665520",
+          "sha": "79b77a08256be453ddd0103cbb3c9082f9665520",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/79b77a08256be453ddd0103cbb3c9082f9665520"
+        }
+      ],
+      "message": "silentpayments: add ctime-tests for scanning with a list of labels\n\nScan with the secret scan key and a label entry whose label is public\nand whose label tweak is secret. This also covers the overflow check on\neach label tweak.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:25Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T08:12:26Z"
+      },
+      "sha": "70ab891d4c203909db517754f0a07dfbbe247bdb"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKGQ4ZTY0ZDA1YmEwMjFjODEyYzkzMzBhMzg0OWE4ODljNjQzMTJlYmU",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/d8e64d05ba021c812c9330a3849a889c64312ebe",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/d8e64d05ba021c812c9330a3849a889c64312ebe",
+      "tree": {
+        "sha": "347552008f92fe65482f276f9e813dff525642f7",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/347552008f92fe65482f276f9e813dff525642f7"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 347552008f92fe65482f276f9e813dff525642f7\nparent 70ab891d4c203909db517754f0a07dfbbe247bdb\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792657160 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792662746 +0200\n\nsilentpayments: extend example with scanning with a list of labels\n\nShow that Bob can pass his label as a label entry to\n`_recipient_scan_outputs_with_labels` instead of the label lookup\ncallback, and that he finds the same outputs.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatnc2hsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyCuvgD/cIycP3z+oIR79lfo7r9A\nSDp0idYaQcB3b1/pM5RPQ/8A/0EAQ21UAglk/e8Ww+OXj4NNSeF2s/Y4Dot5itXC\nhLkL\n=KngQ\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/70ab891d4c203909db517754f0a07dfbbe247bdb",
+          "sha": "70ab891d4c203909db517754f0a07dfbbe247bdb",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/70ab891d4c203909db517754f0a07dfbbe247bdb"
+        }
+      ],
+      "message": "silentpayments: extend example with scanning with a list of labels\n\nShow that Bob can pass his label as a label entry to\n`_recipient_scan_outputs_with_labels` instead of the label lookup\ncallback, and that he finds the same outputs.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T09:52:26Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-22T08:19:20Z"
+      },
+      "sha": "d8e64d05ba021c812c9330a3849a889c64312ebe"
+    }
+  ],
+  "comments": []
+}
