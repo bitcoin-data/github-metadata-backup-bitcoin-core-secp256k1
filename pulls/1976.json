@@ -41,13 +41,23 @@
       "patch_url": null
     },
     "body": "With a label lookup, `secp256k1_silentpayments_recipient_scan_outputs` does two point additions and two lookups for every output of the transaction, even when the recipient scans only for the change label. A transaction with 2323 outputs that does not pay the recipient takes 0.86 ms to scan, against 25 µs for one with 2 outputs. One that pays the recipient in all 2323 outputs, the K_max limit, takes about a second, because the outputs are walked again for every k.\n\nThis PR adds `secp256k1_silentpayments_recipient_scan_outputs_with_labels`, which takes the labels as an array instead of a callback. For each k it adds every label to the candidate output and compares the result with the outputs, so its point additions grow with the number of labels, not with the number of outputs. It returns the same outputs, tweaks and labels as `scan_outputs`, also on malformed transactions, and the tests check that. `scan_outputs` does not change: the first commit only moves its setup into helpers that both functions use.\n\nI measured both functions on the same transactions with an out-of-tree harness, using a hash table as the label lookup (Apple M5, best of 3 to 7 runs), and can share it. The in-tree nomatch benchmark at 2323 outputs agrees: about 880 µs and 30 µs.\n\n| transaction | labels | `scan_outputs` | `_with_labels` |\n|---|---:|---:|---:|\n| 2 outputs, no payment | 1 / 10 / 100 | 25 / 25 / 26 µs | 24 / 26 / 43 µs |\n| 2323 outputs, no payment | 1 / 10 | 858 / 858 µs | 28 / 37 µs |\n| 2323 outputs, all to the recipient (the K_max limit) | 1 / 10 / 100 / 1000 | 1.0 s | 0.027 / 0.040 / 0.18–0.44 / 1.52 s |\n| 23255 outputs, last 2323 to the recipient (non-standard, loaded machine) | 1 | 18.7 s | 76 ms |\n\n#1792 proposed this approach as the only scanning function. It was closed because K_max bounded the worst case it was meant to fix, and #1799 found that a cost growing with the number of labels outweighed its simpler API. jonasnick wrote there that \"in the long run we should have both the BIP approach and the labelset approach\". Now that #1765 has merged the BIP approach, this adds the other one as a second function, so recipients with many labels keep the callback and no label limit is needed. Each function takes the labels once, unlike the hybrid prototype, and the outputs keep their order, unlike in #1792, so the lowest index still wins as in #1765. The cost is one more public function and one struct.\n\nThis does not help a recipient with many labels. At 2323 outputs all paying the recipient, `scan_outputs` is faster from about 650 labels. This PR conflicts with #1912 and #1914, and I will rebase on whichever merges first.\n",
-    "labels": [],
+    "labels": [
+      {
+        "id": 4975389731,
+        "node_id": "LA_kwDOAP4Jqs8AAAABKI5sIw",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/performance",
+        "name": "performance",
+        "description": "",
+        "color": "DE3CCC",
+        "default": false
+      }
+    ],
     "created_at": "2026-10-22T09:57:18Z",
-    "updated_at": "2026-10-22T09:57:18Z",
+    "updated_at": "2026-10-23T20:55:39Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "788073f733d322d13e65147ceba03ecf5647a5cf",
+    "merge_commit_sha": "e6de32f2b4ab6345d1c7b981c65f4deb72725498",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -154,7 +164,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13315,
+        "size": 13331,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -167,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-22T09:55:49Z",
+        "pushed_at": "2026-10-23T19:38:53Z",
         "created_at": "2016-03-28T19:44:17Z",
         "updated_at": "2016-03-28T19:44:19Z",
         "allow_forking": true,
@@ -292,7 +302,7 @@
         "watchers_count": 2495,
         "size": 13242,
         "default_branch": "master",
-        "open_issues_count": 174,
+        "open_issues_count": 173,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -303,9 +313,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-19T23:08:05Z",
+        "pushed_at": "2026-10-23T20:41:16Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-10-21T10:43:50Z",
+        "updated_at": "2026-10-23T20:41:24Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -578,6 +588,41 @@
         "date": "2026-10-22T08:19:20Z"
       },
       "sha": "d8e64d05ba021c812c9330a3849a889c64312ebe"
+    },
+    {
+      "event": "labeled",
+      "id": 34091133935,
+      "node_id": "LE_lADOAP4Jqs8AAAABZEO0os8AAAAH7_1r7w",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/34091133935",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-23T20:55:39Z",
+      "label": {
+        "name": "performance",
+        "color": "DE3CCC"
+      }
     }
   ],
   "comments": []
