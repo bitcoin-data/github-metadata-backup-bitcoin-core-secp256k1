@@ -43,7 +43,7 @@
     "body": "Label tweaks returned by the `label_lookup` callback that overflow the group order were silently reduced. `recipient_label_create` never produces such tweaks, so an overflowing one means the caller's label cache is broken. As suggested in https://github.com/bitcoin-core/secp256k1/pull/1929#issuecomment-6310143782, this PR treats it as API misuse using `ARG_CHECK` (illegal callback, return 0), documents the requirement. It also adds a test and a changelog entry.\r\n",
     "labels": [],
     "created_at": "2026-10-22T03:05:59Z",
-    "updated_at": "2026-10-23T04:10:58Z",
+    "updated_at": "2026-10-23T06:07:06Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -292,7 +292,7 @@
         "watchers_count": 2495,
         "size": 13242,
         "default_branch": "master",
-        "open_issues_count": 175,
+        "open_issues_count": 174,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -335,7 +335,7 @@
     "deletions": 4,
     "changed_files": 3,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 1,
     "comments": 1
   },
   "events": [
@@ -545,7 +545,101 @@
       "submitted_at": "2026-10-23T04:10:58Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1974"
+    },
+    {
+      "event": "reviewed",
+      "id": 5624561171,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABTz_-Ew",
+      "url": null,
+      "actor": null,
+      "commit_id": "b5fb2adf090d49b034db86b60a740d6058743ff7",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-10-23T06:07:06Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Under valgrind's constant-time check, the new `if (tweak_overflow)` branches on a secret value when the label tweak is marked secret.\n\nI added to `ctime_tests` a scan that finds an output sent to a labeled address, with the scan key and the label tweak (the value `label_lookup` returns) marked secret, and ran it under valgrind. Valgrind reports \"Conditional jump or move depends on uninitialised value(s)\" at `if (tweak_overflow) {` in `secp256k1_silentpayments_recipient_scan_outputs`. The same test gives 0 errors on the base commit. With the one-line `secp256k1_declassify` suggested inline, the run is clean and the output is still found.\n\nI can post the test here, or open a follow-up PR that adds it to `src/ctime_tests.c`.\n",
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1974#pullrequestreview-5624561171",
+      "submitted_at": "2026-10-23T06:07:06Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1974"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4356645923",
+      "pull_request_review_id": 5624561171,
+      "id": 4356645923,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABA60kIw",
+      "diff_hunk": "@@ -750,14 +750,21 @@ int secp256k1_silentpayments_recipient_scan_outputs(\n         }\n         if (found_idx != -1) {\n             secp256k1_scalar final_tweak_scalar = t_k_scalar;\n-            found_outputs[k]->output = *tx_outputs[found_idx];\n             /* Clear the t_k_scalar since we no longer need it and leaking this value would\n              * break indistinguishability of the transaction. */\n             secp256k1_scalar_clear(&t_k_scalar);\n             if (label_tweak != NULL) {\n+                int tweak_overflow;\n                 secp256k1_scalar label_tweak_scalar;\n+                secp256k1_scalar_set_b32(&label_tweak_scalar, label_tweak, &tweak_overflow);",
+      "path": "src/modules/silentpayments/main_impl.h",
+      "position": 11,
+      "original_position": 11,
+      "commit_id": "b5fb2adf090d49b034db86b60a740d6058743ff7",
+      "original_commit_id": "b5fb2adf090d49b034db86b60a740d6058743ff7",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "Declassify `tweak_overflow` before it is branched on, as is done for `valid_scan_key`.\n\n```suggestion\n                secp256k1_scalar_set_b32(&label_tweak_scalar, label_tweak, &tweak_overflow);\n                secp256k1_declassify(ctx, &tweak_overflow, sizeof(tweak_overflow));\n```",
+      "created_at": "2026-10-23T06:07:06Z",
+      "updated_at": "2026-10-23T06:07:06Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1974#discussion_r4356645923",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4356645923"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1974"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 759,
+      "original_line": 759,
+      "side": "RIGHT"
+    }
+  ]
 }
