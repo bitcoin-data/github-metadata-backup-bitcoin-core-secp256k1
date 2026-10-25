@@ -43,9 +43,9 @@
     "body": "examples/musig.c is the only example that handles secret keys without\nrandomizing the context, which secp256k1.h highly recommends. Randomize\nit as schnorr.c does.\n\nschnorr.c erases the secret key buffer after use, but the keypair holds\na copy of the secret key and stayed on the stack. Erase it too.\n\n",
     "labels": [],
     "created_at": "2026-10-23T23:26:38Z",
-    "updated_at": "2026-10-23T23:26:38Z",
+    "updated_at": "2026-10-25T03:17:59Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "efbac013084f4652bcc262fd7800269d56745f5c",
     "assignees": [],
@@ -335,7 +335,7 @@
     "deletions": 1,
     "changed_files": 2,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 2,
     "comments": 0
   },
   "events": [
@@ -378,7 +378,155 @@
         "date": "2026-10-23T21:36:18Z"
       },
       "sha": "86f6a53084148ae87871d7311de9f10a45461ca0"
+    },
+    {
+      "event": "reviewed",
+      "id": 5641274714,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABUD8FWg",
+      "url": null,
+      "actor": null,
+      "commit_id": "86f6a53084148ae87871d7311de9f10a45461ca0",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-10-25T03:17:58Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "ACK modulo nits",
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1980#pullrequestreview-5641274714",
+      "submitted_at": "2026-10-25T03:17:58Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1980"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4369463767",
+      "pull_request_review_id": 5641274714,
+      "id": 4369463767,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABBHC51w",
+      "diff_hunk": "@@ -186,9 +186,22 @@ int main(void) {\n     secp256k1_musig_keyagg_cache cache;\n     unsigned char msg[32] = \"this_could_be_the_hash_of_a_msg\";\n     unsigned char sig[64];\n+    unsigned char randomize[32];\n+    int return_val;\n \n     /* Create a secp256k1 context */\n     ctx = secp256k1_context_create(SECP256K1_CONTEXT_NONE);\n+    if (!fill_random(randomize, sizeof(randomize))) {\n+        printf(\"Failed to generate randomness\\n\");\n+        return EXIT_FAILURE;\n+    }\n+    /* Randomizing the context is recommended to protect against side-channel\n+     * leakage. See `secp256k1_context_randomize` in secp256k1.h for more\n+     * information about it. This should never fail. */\n+    return_val = secp256k1_context_randomize(ctx, randomize);\n+    assert(return_val);\n+    (void)return_val;",
+      "path": "examples/musig.c",
+      "position": 18,
+      "original_position": 18,
+      "commit_id": "86f6a53084148ae87871d7311de9f10a45461ca0",
+      "original_commit_id": "86f6a53084148ae87871d7311de9f10a45461ca0",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "This seems unneeded?\n```suggestion\n```",
+      "created_at": "2026-10-25T03:04:43Z",
+      "updated_at": "2026-10-25T03:17:59Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1980#discussion_r4369463767",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4369463767"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1980"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 203,
+      "original_line": 203,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4369471076",
+      "pull_request_review_id": 5641274714,
+      "id": 4369471076,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABBHDWZA",
+      "diff_hunk": "@@ -148,7 +148,10 @@ int main(void) {\n      * swapping them to disk. Hence, we overwrite the secret key buffer with zeros.\n      *\n      * Here we are preventing these writes from being optimized out, as any good compiler\n-     * will remove any writes that aren't used. */\n+     * will remove any writes that aren't used.\n+     *\n+     * The keypair also holds the secret key, so it is erased too. */",
+      "path": "examples/schnorr.c",
+      "position": 7,
+      "original_position": 7,
+      "commit_id": "86f6a53084148ae87871d7311de9f10a45461ca0",
+      "original_commit_id": "86f6a53084148ae87871d7311de9f10a45461ca0",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "nit: seems unnecessary to explain, it's well-known that a keypair also has a secret component\r\n```suggestion\r\n```\r\nbut you could replace \"overwrite the secret key buffer\" with \"overwrite secret key material\" a few lines above (that's how we phrase it in the [musig example](https://github.com/bitcoin-core/secp256k1/blob/307035b302eb7e9b5325638a377e64e6b29c41a3/examples/musig.c#L252)).",
+      "created_at": "2026-10-25T03:07:36Z",
+      "updated_at": "2026-10-25T03:23:27Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1980#discussion_r4369471076",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4369471076"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1980"
+        }
+      },
+      "start_line": 152,
+      "original_start_line": 152,
+      "start_side": "RIGHT",
+      "line": 153,
+      "original_line": 153,
+      "side": "RIGHT"
+    }
+  ]
 }
