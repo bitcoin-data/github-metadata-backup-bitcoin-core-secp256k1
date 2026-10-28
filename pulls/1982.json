@@ -41,11 +41,21 @@
       "patch_url": null
     },
     "body": "The ctx-provided SHA256 compression tests check that the probe was called and the output differs. For functions that hash several values, this passes as soon as any one of them goes through the caller's ctx, so it can't detect another value silently using the default compression.\n\nThis PR lets `DEFINE_SHA256_TRANSFORM_PROBE` perturb a single chosen block (`_target`) and count blocks (`_blocks`). A target of 0 keeps the previous behavior, so existing tests are unchanged. For multi-hash functions, the tests now perturb only the last block and pin the number of blocks: if any value bypassed the ctx, fewer blocks would be hashed and the output would not change.\n\nAlso, optional inputs (`aux_rand32`, the musig nonce inputs) are now passed so that all hashing paths run.\n\nThe idea comes from @apoelstra in https://github.com/BlockstreamResearch/secp256k1-zkp/pull/374#issuecomment-5777732309.\n\n`silentpayments` is not covered here: its ctx test is being added in #1940, which is still open. `sender_create_outputs` (input hash and output tweak) is a good candidate for a follow-up once it's merged.",
-    "labels": [],
+    "labels": [
+      {
+        "id": 165017692,
+        "node_id": "MDU6TGFiZWwxNjUwMTc2OTI=",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/labels/assurance",
+        "name": "assurance",
+        "description": "",
+        "color": "A6DF3D",
+        "default": false
+      }
+    ],
     "created_at": "2026-10-26T10:43:07Z",
-    "updated_at": "2026-10-26T10:43:07Z",
+    "updated_at": "2026-10-28T09:35:36Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
     "merge_commit_sha": "e7bf647ea704e7789c9dceeed9653f2bac767905",
     "assignees": [],
@@ -154,7 +164,7 @@
         "forks_count": 0,
         "stargazers_count": 0,
         "watchers_count": 0,
-        "size": 13231,
+        "size": 13241,
         "default_branch": "master",
         "open_issues_count": 0,
         "is_template": false,
@@ -287,9 +297,9 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1175,
-        "stargazers_count": 2496,
-        "watchers_count": 2496,
+        "forks_count": 1177,
+        "stargazers_count": 2498,
+        "watchers_count": 2498,
         "size": 13254,
         "default_branch": "master",
         "open_issues_count": 174,
@@ -305,7 +315,7 @@
         "visibility": "public",
         "pushed_at": "2026-10-26T08:54:37Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-10-26T08:54:47Z",
+        "updated_at": "2026-10-27T18:53:56Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -440,6 +450,41 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-10-26T10:43:08Z"
+    },
+    {
+      "event": "labeled",
+      "id": 34458686222,
+      "node_id": "LE_lADOAP4Jqs8AAAABZ-YDpM8AAAAIBeXTDg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/34458686222",
+      "actor": {
+        "login": "theStack",
+        "id": 91535,
+        "node_id": "MDQ6VXNlcjkxNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/91535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/theStack",
+        "html_url": "https://github.com/theStack",
+        "followers_url": "https://api.github.com/users/theStack/followers",
+        "following_url": "https://api.github.com/users/theStack/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/theStack/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/theStack/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/theStack/subscriptions",
+        "organizations_url": "https://api.github.com/users/theStack/orgs",
+        "repos_url": "https://api.github.com/users/theStack/repos",
+        "events_url": "https://api.github.com/users/theStack/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/theStack/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-28T09:35:36Z",
+      "label": {
+        "name": "assurance",
+        "color": "A6DF3D"
+      }
     }
   ],
   "comments": []
