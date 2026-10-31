@@ -12,12 +12,12 @@
     "review_comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1973/comments",
     "review_comment_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments%7B/number%7D",
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1973/comments",
-    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/2e5529f2754dc6058b96acc22e196be44265f905",
+    "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
     "number": 1973,
     "state": "open",
     "locked": false,
     "maintainer_can_modify": true,
-    "title": "doc: describe dropping unused tables from static builds",
+    "title": "doc: describe how to reduce the binary size",
     "user": {
       "login": "fametrano",
       "id": 3296421,
@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "doc: describe dropping unused tables from static builds\n\nAdds a short README section: compile with `-ffunction-sections -fdata-sections` and link with `-Wl,--gc-sections`, so a static build drops the precomputed tables and code a program never calls. A verification-only program should use `secp256k1_context_static`, because a context from `secp256k1_context_create` keeps the signing table linked in.\n\nAddresses the last open item of #1065 (the other items are checked). real-or-random agreed to a docs PR in the thread.\n\nSize of `text` in bytes, static library built with the default modules and `CFLAGS=\"-g -O2\"`, plus the section flags in the last column:\n\n| program | no flags | sections + gc |\n|---|---|---|\n| signing only (ECDSA + Schnorr) | 1340145 | 131364 |\n| verifying only, `context_static` | 1340313 | 1128701 |\n| verifying only, `context_create` | 1340281 | 1234429 |\n\nMeasured with `size` and `nm` on the linked binaries (Debian trixie, aarch64, GCC 14.2, GNU ld 2.44); Autotools and CMake give identical sizes.\n",
+    "body": "A static build linked with `--gc-sections` can drop the precomputed tables and code a program never calls, and the README does not say how. This adds a section on it, with the functions that use each table, the options that set the table sizes and the advice against `-Os`. It addresses the last open item of #1065.\n\n`text` size in bytes of a program linked against the static library, built with the default modules and the section's flags ([programs and commands](https://gist.github.com/fametrano/acf804a84a3cbb72fa1ce88cef60e96c/fe07e64d00a22dd104b4b8406f69bbd4a5b909dc)):\n\n| program | without gc | with gc | tables kept with gc |\n|---|---|---|---|\n| ECDSA signing, `secp256k1_context_create` | 1341897 | 126952 | `ecmult_gen` |\n| ECDSA verification, `secp256k1_context_static` | 1342105 | 1124953 | `ecmult` |\n| ECDSA verification, `secp256k1_context_create` | 1342081 | 1229593 | both |\n| ECDH, `secp256k1_context_static` | 1342001 | 70740 | neither |\n\nMeasured with `size` and `nm` (Debian, aarch64, GCC 14.2, GNU ld 2.44). With gc, the CMake command gives the same sizes as the Autotools one for signing, verification with the static context and ECDH.\n",
     "labels": [
       {
         "id": 165020207,
@@ -53,11 +53,11 @@
       }
     ],
     "created_at": "2026-10-21T20:21:20Z",
-    "updated_at": "2026-10-30T18:41:20Z",
+    "updated_at": "2026-10-31T04:24:38Z",
     "mergeable": true,
-    "mergeable_state": "clean",
+    "mergeable_state": "unstable",
     "merged": false,
-    "merge_commit_sha": "b9ed8f43828f7c069844d74575be4037e9e01c07",
+    "merge_commit_sha": "a1991bd3fd17304043f1c2d2b22734ecd69a6fd8",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -65,7 +65,7 @@
     "head": {
       "label": "fametrano:docs-gc-sections",
       "ref": "docs-gc-sections",
-      "sha": "2e5529f2754dc6058b96acc22e196be44265f905",
+      "sha": "1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
       "user": {
         "login": "fametrano",
         "id": 3296421,
@@ -177,7 +177,7 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-26T15:51:03Z",
+        "pushed_at": "2026-10-31T04:24:29Z",
         "created_at": "2016-03-28T19:44:17Z",
         "updated_at": "2026-10-26T16:36:58Z",
         "allow_forking": true,
@@ -201,7 +201,7 @@
     "base": {
       "label": "bitcoin-core:master",
       "ref": "master",
-      "sha": "e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+      "sha": "1b4181f93f7a53639223ced4c347d0d0d2c2ff9c",
       "user": {
         "login": "bitcoin-core",
         "id": 13464320,
@@ -298,11 +298,11 @@
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
         "forks_count": 1176,
-        "stargazers_count": 2500,
-        "watchers_count": 2500,
+        "stargazers_count": 2502,
+        "watchers_count": 2502,
         "size": 13254,
         "default_branch": "master",
-        "open_issues_count": 172,
+        "open_issues_count": 171,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -313,9 +313,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-10-26T08:54:37Z",
+        "pushed_at": "2026-10-31T04:28:01Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-10-30T03:47:49Z",
+        "updated_at": "2026-10-31T04:28:05Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -341,54 +341,14 @@
     },
     "author_association": "CONTRIBUTOR",
     "draft": false,
-    "additions": 12,
+    "additions": 21,
     "deletions": 0,
     "changed_files": 1,
     "commits": 1,
     "review_comments": 2,
-    "comments": 0
+    "comments": 1
   },
   "events": [
-    {
-      "event": "committed",
-      "id": null,
-      "node_id": "C_kwDOAP4JqtoAKDJlNTUyOWYyNzU0ZGM2MDU4Yjk2YWNjMjJlMTk2YmU0NDI2NWY5MDU",
-      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/2e5529f2754dc6058b96acc22e196be44265f905",
-      "actor": null,
-      "commit_id": null,
-      "commit_url": null,
-      "created_at": null,
-      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/2e5529f2754dc6058b96acc22e196be44265f905",
-      "tree": {
-        "sha": "25833ebac39afec40f7b8766fc12ebef99dee804",
-        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/25833ebac39afec40f7b8766fc12ebef99dee804"
-      },
-      "verification": {
-        "verified": true,
-        "reason": "valid",
-        "payload": "tree 25833ebac39afec40f7b8766fc12ebef99dee804\nparent e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792582382 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1792582858 +0200\n\ndoc: describe dropping unused tables from static builds\n\nCompiling with -ffunction-sections -fdata-sections and linking with\n-Wl,--gc-sections lets the linker drop the precomputed tables and code\nthat a program never calls. Document it in the README, with the sizes\nmeasured for a signing-only and a verification-only program.\n\nAddresses the last open item of #1065.\n\nAssisted-by: Claude Opus 5.5\n",
-        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCatikyhsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyDejgD/dEBCy5cyOyloA4pxNo58\nEyzC3dw5SkWnTDuiDEvQPo0A/0q4F7jnd2VossGjMQ9J3d2UtykL1wjIc/fWVzUZ\nV34G\n=txJ6\n-----END PGP SIGNATURE-----"
-      },
-      "parents": [
-        {
-          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
-          "sha": "e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
-          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8"
-        }
-      ],
-      "message": "doc: describe dropping unused tables from static builds\n\nCompiling with -ffunction-sections -fdata-sections and linking with\n-Wl,--gc-sections lets the linker drop the precomputed tables and code\nthat a program never calls. Document it in the README, with the sizes\nmeasured for a signing-only and a verification-only program.\n\nAddresses the last open item of #1065.\n\nAssisted-by: Claude Opus 5.5",
-      "committer": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-21T11:40:58Z"
-      },
-      "author": {
-        "name": "Ferdinando Ametrano",
-        "email": "ferdinando@ametrano.net",
-        "date": "2026-10-21T11:33:02Z"
-      },
-      "sha": "2e5529f2754dc6058b96acc22e196be44265f905"
-    },
     {
       "event": "labeled",
       "id": 34090916913,
@@ -462,6 +422,170 @@
       "submitted_at": "2026-10-30T18:41:19Z",
       "state": "COMMENTED",
       "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1973"
+    },
+    {
+      "event": "committed",
+      "id": null,
+      "node_id": "C_kwDOAP4JqtoAKDFkZDM5YmZkMjgyNzRhNDMwYzAyZDljMDRhNTVmNGNkYjM0NjJkYWM",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
+      "actor": null,
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": null,
+      "html_url": "https://github.com/bitcoin-core/secp256k1/commit/1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
+      "tree": {
+        "sha": "183fc655ca7b291ffc84869981ee36f17adaf7ac",
+        "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/trees/183fc655ca7b291ffc84869981ee36f17adaf7ac"
+      },
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "payload": "tree 183fc655ca7b291ffc84869981ee36f17adaf7ac\nparent e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8\nauthor Ferdinando Ametrano <ferdinando@ametrano.net> 1792582382 +0200\ncommitter Ferdinando Ametrano <ferdinando@ametrano.net> 1793418549 +0700\n\ndoc: describe how to reduce the binary size\n\nCompiling with -ffunction-sections -fdata-sections and linking with\n-Wl,--gc-sections lets the linker drop the precomputed tables and code\nthat a program never calls. Document this in the README, with the API\nfunctions that use each table, the options that set the table sizes and\nthe advice against -Os.\n\nAddresses the last open item of #1065.\n",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\niJEEABYKADkWIQRJ5SMZs3eEinN+Lb4iedqLwmlHIAUCauVlNRsUgAAAAAAEAA5t\nYW51MiwyLjUrMS4xMiwwLDMACgkQInnai8JpRyBLoQEAwq4EIjVphIfqGTdEmEyC\n7X+xHAGdjiPTXEAg89VkKzsA/iUaB1vyuS3bcUciCMy23NQi0JrTZ3dzIpBk+j4R\nli0E\n=mW4T\n-----END PGP SIGNATURE-----"
+      },
+      "parents": [
+        {
+          "url": "https://api.github.com/repos/bitcoin-core/secp256k1/git/commits/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+          "sha": "e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8",
+          "html_url": "https://github.com/bitcoin-core/secp256k1/commit/e74a0187aac1cac734d5ad23ca5e40ceb6ddd4a8"
+        }
+      ],
+      "message": "doc: describe how to reduce the binary size\n\nCompiling with -ffunction-sections -fdata-sections and linking with\n-Wl,--gc-sections lets the linker drop the precomputed tables and code\nthat a program never calls. Document this in the README, with the API\nfunctions that use each table, the options that set the table sizes and\nthe advice against -Os.\n\nAddresses the last open item of #1065.",
+      "committer": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-31T03:49:09Z"
+      },
+      "author": {
+        "name": "Ferdinando Ametrano",
+        "email": "ferdinando@ametrano.net",
+        "date": "2026-10-21T11:33:02Z"
+      },
+      "sha": "1dd39bfd28274a430c02d9c04a55f4cdb3462dac"
+    },
+    {
+      "event": "head_ref_force_pushed",
+      "id": 34753375361,
+      "node_id": "HRFPE_lADOAP4Jqs8AAAABY7bxDs8AAAAIF3ZsgQ",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/34753375361",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": "1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
+      "commit_url": "https://api.github.com/repos/fametrano/secp256k1/commits/1dd39bfd28274a430c02d9c04a55f4cdb3462dac",
+      "created_at": "2026-10-31T04:24:31Z"
+    },
+    {
+      "event": "renamed",
+      "id": 34753378878,
+      "node_id": "RTE_lADOAP4Jqs8AAAABY7bxDs8AAAAIF3Z6Pg",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/34753378878",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-31T04:24:36Z",
+      "rename": {
+        "from": "doc: describe dropping unused tables from static builds",
+        "to": "doc: describe how to reduce the binary size"
+      }
+    },
+    {
+      "event": "commented",
+      "id": 6538967740,
+      "node_id": "IC_kwDOAP4Jqs8AAAABhcC6vA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/6538967740",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-10-31T04:24:38Z",
+      "updated_at": "2026-10-31T04:24:38Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "I pushed the rewrite. The README no longer gives sizes. It describes the functions by context and table, names the table size options and advises against `-Os`.\n\nTo your question: besides verification, the `ecmult` table is used by public key recovery, public key tweaking and some MuSig2 and Silent Payments functions.\n\nOne point differs from your list: `secp256k1_ecdh` works with `secp256k1_context_static` and uses neither table, because it relies on `secp256k1_ecmult_const_ge`. The last row of the table in the PR description measures this, and the documentation of `secp256k1_context_randomize` names ECDH as the exception to its rule of thumb. So the section lists ECDH among the functions that use no table. Tell me if you meant something else.\n",
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1973#issuecomment-6538967740",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1973"
     }
   ],
   "comments": [
@@ -472,7 +596,7 @@
       "node_id": "PRRC_kwDOAP4Jqs8AAAABB-CcQg",
       "diff_hunk": "@@ -144,6 +144,18 @@ In \"Developer Command Prompt for VS 2022\":\n     >cmake -B build -T ClangCL\n     >cmake --build build --config RelWithDebInfo\n \n+Reducing the size of a static build\n+-----------------------------------\n+\n+The library contains large precomputed tables, one for signing and one for verification. A program linked statically only needs the tables of the functions it calls, but the linker keeps them unless each function and table sits in its own section and unused sections are discarded.\n+To get this with GNU ld, compile the library with `-ffunction-sections -fdata-sections` and link your program with `-Wl,--gc-sections`:\n+\n+    $ ./configure --disable-shared CFLAGS=\"-g -O2 -ffunction-sections -fdata-sections\"    # Autotools\n+    $ cmake -B build -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS=\"-ffunction-sections -fdata-sections\"    # CMake\n+\n+With the default modules, GCC 14 and GNU ld on aarch64, the code and tables of a program that only signs shrink from 1.3 MB to 0.13 MB. A program that only verifies shrinks to 1.1 MB with `secp256k1_context_static` and to 1.2 MB with a context made by `secp256k1_context_create`, which keeps the signing table linked in.",
       "path": "README.md",
-      "position": 13,
+      "position": 1,
       "original_position": 13,
       "commit_id": "2e5529f2754dc6058b96acc22e196be44265f905",
       "original_commit_id": "2e5529f2754dc6058b96acc22e196be44265f905",
@@ -515,7 +639,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 156,
+      "line": null,
       "original_line": 156,
       "side": "RIGHT"
     },
@@ -526,7 +650,7 @@
       "node_id": "PRRC_kwDOAP4Jqs8AAAABB-L9VA",
       "diff_hunk": "@@ -144,6 +144,18 @@ In \"Developer Command Prompt for VS 2022\":\n     >cmake -B build -T ClangCL\n     >cmake --build build --config RelWithDebInfo\n \n+Reducing the size of a static build\n+-----------------------------------\n+\n+The library contains large precomputed tables, one for signing and one for verification. A program linked statically only needs the tables of the functions it calls, but the linker keeps them unless each function and table sits in its own section and unused sections are discarded.",
       "path": "README.md",
-      "position": 7,
+      "position": 1,
       "original_position": 7,
       "commit_id": "2e5529f2754dc6058b96acc22e196be44265f905",
       "original_commit_id": "2e5529f2754dc6058b96acc22e196be44265f905",
@@ -569,7 +693,7 @@
       "start_line": null,
       "original_start_line": null,
       "start_side": null,
-      "line": 150,
+      "line": null,
       "original_line": 150,
       "side": "RIGHT"
     }
