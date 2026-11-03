@@ -14,9 +14,9 @@
     "comments_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1988/comments",
     "statuses_url": "https://api.github.com/repos/bitcoin-core/secp256k1/statuses/484f48dcded4b16d6c9a8e5fc1bc3dba57e371e7",
     "number": 1988,
-    "state": "open",
+    "state": "closed",
     "locked": false,
-    "maintainer_can_modify": true,
+    "maintainer_can_modify": false,
     "title": "ctime_tests: treat auxiliary signing randomness as secret",
     "user": {
       "login": "amartya1523",
@@ -43,7 +43,8 @@
     "body": "While looking at #1962 I noticed a similar gap for the signing functions. The BIP340 `aux_rand` buffer is passed to `schnorrsig_sign_custom` in the constant-time tests but is never marked as undefined, and `ecdsa_sign` is only tested with `ndata = NULL`, so the RFC6979 path that mixes in extra entropy never runs with secret inputs.\n\nBoth values end up hashed together with the secret key to derive the nonce, and callers use them to add fresh randomness, so they shouldn't influence control flow or memory access either.\n\n- The first commit marks `aux_rand` as undefined before both `sign_custom` calls (default BIP340 nonce function and the custom one).\n- The second adds an `ecdsa_sign` call with a secret `ndata`.\n\nThis is test-only and doesn't overlap with #1969, which handles the ellswift `auxrnd32` case from #1962.",
     "labels": [],
     "created_at": "2026-11-03T16:33:04Z",
-    "updated_at": "2026-11-03T16:33:04Z",
+    "updated_at": "2026-11-03T17:25:03Z",
+    "closed_at": "2026-11-03T17:25:03Z",
     "mergeable": true,
     "mergeable_state": "unstable",
     "merged": false,
@@ -51,7 +52,7 @@
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
-    "rebaseable": true,
+    "rebaseable": false,
     "head": {
       "label": "amartya1523:ctime-aux-rand",
       "ref": "ctime-aux-rand",
@@ -291,7 +292,7 @@
         "watchers_count": 2502,
         "size": 13262,
         "default_branch": "master",
-        "open_issues_count": 176,
+        "open_issues_count": 172,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -417,6 +418,37 @@
         "date": "2026-11-03T16:18:03Z"
       },
       "sha": "484f48dcded4b16d6c9a8e5fc1bc3dba57e371e7"
+    },
+    {
+      "event": "closed",
+      "id": 35046611600,
+      "node_id": "CE_lADOAP4Jqs8AAAABcMQrwM8AAAAIKPDakA",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/events/35046611600",
+      "actor": {
+        "login": "amartya1523",
+        "id": 133855728,
+        "node_id": "U_kgDOB_p58A",
+        "avatar_url": "https://avatars.githubusercontent.com/u/133855728?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/amartya1523",
+        "html_url": "https://github.com/amartya1523",
+        "followers_url": "https://api.github.com/users/amartya1523/followers",
+        "following_url": "https://api.github.com/users/amartya1523/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/amartya1523/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/amartya1523/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/amartya1523/subscriptions",
+        "organizations_url": "https://api.github.com/users/amartya1523/orgs",
+        "repos_url": "https://api.github.com/users/amartya1523/repos",
+        "events_url": "https://api.github.com/users/amartya1523/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/amartya1523/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-11-03T17:25:03Z"
     }
   ],
   "comments": []
