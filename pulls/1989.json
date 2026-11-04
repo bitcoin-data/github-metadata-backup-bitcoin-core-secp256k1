@@ -43,11 +43,11 @@
     "body": "`secp256k1_der_parse_integer` rejects a negative integer whose leading 0xFF byte is redundant (X.690 8.3.2), but nothing in the test suite checks it. `random_ber_signature` can produce such encodings, but doesn't mark them as `certainly_not_der`, so `run_ecdsa_der_parse` stays green if the check is removed, or if either of its two conditions is dropped (I tried all three; a coverage build also shows 0 hits on that branch).\n\nThis adds a small deterministic test with the padded encoding that must be rejected, plus the two neighbouring negative encodings that must still parse (as an overflow to zero): a lone 0xFF, and 0xFF 0x7F. It follows the same pattern as the recent long-form length test (#1924).",
     "labels": [],
     "created_at": "2026-11-03T16:46:03Z",
-    "updated_at": "2026-11-03T17:29:16Z",
+    "updated_at": "2026-11-04T08:09:41Z",
     "mergeable": true,
-    "mergeable_state": "unstable",
+    "mergeable_state": "clean",
     "merged": false,
-    "merge_commit_sha": "09585542f18d476413a1b5a3f0ed7b41ab714920",
+    "merge_commit_sha": "000f000927988e5d0db25d6dfec5af4399ccbddd",
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -286,7 +286,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1179,
+        "forks_count": 1180,
         "stargazers_count": 2502,
         "watchers_count": 2502,
         "size": 13262,
@@ -302,9 +302,9 @@
         "archived": false,
         "disabled": false,
         "visibility": "public",
-        "pushed_at": "2026-11-03T09:37:07Z",
+        "pushed_at": "2026-11-04T08:13:02Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-11-03T09:37:14Z",
+        "updated_at": "2026-11-04T08:13:13Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
@@ -328,13 +328,13 @@
         "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1989"
       }
     },
-    "author_association": "NONE",
+    "author_association": "CONTRIBUTOR",
     "draft": false,
     "additions": 33,
     "deletions": 0,
     "changed_files": 1,
     "commits": 1,
-    "review_comments": 0,
+    "review_comments": 2,
     "comments": 2
   },
   "events": [
@@ -529,7 +529,7 @@
       "commit_url": null,
       "created_at": "2026-11-03T17:29:16Z",
       "updated_at": "2026-11-03T17:29:16Z",
-      "author_association": "NONE",
+      "author_association": "CONTRIBUTOR",
       "body": "Thanks @pinheadmz , and sorry for the noise. Opening five PRs at once was too much and I’ve closed the other four.\r\n\r\nI kept this one because the excessive 0xFF padding check in secp256k1_der_parse_integer had no test: when I disabled it (or dropped either of its two conditions), the whole test suite still passed. E.g. FF 80 must be rejected because 80 alone already encodes -128, while FF (-1) and FF 7F (-129) are valid and should still parse (as overflow → zero). The new test checks exactly those three cases.\r\n\r\nI’ve read the AI policy. Going forward I’ll keep it to one PR at a time and wait for review. Happy to close this one too if it isn’t useful.",
       "user": {
         "login": "amartya1523",
@@ -617,7 +617,155 @@
       "commit_id": null,
       "commit_url": null,
       "created_at": "2026-11-03T17:29:18Z"
+    },
+    {
+      "event": "reviewed",
+      "id": 5765264216,
+      "node_id": "PRR_kwDOAP4Jqs8AAAABV6LzWA",
+      "url": null,
+      "actor": null,
+      "commit_id": "4aa2803d5efbd004be7121d2bb440a376fcec068",
+      "commit_url": null,
+      "created_at": null,
+      "updated_at": "2026-11-04T08:09:41Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "Concept ACK",
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1989#pullrequestreview-5765264216",
+      "submitted_at": "2026-11-04T08:09:41Z",
+      "state": "COMMENTED",
+      "pull_request_url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1989"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4465155541",
+      "pull_request_review_id": 5765264216,
+      "id": 4465155541,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABCiTd1Q",
+      "diff_hunk": "@@ -7553,6 +7553,38 @@ static void run_ecdsa_der_parse_long_form(void) {\n     CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 0);\n }\n \n+/* Tests the minimal encoding of negative integers (X.690-0207 8.3.2).\n+ *\n+ * A negative R or S is not rejected: secp256k1_der_parse_integer flags it as\n+ * overflowing and, as for any overflow, sets the scalar to zero. A leading\n+ * 0xFF byte is not allowed if the next byte has its top bit set, though.",
+      "path": "src/tests.c",
+      "position": 8,
+      "original_position": 8,
+      "commit_id": "4aa2803d5efbd004be7121d2bb440a376fcec068",
+      "original_commit_id": "4aa2803d5efbd004be7121d2bb440a376fcec068",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I think it would be nicer to move the descriptions of the exact checked conditions above the correspondling CHECK line. ",
+      "created_at": "2026-11-04T08:09:11Z",
+      "updated_at": "2026-11-04T08:09:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1989#discussion_r4465155541",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4465155541"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1989"
+        }
+      },
+      "start_line": 7558,
+      "original_start_line": 7558,
+      "start_side": "RIGHT",
+      "line": 7560,
+      "original_line": 7560,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4465158712",
+      "pull_request_review_id": 5765264216,
+      "id": 4465158712,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABCiTqOA",
+      "diff_hunk": "@@ -7553,6 +7553,38 @@ static void run_ecdsa_der_parse_long_form(void) {\n     CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 0);\n }\n \n+/* Tests the minimal encoding of negative integers (X.690-0207 8.3.2).\n+ *\n+ * A negative R or S is not rejected: secp256k1_der_parse_integer flags it as\n+ * overflowing and, as for any overflow, sets the scalar to zero. A leading\n+ * 0xFF byte is not allowed if the next byte has its top bit set, though.\n+ * random_ber_signature can emit such padding, but does not mark those\n+ * signatures as certainly_not_der, so run_ecdsa_der_parse would not notice if",
+      "path": "src/tests.c",
+      "position": 10,
+      "original_position": 10,
+      "commit_id": "4aa2803d5efbd004be7121d2bb440a376fcec068",
+      "original_commit_id": "4aa2803d5efbd004be7121d2bb440a376fcec068",
+      "in_reply_to_id": null,
+      "user": {
+        "login": "real-or-random",
+        "id": 1071625,
+        "node_id": "MDQ6VXNlcjEwNzE2MjU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1071625?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/real-or-random",
+        "html_url": "https://github.com/real-or-random",
+        "followers_url": "https://api.github.com/users/real-or-random/followers",
+        "following_url": "https://api.github.com/users/real-or-random/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/real-or-random/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/real-or-random/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/real-or-random/subscriptions",
+        "organizations_url": "https://api.github.com/users/real-or-random/orgs",
+        "repos_url": "https://api.github.com/users/real-or-random/repos",
+        "events_url": "https://api.github.com/users/real-or-random/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/real-or-random/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "I think we can drop this comment. It's hard to maintain because it creates a coupling with `random_ber_signature`",
+      "created_at": "2026-11-04T08:09:35Z",
+      "updated_at": "2026-11-04T08:09:41Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1989#discussion_r4465158712",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4465158712"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1989"
+        }
+      },
+      "start_line": 7561,
+      "original_start_line": 7561,
+      "start_side": "RIGHT",
+      "line": 7562,
+      "original_line": 7562,
+      "side": "RIGHT"
+    }
+  ]
 }
