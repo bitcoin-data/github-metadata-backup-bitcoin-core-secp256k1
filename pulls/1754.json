@@ -53,7 +53,7 @@
       }
     ],
     "created_at": "2025-09-25T23:02:03Z",
-    "updated_at": "2026-11-04T16:41:41Z",
+    "updated_at": "2026-11-05T00:00:05Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -346,7 +346,7 @@
     "changed_files": 22,
     "commits": 8,
     "review_comments": 0,
-    "comments": 14
+    "comments": 15
   },
   "events": [
     {
@@ -2173,6 +2173,64 @@
         "patch_url": null
       },
       "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1754#issuecomment-6636321974",
+      "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1754"
+    },
+    {
+      "event": "commented",
+      "id": 6645633534,
+      "node_id": "IC_kwDOAP4Jqs8AAAABjBxR_g",
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/comments/6645633534",
+      "actor": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "commit_id": null,
+      "commit_url": null,
+      "created_at": "2026-11-05T00:00:05Z",
+      "updated_at": "2026-11-05T00:00:05Z",
+      "author_association": "CONTRIBUTOR",
+      "body": "At 5f0e692, what Yudis-bit's ctime patch adds is that `keypair` is undefined when `nonce_gen_counter` runs; the extra signing pass with the `nonce_gen` secnonce adds no coverage.\n\nTo check this, I added a branch on a secret value to the module and ran `ctime_tests` under Valgrind 3.24 on Linux aarch64 with three harnesses: as it is, with Yudis-bit's patch, and with only its `keypair` line added. A branch on the secret key in `nonce_gen_counter` goes unreported as the harness is, and is reported with either change. A branch on the secret nonce in `partial_sign` is already reported as the harness is, because the counter secnonce is undefined through `extra_input` and `partial_sign` does not depend on which function made the nonce. With no branch added, all three report 0 errors. The patches, the command and the output are in https://gist.github.com/fametrano/520c7d7fb7ae32a6df298b09c2d39c12/17ca42fe588140de1fc16751a1a6f75fe3a0e306.\n\nSo `SECP256K1_CHECKMEM_UNDEFINE(&keypair, sizeof(keypair))` before `nonce_gen_counter` is enough. The musig harness on master has the same gap, and #1979 adds the same line there. musig also needs a declassify, because it copies the pubkey with `keypair_pub`; fullagg takes it with `keypair_xonly_pub`, whose `keypair_load` already declassifies it.\n\n`vectors.h` is now exactly what the generator produces from BIP459 as merged in bitcoin/bips (a0c977f), and verify 14 is among the cases `tests` runs. `make check`, and `tests 300` under ASan and UBSan, pass on macOS arm64.\n",
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1754#issuecomment-6645633534",
       "issue_url": "https://api.github.com/repos/bitcoin-core/secp256k1/issues/1754"
     }
   ],
