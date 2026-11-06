@@ -40,7 +40,7 @@
       "name": null,
       "patch_url": null
     },
-    "body": "Background: An adversary can create a fake SP address reusing another owner's scan public key. If such an address is batched together with that owner's address, the owner's output may be ordered after the adversary's (resulting in an output with a k value > 0) and is then not found by the BIP352 scanning algorithm. This PR adds an API doc comment on the SP sending function to raise awareness of this issue.\r\n\r\nIndependently of Silent Payments, the general observation that it's the senders responsibility to ensure the recipient addresses belong to the owner seems trivial; if a recipient doesn't control the keys behind the provided address, the payment obviously fails. The crucial difference in the BIP-352 scenario with shared scan public keys is that the presence of incorrect recipient addresses could make payments to correct recipient addresses unfindable for the owner (not unspendable though), so this is worth to point out explicitly.\r\n\r\nNote that the issue only exists if the incorrect addresses have a lower k value than the correct ones, so we could e.g. recommend to to put all recipients that are known to be correct in an earlier recipient position, but that might be a level of detail that is creating even more confusion. At the moment the SP ecosystem seems to be far away from multi-party sending, so it seems reasonable to give a conservative recommendation and possibly re-evaluate that at a later point.\r\n\r\nA very restrictive alternative could be to limit the group size to 1 (i.e. effectively only ever creating k=0 outputs) to be on the safe side, but this suggestion didn't have consensus for the BIP-352 authors, and I don't think the libsecp256k1 implementation should be more restrictive than the BIP. An in-between solution could be to e.g. introduce a \"dangerous\" flag parameter that has to be set to allow group sizes of > 1, or introduce a safer variant of `_sender_create_outputs` with that limitation, but I'm not sure if it's worth it to extend/change the API at this point.\r\n\r\nThanks to l0rinc for first finding this issue (PRed in Bitcoin Red Team's bitcoin-security-council/secp256k1 repository on Sep. 19th). Similar vulnerability reports were later submitted by the Anthropic OSS scanner (Oct. 16th) and Project Loupe (Oct. 29th).",
+    "body": "Background: An adversary can create a fake SP address reusing another owner's scan public key. If such an address is batched together with that owner's address, the owner's output may be ordered after the adversary's (resulting in an output with a k value > 0) and is then not found by the BIP352 scanning algorithm. This PR adds an API doc comment on the SP sending function to raise awareness of this issue.\r\n\r\nIndependently of Silent Payments, the general observation that it's the senders responsibility to ensure the recipient addresses belong to the owner seems trivial; if a recipient doesn't control the keys behind the provided address, the payment obviously fails. The crucial difference in the BIP-352 scenario with shared scan public keys is that the presence of incorrect recipient addresses could make payments to correct recipient addresses unfindable for the owner (not unspendable though), so this is worth to point out explicitly.\r\n\r\nNote that the issue only exists if the incorrect addresses have a lower k value than the correct ones, so we could e.g. recommend to to put all recipients that are known to be correct in an earlier recipient position, but that might be a level of detail that is creating even more confusion. At the moment the SP ecosystem seems to be far away from multi-party sending, so it seems reasonable to give a conservative recommendation and possibly re-evaluate that at a later point.\r\n\r\nA very restrictive alternative could be to limit the group size to 1 (i.e. effectively only ever creating k=0 outputs) to be on the safe side, but this suggestion didn't have consensus for the BIP-352 authors, and I don't think the libsecp256k1 implementation should be more restrictive than the BIP. An in-between solution could be to e.g. introduce a \"dangerous\" flag parameter that has to be set to allow group sizes of > 1, or introduce a safer variant of `_sender_create_outputs` with that limitation, but I'm not sure if it's worth it to extend/change the API at this point.\r\n\r\nSee also [Ruben's write-up](https://gist.github.com/RubenSomsen/ade30d90d13c06025433c13fed924727) for a more detailed description of the problem and potential future mitigations. The various AI scanner findings are included as a comment below there for additional context.\r\n\r\nThanks to l0rinc for first finding this issue (PRed in Bitcoin Red Team's bitcoin-security-council/secp256k1 repository on Sep. 19th). Similar vulnerability reports were later submitted by the Anthropic OSS scanner (Oct. 16th) and Project Loupe (Oct. 29th).",
     "labels": [
       {
         "id": 165020207,
@@ -91,7 +91,7 @@
       "due_on": "2026-11-02T00:00:00Z"
     },
     "created_at": "2026-11-05T17:12:41Z",
-    "updated_at": "2026-11-05T21:52:58Z",
+    "updated_at": "2026-11-06T16:40:25Z",
     "mergeable": true,
     "mergeable_state": "clean",
     "merged": false,
@@ -335,12 +335,12 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1179,
-        "stargazers_count": 2502,
-        "watchers_count": 2502,
+        "forks_count": 1180,
+        "stargazers_count": 2504,
+        "watchers_count": 2504,
         "size": 13265,
         "default_branch": "master",
-        "open_issues_count": 174,
+        "open_issues_count": 175,
         "is_template": false,
         "topics": [],
         "has_issues": true,
@@ -353,7 +353,7 @@
         "visibility": "public",
         "pushed_at": "2026-11-04T08:13:02Z",
         "created_at": "2014-02-08T17:30:06Z",
-        "updated_at": "2026-11-05T11:47:38Z",
+        "updated_at": "2026-11-06T11:25:49Z",
         "allow_forking": true,
         "license": {
           "key": "mit",
