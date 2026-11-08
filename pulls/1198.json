@@ -62,7 +62,7 @@
       }
     ],
     "created_at": "2023-01-27T18:32:46Z",
-    "updated_at": "2026-11-08T09:02:07Z",
+    "updated_at": "2026-11-08T19:41:58Z",
     "mergeable": false,
     "mergeable_state": "dirty",
     "merged": false,
@@ -305,7 +305,7 @@
         "hooks_url": "https://api.github.com/repos/bitcoin-core/secp256k1/hooks",
         "svn_url": "https://github.com/bitcoin-core/secp256k1",
         "language": "C",
-        "forks_count": 1181,
+        "forks_count": 1180,
         "stargazers_count": 2504,
         "watchers_count": 2504,
         "size": 13265,
@@ -353,7 +353,7 @@
     "deletions": 8,
     "changed_files": 6,
     "commits": 4,
-    "review_comments": 3,
+    "review_comments": 4,
     "comments": 26
   },
   "events": [
@@ -3453,6 +3453,60 @@
       "_links": {
         "self": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/1480635371"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1198"
+        }
+      },
+      "start_line": null,
+      "original_start_line": null,
+      "start_side": null,
+      "line": 95,
+      "original_line": 95,
+      "side": "RIGHT"
+    },
+    {
+      "url": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4507539917",
+      "pull_request_review_id": 5819376624,
+      "id": 4507539917,
+      "node_id": "PRRC_kwDOAP4Jqs8AAAABDKuZzQ",
+      "diff_hunk": "@@ -56,6 +76,33 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_ecdh(\n   void *data\n ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);\n \n+/** Compute an EC X-only Diffie-Hellman secret in constant time\n+ *\n+ *  Returns: 1: exponentiation was successful\n+ *           0: scalar was invalid (zero or overflow), input is not a valid X coordinate, or hashfp\n+ *              returned 0.\n+ *  Args:    ctx:        pointer to a context object.\n+ *  Out:     output:     pointer to an array to be filled by hashfp.\n+ *  In:      xpubkey:    a pointer to the 32-byte serialization of an x-only public key (see the\n+ *                       extrakeys module for details).\n+ *           seckey:     a 32-byte scalar with which to multiply the point.\n+ *           hashfp:     pointer to a hash function. If NULL,\n+ *                       secp256k1_ecdh_xonly+hash_function_sha256 is used\n+ *                       (in which case, 32 bytes will be written to output).\n+ *           data:       arbitrary data pointer that is passed through to hashfp\n+ *                       (can be NULL for secp256k1_ecdh_xonly_hash_function_sha256).\n+ *\n+ * The function is constant time in seckey. It is not constant time in xpubkey, hashfp, or the output.",
+      "path": "include/secp256k1_ecdh.h",
+      "position": 62,
+      "original_position": 54,
+      "commit_id": "a732222f9aeee9a395c217049a6e6b8b693de85b",
+      "original_commit_id": "a732222f9aeee9a395c217049a6e6b8b693de85b",
+      "in_reply_to_id": 1480635371,
+      "user": {
+        "login": "fametrano",
+        "id": 3296421,
+        "node_id": "MDQ6VXNlcjMyOTY0MjE=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3296421?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/fametrano",
+        "html_url": "https://github.com/fametrano",
+        "followers_url": "https://api.github.com/users/fametrano/followers",
+        "following_url": "https://api.github.com/users/fametrano/following%7B/other_user%7D",
+        "gists_url": "https://api.github.com/users/fametrano/gists%7B/gist_id%7D",
+        "starred_url": "https://api.github.com/users/fametrano/starred%7B/owner%7D%7B/repo%7D",
+        "subscriptions_url": "https://api.github.com/users/fametrano/subscriptions",
+        "organizations_url": "https://api.github.com/users/fametrano/orgs",
+        "repos_url": "https://api.github.com/users/fametrano/repos",
+        "events_url": "https://api.github.com/users/fametrano/events%7B/privacy%7D",
+        "received_events_url": "https://api.github.com/users/fametrano/received_events",
+        "type": "User",
+        "site_admin": false,
+        "name": null,
+        "patch_url": null
+      },
+      "body": "It is, for the default hashfp. I ran our port of this PR onto master b97f7f5, `0001-port-pr1198-onto-master-b97f7f5.patch` in https://gist.github.com/fametrano/882fb1309c3a61ef271e7ed8b3535994/902feebb36ce1169803fff92318be526bd3e7b63. `ctime_tests` marks the key as secret, and valgrind tracks it into the shared x and its hash. The x-only case this PR adds to `ctime_tests` reports no valgrind error. A conditional jump on the key, added on purpose just before hashfp, is reported (exit 42). So the header could say it is constant time in the output when hashfp is, rather than that it is not. Linux aarch64, gcc 14.2, valgrind; script and logs: https://gist.github.com/fametrano/b262245de1ebeded1a43dde621e9c19b/c1163ef8655848f88d086df215ed808e9402f6c0\n",
+      "created_at": "2026-11-08T19:41:58Z",
+      "updated_at": "2026-11-08T19:41:58Z",
+      "html_url": "https://github.com/bitcoin-core/secp256k1/pull/1198#discussion_r4507539917",
+      "author_association": "CONTRIBUTOR",
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/comments/4507539917"
         },
         "pull_request": {
           "href": "https://api.github.com/repos/bitcoin-core/secp256k1/pulls/1198"
